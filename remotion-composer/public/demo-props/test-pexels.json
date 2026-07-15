@@ -1,0 +1,17 @@
+{
+  "theme": "flat-motion-graphics",
+  "cuts": [
+    {
+      "id": "pexels1",
+      "source": "",
+      "type": "pexels_scene",
+      "in_seconds": 0,
+      "out_seconds": 4,
+      "text": "Claude Codeで就活を完全自動化",
+      "textPosition": "bottom",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#0B0F1A"
+    }
+  ],
+  "overlays": []
+}

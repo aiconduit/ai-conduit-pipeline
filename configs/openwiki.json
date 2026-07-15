@@ -1,0 +1,28 @@
+{
+  "name": "openwiki",
+  "hook_text": "AIがコードベースのドキュメントを自動で書いてくれる",
+  "hook_subtitle": "今月のGitHubトレンド 10.7k Stars",
+  "terminal_title": "openwiki",
+  "prompt": "$",
+  "accentColor": "#34D399",
+  "steps": [
+    { "kind": "cmd", "text": "pip install openwiki", "typeSpeed": 0.02 },
+    { "kind": "out", "text": "+ openwiki installed" },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "cmd", "text": "openwiki generate --repo ./my-project" },
+    { "kind": "out", "text": "> Analyzing codebase..." },
+    { "kind": "pill", "text": "LangChain + AI Documentation", "color": "#34D399", "durationSeconds": 2 },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "out", "text": "> 42 functions documented" },
+    { "kind": "out", "text": "> Wiki generated and synced." }
+  ],
+  "kpi_title": "今月のGitHubトレンド",
+  "kpi_data": [
+    { "label": "Stars", "value": 10700, "change": 0, "suffix": "" },
+    { "label": "今月増加", "value": 729, "change": 0, "suffix": "" },
+    { "label": "対応言語", "value": 15, "change": 0, "suffix": "+" }
+  ],
+  "narration_text": "LangChainが作った、AIがコードベースのドキュメントを自動で書いてくれるCLIツールです。コードを解析して関数やクラスの説明を自動生成し、常に最新の状態に保ってくれます。ドキュメント書くの面倒くさいエンジニアには刺さるツールです。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 195,
+  "say_voice": "Kyoko"
+}

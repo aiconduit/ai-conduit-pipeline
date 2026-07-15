@@ -1,0 +1,108 @@
+{
+  "theme": "flat-motion-graphics",
+  "cuts": [
+    {
+      "id": "hook",
+      "source": "",
+      "type": "hero_title",
+      "in_seconds": 0,
+      "out_seconds": 3,
+      "text": "会議の議事録、AIが自動で取ってくれる",
+      "subtitle": "本日GitHubトレンド 本日607スター",
+      "backgroundColor": "#0B0F1A"
+    },
+    {
+      "id": "terminal-demo",
+      "source": "",
+      "type": "terminal_scene",
+      "in_seconds": 3,
+      "out_seconds": 16,
+      "terminalTitle": "meetily",
+      "prompt": "$",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#0B0F1A",
+      "steps": [
+        {
+          "kind": "cmd",
+          "text": "brew install meetily",
+          "typeSpeed": 0.02
+        },
+        {
+          "kind": "out",
+          "text": "+ meetily installed"
+        },
+        {
+          "kind": "pause",
+          "seconds": 0.3
+        },
+        {
+          "kind": "cmd",
+          "text": "meetily start --local"
+        },
+        {
+          "kind": "out",
+          "text": "> Listening... (100% local, no cloud)"
+        },
+        {
+          "kind": "pill",
+          "text": "Whisper + Parakeet 4x faster",
+          "color": "#22D3EE",
+          "durationSeconds": 2
+        },
+        {
+          "kind": "pause",
+          "seconds": 0.3
+        },
+        {
+          "kind": "cmd",
+          "text": "meetily summary"
+        },
+        {
+          "kind": "out",
+          "text": "> 3 action items, 2 decisions found"
+        },
+        {
+          "kind": "out",
+          "text": "> Speaker diarization: 4 speakers detected"
+        }
+      ]
+    },
+    {
+      "id": "kpis",
+      "source": "",
+      "type": "kpi_grid",
+      "in_seconds": 16,
+      "out_seconds": 22,
+      "title": "本日のGitHubトレンド",
+      "chartData": [
+        {
+          "label": "本日スター",
+          "value": 607,
+          "change": 0,
+          "suffix": ""
+        },
+        {
+          "label": "対応OS",
+          "value": 2,
+          "change": 0,
+          "suffix": "種"
+        },
+        {
+          "label": "処理",
+          "value": 100,
+          "change": 0,
+          "suffix": "%ローカル"
+        }
+      ],
+      "columns": 3,
+      "chartColors": [
+        "#22D3EE",
+        "#34D399",
+        "#F59E0B"
+      ],
+      "chartAnimation": "cascade",
+      "backgroundColor": "#0B0F1A"
+    }
+  ],
+  "overlays": []
+}

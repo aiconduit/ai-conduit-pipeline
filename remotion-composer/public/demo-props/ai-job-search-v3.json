@@ -1,0 +1,64 @@
+{
+  "theme": "flat-motion-graphics",
+  "cuts": [
+    {
+      "id": "attention",
+      "source": "",
+      "type": "stat_counter",
+      "in_seconds": 0,
+      "out_seconds": 3,
+      "title": "今月のGitHubトレンド急上昇",
+      "accentColor": "#F59E0B",
+      "backgroundColor": "#0B0F1A",
+      "stats": [
+        { "label": "⭐ 総スター数", "value": 17500, "suffix": "", "color": "#F59E0B" },
+        { "label": "📈 今月の増加", "value": 4700, "suffix": "+", "color": "#22D3EE" }
+      ]
+    },
+    {
+      "id": "hook",
+      "source": "",
+      "type": "cinematic_title",
+      "in_seconds": 3,
+      "out_seconds": 6,
+      "text": "Claude Codeで就活を完全自動化",
+      "subtitle": "MadsLorentzen / ai-job-search",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#0B0F1A"
+    },
+    {
+      "id": "terminal-demo",
+      "source": "",
+      "type": "terminal_scene",
+      "in_seconds": 6,
+      "out_seconds": 20,
+      "terminalTitle": "ai-job-search",
+      "prompt": "$",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#0B0F1A",
+      "steps": [
+        { "kind": "cmd", "text": "git clone github.com/MadsLorentzen/ai-job-search", "typeSpeed": 0.02 },
+        { "kind": "out", "text": "+ ai-job-search cloned successfully" },
+        { "kind": "pause", "seconds": 0.3 },
+        { "kind": "cmd", "text": "claude evaluate --job senior-engineer --profile ./me.md" },
+        { "kind": "pill", "text": "Claude Code が履歴書を自動生成中...", "color": "#22D3EE", "durationSeconds": 2 },
+        { "kind": "out", "text": "> Job match score: 87%" },
+        { "kind": "out", "text": "> CV tailored. Cover letter generated." },
+        { "kind": "out", "text": "> Interview prep questions ready." }
+      ]
+    },
+    {
+      "id": "cta",
+      "source": "",
+      "type": "subscribe_cta",
+      "in_seconds": 20,
+      "out_seconds": 25,
+      "handle": "@AI_Conduit",
+      "message": "毎日AIトレンドを紹介中",
+      "ctaText": "コメントに「conduit」でテンプレ無料プレゼント",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#0B0F1A"
+    }
+  ],
+  "overlays": []
+}

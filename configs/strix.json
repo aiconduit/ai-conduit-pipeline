@@ -1,0 +1,28 @@
+{
+  "name": "strix",
+  "hook_text": "AIがあなたのアプリの脆弱性を自動で発見する",
+  "hook_subtitle": "今月のGitHubトレンド 12.7k Stars",
+  "terminal_title": "strix",
+  "prompt": "$",
+  "accentColor": "#F59E0B",
+  "steps": [
+    { "kind": "cmd", "text": "pip install strix", "typeSpeed": 0.02 },
+    { "kind": "out", "text": "+ strix installed" },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "cmd", "text": "strix scan --target https://myapp.com" },
+    { "kind": "out", "text": "> Scanning for vulnerabilities..." },
+    { "kind": "pill", "text": "AI Penetration Testing", "color": "#F59E0B", "durationSeconds": 2 },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "out", "text": "> Found 3 vulnerabilities: SQL injection, XSS, CSRF" },
+    { "kind": "out", "text": "> Fix suggestions generated." }
+  ],
+  "kpi_title": "今月のGitHubトレンド",
+  "kpi_data": [
+    { "label": "Stars", "value": 12700, "change": 0, "suffix": "" },
+    { "label": "今月増加", "value": 1200, "change": 0, "suffix": "" },
+    { "label": "検出精度", "value": 98, "change": 0, "suffix": "%" }
+  ],
+  "narration_text": "AIがあなたのアプリの脆弱性を自動で発見して修正方法まで提案してくれるオープンソースのペネトレーションテストツールです。SQLインジェクション、XSS、CSRFなど主要な脆弱性を自動検出します。今月のGitHubトレンドで1200スター増加中です。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 195,
+  "say_voice": "Kyoko"
+}

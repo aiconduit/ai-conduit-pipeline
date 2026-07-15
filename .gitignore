@@ -1,0 +1,13 @@
+node_modules/
+.venv/
+projects/
+assets/
+remotion-composer/public/videos/
+remotion-composer/public/programming_*.mp4
+remotion-composer/public/career_*.mp4
+*.mp4
+*.aiff
+*.mp3
+.env
+__pycache__/
+*.pyc

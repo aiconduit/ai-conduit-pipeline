@@ -1,0 +1,67 @@
+{
+  "theme": "flat-motion-graphics",
+  "cuts": [
+    {
+      "id": "attention",
+      "source": "",
+      "type": "stat_counter",
+      "in_seconds": 0,
+      "out_seconds": 3,
+      "title": "今月のGitHubトレンド急上昇",
+      "accentColor": "#F59E0B",
+      "backgroundColor": "#0B0F1A",
+      "stats": [
+        {
+          "label": "⭐ Stars",
+          "value": 17500,
+          "suffix": "",
+          "color": "#F59E0B"
+        }
+      ]
+    },
+    {
+      "id": "title",
+      "source": "",
+      "type": "cinematic_title",
+      "in_seconds": 3,
+      "out_seconds": 6,
+      "text": "エンジニアの夢！履歴書作成・求人評価・面接準備を自動化するAI",
+      "subtitle": "MadsLorentzen/ai-job-search",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#0B0F1A"
+    },
+    {
+      "id": "broll_0",
+      "source": "/videos/programming_5473804.mp4",
+      "type": "pexels_scene",
+      "in_seconds": 6,
+      "out_seconds": 13,
+      "text": "MadsLorentzen/ai-job-searchは、エンジニア向けの求人評",
+      "textPosition": "bottom",
+      "accentColor": "#22D3EE"
+    },
+    {
+      "id": "broll_1",
+      "source": "/videos/career_8632494.mp4",
+      "type": "pexels_scene",
+      "in_seconds": 13,
+      "out_seconds": 20,
+      "text": "このフレームワークは、求人評価、面接準備、履歴書作成を自動化します。面接対策やキ",
+      "textPosition": "bottom",
+      "accentColor": "#22D3EE"
+    },
+    {
+      "id": "cta",
+      "source": "",
+      "type": "subscribe_cta",
+      "in_seconds": 20,
+      "out_seconds": 25,
+      "handle": "@AI_Conduit",
+      "message": "毎日AIトレンドを紹介中",
+      "ctaText": "コメントに「conduit」でテンプレ無料プレゼント",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#0B0F1A"
+    }
+  ],
+  "overlays": []
+}

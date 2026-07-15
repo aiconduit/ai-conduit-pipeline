@@ -1,0 +1,17 @@
+{
+  "theme": "flat-motion-graphics",
+  "cuts": [
+    {
+      "id": "text1",
+      "source": "",
+      "type": "cinematic_title",
+      "in_seconds": 0,
+      "out_seconds": 5,
+      "text": "Claude Codeで就活を完全自動化",
+      "subtitle": "今月17,500スター急上昇",
+      "accentColor": "#22D3EE",
+      "backgroundColor": "#000000"
+    }
+  ],
+  "overlays": []
+}

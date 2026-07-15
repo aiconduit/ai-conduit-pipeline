@@ -1,0 +1,29 @@
+{
+  "name": "meetily2",
+  "hook_text": "会議の議事録をAIが完全ローカルで自動作成",
+  "hook_subtitle": "今月のGitHubトレンド 10.4k Stars",
+  "terminal_title": "meetily",
+  "prompt": "$",
+  "accentColor": "#A78BFA",
+  "steps": [
+    { "kind": "cmd", "text": "brew install meetily", "typeSpeed": 0.02 },
+    { "kind": "out", "text": "+ meetily installed" },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "cmd", "text": "meetily start --local --speakers 4" },
+    { "kind": "out", "text": "> Listening... (100% local, no cloud)" },
+    { "kind": "pill", "text": "Whisper + Parakeet 4x faster", "color": "#A78BFA", "durationSeconds": 2 },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "cmd", "text": "meetily summary" },
+    { "kind": "out", "text": "> 5 action items, 3 decisions detected" },
+    { "kind": "out", "text": "> Speaker diarization: 4 speakers identified" }
+  ],
+  "kpi_title": "今月のGitHubトレンド",
+  "kpi_data": [
+    { "label": "Stars", "value": 10400, "change": 0, "suffix": "" },
+    { "label": "今月増加", "value": 1100, "change": 0, "suffix": "" },
+    { "label": "処理", "value": 100, "change": 0, "suffix": "%ローカル" }
+  ],
+  "narration_text": "会議の議事録をAIが完全ローカルで自動作成してくれるツールです。クラウドに音声データを送らないのでプライバシー安全。話者を自動識別して、アクションアイテムや決定事項をまとめてくれます。今月のGitHubトレンドで1100スター増加中です。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 195,
+  "say_voice": "Kyoko"
+}

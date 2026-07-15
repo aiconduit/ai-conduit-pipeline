@@ -1,0 +1,29 @@
+{
+  "name": "meetily",
+  "hook_text": "会議の議事録、AIが自動で取ってくれる",
+  "hook_subtitle": "本日GitHubトレンド 本日607スター",
+  "terminal_title": "meetily",
+  "prompt": "$",
+  "accentColor": "#22D3EE",
+  "steps": [
+    { "kind": "cmd", "text": "brew install meetily", "typeSpeed": 0.02 },
+    { "kind": "out", "text": "+ meetily installed" },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "cmd", "text": "meetily start --local" },
+    { "kind": "out", "text": "> Listening... (100% local, no cloud)" },
+    { "kind": "pill", "text": "Whisper + Parakeet 4x faster", "color": "#22D3EE", "durationSeconds": 2 },
+    { "kind": "pause", "seconds": 0.3 },
+    { "kind": "cmd", "text": "meetily summary" },
+    { "kind": "out", "text": "> 3 action items, 2 decisions found" },
+    { "kind": "out", "text": "> Speaker diarization: 4 speakers detected" }
+  ],
+  "kpi_title": "本日のGitHubトレンド",
+  "kpi_data": [
+    { "label": "本日スター", "value": 607, "change": 0, "suffix": "" },
+    { "label": "対応OS", "value": 2, "change": 0, "suffix": "種" },
+    { "label": "処理", "value": 100, "change": 0, "suffix": "%ローカル" }
+  ],
+  "narration_text": "会議の議事録を、AIが自動で取ってくれるツールです。ミーティリーというツールは、完全ローカルで動くので、クラウドに音声データを送りません。話者を自動で識別して、決定事項やタスクをまとめてくれます。プライバシー重視の議事録ツールとして、今日GitHubトレンドで伸びています。",
+  "say_rate": 195,
+  "say_voice": "Kyoko"
+}

@@ -1,0 +1,73 @@
+{
+  "name": "ai-job-search",
+  "hook_text": "Claude Codeで就活を完全自動化するツール",
+  "hook_subtitle": "今月のGitHubトレンド 17.5k Stars",
+  "terminal_title": "ai-job-search",
+  "prompt": "$",
+  "accentColor": "#22D3EE",
+  "steps": [
+    {
+      "kind": "cmd",
+      "text": "git clone github.com/MadsLorentzen/ai-job-search",
+      "typeSpeed": 0.02
+    },
+    {
+      "kind": "out",
+      "text": "+ ai-job-search cloned"
+    },
+    {
+      "kind": "pause",
+      "seconds": 0.3
+    },
+    {
+      "kind": "cmd",
+      "text": "# プロフィールを入力してClaudeに任せるだけ"
+    },
+    {
+      "kind": "pill",
+      "text": "Claude Code が履歴書を自動作成",
+      "color": "#22D3EE",
+      "durationSeconds": 2
+    },
+    {
+      "kind": "pause",
+      "seconds": 0.3
+    },
+    {
+      "kind": "cmd",
+      "text": "claude evaluate --job senior-engineer"
+    },
+    {
+      "kind": "out",
+      "text": "> Job match: 87% — tailoring CV..."
+    },
+    {
+      "kind": "out",
+      "text": "> Cover letter generated. Interview prep ready."
+    }
+  ],
+  "kpi_title": "今月のGitHubトレンド",
+  "kpi_data": [
+    {
+      "label": "Stars",
+      "value": 17500,
+      "change": 0,
+      "suffix": ""
+    },
+    {
+      "label": "今月増加",
+      "value": 4700,
+      "change": 0,
+      "suffix": ""
+    },
+    {
+      "label": "自動化",
+      "value": 100,
+      "change": 0,
+      "suffix": "%"
+    }
+  ],
+  "narration_text": "Claude Codeを使って就活を完全自動化するフレームワークです。プロフィールを入力するだけで、Claudeが求人を評価して、履歴書をカスタマイズして、カバーレターを書いて、面接準備まで全部やってくれます。今月のGitHubトレンドで4700スター増加、注目度急上昇中です。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 195,
+  "say_voice": "ja-JP-KeitaNeural"
+}
