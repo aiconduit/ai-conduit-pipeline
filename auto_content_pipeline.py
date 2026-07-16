@@ -232,7 +232,10 @@ def compose_final(remotion_video: Path, broll_path: str, narration: Path, srt_pa
     broll = broll_raw.with_effects([vfx.Loop(n=n_loops)]).subclipped(0, main.duration).resized((w, h))
     
     # ナレーション音声
-    audio = AudioFileClip(str(narration)).subclipped(0, main.duration)
+    audio_clip = AudioFileClip(str(narration))
+    audio_duration = min(audio_clip.duration, main.duration)
+    audio = audio_clip.subclipped(0, audio_duration)
+    main = main.subclipped(0, audio_duration)
     
     # 字幕クリップ
     captions_data = parse_srt(str(srt_path))
