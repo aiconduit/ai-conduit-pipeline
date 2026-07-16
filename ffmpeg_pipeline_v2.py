@@ -13,11 +13,11 @@ AI Conduit 純ffmpegパイプライン v2 (シーン単位B-roll方式)
     python3 ffmpeg_pipeline_v2.py "MadsLorentzen/ai-job-search" "17500" "説明"
 """
 import sys, json, os, subprocess, requests, random, re, asyncio, tempfile
+from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 from features.viral_scorer import score_script, optimize_hook
 from features.brand_template import BRAND, get_scene_template, add_watermark
 from features.bgm_selector import get_bgm, mix_bgm
-from pathlib import Path
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
 PEXELS_API_KEY = os.environ.get("PEXELS_API_KEY", "LSsE8rcX23VNaFN0M0F19PCMtoLhEyg1NxZpIqwr7aCuvUYInctIexrW")
