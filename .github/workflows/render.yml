@@ -22,11 +22,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
@@ -39,30 +34,17 @@ jobs:
             ffmpeg \
             fonts-noto-cjk \
             fonts-noto-cjk-extra \
-            imagemagick \
-            libmagic1 \
-            python3-dev
+            libass-dev
 
       - name: Install Python deps
-        run: |
-          pip install requests edge-tts moviepy openai-whisper pillow
+        run: pip install requests edge-tts openai-whisper
 
-      - name: Install Node deps
-        run: |
-          cd remotion-composer
-          npm install
-
-      - name: Install Remotion Chrome
-        run: |
-          cd remotion-composer
-          npx remotion browser ensure
-
-      - name: Run full pipeline
+      - name: Run ffmpeg pipeline
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
-          python3 auto_content_pipeline.py \
+          python3 ffmpeg_pipeline.py \
             "${{ github.event.inputs.repo }}" \
             "${{ github.event.inputs.stars }}" \
             "${{ github.event.inputs.description }}"
