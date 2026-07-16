@@ -221,6 +221,58 @@ def compose(broll_path, narration_path, ass_path, output_path, duration):
     ]
     _run(cmd)
 
+# === A/Bスプリット合成(AutoShorts AI方式) ===
+def compose_ab_split(broll_a: str, broll_b: str, narration_path: str, 
+                     ass_path: str, output_path: str, duration: float):
+    """2本のB-rollをA/Bスプリットで合成"""
+    print(f"[5/5] 🎬 A/Bスプリット合成中...")
+    
+    dur_a = duration / 2
+    dur_b = duration / 2 + 0.5
+    loop_a = int(dur_a / max(_probe_dur(broll_a), 1)) + 2
+    loop_b = int(dur_b / max(_probe_dur(broll_b), 1)) + 2
+    
+    temp_a = str(WORK_DIR / "scene_a.mp4")
+    temp_b = str(WORK_DIR / "scene_b.mp4")
+    
+    # Scene A
+    _run(["ffmpeg", "-y", "-stream_loop", str(loop_a), "-i", broll_a,
+          "-t", str(dur_a),
+          "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
+          "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p",
+          "-an", temp_a])
+    
+    # Scene B
+    _run(["ffmpeg", "-y", "-stream_loop", str(loop_b), "-i", broll_b,
+          "-t", str(dur_b),
+          "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
+          "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p",
+          "-an", temp_b])
+    
+    # xfadeで結合(0.5秒トランジション)
+    trans = random.choice(['fade', 'slideleft', 'slideright', 'wipeleft'])
+    offset = dur_a - 0.5
+    temp_combined = str(WORK_DIR / "combined.mp4")
+    _run(["ffmpeg", "-y", "-i", temp_a, "-i", temp_b,
+          "-filter_complex",
+          f"[0:v][1:v]xfade=transition={trans}:duration=0.5:offset={offset}[out]",
+          "-map", "[out]",
+          "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p",
+          temp_combined])
+    
+    # ASS字幕 + ナレーション追加
+    _run(["ffmpeg", "-y",
+          "-i", temp_combined,
+          "-i", narration_path,
+          "-vf", f"ass={ass_path}",
+          "-map", "0:v", "-map", "1:a",
+          "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+          "-c:a", "aac", "-b:a", "128k",
+          "-t", str(duration),
+          "-pix_fmt", "yuv420p",
+          output_path])
+    print(f"   ✅ A/Bスプリット完成")
+
 # === メイン ===
 def main():
     repo = sys.argv[1] if len(sys.argv) > 1 else "MadsLorentzen/ai-job-search"
@@ -275,55 +327,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-# === A/Bスプリット合成(AutoShorts AI方式) ===
-def compose_ab_split(broll_a: str, broll_b: str, narration_path: str, 
-                     ass_path: str, output_path: str, duration: float):
-    """2本のB-rollをA/Bスプリットで合成"""
-    print(f"[5/5] 🎬 A/Bスプリット合成中...")
-    
-    dur_a = duration / 2
-    dur_b = duration / 2 + 0.5
-    loop_a = int(dur_a / max(_probe_dur(broll_a), 1)) + 2
-    loop_b = int(dur_b / max(_probe_dur(broll_b), 1)) + 2
-    
-    temp_a = str(WORK_DIR / "scene_a.mp4")
-    temp_b = str(WORK_DIR / "scene_b.mp4")
-    
-    # Scene A
-    _run(["ffmpeg", "-y", "-stream_loop", str(loop_a), "-i", broll_a,
-          "-t", str(dur_a),
-          "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
-          "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p",
-          "-an", temp_a])
-    
-    # Scene B
-    _run(["ffmpeg", "-y", "-stream_loop", str(loop_b), "-i", broll_b,
-          "-t", str(dur_b),
-          "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
-          "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p",
-          "-an", temp_b])
-    
-    # xfadeで結合(0.5秒トランジション)
-    trans = random.choice(['fade', 'slideleft', 'slideright', 'wipeleft'])
-    offset = dur_a - 0.5
-    temp_combined = str(WORK_DIR / "combined.mp4")
-    _run(["ffmpeg", "-y", "-i", temp_a, "-i", temp_b,
-          "-filter_complex",
-          f"[0:v][1:v]xfade=transition={trans}:duration=0.5:offset={offset}[out]",
-          "-map", "[out]",
-          "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p",
-          temp_combined])
-    
-    # ASS字幕 + ナレーション追加
-    _run(["ffmpeg", "-y",
-          "-i", temp_combined,
-          "-i", narration_path,
-          "-vf", f"ass={ass_path}",
-          "-map", "0:v", "-map", "1:a",
-          "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-          "-c:a", "aac", "-b:a", "128k",
-          "-t", str(duration),
-          "-pix_fmt", "yuv420p",
-          output_path])
-    print(f"   ✅ A/Bスプリット完成")
