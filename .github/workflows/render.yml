@@ -37,7 +37,7 @@ jobs:
             libass-dev
 
       - name: Install Python deps
-        run: pip install requests edge-tts openai-whisper
+        run: pip install requests edge-tts openai-whisper pysubs2
 
       - name: Run ffmpeg pipeline
         env:

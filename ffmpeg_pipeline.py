@@ -157,6 +157,59 @@ def generate_srt(audio_path, name):
     srt_name = Path(audio_path).stem + ".srt"
     return WORK_DIR / srt_name
 
+# === キネティックキャプション生成(pysubs2版) ===
+def generate_kinetic_ass(audio_path: str, ass_path: Path) -> Path:
+    """Whisperの単語タイムスタンプを使ってキネティックキャプションを生成"""
+    print(f"[3/5] 📝 キネティックキャプション生成中...")
+    import whisper, pysubs2
+    
+    model = whisper.load_model("small")
+    result = model.transcribe(audio_path, word_timestamps=True, language="ja")
+    
+    all_words = []
+    for segment in result.get("segments", []):
+        all_words.extend(segment.get("words", []))
+    
+    subs = pysubs2.SSAFile()
+    subs.info["PlayResX"] = "1080"
+    subs.info["PlayResY"] = "1920"
+    
+    style = pysubs2.SSAStyle(
+        fontname=FONT_NAME,
+        fontsize=72,
+        primarycolor=pysubs2.Color(255, 255, 255, 0),   # 白
+        outlinecolor=pysubs2.Color(0, 0, 0, 0),          # 黒縁
+        backcolor=pysubs2.Color(0, 0, 0, 160),            # 半透明背景
+        bold=True,
+        outline=4,
+        shadow=2,
+        alignment=2,   # 下部中央
+        marginv=120,
+        marginl=40,
+        marginr=40,
+    )
+    subs.styles["Default"] = style
+    
+    # 3〜5単語ずつグループ化して表示
+    group_size = 4
+    for i in range(0, len(all_words), group_size):
+        group = all_words[i:i+group_size]
+        if not group:
+            continue
+        start_ms = int(group[0]["start"] * 1000)
+        end_ms = int(group[-1]["end"] * 1000)
+        text = " ".join(strip_emoji(w["word"].strip()) for w in group if w["word"].strip())
+        if text:
+            subs.append(pysubs2.SSAEvent(
+                start=pysubs2.make_time(ms=start_ms),
+                end=pysubs2.make_time(ms=end_ms),
+                text=text,
+            ))
+    
+    subs.save(str(ass_path))
+    print(f"   ✅ キネティックキャプション: {len(subs)}ブロック")
+    return ass_path
+
 # === Step 4: Pexels B-roll ===
 MOTION_KEYWORDS = {
     "programming": "keyboard typing coding fast",
@@ -290,10 +343,8 @@ def main():
     duration = _probe_dur(narration_path)
     print(f"   ✅ ナレーション: {duration:.1f}s")
 
-    srt_path = generate_srt(narration_path, name)
     ass_path = WORK_DIR / f"{name}.ass"
-    srt_to_ass(srt_path, ass_path)
-    print(f"   ✅ ASS字幕生成完了")
+    generate_kinetic_ass(narration_path, ass_path)
 
     # B-roll 2本取得(A/Bスプリット用)
     keywords = script.get("pexels_keywords", ["coding", "technology", "programming"])
