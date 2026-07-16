@@ -161,36 +161,47 @@ def generate_srt(audio_path, name):
 def generate_kinetic_ass(audio_path: str, ass_path: Path) -> Path:
     """Whisperの単語タイムスタンプを使ってキネティックキャプションを生成"""
     print(f"[3/5] 📝 キネティックキャプション生成中...")
-    import whisper, pysubs2
-    
+    import whisper, pysubs2, os
+
     model = whisper.load_model("small")
     result = model.transcribe(audio_path, word_timestamps=True, language="ja")
-    
+
     all_words = []
     for segment in result.get("segments", []):
         all_words.extend(segment.get("words", []))
-    
+
+    # Linux/Mac両対応フォント設定
+    if os.path.exists("/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc"):
+        font_name = "Noto Sans CJK JP"
+        print("   フォント: NotoSansCJK-Bold.ttc")
+    elif os.path.exists("/usr/share/fonts/opentype/noto/NotoSansCJKjp-Bold.otf"):
+        font_name = "Noto Sans CJK JP"
+        print("   フォント: NotoSansCJKjp-Bold.otf")
+    else:
+        font_name = "Arial"
+        print("   フォント: Arial (fallback)")
+
     subs = pysubs2.SSAFile()
     subs.info["PlayResX"] = "1080"
     subs.info["PlayResY"] = "1920"
-    
+
     style = pysubs2.SSAStyle(
-        fontname=FONT_NAME,
+        fontname=font_name,
         fontsize=72,
-        primarycolor=pysubs2.Color(255, 255, 255, 0),   # 白
-        outlinecolor=pysubs2.Color(0, 0, 0, 0),          # 黒縁
-        backcolor=pysubs2.Color(0, 0, 0, 160),            # 半透明背景
+        primarycolor=pysubs2.Color(255, 255, 255, 0),
+        outlinecolor=pysubs2.Color(0, 0, 0, 0),
+        backcolor=pysubs2.Color(0, 0, 0, 160),
         bold=True,
         outline=4,
         shadow=2,
-        alignment=2,   # 下部中央
+        alignment=2,
         marginv=120,
         marginl=40,
         marginr=40,
     )
     subs.styles["Default"] = style
-    
-    # 3〜5単語ずつグループ化して表示
+
+    # 3〜4単語ずつグループ化
     group_size = 4
     for i in range(0, len(all_words), group_size):
         group = all_words[i:i+group_size]
@@ -205,26 +216,47 @@ def generate_kinetic_ass(audio_path: str, ass_path: Path) -> Path:
                 end=pysubs2.make_time(ms=end_ms),
                 text=text,
             ))
-    
+
     subs.save(str(ass_path))
     print(f"   ✅ キネティックキャプション: {len(subs)}ブロック")
     return ass_path
 
+
 # === Step 4: Pexels B-roll ===
+# GitHubトレンド紹介専用B-rollキーワード(コーディング映像のみ)
+TECH_BROLL_KEYWORDS = [
+    "programmer typing keyboard dark",
+    "coding screen terminal dark",
+    "developer laptop code night",
+    "typing keyboard programming fast",
+    "computer screen code dark",
+]
+
 MOTION_KEYWORDS = {
-    "programming": "keyboard typing coding fast",
-    "coding": "developer coding screen dark",
-    "technology": "technology digital screen",
-    "ai": "artificial intelligence data",
-    "job": "laptop working professional",
-    "career": "office technology laptop",
+    "programming": "programmer typing keyboard dark",
+    "coding": "coding screen terminal dark",
+    "technology": "developer laptop code night",
+    "ai": "typing keyboard programming fast",
+    "job": "developer laptop code night",
+    "career": "programmer typing keyboard dark",
+    "developer": "coding screen terminal dark",
+    "github": "programmer typing keyboard dark",
 }
 
 def fetch_pexels(keywords):
     print(f"[4/5] 🎬 B-roll取得中...")
     headers = {"Authorization": PEXELS_API_KEY}
+    # キーワードをtech系に変換、なければデフォルトのコーディング映像を使う
+    tech_kws = []
     for kw in keywords[:3]:
-        q = MOTION_KEYWORDS.get(kw.lower(), kw)
+        tech_q = MOTION_KEYWORDS.get(kw.lower().split()[0], "programmer typing keyboard dark")
+        tech_kws.append(tech_q)
+    # tech_kwsが空の場合はデフォルト
+    if not tech_kws:
+        tech_kws = ["programmer typing keyboard dark", "coding screen terminal dark"]
+    
+    for kw in tech_kws[:3]:
+        q = kw
         params = {"query": q, "per_page": 5, "orientation": "portrait", "size": "small"}
         r = requests.get("https://api.pexels.com/videos/search", headers=headers, params=params, timeout=10)
         if r.status_code != 200:
@@ -263,7 +295,7 @@ def compose(broll_path, narration_path, ass_path, output_path, duration):
         "-i", narration_path,
         "-filter_complex",
         f"[0:v]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,setsar=1[bg];"
-        f"[bg]ass={ass_path}[out]",
+        f"[bg]ass={ass_path}:fontsdir=/usr/share/fonts[out]",
         "-map", "[out]",
         "-map", "1:a",
         "-c:v", "libx264", "-preset", "fast", "-crf", "22",
@@ -317,7 +349,7 @@ def compose_ab_split(broll_a: str, broll_b: str, narration_path: str,
     _run(["ffmpeg", "-y",
           "-i", temp_combined,
           "-i", narration_path,
-          "-vf", f"ass={ass_path}",
+          "-vf", f"ass={ass_path}:fontsdir=/usr/share/fonts",
           "-map", "0:v", "-map", "1:a",
           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
           "-c:a", "aac", "-b:a", "128k",

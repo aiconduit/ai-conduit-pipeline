@@ -44,7 +44,7 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
-          python3 ffmpeg_pipeline.py \
+          python3 ffmpeg_pipeline_v2.py \
             "${{ github.event.inputs.repo }}" \
             "${{ github.event.inputs.stars }}" \
             "${{ github.event.inputs.description }}"
