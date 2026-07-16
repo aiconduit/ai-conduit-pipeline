@@ -238,20 +238,40 @@ def generate_kinetic_ass(all_audio_path, ass_path, scenes):
     )
     subs.styles["Default"] = style
     
-    # 3〜4単語ずつグループ化
-    group_size = 3
-    for i in range(0, len(all_words), group_size):
-        group = all_words[i:i+group_size]
-        if not group:
+    # 日本語: セグメント単位で表示(単語ではなく文節単位)
+    # Whisperのセグメント(文章の切れ目)をそのまま使う
+    for segment in result.get("segments", []):
+        seg_text = strip_emoji(segment["text"].strip())
+        if not seg_text:
             continue
-        start_ms = int(group[0]["start"] * 1000)
-        end_ms = int(group[-1]["end"] * 1000)
-        text = " ".join(strip_emoji(w["word"].strip()) for w in group if w["word"].strip())
-        if text:
+        start_ms = int(segment["start"] * 1000)
+        end_ms = int(segment["end"] * 1000)
+        duration_ms = end_ms - start_ms
+        
+        # 長いセグメントは2分割
+        if len(seg_text) > 15 and duration_ms > 2000:
+            mid = len(seg_text) // 2
+            # 句読点で分割を試みる
+            split_pos = seg_text.rfind("、", 0, mid+5) or seg_text.rfind("。", 0, mid+5) or mid
+            if split_pos <= 0:
+                split_pos = mid
+            mid_ms = start_ms + duration_ms // 2
+            
+            subs.append(pysubs2.SSAEvent(
+                start=pysubs2.make_time(ms=start_ms),
+                end=pysubs2.make_time(ms=mid_ms),
+                text=seg_text[:split_pos],
+            ))
+            subs.append(pysubs2.SSAEvent(
+                start=pysubs2.make_time(ms=mid_ms),
+                end=pysubs2.make_time(ms=end_ms),
+                text=seg_text[split_pos:],
+            ))
+        else:
             subs.append(pysubs2.SSAEvent(
                 start=pysubs2.make_time(ms=start_ms),
                 end=pysubs2.make_time(ms=end_ms),
-                text=text,
+                text=seg_text,
             ))
     
     subs.save(str(ass_path))
