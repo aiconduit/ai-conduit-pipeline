@@ -32,32 +32,44 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install ffmpeg
-        run: sudo apt-get install -y ffmpeg
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ffmpeg \
+            fonts-noto-cjk \
+            fonts-noto-cjk-extra \
+            imagemagick \
+            libmagic1 \
+            python3-dev
 
       - name: Install Python deps
-        run: pip install requests edge-tts
+        run: |
+          pip install requests edge-tts moviepy openai-whisper pillow
 
       - name: Install Node deps
         run: |
           cd remotion-composer
           npm install
 
-      - name: Install Remotion deps
+      - name: Install Remotion Chrome
         run: |
           cd remotion-composer
           npx remotion browser ensure
 
-      - name: Generate script & render
+      - name: Run full pipeline
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
-          python3 auto_content_pipeline.py "${{ github.event.inputs.repo }}" "${{ github.event.inputs.stars }}" "${{ github.event.inputs.description }}"
+          python3 auto_content_pipeline.py \
+            "${{ github.event.inputs.repo }}" \
+            "${{ github.event.inputs.stars }}" \
+            "${{ github.event.inputs.description }}"
 
-      - name: Upload video artifact
+      - name: Upload video
         uses: actions/upload-artifact@v4
         with:
           name: rendered-video
-          path: projects/daily/renders/*.mp4
+          path: projects/daily/renders/*_final.mp4
           retention-days: 7

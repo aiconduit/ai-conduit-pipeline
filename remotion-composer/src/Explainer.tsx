@@ -46,6 +46,7 @@ import { CinematicTitle } from "./components/CinematicTitle";
 import { StatCounter } from "./components/StatCounter";
 import { SubscribeCTA } from "./components/SubscribeCTA";
 import { PexelsScene } from "./components/PexelsScene";
+import { KineticCaption } from "./components/KineticCaption";
 import type { TerminalStep } from "./components/TerminalScene";
 import { ScreenshotScene } from "./components/ScreenshotScene";
 import type { ScreenshotStep } from "./components/ScreenshotScene";

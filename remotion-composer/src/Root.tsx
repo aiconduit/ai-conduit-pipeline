@@ -132,6 +132,9 @@ const calculateMetadata: CalculateMetadataFunction<ExplainerProps> = async ({
   return { durationInFrames: Math.ceil((lastEnd + 1) * 30) };
 };
 
+import { loadFont } from "@remotion/google-fonts/NotoSansJP";
+const { fontFamily: notoSansJP } = loadFont();
+
 export const Root: React.FC = () => {
   return (
     <>

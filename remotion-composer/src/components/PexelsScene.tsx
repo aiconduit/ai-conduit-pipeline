@@ -58,7 +58,7 @@ export const PexelsScene: React.FC<PexelsSceneProps> = ({
           ...positionStyle,
           opacity: textOpacity,
           textAlign: "center",
-          fontFamily: "system-ui, -apple-system, sans-serif",
+          fontFamily: "Noto Sans JP, system-ui, sans-serif",
         }}>
           <div style={{
             color: "white",

@@ -11,8 +11,18 @@
       "accentColor": "#F59E0B",
       "backgroundColor": "#0B0F1A",
       "stats": [
-        { "label": "⭐ 総スター数", "value": 17500, "suffix": "", "color": "#F59E0B" },
-        { "label": "📈 今月の増加", "value": 4700, "suffix": "+", "color": "#22D3EE" }
+        {
+          "label": "⭐ 総スター数",
+          "value": 17500,
+          "suffix": "",
+          "color": "#F59E0B"
+        },
+        {
+          "label": "📈 今月の増加",
+          "value": 4700,
+          "suffix": "+",
+          "color": "#22D3EE"
+        }
       ]
     },
     {
@@ -37,14 +47,41 @@
       "accentColor": "#22D3EE",
       "backgroundColor": "#0B0F1A",
       "steps": [
-        { "kind": "cmd", "text": "git clone github.com/MadsLorentzen/ai-job-search", "typeSpeed": 0.02 },
-        { "kind": "out", "text": "+ ai-job-search cloned successfully" },
-        { "kind": "pause", "seconds": 0.3 },
-        { "kind": "cmd", "text": "claude evaluate --job senior-engineer --profile ./me.md" },
-        { "kind": "pill", "text": "Claude Code が履歴書を自動生成中...", "color": "#22D3EE", "durationSeconds": 2 },
-        { "kind": "out", "text": "> Job match score: 87%" },
-        { "kind": "out", "text": "> CV tailored. Cover letter generated." },
-        { "kind": "out", "text": "> Interview prep questions ready." }
+        {
+          "kind": "cmd",
+          "text": "git clone github.com/MadsLorentzen/ai-job-search",
+          "typeSpeed": 0.02
+        },
+        {
+          "kind": "out",
+          "text": "+ ai-job-search cloned successfully"
+        },
+        {
+          "kind": "pause",
+          "seconds": 0.3
+        },
+        {
+          "kind": "cmd",
+          "text": "claude evaluate --job senior-engineer --profile ./me.md"
+        },
+        {
+          "kind": "pill",
+          "text": "Claude Code が履歴書を自動生成中...",
+          "color": "#22D3EE",
+          "durationSeconds": 2
+        },
+        {
+          "kind": "out",
+          "text": "> Job match score: 87%"
+        },
+        {
+          "kind": "out",
+          "text": "> CV tailored. Cover letter generated."
+        },
+        {
+          "kind": "out",
+          "text": "> Interview prep questions ready."
+        }
       ]
     },
     {
@@ -60,5 +97,68 @@
       "backgroundColor": "#0B0F1A"
     }
   ],
-  "overlays": []
+  "overlays": [],
+  "captions": [
+    {
+      "word": "今月GitHubトレンドで17,500スターを集めた急上昇ツール",
+      "startMs": 0,
+      "endMs": 5680
+    },
+    {
+      "word": "Claude",
+      "startMs": 5680,
+      "endMs": 7840
+    },
+    {
+      "word": "Codeを使って就活を完全自動化するフレームワーク",
+      "startMs": 7840,
+      "endMs": 10000
+    },
+    {
+      "word": "ai-job-search",
+      "startMs": 10000,
+      "endMs": 11920
+    },
+    {
+      "word": "プロフィールを入れるだけで",
+      "startMs": 11920,
+      "endMs": 13840
+    },
+    {
+      "word": "履歴書の作成・求人の評価・面接準備まで全部Claudeがやってくれます",
+      "startMs": 13840,
+      "endMs": 18720
+    },
+    {
+      "word": "就活にかける時間を劇的に削減できます",
+      "startMs": 18720,
+      "endMs": 22880
+    },
+    {
+      "word": "コメントに",
+      "startMs": 22880,
+      "endMs": 23946
+    },
+    {
+      "word": "conduit",
+      "startMs": 23946,
+      "endMs": 25013
+    },
+    {
+      "word": "と入れてくれた方に",
+      "startMs": 25013,
+      "endMs": 26080
+    },
+    {
+      "word": "テンプレートをプレゼントします",
+      "startMs": 26080,
+      "endMs": 29088
+    }
+  ],
+  "audio": {
+    "narration": {
+      "src": "narration_v3.mp3",
+      "volume": 1.0
+    }
+  }
 }
