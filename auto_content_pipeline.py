@@ -226,7 +226,10 @@ def compose_final(remotion_video: Path, broll_path: str, narration: Path, srt_pa
     w, h = main.size
     
     # B-roll(縦型にリサイズしてループ)
-    broll = VideoFileClip(broll_path).with_effects([vfx.Loop(duration=main.duration)]).resized((w, h))
+    broll_raw = VideoFileClip(broll_path)
+    # ループ回数を計算して確実にdurationをカバー
+    n_loops = int(main.duration / broll_raw.duration) + 2
+    broll = broll_raw.with_effects([vfx.Loop(n=n_loops)]).subclipped(0, main.duration).resized((w, h))
     
     # ナレーション音声
     audio = AudioFileClip(str(narration)).subclipped(0, main.duration)
