@@ -13,6 +13,10 @@ AI Conduit 純ffmpegパイプライン v2 (シーン単位B-roll方式)
     python3 ffmpeg_pipeline_v2.py "MadsLorentzen/ai-job-search" "17500" "説明"
 """
 import sys, json, os, subprocess, requests, random, re, asyncio, tempfile
+sys.path.insert(0, str(Path(__file__).parent))
+from features.viral_scorer import score_script, optimize_hook
+from features.brand_template import BRAND, get_scene_template, add_watermark
+from features.bgm_selector import get_bgm, mix_bgm
 from pathlib import Path
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -267,6 +271,11 @@ def main():
     # 1. シーン単位スクリプト生成
     scenes = generate_scene_script(repo, stars, description)
     
+    # バイラルスコアリング
+    print("   🎯 バイラルスコアリング中...")
+    scenes = score_script(scenes)
+    scenes = optimize_hook(scenes)
+
     # 2. シーン別ナレーション生成
     generate_scene_narrations(scenes)
     
@@ -302,6 +311,32 @@ def main():
           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
           "-c:a", "copy", "-pix_fmt", "yuv420p", output])
     
+    # バイラルスコアリング結果表示
+    scored = [s for s in scenes if "viral_score" in s]
+    if scored:
+        avg_score = sum(s["viral_score"] for s in scored) / len(scored)
+        print(f"\n📊 バイラルスコア平均: {avg_score:.1f}/10")
+
+    # ウォーターマーク追加
+    output_wm = output.replace("_final.mp4", "_branded.mp4")
+    try:
+        add_watermark(output, output_wm)
+        print(f"   ✅ ウォーターマーク追加完了")
+        output = output_wm
+    except Exception as e:
+        print(f"   ⚠️ ウォーターマーク失敗: {e}")
+
+    # BGM追加
+    bgm = get_bgm(mood="upbeat")
+    if bgm:
+        output_bgm = output.replace(".mp4", "_bgm.mp4")
+        try:
+            mix_bgm(output, bgm, output_bgm, bgm_volume=0.12)
+            output = output_bgm
+            print(f"   ✅ BGM追加完了")
+        except Exception as e:
+            print(f"   ⚠️ BGM追加失敗: {e}")
+
     total_dur = _probe_dur(output)
     print(f"\n✅ 完成: {output} ({total_dur:.1f}s)")
     narration = " ".join(s['text'] for s in scenes)
