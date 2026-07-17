@@ -54,15 +54,17 @@ Create a 6-scene script in Japanese for a 25-second vertical video.
 
 Rules:
 - 3rd person perspective (「このツールは...」「開発者が...」)
-- Hook -> What -> How -> Why -> CTA structure
-- Each scene: 3-4 seconds of narration
+- Hook -> What -> How -> Why -> CTA structure  
+- CRITICAL: Each scene text must be VERY SHORT: maximum 20 Japanese characters per scene
+- 6 scenes total, each 3-4 seconds when spoken aloud
+- NO long sentences. Each scene = ONE short punchy sentence only
 - For each scene provide TWO distinct Pexels video search terms (English, specific and literal)
 - visual_1: matches start of narration, visual_2: matches end or reaction
-- CTA must include: 「コメントにconduitで無料テンプレートプレゼント」
+- CTA scene: 「コメントにconduitでテンプレ無料」(keep it short)
 
 Output ONLY valid JSON array:
 [
-  {{"id":1,"text":"ナレーション文","visual_1":"specific english search term","visual_2":"specific english search term","duration":3}},
+  {{"id":1,"text":"短いナレーション文(最大20文字)","visual_1":"english term","visual_2":"english term"}},
   ...
 ]"""
 
