@@ -298,7 +298,7 @@ def main():
     
     # 5. キネティックキャプション生成・焼き込み
     ass_path = WORK_DIR / f"{name}.ass"
-    generate_kinetic_ass(combined, ass_path, scenes)
+    generate_kinetic_ass(combined, ass_path, "hormozi")
     
     output = str(OUTPUT_DIR / f"{name}_final.mp4")
     _run(["ffmpeg", "-y", "-i", combined,
