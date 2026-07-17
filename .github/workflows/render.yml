@@ -33,11 +33,12 @@ jobs:
           sudo apt-get install -y \
             ffmpeg \
             fonts-noto-cjk \
+            fonts-urw-base35 \
             fonts-noto-cjk-extra \
             libass-dev
 
       - name: Install Python deps
-        run: pip install requests edge-tts openai-whisper pysubs2
+        run: pip install requests edge-tts faster-whisper pysubs2 openai-whisper
 
       - name: Run ffmpeg pipeline
         env:

@@ -204,81 +204,54 @@ def compose_scene(scene, idx):
     
     return output
 
-# === Step 5: キネティックキャプション生成 ===
-def generate_kinetic_ass(all_audio_path, ass_path, scenes):
-    print(f"[5/5] 📝 キネティックキャプション生成中...")
-    import whisper, pysubs2
+# === Step 5: 高品質キャプション生成(ai-video-captions方式) ===
+def generate_kinetic_ass(audio_path: str, ass_path: Path, style: str = "hormozi") -> Path:
+    """faster-whisperで単語タイムスタンプ取得 + Hormoziスタイルで字幕生成"""
+    print(f"[3/5] 📝 高品質キャプション生成中({style}スタイル)...")
     
-    model = whisper.load_model("small")
-    result = model.transcribe(all_audio_path, word_timestamps=True, language="ja")
-    
-    all_words = []
-    for segment in result.get("segments", []):
-        all_words.extend(segment.get("words", []))
-    
-    font_name = "Noto Sans CJK JP"
-    if not IS_CI:
-        font_name = "Arial"
-    
-    subs = pysubs2.SSAFile()
-    subs.info["PlayResX"] = "1080"
-    subs.info["PlayResY"] = "1920"
-    
-    style = pysubs2.SSAStyle(
-        fontname=font_name,
-        fontsize=68,
-        primarycolor=pysubs2.Color(255, 255, 255, 0),
-        outlinecolor=pysubs2.Color(0, 0, 0, 0),
-        backcolor=pysubs2.Color(0, 0, 0, 150),
-        bold=True,
-        outline=4,
-        shadow=2,
-        alignment=2,
-        marginv=130,
-        marginl=40,
-        marginr=40,
-    )
-    subs.styles["Default"] = style
-    
-    # 日本語: セグメント単位で表示(単語ではなく文節単位)
-    # Whisperのセグメント(文章の切れ目)をそのまま使う
-    for segment in result.get("segments", []):
-        seg_text = strip_emoji(segment["text"].strip())
-        if not seg_text:
-            continue
-        start_ms = int(segment["start"] * 1000)
-        end_ms = int(segment["end"] * 1000)
-        duration_ms = end_ms - start_ms
+    # faster-whisperがあればそちらを使用、なければopenai-whisper
+    try:
+        from faster_whisper import WhisperModel
+        model = WhisperModel("small", device="cpu", compute_type="int8")
+        segments_iter, info = model.transcribe(audio_path, word_timestamps=True, language="ja")
         
-        # 長いセグメントは2分割
-        if len(seg_text) > 15 and duration_ms > 2000:
-            mid = len(seg_text) // 2
-            # 句読点で分割を試みる
-            split_pos = seg_text.rfind("、", 0, mid+5) or seg_text.rfind("。", 0, mid+5) or mid
-            if split_pos <= 0:
-                split_pos = mid
-            mid_ms = start_ms + duration_ms // 2
-            
-            subs.append(pysubs2.SSAEvent(
-                start=pysubs2.make_time(ms=start_ms),
-                end=pysubs2.make_time(ms=mid_ms),
-                text=seg_text[:split_pos],
-            ))
-            subs.append(pysubs2.SSAEvent(
-                start=pysubs2.make_time(ms=mid_ms),
-                end=pysubs2.make_time(ms=end_ms),
-                text=seg_text[split_pos:],
-            ))
-        else:
-            subs.append(pysubs2.SSAEvent(
-                start=pysubs2.make_time(ms=start_ms),
-                end=pysubs2.make_time(ms=end_ms),
-                text=seg_text,
-            ))
+        # faster-whisperのフォーマットをOpenAI Whisper互換に変換
+        transcript = {"language": "ja", "segments": []}
+        for seg in segments_iter:
+            words = [{"word": w.word, "start": w.start, "end": w.end} for w in (seg.words or [])]
+            transcript["segments"].append({
+                "start": seg.start, "end": seg.end,
+                "text": seg.text, "words": words
+            })
+    except ImportError:
+        import whisper
+        model = whisper.load_model("small")
+        transcript = model.transcribe(audio_path, word_timestamps=True, language="ja")
     
-    subs.save(str(ass_path))
-    print(f"   ✅ {len(subs)}ブロックの字幕生成完了")
+    # ai-video-captionsのgenerate_ass関数を使用
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent / "features"))
+    from subtitles import generate_ass
+    
+    dur = _probe_dur(audio_path)
+    success = generate_ass(
+        transcript=transcript,
+        clip_start=0.0,
+        clip_end=dur,
+        output_path=str(ass_path),
+        caption_style=style,
+        caption_position=15,
+        language="ja",
+        video_width=1080,
+        video_height=1920,
+    )
+    
+    if success:
+        print(f"   ✅ キャプション生成完了({style}スタイル)")
+    else:
+        print(f"   ⚠️ キャプション生成失敗 - フォールバック")
     return ass_path
+
 
 # === メイン ===
 def main():
