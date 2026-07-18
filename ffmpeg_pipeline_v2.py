@@ -304,7 +304,7 @@ def main():
 
     total_dur = _probe_dur(output)
     print(f"\n✅ 完成: {output} ({total_dur:.1f}s)")
-    narration = " ".join(s['text'] for s in scenes)
+    narration = " ".join(s.get('narration', s.get('text', '')) for s in scenes)
     print(f"\n📋 ナレーション:\n{narration}")
     print(f"\n#AI #GitHub #GitHubTrending #AIツール #エンジニア")
 
