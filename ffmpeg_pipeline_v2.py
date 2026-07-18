@@ -50,21 +50,21 @@ def generate_scene_script(repo, stars, description):
     prompt = f"""You are a scriptwriter for a high-retention Japanese AI/GitHub trends channel.
 Topic: {repo} ({stars} stars) - {description}
 
-Create a 6-scene script in Japanese for a 25-second vertical video.
+Create a 12-scene script in Japanese for a 60-second vertical video.
 
 Rules:
 - 3rd person perspective (「このツールは...」「開発者が...」)
-- Hook -> What -> How -> Why -> CTA structure  
-- CRITICAL: Each scene text must be VERY SHORT: maximum 20 Japanese characters per scene
-- 6 scenes total, each 3-4 seconds when spoken aloud
-- NO long sentences. Each scene = ONE short punchy sentence only
+- Structure: Hook(2scenes) -> Problem(2scenes) -> Solution/What(3scenes) -> How it works(3scenes) -> Results(1scene) -> CTA(1scene)
+- Each scene: 30-40 Japanese characters, spoken in 4-6 seconds
+- Write INFORMATIVE, DETAILED content that clearly explains the tool
+- Include specific numbers, features, and benefits
 - For each scene provide TWO distinct Pexels video search terms (English, specific and literal)
 - visual_1: matches start of narration, visual_2: matches end or reaction
-- CTA scene: 「コメントにconduitでテンプレ無料」(keep it short)
+- CTA scene: 「コメントにconduitでテンプレ無料プレゼント」
 
 Output ONLY valid JSON array:
 [
-  {{"id":1,"text":"短いナレーション文(最大20文字)","visual_1":"english term","visual_2":"english term"}},
+  {{"id":1,"text":"詳しいナレーション文(30〜40文字)","visual_1":"english term","visual_2":"english term"}},
   ...
 ]"""
 

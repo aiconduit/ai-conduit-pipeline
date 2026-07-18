@@ -58,7 +58,7 @@ def build_hormozi_ass(scenes: list, output_path: str,
             continue
 
         # 長い文は分割(最大16文字)
-        chunks = split_text(text, max_chars=16)
+        chunks = split_text(text, max_chars=20)
         chunk_duration = duration / len(chunks)
 
         for i, chunk in enumerate(chunks):
@@ -79,7 +79,7 @@ def build_hormozi_ass(scenes: list, output_path: str,
     return output_path
 
 
-def split_text(text: str, max_chars: int = 16) -> list:
+def split_text(text: str, max_chars: int = 20) -> list:
     """テキストを自然な区切りで分割"""
     if len(text) <= max_chars:
         return [text]
