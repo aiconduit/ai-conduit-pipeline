@@ -204,53 +204,21 @@ def compose_scene(scene, idx):
     
     return output
 
-# === Step 5: 高品質キャプション生成(ai-video-captions方式) ===
-def generate_kinetic_ass(audio_path: str, ass_path: Path, style: str = "hormozi") -> Path:
-    """faster-whisperで単語タイムスタンプ取得 + Hormoziスタイルで字幕生成"""
-    print(f"[3/5] 📝 高品質キャプション生成中({style}スタイル)...")
-    
-    # faster-whisperがあればそちらを使用、なければopenai-whisper
-    try:
-        from faster_whisper import WhisperModel
-        model = WhisperModel("small", device="cpu", compute_type="int8")
-        segments_iter, info = model.transcribe(audio_path, word_timestamps=True, language="ja")
-        
-        # faster-whisperのフォーマットをOpenAI Whisper互換に変換
-        transcript = {"language": "ja", "segments": []}
-        for seg in segments_iter:
-            words = [{"word": w.word, "start": w.start, "end": w.end} for w in (seg.words or [])]
-            transcript["segments"].append({
-                "start": seg.start, "end": seg.end,
-                "text": seg.text, "words": words
-            })
-    except ImportError:
-        import whisper
-        model = whisper.load_model("small")
-        transcript = model.transcribe(audio_path, word_timestamps=True, language="ja")
-    
-    # ai-video-captionsのgenerate_ass関数を使用
+# === Step 5: 字幕生成(ナレーションテキストから直接生成) ===
+def generate_captions_from_scenes(scenes: list, ass_path: Path) -> Path:
+    """ナレーションテキストから直接Hormoziスタイルの字幕を生成
+    Whisperの誤認識ゼロ・音声と100%一致"""
+    print(f"[3/5] 📝 Hormozi字幕生成中...")
     import sys
     sys.path.insert(0, str(Path(__file__).parent / "features"))
-    from subtitles import generate_ass
+    from caption_generator import build_hormozi_ass
     
-    dur = _probe_dur(audio_path)
-    success = generate_ass(
-        transcript=transcript,
-        clip_start=0.0,
-        clip_end=dur,
-        output_path=str(ass_path),
-        caption_style=style,
-        caption_position=15,
-        language="ja",
-        video_width=1080,
-        video_height=1920,
-    )
+    IS_CI = os.environ.get("CI", "") == "true"
+    font_name = "Noto Sans CJK JP" if IS_CI else "Hiragino Sans"
     
-    if success:
-        print(f"   ✅ キャプション生成完了({style}スタイル)")
-    else:
-        print(f"   ⚠️ キャプション生成失敗 - フォールバック")
+    build_hormozi_ass(scenes, str(ass_path), font_name=font_name, font_size=90)
     return ass_path
+
 
 
 # === メイン ===
@@ -298,7 +266,7 @@ def main():
     
     # 5. キネティックキャプション生成・焼き込み
     ass_path = WORK_DIR / f"{name}.ass"
-    generate_kinetic_ass(combined, ass_path, "hormozi")
+    generate_captions_from_scenes(scenes, ass_path)
     
     output = str(OUTPUT_DIR / f"{name}_final.mp4")
     _run(["ffmpeg", "-y", "-i", combined,
