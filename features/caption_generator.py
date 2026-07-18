@@ -16,7 +16,7 @@ VIDEO_W = 1080
 VIDEO_H = 1920
 LATIN_FONT_SIZE = 105
 CJK_FONT_SCALE = 0.65
-FONT_SIZE = int(LATIN_FONT_SIZE * CJK_FONT_SCALE)  # 68px
+FONT_SIZE = 80  # より大きく
 CJK_CHAR_WIDTH = FONT_SIZE * 1.05                   # 71.4px
 MARGIN_H = 80
 MARGIN_V = int(VIDEO_H * 0.20)                      # 384px
@@ -87,7 +87,7 @@ def build_hormozi_ass(scenes: list, output_path: str,
         bold=True,
         outline=5,
         shadow=3,
-        alignment=2,
+        alignment=2,  # ASS: 2=中央下(正しい)
         marginv=MARGIN_V,
         marginl=MARGIN_H,
         marginr=MARGIN_H,
