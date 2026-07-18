@@ -235,6 +235,20 @@ def main():
     # 1. シーン単位スクリプト生成
     scenes = generate_scene_script(repo, stars, description)
     
+    # テキスト長を強制的に制限(15文字以内)
+    for scene in scenes:
+        text = scene.get("text", "")
+        if len(text) > 20:
+            # 句読点で切る
+            for sep in ["、", "。", "！", "？", "が", "を", "に", "は", "で"]:
+                idx = text.find(sep, 8)
+                if 8 <= idx <= 18:
+                    scene["text"] = text[:idx+1]
+                    break
+            else:
+                scene["text"] = text[:15]
+        print(f"   Scene {scene['id']}: {scene['text']}")
+
     # バイラルスコアリング
     print("   🎯 バイラルスコアリング中...")
     scenes = score_script(scenes)
