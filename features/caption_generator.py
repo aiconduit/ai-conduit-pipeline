@@ -76,7 +76,7 @@ def build_hormozi_ass(scenes: list, output_path: str,
     subs = pysubs2.SSAFile()
     subs.info["PlayResX"] = str(VIDEO_W)
     subs.info["PlayResY"] = str(VIDEO_H)
-    subs.info["WrapStyle"] = "0"
+    subs.info["WrapStyle"] = "2"
 
     style = pysubs2.SSAStyle(
         fontname=font_name,
@@ -104,21 +104,15 @@ def build_hormozi_ass(scenes: list, output_path: str,
             current_time += duration
             continue
 
-        lines = split_to_lines(text)
-        chunk_dur = duration / max(len(lines), 1)
-
-        for i, line in enumerate(lines):
-            if not line.strip():
-                continue
-            start_ms = int((current_time + i * chunk_dur) * 1000)
-            end_ms = int((current_time + (i + 1) * chunk_dur) * 1000)
-
-            subs.append(pysubs2.SSAEvent(
-                start=pysubs2.make_time(ms=start_ms),
-                end=pysubs2.make_time(ms=end_ms),
-                text=line.strip(),
-                style="Hormozi"
-            ))
+        # テキスト全体を1ブロックとして表示(WrapStyle=2で自動折り返し)
+        start_ms = int(current_time * 1000)
+        end_ms = int((current_time + duration) * 1000)
+        subs.append(pysubs2.SSAEvent(
+            start=pysubs2.make_time(ms=start_ms),
+            end=pysubs2.make_time(ms=end_ms),
+            text=text,
+            style="Hormozi"
+        ))
 
         current_time += duration
 
