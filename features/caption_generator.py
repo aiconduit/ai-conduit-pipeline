@@ -97,7 +97,8 @@ def build_hormozi_ass(scenes: list, output_path: str,
     current_time = 0.0
 
     for scene in scenes:
-        text = strip_emoji(scene.get("text", ""))
+        # captionフィールド優先(短いキーワード)、なければtextを使う
+        text = strip_emoji(scene.get("caption", scene.get("text", "")))
         duration = scene.get("actual_duration", 3.0)
 
         if not text:

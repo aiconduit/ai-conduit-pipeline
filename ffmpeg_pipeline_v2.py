@@ -52,20 +52,19 @@ Topic: {repo} ({stars} stars) - {description}
 
 Create a 12-scene script in Japanese for a 60-second vertical video.
 
-Rules:
-- 3rd person perspective (「このツールは...」「開発者が...」)
-- Structure: Hook(2scenes) -> Problem(2scenes) -> Solution/What(3scenes) -> How it works(3scenes) -> Results(1scene) -> CTA(1scene)
-- Each scene: MAXIMUM 15 Japanese characters, spoken in 3-5 seconds
-- Write PUNCHY, IMPACTFUL content - one key fact per scene
-- Include specific numbers when possible
-- Think TikTok captions: short, bold, memorable
-- For each scene provide TWO distinct Pexels video search terms (English, specific and literal)
-- visual_1: matches start of narration, visual_2: matches end or reaction
-- CTA scene: 「コメントにconduitでテンプレ無料プレゼント」
+CRITICAL RULE - TWO separate text fields per scene:
+- "narration": Full natural Japanese sentence for voice (20-35 chars). This is SPOKEN.
+- "caption": ONE ultra-short keyword shown on screen (MAX 8 chars). This is DISPLAYED.
+
+Structure: Hook(2) -> Problem(2) -> Solution(3) -> How(3) -> Result(1) -> CTA(1)
+- narration: 3rd person, natural spoken Japanese
+- caption examples: "17,500⭐", "自動化", "3分で完了", "無料"
+- CTA caption must be: "conduit"
+- TWO Pexels search terms per scene (English, specific, show motion)
 
 Output ONLY valid JSON array:
 [
-  {{"id":1,"text":"詳しいナレーション文(30〜40文字)","visual_1":"english term","visual_2":"english term"}},
+  {{"id":1,"narration":"ナレーション文章(20-35文字)","caption":"表示文字(最大8文字)","visual_1":"english term","visual_2":"english term"}},
   ...
 ]"""
 
@@ -94,11 +93,13 @@ def generate_scene_narrations(scenes):
     audio_paths = []
     for scene in scenes:
         path = str(WORK_DIR / f"scene_{scene['id']}.mp3")
-        asyncio.run(_tts_scene(scene['text'], path))
+        # narrationフィールド優先、なければtextを使う
+        narration_text = scene.get('narration', scene.get('text', ''))
+        asyncio.run(_tts_scene(narration_text, path))
         dur = _probe_dur(path)
         scene['audio_path'] = path
         scene['actual_duration'] = dur
-        print(f"   Scene {scene['id']}: {dur:.1f}s - {scene['text'][:30]}...")
+        print(f"   Scene {scene['id']}: {dur:.1f}s - {narration_text[:30]}...")
         audio_paths.append(path)
     return audio_paths
 
@@ -235,20 +236,6 @@ def main():
     # 1. シーン単位スクリプト生成
     scenes = generate_scene_script(repo, stars, description)
     
-    # テキスト長を強制的に制限(15文字以内)
-    for scene in scenes:
-        text = scene.get("text", "")
-        if len(text) > 20:
-            # 句読点で切る
-            for sep in ["、", "。", "！", "？", "が", "を", "に", "は", "で"]:
-                idx = text.find(sep, 8)
-                if 8 <= idx <= 18:
-                    scene["text"] = text[:idx+1]
-                    break
-            else:
-                scene["text"] = text[:15]
-        print(f"   Scene {scene['id']}: {scene['text']}")
-
     # バイラルスコアリング
     print("   🎯 バイラルスコアリング中...")
     scenes = score_script(scenes)
