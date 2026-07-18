@@ -55,9 +55,10 @@ Create a 12-scene script in Japanese for a 60-second vertical video.
 Rules:
 - 3rd person perspective (「このツールは...」「開発者が...」)
 - Structure: Hook(2scenes) -> Problem(2scenes) -> Solution/What(3scenes) -> How it works(3scenes) -> Results(1scene) -> CTA(1scene)
-- Each scene: 30-40 Japanese characters, spoken in 4-6 seconds
-- Write INFORMATIVE, DETAILED content that clearly explains the tool
-- Include specific numbers, features, and benefits
+- Each scene: MAXIMUM 15 Japanese characters, spoken in 3-5 seconds
+- Write PUNCHY, IMPACTFUL content - one key fact per scene
+- Include specific numbers when possible
+- Think TikTok captions: short, bold, memorable
 - For each scene provide TWO distinct Pexels video search terms (English, specific and literal)
 - visual_1: matches start of narration, visual_2: matches end or reaction
 - CTA scene: 「コメントにconduitでテンプレ無料プレゼント」
