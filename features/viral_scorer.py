@@ -5,7 +5,7 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 def score_script(scenes):
     if not GROQ_API_KEY:
         return scenes
-    script_text = "\n".join([f"Scene {s['id']}: {s['text']}" for s in scenes])
+    script_text = "\n".join([f"Scene {s['id']}: {s.get('narration', s.get('text', ''))}" for s in scenes])
     prompt = f"""Rate each scene viral potential 1-10 for Japanese tech channel.
 Scenes:
 {script_text}
