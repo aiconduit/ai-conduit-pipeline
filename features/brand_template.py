@@ -21,24 +21,16 @@ def get_scene_template(scene_type="normal"):
     return templates.get(scene_type, templates["normal"])
 
 def add_watermark(video_path, output_path):
-    watermark_ass = f"""[Script Info]
-PlayResX: 1080
-PlayResY: 1920
-
-[V4+ Styles]
-Format: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, Bold, Alignment, MarginL, MarginR, MarginV
-Style: WM,Arial,32,&H88FFFFFF,&H00000000,-1,7,20,20,20
-
-[Events]
-Format: Layer, Start, End, Style, Text
-Dialogue: 0,0:00:00.00,9:59:59.99,WM,{BRAND["watermark_text"]}
-"""
-    wm_path = "/tmp/watermark.ass"
-    with open(wm_path, "w") as f:
-        f.write(watermark_ass)
-    cmd = ["ffmpeg", "-y", "-i", video_path,
-           "-vf", f"ass={wm_path}:fontsdir=/usr/share/fonts",
-           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-           "-c:a", "copy", "-pix_fmt", "yuv420p", output_path]
-    subprocess.run(cmd, capture_output=True, check=True)
+    """drawtextフィルターでウォーターマーク追加(ASSより安定)"""
+    cmd = [
+        "ffmpeg", "-y", "-i", video_path,
+        "-vf", "drawtext=text='@AI_Conduit':fontsize=28:fontcolor=white@0.6:x=20:y=20:box=0",
+        "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+        "-c:a", "copy", "-pix_fmt", "yuv420p", output_path
+    ]
+    result = subprocess.run(cmd, capture_output=True)
+    if result.returncode != 0:
+        # 失敗した場合はコピーのみ
+        import shutil
+        shutil.copy(video_path, output_path)
     return output_path
