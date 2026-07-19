@@ -19,7 +19,7 @@ CJK_FONT_SCALE = 0.65
 FONT_SIZE = 80  # より大きく
 CJK_CHAR_WIDTH = FONT_SIZE * 1.05                   # 71.4px
 MARGIN_H = 80
-MARGIN_V = int(VIDEO_H * 0.20)                      # 384px
+MARGIN_V = 120                                        # 下から120px(y=1800位置)
 SAFE_WIDTH = VIDEO_W - MARGIN_H * 2                 # 920px
 MAX_CHARS = int(SAFE_WIDTH / CJK_CHAR_WIDTH)        # 12文字
 

@@ -14,6 +14,14 @@ from PIL import Image
 ASSETS_DIR = Path(__file__).parent / "assets"
 MOUTH_DIR = ASSETS_DIR / "mouth"
 
+def extract_audio_from_video(video_path: str) -> str:
+    """動画ファイルから音声を抽出してWAVに変換"""
+    wav_path = "/tmp/lipsync_extracted.wav"
+    subprocess.run(["ffmpeg", "-y", "-i", video_path,
+                   "-ar", "44100", "-ac", "1", wav_path],
+                  capture_output=True)
+    return wav_path
+
 def analyze_audio_volume(audio_path: str, fps: int = 30) -> list:
     """音声ファイルをWAVに変換してフレームごとの音量を解析"""
     wav_path = "/tmp/lipsync_audio.wav"
@@ -84,7 +92,7 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
     if mouth_x is None:
         mouth_x = W // 2
     if mouth_y is None:
-        mouth_y = int(H * 0.82)  # 下部82%の位置
+        mouth_y = int(H * 0.26)  # ロゴパネル下部(26%の位置)
     
     print(f"   キャラクターサイズ: {W}x{H}, 口位置: ({mouth_x}, {mouth_y})")
     
@@ -95,9 +103,15 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
         "open": Image.open(MOUTH_DIR / "open.png").convert("RGBA"),
     }
     
-    # 音声解析
+    # 音声解析(動画ファイルの場合は音声を抽出)
     print(f"[lipsync] 音声解析中...")
-    volumes, duration = analyze_audio_volume(audio_path, fps)
+    import os
+    ext = os.path.splitext(audio_path)[1].lower()
+    if ext in [".mp4", ".mov", ".avi", ".mkv"]:
+        actual_audio = extract_audio_from_video(audio_path)
+    else:
+        actual_audio = audio_path
+    volumes, duration = analyze_audio_volume(actual_audio, fps)
     
     # フレームを一時ディレクトリに生成
     frames_dir = "/tmp/lipsync_frames"

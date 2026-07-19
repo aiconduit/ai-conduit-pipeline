@@ -60,7 +60,9 @@ Structure: Hook(2) -> Problem(2) -> Solution(3) -> How(3) -> Result(1) -> CTA(1)
 - narration: 3rd person, natural spoken Japanese
 - caption examples: "17,500⭐", "自動化", "3分で完了", "無料"
 - CTA caption must be: "conduit"
-- TWO Pexels search terms per scene (English, specific, show motion)
+- TWO Pexels search terms per scene (English, MUST be cinematic/3D/sci-fi style)
+- visual examples: "cinematic dark technology", "3d hologram interface", "cyber neon city", "matrix code digital", "futuristic sci-fi space", "dark abstract motion", "holographic data stream", "artificial intelligence visualization"
+- NEVER use plain office or coding footage - always cinematic and visually striking
 
 Output ONLY valid JSON array:
 [
@@ -266,15 +268,49 @@ def main():
           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
           "-c:a", "aac", "-pix_fmt", "yuv420p", combined])
     
-    # 5. キネティックキャプション生成・焼き込み
+    # 5. 口パクキャラクター動画生成
+    print(f"[5/6] 🎭 口パクキャラクター動画生成中...")
+    char_path = str(Path(__file__).parent / "assets" / "character_main.png")
+    char_video = str(WORK_DIR / "character_lipsync.mp4")
+    try:
+        sys.path.insert(0, str(Path(__file__).parent))
+        from lipsync_generator import generate_lipsync_video
+        generate_lipsync_video(char_path, combined, char_video,
+                               mouth_x=540, mouth_y=503, fps=30)
+        print(f"   ✅ 口パク動画生成完了")
+    except Exception as e:
+        print(f"   ⚠️ 口パク失敗: {e} → キャラ静止画で代替")
+        # 失敗時はキャラ静止画をループ動画に
+        dur = _probe_dur(combined)
+        _run(["ffmpeg", "-y", "-loop", "1", "-i", char_path,
+              "-t", str(dur),
+              "-vf", "scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2",
+              "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", char_video])
+
+    # 6. 上下分割合成 + 字幕焼き込み
+    print(f"[6/6] 🎬 上下分割合成中...")
     ass_path = WORK_DIR / f"{name}.ass"
     generate_captions_from_scenes(scenes, ass_path)
-    
+
     output = str(OUTPUT_DIR / f"{name}_final.mp4")
-    _run(["ffmpeg", "-y", "-i", combined,
-          "-vf", f"ass={ass_path}:fontsdir=/usr/share/fonts",
+    # 上: B-roll(1080x960) 下: キャラ口パク(1080x960) → 縦結合1080x1920
+    # 字幕はキャラの下部(y=1800)に焼き込み
+    filter_complex = (
+        "[0:v]scale=1080:960:force_original_aspect_ratio=increase,"
+        "crop=1080:960[top];"
+        "[1:v]scale=1080:1936:force_original_aspect_ratio=increase,"
+        "crop=1080:960:0:0[bottom];"
+        "[top][bottom]vstack=inputs=2[stacked];"
+        f"[stacked]ass={ass_path}:fontsdir=/usr/share/fonts[out]"
+    )
+    _run(["ffmpeg", "-y",
+          "-i", combined,
+          "-i", char_video,
+          "-filter_complex", filter_complex,
+          "-map", "[out]",
+          "-map", "0:a",
           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-          "-c:a", "copy", "-pix_fmt", "yuv420p", output])
+          "-c:a", "aac", "-pix_fmt", "yuv420p", output])
     
     # バイラルスコアリング結果表示
     scored = [s for s in scenes if "viral_score" in s]
