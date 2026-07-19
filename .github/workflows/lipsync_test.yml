@@ -1,0 +1,45 @@
+name: Lipsync Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  lipsync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install numpy pillow
+
+      - name: Generate test narration
+        run: |
+          pip install edge-tts
+          python3 -c "
+import asyncio, edge_tts
+async def main():
+    await edge_tts.Communicate('こんにちは。AI Conduitです。今日のGitHubトレンドを紹介します。', 'ja-JP-KeitaNeural').save('/tmp/test_narration.mp3')
+asyncio.run(main())
+"
+
+      - name: Run lipsync
+        run: |
+          python3 lipsync_generator.py \
+            assets/character_main.png \
+            /tmp/test_narration.mp3 \
+            /tmp/lipsync_output.mp4
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: lipsync-test
+          path: /tmp/lipsync_output.mp4
+          retention-days: 3
