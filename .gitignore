@@ -1,7 +1,11 @@
 node_modules/
 .venv/
 projects/
-assets/
+assets/pexels_cache/
+assets/*.mp4
+assets/*.aiff
+assets/*.mp3
+
 remotion-composer/public/videos/
 remotion-composer/public/programming_*.mp4
 remotion-composer/public/career_*.mp4
