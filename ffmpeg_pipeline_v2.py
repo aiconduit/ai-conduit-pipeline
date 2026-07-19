@@ -296,12 +296,11 @@ def main():
     # 上: B-roll(1080x960) 下: キャラ口パク(1080x960) → 縦結合1080x1920
     # 字幕はキャラの下部(y=1800)に焼き込み
     filter_complex = (
-        # 上半分: B-roll → 1080x960にクロップ(中央)
+        # 上半分: B-roll → 1080x960にスケール+クロップ(中央)
         "[0:v]scale=1080:960:force_original_aspect_ratio=increase,"
         "crop=1080:960[top];"
-        # 下半分: キャラ → 幅1080にリサイズして中央配置でpad
-        "[1:v]scale=1080:-2:force_original_aspect_ratio=decrease,"
-        "pad=1080:960:(ow-iw)/2:(oh-ih)/2:color=black[bottom];"
+        # 下半分: キャラ動画は既に1080x960なのでそのまま使用
+        "[1:v]scale=1080:960[bottom];"
         "[top][bottom]vstack=inputs=2[stacked];"
         f"[stacked]ass={ass_path}:fontsdir=/usr/share/fonts[out]"
     )

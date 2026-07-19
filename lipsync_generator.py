@@ -83,18 +83,30 @@ def compose_character_frame(char_img: Image.Image, mouth_img: Image.Image,
 def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
                             mouth_x: int = None, mouth_y: int = None,
                             fps: int = 30) -> str:
-    """口パクアニメーション動画を生成"""
+    """口パクアニメーション動画を生成(出力: 1080x960 上半身のみ)"""
     print(f"[lipsync] キャラクター画像読み込み中...")
-    char_img = Image.open(char_path).convert("RGBA")
-    W, H = char_img.size
-    
-    # 口の位置のデフォルト(画像下部40%の中央)
+    char_img_orig = Image.open(char_path).convert("RGBA")
+    ORIG_W, ORIG_H = char_img_orig.size
+
+    # 出力サイズ: 1080x960(下半分用)
+    OUT_W, OUT_H = 1080, 960
+    scale = OUT_W / ORIG_W          # 768→1080: scale=1.406
+    scaled_H = int(ORIG_H * scale)  # 1377*1.406=1936px
+
+    # リサイズして上半身960pxをクロップ
+    char_scaled = char_img_orig.resize((OUT_W, scaled_H), Image.LANCZOS)
+    char_img = char_scaled.crop((0, 0, OUT_W, OUT_H))
+    W, H = OUT_W, OUT_H  # 1080x960
+
+    # 口位置(スケール後の座標)
     if mouth_x is None:
-        mouth_x = W // 2
+        mouth_x = OUT_W // 2                              # 540px
     if mouth_y is None:
-        mouth_y = int(H * 0.26)  # ロゴパネル下部(26%の位置)
-    
-    print(f"   キャラクターサイズ: {W}x{H}, 口位置: ({mouth_x}, {mouth_y})")
+        mouth_y = int(ORIG_H * 0.26 * scale)             # 503px
+
+    print(f"   元:{ORIG_W}x{ORIG_H} → スケール:{OUT_W}x{scaled_H} → クロップ:{W}x{H}")
+    print(f"   口位置: ({mouth_x}, {mouth_y})")
+
     
     # 口スプライト読み込み
     mouths = {
