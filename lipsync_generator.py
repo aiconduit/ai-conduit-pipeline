@@ -114,6 +114,9 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
         
         frame = compose_character_frame(char_img, mouths[mouth_type], mouth_x, mouth_y)
         frame.save(f"{frames_dir}/frame_{i:05d}.jpg", quality=85)
+        if i == 0:
+            import os
+            print(f"   最初のフレーム保存確認: {os.path.exists(f'{frames_dir}/frame_00000.jpg')}")
         prev_mouth = mouth_type
         
         if i % 30 == 0:
@@ -132,8 +135,10 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
         "-shortest",
         output_path
     ], capture_output=True, text=True)
+    print(f"ffmpeg stdout: {result.stdout[-200:]}")
+    print(f"ffmpeg stderr: {result.stderr[-500:]}")
+    print(f"ffmpeg returncode: {result.returncode}")
     if result.returncode != 0:
-        print(f"ffmpegエラー: {result.stderr[-300:]}")
         raise RuntimeError(f"ffmpeg failed: {result.returncode}")
     
     print(f"[lipsync] ✅ 完成: {output_path}")
