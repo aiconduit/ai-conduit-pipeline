@@ -114,6 +114,8 @@ def generate_scene_narrations(scenes):
         path = str(WORK_DIR / f"scene_{scene['id']}.mp3")
         # narrationフィールド優先、なければtextを使う
         narration_text = scene.get('narration', scene.get('text', ''))
+        if not narration_text or not narration_text.strip():
+            narration_text = f"シーン{scene['id']}"
         asyncio.run(_tts_scene(narration_text, path))
         dur = _probe_dur(path)
         scene['audio_path'] = path
