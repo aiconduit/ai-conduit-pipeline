@@ -104,6 +104,7 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
     os.makedirs(frames_dir, exist_ok=True)
     
     print(f"[lipsync] {len(volumes)}フレームを生成中...")
+    os.makedirs(frames_dir, exist_ok=True)
     prev_mouth = "closed"
     for i, vol in enumerate(volumes):
         mouth_type = volume_to_mouth(vol)
@@ -120,7 +121,7 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
     
     # ffmpegで動画+音声を合成
     print(f"[lipsync] 動画合成中...")
-    subprocess.run([
+    result = subprocess.run([
         "ffmpeg", "-y",
         "-r", str(fps),
         "-i", f"{frames_dir}/frame_%05d.png",
@@ -130,7 +131,10 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
         "-pix_fmt", "yuv420p",
         "-shortest",
         output_path
-    ], capture_output=True, check=True)
+    ], capture_output=True, text=True)
+    if result.returncode != 0:
+        print(f"ffmpegエラー: {result.stderr[-300:]}")
+        raise RuntimeError(f"ffmpeg failed: {result.returncode}")
     
     print(f"[lipsync] ✅ 完成: {output_path}")
     return output_path
