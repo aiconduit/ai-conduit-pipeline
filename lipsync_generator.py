@@ -133,7 +133,7 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
         output_path
     ], capture_output=True, text=True)
     print(f"ffmpeg stdout: {result.stdout[-200:]}")
-    print(f"ffmpeg stderr: {result.stderr[-500:]}")
+    print(f"ffmpeg stderr: {result.stderr[-2000:]}")
     print(f"ffmpeg returncode: {result.returncode}")
     if result.returncode != 0:
         raise RuntimeError(f"ffmpeg failed: {result.returncode}")
