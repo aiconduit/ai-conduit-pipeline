@@ -1,6 +1,6 @@
 name: Lipsync Test
 
-"on":
+on:
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
           sudo apt-get install -y ffmpeg
           pip install numpy pillow edge-tts
       - name: Generate narration
-        run: python3 -c "import asyncio, edge_tts; asyncio.run(edge_tts.Communicate("AI Conduitです", "ja-JP-KeitaNeural").save("/tmp/test.mp3"))"
+        run: python3 generate_test_narration.py
       - name: Run lipsync
         run: python3 lipsync_generator.py assets/character_main.png /tmp/test.mp3 /tmp/out.mp4
       - name: Upload
