@@ -113,7 +113,7 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
             mouth_type = "half"
         
         frame = compose_character_frame(char_img, mouths[mouth_type], mouth_x, mouth_y)
-        frame.save(f"{frames_dir}/frame_{i:05d}.png")
+        frame.save(f"{frames_dir}/frame_{i:05d}.jpg", quality=85)
         prev_mouth = mouth_type
         
         if i % 30 == 0:
@@ -124,7 +124,7 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
     result = subprocess.run([
         "ffmpeg", "-y",
         "-r", str(fps),
-        "-i", f"{frames_dir}/frame_%05d.png",
+        "-i", f"{frames_dir}/frame_%05d.jpg",
         "-i", audio_path,
         "-c:v", "libx264", "-preset", "fast", "-crf", "22",
         "-c:a", "aac", "-b:a", "128k",
