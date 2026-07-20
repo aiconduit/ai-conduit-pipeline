@@ -54,5 +54,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rendered-video
-          path: projects/daily/renders/*_final.mp4
+          path: |
+            projects/daily/renders/*_final.mp4
+            /tmp/ai_conduit_v2/character_lipsync.mp4
+            /tmp/ai_conduit_v2/stacked.mp4
           retention-days: 7
