@@ -84,9 +84,10 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
                             mouth_x: int = None, mouth_y: int = None,
                             fps: int = 30) -> str:
     """口パクアニメーション動画を生成(出力: 1080x960 上半身のみ)"""
-    print(f"[lipsync] キャラクター画像読み込み中...")
+    print(f"[lipsync] キャラクター画像読み込み中... {char_path}")
     char_img_orig = Image.open(char_path).convert("RGBA")
     ORIG_W, ORIG_H = char_img_orig.size
+    print(f"   元サイズ: {ORIG_W}x{ORIG_H}")
 
     # 出力サイズ: 1080x960(下半分用)
     OUT_W, OUT_H = 1080, 960
