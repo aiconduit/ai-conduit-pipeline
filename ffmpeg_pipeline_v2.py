@@ -299,29 +299,20 @@ def main():
         print(f"   ✅ 口パク動画生成完了")
     except Exception as e:
         print(f"   ⚠️ 口パク失敗: {e} → キャラ静止画で代替")
-        # 失敗時はキャラ静止画をループ動画に
         dur = _probe_dur(combined)
         _run(["ffmpeg", "-y", "-loop", "1", "-i", char_path,
               "-t", str(dur),
               "-vf", "scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2",
               "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", char_video])
 
-    # 6. 上下分割合成 + 字幕焼き込み
+    # 6. 上下分割合成
     print(f"[6/6] 🎬 上下分割合成中...")
-    ass_path = WORK_DIR / f"{name}.ass"
-    generate_captions_from_scenes(scenes, ass_path)
-
-    output = str(OUTPUT_DIR / f"{name}_final.mp4")
-    # 上: B-roll(1080x960) 下: キャラ口パク(1080x960) → 縦結合1080x1920
-    # 字幕はキャラの下部(y=1800)に焼き込み
+    stacked = str(WORK_DIR / "stacked.mp4")
     filter_complex = (
-        # 上半分: B-roll → 1080x960にスケール+クロップ(中央)
         "[0:v]scale=1080:960:force_original_aspect_ratio=increase,"
         "crop=1080:960[top];"
-        # 下半分: キャラ動画は既に1080x960なのでそのまま使用
         "[1:v]scale=1080:960[bottom];"
-        "[top][bottom]vstack=inputs=2[stacked];"
-        f"[stacked]ass={ass_path}:fontsdir=/usr/share/fonts[out]"
+        "[top][bottom]vstack=inputs=2[out]"
     )
     _run(["ffmpeg", "-y",
           "-i", combined,
@@ -330,7 +321,17 @@ def main():
           "-map", "[out]",
           "-map", "0:a",
           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-          "-c:a", "aac", "-pix_fmt", "yuv420p", output])
+          "-c:a", "aac", "-pix_fmt", "yuv420p", stacked])
+
+    # 7. 字幕オーバーレイ (Pillow方式)
+    print(f"[7/7] 📝 字幕オーバーレイ中 (Pillow方式)...")
+    from features.caption_generator import build_caption_pngs, overlay_captions_on_video
+    caption_dir = str(WORK_DIR / "captions")
+    build_caption_pngs(scenes, caption_dir)
+
+    output = str(OUTPUT_DIR / f"{name}_final.mp4")
+    overlay_captions_on_video(stacked, scenes, caption_dir, output)
+    print(f"   ✅ 字幕焼き込み完了")
     
     # バイラルスコアリング結果表示
     scored = [s for s in scenes if "viral_score" in s]
