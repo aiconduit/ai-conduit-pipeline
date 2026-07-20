@@ -140,6 +140,8 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
             mouth_type = "half"
         
         frame = compose_character_frame(char_img, mouths[mouth_type], mouth_x, mouth_y)
+        if i == 0:
+            print(f"   フレームサイズ: {frame.size}")
         frame.save(f"{frames_dir}/frame_{i:05d}.jpg", quality=85)
         prev_mouth = mouth_type
         
