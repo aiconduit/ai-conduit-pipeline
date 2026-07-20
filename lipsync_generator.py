@@ -140,9 +140,12 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
             mouth_type = "half"
         
         frame = compose_character_frame(char_img, mouths[mouth_type], mouth_x, mouth_y)
-        if i == 0:
-            print(f"   フレームサイズ: {frame.size}")
         frame.save(f"{frames_dir}/frame_{i:05d}.jpg", quality=85)
+        if i == 0:
+            # フレームサイズをffprobeで確認
+            import subprocess as _sp
+            r = _sp.run(["ffprobe","-v","error","-show_entries","stream=width,height","-of","default",f"{frames_dir}/frame_00000.jpg"], capture_output=True, text=True)
+            print(f"   フレーム0サイズ: {r.stdout.strip()}")
         prev_mouth = mouth_type
         
         if i % 30 == 0:
