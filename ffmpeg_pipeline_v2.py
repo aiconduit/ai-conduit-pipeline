@@ -295,7 +295,7 @@ def main():
         sys.path.insert(0, str(Path(__file__).parent))
         from lipsync_generator import generate_lipsync_video
         generate_lipsync_video(char_path, combined, char_video,
-                               mouth_x=350, mouth_y=320, fps=30)
+                               mouth_x=372, mouth_y=383, fps=30)
         print(f"   ✅ 口パク動画生成完了")
     except Exception as e:
         print(f"   ⚠️ 口パク失敗: {e} → キャラ静止画で代替")

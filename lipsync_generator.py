@@ -53,8 +53,8 @@ def generate_lipsync_video(char_path, audio_path, output_path, mouth_x=None, mou
     
     # 口位置
     # 横長画像用口位置: 顔はx=30%, y=35%
-    if mouth_x is None: mouth_x = 350  # ロゴパネル中央
-    if mouth_y is None: mouth_y = 320  # ロゴパネル下端
+    if mouth_x is None: mouth_x = 372  # 自動検出
+    if mouth_y is None: mouth_y = 383  # 自動検出
     print(f"[lipsync] 口位置: ({mouth_x}, {mouth_y})")
     
     # 口スプライト
