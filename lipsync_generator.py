@@ -43,15 +43,18 @@ def generate_lipsync_video(char_path, audio_path, output_path, mouth_x=None, mou
     W0, H0 = char_orig.size
     print(f"[lipsync] 元サイズ: {W0}x{H0}")
     
-    scale = 1080 / W0
-    new_h = int(H0 * scale)
-    char_scaled = char_orig.resize((1080, new_h), Image.LANCZOS)
-    char_img = char_scaled.crop((0, 0, 1080, 960))
-    print(f"[lipsync] リサイズ後: 1080x{new_h} → クロップ: 1080x960")
+    # 高さ基準でリサイズして中央クロップ(縦横比保持)
+    scale_h = 960 / H0
+    new_w = int(W0 * scale_h)
+    resized = char_orig.resize((new_w, 960), Image.LANCZOS)
+    x_start = max(0, (new_w - 1080) // 2)
+    char_img = resized.crop((x_start, 0, x_start+1080, 960)).convert("RGBA")
+    print(f"[lipsync] リサイズ: {W0}x{H0} → {new_w}x960 → クロップ: 1080x960")
     
     # 口位置
-    if mouth_x is None: mouth_x = 540
-    if mouth_y is None: mouth_y = int(H0 * 0.30 * scale)
+    # 横長画像用口位置: 顔はx=30%, y=35%
+    if mouth_x is None: mouth_x = int(1080 * 0.30)  # 324px
+    if mouth_y is None: mouth_y = int(960 * 0.35)   # 336px
     print(f"[lipsync] 口位置: ({mouth_x}, {mouth_y})")
     
     # 口スプライト
