@@ -128,7 +128,10 @@ def generate_lipsync_video(char_path: str, audio_path: str, output_path: str,
     
     # フレームを一時ディレクトリに生成
     frames_dir = "/tmp/lipsync_frames"
-    os.makedirs(frames_dir, exist_ok=True)
+    import shutil
+    if os.path.exists(frames_dir):
+        shutil.rmtree(frames_dir)
+    os.makedirs(frames_dir)
     
     print(f"[lipsync] {len(volumes)}フレームを生成中...")
     os.makedirs(frames_dir, exist_ok=True)
