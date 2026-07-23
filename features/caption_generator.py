@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 VIDEO_W = 1080
 VIDEO_H = 1920
-FONT_SIZE = 68
+FONT_SIZE = 52
 CAPTION_Y = 1800     # 下から120px
 OUTLINE_SIZE = 5
 EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF\U00002600-\U000027BF⭐]")
@@ -89,7 +89,7 @@ def build_caption_pngs(scenes, output_dir):
     
     caption_files = []
     for scene in scenes:
-        text = strip_emoji(scene.get('caption', scene.get('text', '')))
+        text = strip_emoji(scene.get('narration', scene.get('caption', scene.get('text', ''))))
         if not text:
             caption_files.append(None)
             continue
