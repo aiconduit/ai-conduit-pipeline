@@ -78,7 +78,11 @@ Output ONLY valid JSON array:
               "messages": [{"role": "user", "content": prompt}], 
               "max_tokens": 1200}
     )
-    text = r.json()["choices"][0]["message"]["content"].strip()
+    resp = r.json()
+    if "choices" not in resp:
+        print(f"OpenRouter APIエラー: {resp}")
+        raise Exception(f"OpenRouter API error: {resp}")
+    text = resp["choices"][0]["message"]["content"].strip()
     if "```" in text:
         parts = text.split("```")
         for p in parts:
