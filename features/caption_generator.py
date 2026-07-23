@@ -51,32 +51,62 @@ def draw_text_with_outline(draw, text, x, y, font, text_color, outline_color, ou
                 draw.text((x+dx, y+dy), text, font=font, fill=outline_color)
     draw.text((x, y), text, font=font, fill=text_color)
 
+def wrap_text(text, font, max_width):
+    """テキストを最大幅で折り返す"""
+    lines = []
+    line = ''
+    dummy_img = Image.new('RGBA', (1, 1))
+    draw = ImageDraw.Draw(dummy_img)
+    for char in text:
+        test = line + char
+        bbox = draw.textbbox((0, 0), test, font=font)
+        if bbox[2] - bbox[0] > max_width and line:
+            lines.append(line)
+            line = char
+        else:
+            line = test
+    if line:
+        lines.append(line)
+    return lines
+
 def generate_caption_png(text, output_path, font_size=FONT_SIZE):
-    """字幕テキストを透過PNGとして生成"""
+    """字幕テキストを透過PNGとして生成（折り返し対応）"""
     text = strip_emoji(text)
     if not text:
         return None
     
     font, font_path = get_font(font_size)
+    MAX_WIDTH = VIDEO_W - 80  # 左右40pxマージン
+    LINE_SPACING = 10
+    
+    # 折り返し処理
+    lines = wrap_text(text, font, MAX_WIDTH)
+    
+    # 各行のサイズ計測
+    dummy_img = Image.new('RGBA', (1, 1))
+    draw_dummy = ImageDraw.Draw(dummy_img)
+    line_heights = []
+    line_widths = []
+    for line in lines:
+        bbox = draw_dummy.textbbox((0, 0), line, font=font)
+        line_widths.append(bbox[2] - bbox[0])
+        line_heights.append(bbox[3] - bbox[1])
+    
+    total_h = sum(line_heights) + LINE_SPACING * (len(lines) - 1)
     
     # 透過画像(1080×1920)を生成
     img = Image.new('RGBA', (VIDEO_W, VIDEO_H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
-    # テキストサイズを計測
-    bbox = draw.textbbox((0, 0), text, font=font)
-    tw = bbox[2] - bbox[0]
-    th = bbox[3] - bbox[1]
-    
-    # 中央配置
-    x = (VIDEO_W - tw) // 2
-    y = CAPTION_Y - th // 2
-    
-    # 縁取り付きテキスト描画
-    draw_text_with_outline(draw, text, x, y, font,
-                           text_color=(255, 255, 255, 255),
-                           outline_color=(0, 0, 0, 255),
-                           outline_size=OUTLINE_SIZE)
+    # 複数行を中央下部に描画
+    y = CAPTION_Y - total_h // 2
+    for i, line in enumerate(lines):
+        x = (VIDEO_W - line_widths[i]) // 2
+        draw_text_with_outline(draw, line, x, y, font,
+                               text_color=(255, 255, 255, 255),
+                               outline_color=(0, 0, 0, 255),
+                               outline_size=OUTLINE_SIZE)
+        y += line_heights[i] + LINE_SPACING
     
     img.save(output_path, 'PNG')
     return output_path

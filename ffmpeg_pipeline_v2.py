@@ -287,23 +287,16 @@ def main():
           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
           "-c:a", "aac", "-pix_fmt", "yuv420p", combined])
     
-    # 5. 口パクキャラクター動画生成
-    print(f"[5/6] 🎭 口パクキャラクター動画生成中...")
+    # 5. キャラクター静止画動画生成（口パク無効）
+    print(f"[5/6] 🎭 キャラクター静止画動画生成中...")
     char_path = str(Path(__file__).parent / "assets" / "character_main.png")
     char_video = str(WORK_DIR / "character_lipsync.mp4")
-    try:
-        sys.path.insert(0, str(Path(__file__).parent))
-        from lipsync_generator import generate_lipsync_video
-        generate_lipsync_video(char_path, combined, char_video,
-                               mouth_x=324, mouth_y=336, fps=30)
-        print(f"   ✅ 口パク動画生成完了")
-    except Exception as e:
-        print(f"   ⚠️ 口パク失敗: {e} → キャラ静止画で代替")
-        dur = _probe_dur(combined)
-        _run(["ffmpeg", "-y", "-loop", "1", "-i", char_path,
-              "-t", str(dur),
-              "-vf", "scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2",
-              "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", char_video])
+    dur = _probe_dur(combined)
+    _run(["ffmpeg", "-y", "-loop", "1", "-i", char_path,
+          "-t", str(dur),
+          "-vf", "scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2",
+          "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", char_video])
+    print(f"   ✅ キャラクター静止画動画生成完了")
 
     # 6. 上下分割合成
     print(f"[6/6] 🎬 上下分割合成中...")
