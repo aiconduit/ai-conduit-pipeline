@@ -20,7 +20,6 @@ from features.brand_template import BRAND, get_scene_template, add_watermark
 from features.bgm_selector import get_bgm, mix_bgm
 
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
 PEXELS_API_KEY = os.environ.get("PEXELS_API_KEY", "LSsE8rcX23VNaFN0M0F19PCMtoLhEyg1NxZpIqwr7aCuvUYInctIexrW")
 ROOT_DIR = Path(__file__).parent
 OUTPUT_DIR = ROOT_DIR / "projects" / "daily" / "renders"
@@ -72,9 +71,9 @@ Output ONLY valid JSON array:
 ]"""
 
     r = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "HTTP-Referer": "https://github.com/aiconduit", "X-Title": "AI Conduit"},
-        json={"model": "moonshotai/kimi-k2", 
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={"Authorization": f"Bearer {GROQ_API_KEY}", "Content-Type": "application/json"},
+        json={"model": "llama-3.3-70b-versatile", 
               "messages": [{"role": "user", "content": prompt}], 
               "max_tokens": 1000}
     )
