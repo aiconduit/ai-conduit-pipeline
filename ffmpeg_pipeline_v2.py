@@ -107,9 +107,22 @@ Output ONLY valid JSON array:
     return scenes
 
 # === Step 2: シーン別ナレーション生成 ===
-async def _tts_scene(text, path):
-    import edge_tts
-    await edge_tts.Communicate(text, "ja-JP-KeitaNeural").save(path)
+def _tts_scene(text, path):
+    import requests, base64
+    API_KEY = 'AIzaSyCsrOd3cgi9hcnoOeFXRde9prLAy6Y2vdY'
+    url = f'https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}'
+    payload = {
+        'input': {'text': text},
+        'voice': {'languageCode': 'ja-JP', 'name': 'ja-JP-Chirp3-HD-Charon'},
+        'audioConfig': {'audioEncoding': 'MP3'}
+    }
+    r = requests.post(url, json=payload)
+    if r.status_code == 200:
+        audio = base64.b64decode(r.json()['audioContent'])
+        with open(path, 'wb') as f:
+            f.write(audio)
+    else:
+        raise Exception(f'TTS error: {r.json()}')
 
 def generate_scene_narrations(scenes):
     print(f"[2/5] 🎙️ シーン別ナレーション生成中...")
@@ -120,7 +133,7 @@ def generate_scene_narrations(scenes):
         narration_text = scene.get('narration', scene.get('text', ''))
         if not narration_text or not narration_text.strip():
             narration_text = f"シーン{scene['id']}"
-        asyncio.run(_tts_scene(narration_text, path))
+        _tts_scene(narration_text, path)
         dur = _probe_dur(path)
         scene['audio_path'] = path
         scene['actual_duration'] = dur
