@@ -76,7 +76,7 @@ Output ONLY valid JSON array:
         headers={"Authorization": f"Bearer {OPENROUTER_API_KEY}", "HTTP-Referer": "https://github.com/aiconduit", "X-Title": "AI Conduit"},
         json={"model": "moonshotai/kimi-k2", 
               "messages": [{"role": "user", "content": prompt}], 
-              "max_tokens": 1200}
+              "max_tokens": 1000}
     )
     resp = r.json()
     if "choices" not in resp:
