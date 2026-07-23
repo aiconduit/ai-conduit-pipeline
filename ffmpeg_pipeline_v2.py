@@ -170,9 +170,9 @@ def fetch_pexels_video(query, exclude_paths=[]):
 def fetch_scene_brolls(scenes):
     print(f"[3/5] 🎬 シーン別B-roll取得中...")
     for scene in scenes:
-        v1 = fetch_pexels_video(scene['visual_1'])
+        v1 = fetch_pexels_video(scene.get('visual_1') or scene.get('caption', 'cinematic technology') + ' cinematic')
         exclude = [v1] if v1 else []
-        v2 = fetch_pexels_video(scene['visual_2'], exclude)
+        v2 = fetch_pexels_video(scene.get('visual_2') or 'futuristic sci-fi space', exclude)
         scene['broll_a'] = v1
         scene['broll_b'] = v2 or v1  # B-rollがない場合はAを使用
         print(f"   Scene {scene['id']}: {Path(v1).name if v1 else 'none'} + {Path(scene['broll_b']).name if scene['broll_b'] else 'none'}")
