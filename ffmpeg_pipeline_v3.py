@@ -203,19 +203,11 @@ def compose_scene(scene, idx):
               "-vf", "scale=320:180:force_original_aspect_ratio=increase,crop=320:180",
               "-c:v", "libx264", "-preset", "fast", "-an", "-pix_fmt", "yuv420p", broll_pip])
 
-        # vignette + PIP overlay + audio
-        vignette = (
-            "split[main][vig];"
-            "[vig]format=gbrp,geq="
-            "r='r(X,Y)*if(lte(sqrt((X-W/2)^2+(Y-H/2)^2),W*0.45),1,max(0,1-0.8*(sqrt((X-W/2)^2+(Y-H/2)^2)-W*0.45)/(W*0.25)))'"
-            ":g='g(X,Y)*if(lte(sqrt((X-W/2)^2+(Y-H/2)^2),W*0.45),1,max(0,1-0.8*(sqrt((X-W/2)^2+(Y-H/2)^2)-W*0.45)/(W*0.25)))'"
-            ":b='b(X,Y)*if(lte(sqrt((X-W/2)^2+(Y-H/2)^2),W*0.45),1,max(0,1-0.8*(sqrt((X-W/2)^2+(Y-H/2)^2)-W*0.45)/(W*0.25)))'"
-            "[vignette];"
-            "[vignette][2:v]overlay=x=W-w-20:y=20:enable='between(t,0,999)'[out]"
-        )
+        # PIP overlay + audio（シンプル版）
         _run(["ffmpeg", "-y",
               "-i", char_video, "-i", audio, "-i", broll_pip,
-              "-filter_complex", vignette,
+              "-filter_complex",
+              "[0:v][2:v]overlay=x=W-w-20:y=20[out]",
               "-map", "[out]", "-map", "1:a",
               "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-c:a", "aac", "-shortest", "-pix_fmt", "yuv420p", out])
