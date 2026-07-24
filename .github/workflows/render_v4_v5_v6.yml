@@ -1,0 +1,62 @@
+name: Render Video V4-V5-V6
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: 'Pipeline to run (v4_reddit / v5_news / v6_ranking)'
+        required: true
+        default: 'v4_reddit'
+      repo:
+        description: 'GitHub repo'
+        required: false
+        default: 'MadsLorentzen/ai-job-search'
+      stars:
+        description: 'Star count'
+        required: false
+        default: '17500'
+      description:
+        description: 'Description'
+        required: false
+        default: 'Claude Codeで就活を自動化するフレームワーク'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
+
+      - name: Install Python deps
+        run: pip install requests pillow numpy
+
+      - name: Run pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.pipeline }}" = "v4_reddit" ]; then
+            python3 ffmpeg_pipeline_v4_reddit.py "${{ github.event.inputs.repo }}" "${{ github.event.inputs.stars }}" "${{ github.event.inputs.description }}"
+          elif [ "${{ github.event.inputs.pipeline }}" = "v5_news" ]; then
+            python3 ffmpeg_pipeline_v5_news.py "${{ github.event.inputs.repo }}" "${{ github.event.inputs.stars }}" "${{ github.event.inputs.description }}"
+          elif [ "${{ github.event.inputs.pipeline }}" = "v6_ranking" ]; then
+            python3 ffmpeg_pipeline_v6_ranking.py
+          fi
+
+      - name: Upload video
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video-${{ github.event.inputs.pipeline }}
+          path: projects/daily/renders/*.mp4
+          retention-days: 7
