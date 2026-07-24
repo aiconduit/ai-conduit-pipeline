@@ -1,0 +1,74 @@
+name: Render Video V7-V10
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: 'Pipeline (v7_horror / v8_aiimage / v9_splitscreen / v10_docu)'
+        required: true
+        default: 'v7_horror'
+      repo:
+        description: 'GitHub repo'
+        required: false
+        default: 'MadsLorentzen/ai-job-search'
+      stars:
+        description: 'Star count'
+        required: false
+        default: '17500'
+      description:
+        description: 'Description'
+        required: false
+        default: 'Claude Codeで就活を自動化するフレームワーク'
+      genre:
+        description: 'Genre for v10 (tech/inspiring/mystery)'
+        required: false
+        default: 'tech'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
+
+      - name: Install Python deps
+        run: pip install requests pillow numpy
+
+      - name: Run pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+        run: |
+          PIPELINE="${{ github.event.inputs.pipeline }}"
+          REPO="${{ github.event.inputs.repo }}"
+          STARS="${{ github.event.inputs.stars }}"
+          DESC="${{ github.event.inputs.description }}"
+          GENRE="${{ github.event.inputs.genre }}"
+          
+          if [ "$PIPELINE" = "v7_horror" ]; then
+            python3 ffmpeg_pipeline_v7_horror.py "$REPO" "$STARS" "$DESC"
+          elif [ "$PIPELINE" = "v8_aiimage" ]; then
+            python3 ffmpeg_pipeline_v8_aiimage.py "$REPO" "$STARS" "$DESC"
+          elif [ "$PIPELINE" = "v9_splitscreen" ]; then
+            python3 ffmpeg_pipeline_v9_splitscreen.py "$REPO" "$STARS" "$DESC"
+          elif [ "$PIPELINE" = "v10_docu" ]; then
+            python3 ffmpeg_pipeline_v10_docu.py "$REPO" "$STARS" "$DESC" "$GENRE"
+          fi
+
+      - name: Upload video
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video-${{ github.event.inputs.pipeline }}
+          path: projects/daily/renders/*.mp4
+          retention-days: 7
