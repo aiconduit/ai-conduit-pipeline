@@ -1,0 +1,67 @@
+name: Render Video V14-V17
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: 'Pipeline (v14_gameplay / v15_facts / v16_niche / v17_quotes)'
+        required: true
+        default: 'v14_gameplay'
+      repo:
+        description: 'GitHub repo'
+        required: false
+        default: 'MadsLorentzen/ai-job-search'
+      stars:
+        description: 'Star count'
+        required: false
+        default: '17500'
+      description:
+        description: 'Description'
+        required: false
+        default: 'Claude Codeで就活を自動化するフレームワーク'
+      extra:
+        description: 'Extra param (facts_type for v15, niche for v16)'
+        required: false
+        default: 'tech'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
+      - name: Install Python deps
+        run: pip install requests pillow numpy
+      - name: Run pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+        run: |
+          P="${{ github.event.inputs.pipeline }}"
+          R="${{ github.event.inputs.repo }}"
+          S="${{ github.event.inputs.stars }}"
+          D="${{ github.event.inputs.description }}"
+          E="${{ github.event.inputs.extra }}"
+          if [ "$P" = "v14_gameplay" ]; then
+            python3 ffmpeg_pipeline_v14_gameplay.py "$R" "$S" "$D"
+          elif [ "$P" = "v15_facts" ]; then
+            python3 ffmpeg_pipeline_v15_facts.py "$R" "$S" "$D" "$E"
+          elif [ "$P" = "v16_niche" ]; then
+            python3 ffmpeg_pipeline_v16_niche.py "$R" "$S" "$D" "$E"
+          elif [ "$P" = "v17_quotes" ]; then
+            python3 ffmpeg_pipeline_v17_quotes.py "$R" "$S" "$D"
+          fi
+      - name: Upload video
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video-${{ github.event.inputs.pipeline }}
+          path: projects/daily/renders/*.mp4
+          retention-days: 7
