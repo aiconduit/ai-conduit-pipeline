@@ -47,32 +47,34 @@ def _probe_dur(f):
 # === Step 1: シーン単位スクリプト生成 ===
 def generate_scene_script(repo, stars, description):
     print(f"[1/5] 📝 シーン単位スクリプト生成中...")
-    prompt = f"""You are a master scriptwriter for a high-retention Japanese AI/GitHub trends channel.
+    prompt = f"""You are a master storyteller for a high-retention Japanese AI/GitHub trends channel.
 Topic: {repo} ({stars} stars) - {description}
 
-Create a 12-scene script in Japanese for a 60-second vertical video.
+Create a 12-scene STORY script in Japanese for a 60-second vertical video.
+The story follows a character named タク (Taku) who struggles, discovers this tool, and transforms.
 
-STRUCTURE (follow exactly):
-- Hook(2 scenes): Shocking fact or question. Make viewer STOP scrolling.
-- Problem(2 scenes): Pain point the target audience feels daily.
-- Solution(2 scenes): Introduce the tool as the answer.
-- Mechanism(3 scenes): HOW it works, specific and literal.
-- Result(2 scenes): Outcome, numbers, social proof.
-- CTA(1 scene): Call to action.
+STORY STRUCTURE (follow exactly):
+- Scene 1-2 (hook): Start IN THE MIDDLE of action. タク is struggling/failing. Make viewer STOP scrolling.
+- Scene 3-4 (problem): Show タク's specific daily pain. Make it relatable and emotional.
+- Scene 5-6 (solution): タク discovers this tool by chance. The moment of discovery.
+- Scene 7-9 (mechanism): タク tries it. Show HOW it works through his experience. Specific actions.
+- Scene 10-11 (result): タク's transformation. Concrete numbers. Emotional payoff.
+- Scene 12 (cta): Direct address to viewer. "あなたも" (you too can).
 
 RULES:
-- "narration": Natural Japanese sentence for voice (20-35 chars). 3rd person. No fluff.
-- "caption": Ultra-short keyword MAX 8 chars shown on screen.
+- "narration": Natural Japanese story sentence (20-35 chars). Use タク as subject. Past tense narrative.
+  Examples: "タクは100社目の不採用通知を見た", "深夜2時、タクはこのツールに出会った"
+- "caption": Ultra-short keyword MAX 8 chars.
 - "mood": One of [hook, problem, solution, mechanism, result, cta]
-- "visual_1", "visual_2": TWO Pexels English search terms. STRICTLY cinematic/3D/sci-fi.
-  Good: "cinematic dark technology", "3d hologram interface", "cyber neon city"
+- "visual_1", "visual_2": TWO Pexels English cinematic/3D/sci-fi search terms.
+  Good: "cinematic dark city rain", "3d hologram interface", "cyber neon glow"
   Bad: "person working", "office desk", "laptop screen"
-- CTA narration must mention "AI Conduit" and ask to follow.
+- CTA narration: speak directly to viewer, mention "AI Conduit", ask to follow.
 - CTA caption must be: "conduit"
 
-Output ONLY valid JSON array (no markdown):
+Output ONLY valid JSON array (no markdown, no explanation):
 [
-  {{"id":1,"narration":"就活で何社も落ちて消耗してない？","caption":"就活地獄","mood":"hook","visual_1":"cinematic dark city rain","visual_2":"rejected application paper"}},
+  {{"id":1,"narration":"タクは100社目の不採用通知を受け取った","caption":"100社落ち","mood":"hook","visual_1":"cinematic dark city rain","visual_2":"digital rejection screen"}},
   ...12 scenes total...
 ]"""
 
