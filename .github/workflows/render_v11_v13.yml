@@ -1,0 +1,65 @@
+name: Render Video V11-V13
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: 'Pipeline (v11_styles / v12_trends / v13_karaoke)'
+        required: true
+        default: 'v11_styles'
+      repo:
+        description: 'GitHub repo'
+        required: false
+        default: 'MadsLorentzen/ai-job-search'
+      stars:
+        description: 'Star count'
+        required: false
+        default: '17500'
+      description:
+        description: 'Description'
+        required: false
+        default: 'Claude Codeで就活を自動化するフレームワーク'
+      style:
+        description: 'Style for v11 (mind_blowing/dark_fact/future_tech/psychology/myth_busted)'
+        required: false
+        default: 'future_tech'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
+      - name: Install Python deps
+        run: pip install requests pillow numpy
+      - name: Run pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+        run: |
+          P="${{ github.event.inputs.pipeline }}"
+          R="${{ github.event.inputs.repo }}"
+          S="${{ github.event.inputs.stars }}"
+          D="${{ github.event.inputs.description }}"
+          ST="${{ github.event.inputs.style }}"
+          if [ "$P" = "v11_styles" ]; then
+            python3 ffmpeg_pipeline_v11_styles.py "$R" "$S" "$D" "$ST"
+          elif [ "$P" = "v12_trends" ]; then
+            python3 ffmpeg_pipeline_v12_trends.py "$R" "$S" "$D"
+          elif [ "$P" = "v13_karaoke" ]; then
+            python3 ffmpeg_pipeline_v13_karaoke.py "$R" "$S" "$D"
+          fi
+      - name: Upload video
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video-${{ github.event.inputs.pipeline }}
+          path: projects/daily/renders/*.mp4
+          retention-days: 7
