@@ -153,27 +153,25 @@ def fetch_brolls(scenes):
 
 # === Step 4: エフェクト付きシーン合成 ===
 def apply_effect_to_char(char_img, dur, effect, idx):
-    """キャラクター画像にエフェクトを適用"""
+    """キャラクター画像を1080x960にリサイズしてエフェクト適用"""
     out = str(WORK_DIR / f"char_{idx:02d}.mp4")
-    frames = max(int(dur * 30), 1)
-    
-    base_vf = "scale=1080:1920:force_original_aspect_ratio=decrease,pad=1080:1920:(ow-iw)/2:(oh-ih)/2"
-    
+    base_vf = "scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2"
+
     if effect == "zoom_in":
-        # punch-in zoom: 1.0→1.08 over first 0.15s then back
         vf = (f"{base_vf},"
-              f"zoompan=z='if(lte(on,{int(0.15*30)}),1+0.08*(on/{int(0.15*30)}),if(lte(on,{int(0.3*30)}),1.08-0.08*((on-{int(0.15*30)})/{int(0.15*30)}),1))'"
-              f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30")
+              f"zoompan=z='if(lte(on,5),1+0.08*(on/5),if(lte(on,10),1.08-0.08*((on-5)/5),1))'"
+              f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x960:fps=30")
     elif effect == "zoom_out":
+        frames = max(int(dur * 30), 1)
         vf = (f"{base_vf},"
-              f"zoompan=z='if(lte(on,{frames}),1.08-0.08*(on/{frames}),1)'"
-              f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30")
+              f"zoompan=z='max(1.06-0.06*(on/{frames}),1.0)'"
+              f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x960:fps=30")
     elif effect == "shake":
-        vf = (f"scale=1120:1960:force_original_aspect_ratio=decrease,pad=1120:1960:(ow-iw)/2:(oh-ih)/2,"
-              f"crop=1080:1920:x='10*sin(t*30)':y='8*sin(t*25)'")
+        vf = (f"scale=1120:1000:force_original_aspect_ratio=decrease,pad=1120:1000:(ow-iw)/2:(oh-ih)/2,"
+              f"crop=1080:960:x='20*sin(t*25)':y='10*sin(t*30)'")
     elif effect == "slow_zoom":
         vf = (f"{base_vf},"
-              f"zoompan=z='min(zoom+0.0008,1.06)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30")
+              f"zoompan=z='min(zoom+0.0008,1.05)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x960:fps=30")
     else:
         vf = base_vf
 
@@ -183,43 +181,57 @@ def apply_effect_to_char(char_img, dur, effect, idx):
     return out
 
 def compose_scene(scene, idx):
-    """シーンを合成: キャラメイン + B-roll PIP + white flash + vignette"""
+    """シーンを合成: 上半分B-roll（エフェクト付き）+ 下半分キャラ（エフェクト付き）"""
     dur = scene["duration"]
     audio = scene["audio_path"]
     broll = scene["broll"]
     effect = scene.get("effect", "none")
     out = str(WORK_DIR / f"scene_{idx:02d}.mp4")
 
-    # キャラクターにエフェクト適用
+    # キャラクター（下半分 1080x960）
     char_video = apply_effect_to_char(str(CHAR_PATH), dur, effect, idx)
 
+    # B-roll（上半分 1080x960）
     if broll and os.path.exists(broll):
-        # B-roll PIP: 右上に320x180で表示
         broll_dur = _probe_dur(broll)
         loop = int(dur / max(broll_dur, 1)) + 2
-        broll_pip = str(WORK_DIR / f"pip_{idx:02d}.mp4")
+        broll_top = str(WORK_DIR / f"broll_top_{idx:02d}.mp4")
+
+        if effect == "zoom_in":
+            broll_vf = (f"scale=1180:1060:force_original_aspect_ratio=increase,crop=1080:960,"
+                        f"zoompan=z='min(zoom+0.002,1.08)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x960:fps=30")
+        elif effect == "shake":
+            broll_vf = (f"scale=1120:1000:force_original_aspect_ratio=increase,crop=1080:960:x='10*sin(t*25)':y='8*sin(t*30)'")
+        elif effect == "slow_zoom":
+            broll_vf = (f"scale=1180:1060:force_original_aspect_ratio=increase,crop=1080:960,"
+                        f"zoompan=z='min(zoom+0.001,1.06)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x960:fps=30")
+        else:
+            broll_vf = "scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960"
+
         _run(["ffmpeg", "-y", "-stream_loop", str(loop), "-i", broll,
-              "-t", str(dur),
-              "-vf", "scale=320:180:force_original_aspect_ratio=increase,crop=320:180",
-              "-c:v", "libx264", "-preset", "fast", "-an", "-pix_fmt", "yuv420p", broll_pip])
-
-        # PIP overlay + audio（シンプル版）
-        _run(["ffmpeg", "-y",
-              "-i", char_video, "-i", audio, "-i", broll_pip,
-              "-filter_complex",
-              "[0:v][2:v]overlay=x=W-w-20:y=20[out]",
-              "-map", "[out]", "-map", "1:a",
-              "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-              "-c:a", "aac", "-shortest", "-pix_fmt", "yuv420p", out])
+              "-t", str(dur), "-vf", broll_vf,
+              "-c:v", "libx264", "-preset", "fast", "-crf", "23", "-an", "-pix_fmt", "yuv420p", broll_top])
     else:
-        _run(["ffmpeg", "-y", "-i", char_video, "-i", audio,
-              "-c:v", "copy", "-c:a", "aac", "-shortest", out])
+        broll_top = str(WORK_DIR / f"broll_top_{idx:02d}.mp4")
+        _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=black:s=1080x960:r=30:d={dur}",
+              "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", broll_top])
 
-    # white flash on zoom_in/flash effect
+    # 上下vstack合成
+    stacked = str(WORK_DIR / f"stacked_{idx:02d}.mp4")
+    _run(["ffmpeg", "-y", "-i", broll_top, "-i", char_video,
+          "-filter_complex", "[0:v][1:v]vstack=inputs=2[out]",
+          "-map", "[out]", "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", stacked])
+
+    # 音声追加
+    _run(["ffmpeg", "-y", "-i", stacked, "-i", audio,
+          "-c:v", "copy", "-c:a", "aac", "-map", "0:v", "-map", "1:a",
+          "-shortest", out])
+
+    # white flash
     if effect in ["zoom_in", "flash"]:
         flash_out = str(WORK_DIR / f"flash_{idx:02d}.mp4")
         _run(["ffmpeg", "-y", "-i", out,
-              "-vf", f"fade=t=in:st=0:d=0.08:color=white",
+              "-vf", "fade=t=in:st=0:d=0.08:color=white",
               "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-c:a", "copy", "-pix_fmt", "yuv420p", flash_out])
         os.replace(flash_out, out)
