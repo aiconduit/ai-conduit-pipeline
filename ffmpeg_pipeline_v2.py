@@ -313,7 +313,7 @@ def main():
           "-vf", (
               "scale=1180:1060:force_original_aspect_ratio=decrease,"
               "pad=1180:1060:(ow-iw)/2:(oh-ih)/2,"
-              "scale=w='1080+20*sin(2*PI*t*0.8)':h='960+18*sin(2*PI*t*0.8)',"
+              "scale=w='1080+20*sin(2*3.14159*t*0.8)':h='960+18*sin(2*3.14159*t*0.8)',"
               "crop=1080:960"
           ),
           "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", char_video])
