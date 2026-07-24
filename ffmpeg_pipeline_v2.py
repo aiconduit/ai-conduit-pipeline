@@ -62,19 +62,24 @@ STORY STRUCTURE (follow exactly):
 - Scene 12 (cta): Direct address to viewer. "あなたも" (you too can).
 
 RULES:
-- "narration": Natural Japanese story sentence (20-35 chars). Use タク as subject. Past tense narrative.
-  Examples: "タクは100社目の不採用通知を見た", "深夜2時、タクはこのツールに出会った"
-- "caption": Ultra-short keyword MAX 8 chars.
+- "narration": Casual, punchy Japanese (20-35 chars). Conversational, SNS-style. Use タク as subject.
+  STYLE GUIDE:
+  - Use casual speech: ヤバい、マジで、めっちゃ、とかいう、なんと、まさかの
+  - Short punchy sentences with rhythm. Like texting a friend.
+  - Emotion first: surprise, frustration, excitement, relief
+  - Examples (GOOD): "タク、マジで100社落ちてた", "深夜2時、ヤバいもん見つけた", "え、これ無料なの？", "3日後、内定きた。マジで"
+  - Examples (BAD): "タクは100社目の不採用通知を受け取った", "ツールを活用して内定を獲得した"
+- "caption": Ultra-short punchy keyword MAX 8 chars. Also casual.
 - "mood": One of [hook, problem, solution, mechanism, result, cta]
 - "visual_1", "visual_2": TWO Pexels English cinematic/3D/sci-fi search terms.
   Good: "cinematic dark city rain", "3d hologram interface", "cyber neon glow"
   Bad: "person working", "office desk", "laptop screen"
-- CTA narration: speak directly to viewer, mention "AI Conduit", ask to follow.
+- CTA narration: casual direct address to viewer, mention "AI Conduit", ask to follow.
 - CTA caption must be: "conduit"
 
 Output ONLY valid JSON array (no markdown, no explanation):
 [
-  {{"id":1,"narration":"タクは100社目の不採用通知を受け取った","caption":"100社落ち","mood":"hook","visual_1":"cinematic dark city rain","visual_2":"digital rejection screen"}},
+  {{"id":1,"narration":"タク、マジで100社落ちてた","caption":"100社落ち","mood":"hook","visual_1":"cinematic dark city rain","visual_2":"digital rejection screen"}},
   ...12 scenes total...
 ]"""
 
