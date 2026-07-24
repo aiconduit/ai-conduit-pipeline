@@ -119,48 +119,36 @@ Output ONLY valid JSON array (no markdown, no explanation):
     return scenes
 
 # === Step 2: シーン別ナレーション生成 ===
-def _build_ssml(text):
-    """テキストをSSMLに変換（自然な感情表現）"""
-    import re
-    # 感嘆・強調ワードを強調
-    text = re.sub(r'(マジで|ヤバい|めっちゃ|なんと|え、|まさかの|信じられない)', r'<emphasis level="strong">\1</emphasis>', text)
-    # 数字を強調
-    text = re.sub(r'(\d+社|\d+日|\d+分|\d+倍|\d+件)', r'<emphasis level="moderate">\1</emphasis>', text)
-    # 読点で短い間
-    text = text.replace('、', '<break time="120ms"/>')
-    # 句点で長めの間
-    text = text.replace('。', '<break time="200ms"/>')
-    # 感嘆符・疑問符後に間
-    text = text.replace('！', '！<break time="180ms"/>')
-    text = text.replace('？', '？<break time="180ms"/>')
-    return f'<speak>{text}</speak>'
-
 def _tts_scene(text, path):
-    import requests, base64
-    API_KEY = 'AIzaSyCsrOd3cgi9hcnoOeFXRde9prLAy6Y2vdY'
-    url = f'https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}'
-    ssml = _build_ssml(text)
-    payload = {
-        'input': {'ssml': ssml},
-        'voice': {'languageCode': 'ja-JP', 'name': 'ja-JP-Chirp3-HD-Charon'},
-        'audioConfig': {'audioEncoding': 'MP3', 'speakingRate': 1.08}
-    }
-    r = requests.post(url, json=payload)
+    """ElevenLabs George (eleven_multilingual_v2) で音声生成"""
+    import requests
+    API_KEY = 'sk_bb78b0e1caafa33f46892b4395b362d047ad8d406cc0fc55'
+    VOICE_ID = 'JBFqnCBsd6RMkjVDRZzb'  # George
+    url = f'https://api.elevenlabs.io/v1/text-to-speech/{VOICE_ID}'
+    r = requests.post(url,
+        headers={'xi-api-key': API_KEY, 'Content-Type': 'application/json'},
+        json={
+            'text': text,
+            'model_id': 'eleven_multilingual_v2',
+            'voice_settings': {'stability': 0.45, 'similarity_boost': 0.75, 'style': 0.3, 'use_speaker_boost': True}
+        }
+    )
     if r.status_code == 200:
-        audio = base64.b64decode(r.json()['audioContent'])
         with open(path, 'wb') as f:
-            f.write(audio)
+            f.write(r.content)
     else:
-        # SSMLが失敗したらプレーンテキストでフォールバック
-        payload['input'] = {'text': text}
-        payload['audioConfig'].pop('speakingRate', None)
-        r2 = requests.post(url, json=payload)
+        # フォールバック: Google Cloud TTS
+        import base64
+        gkey = 'AIzaSyCsrOd3cgi9hcnoOeFXRde9prLAy6Y2vdY'
+        r2 = requests.post(
+            f'https://texttospeech.googleapis.com/v1/text:synthesize?key={gkey}',
+            json={'input': {'text': text}, 'voice': {'languageCode': 'ja-JP', 'name': 'ja-JP-Chirp3-HD-Charon'}, 'audioConfig': {'audioEncoding': 'MP3'}}
+        )
         if r2.status_code == 200:
-            audio = base64.b64decode(r2.json()['audioContent'])
             with open(path, 'wb') as f:
-                f.write(audio)
+                f.write(base64.b64decode(r2.json()['audioContent']))
         else:
-            raise Exception(f'TTS error: {r2.json()}')
+            raise Exception(f'TTS error: {r.json()}')
 
 def generate_scene_narrations(scenes):
     print(f"[2/5] 🎙️ シーン別ナレーション生成中...")
