@@ -52,24 +52,51 @@ def get_bgm(mood="upbeat"):
     
     return None
 
-def mix_bgm(video_path, bgm_path, output_path, bgm_volume=0.10):
-    """BGMを動画に低音量でmix"""
+def mix_bgm(video_path, bgm_path, output_path, bgm_volume=0.10, duck=False):
+    """BGMを動画に低音量でmix（ダッキング対応）"""
     dur = float(subprocess.run(
         ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',
          '-of', 'csv=p=0', video_path],
         capture_output=True, text=True).stdout.strip())
     
-    subprocess.run([
+    if duck:
+        # ダッキング: ナレーションがある時BGMを下げる
+        filter_complex = (
+            f'[1:a]volume={bgm_volume},afade=t=out:st={max(0,dur-2)}:d=2[bgm];'
+            f'[0:a]asplit=2[voice][voicedet];'
+            f'[voicedet]ebur128=peak=true[voicedet_out];'
+            f'[bgm][voice]sidechaincompress=threshold=0.02:ratio=4:attack=50:release=300[bgm_ducked];'
+            f'[0:a][bgm_ducked]amix=inputs=2:duration=first:normalize=0[aout]'
+        )
+    else:
+        filter_complex = (
+            f'[1:a]volume={bgm_volume},afade=t=out:st={max(0,dur-2)}:d=2[bgm];'
+            f'[0:a][bgm]amix=inputs=2:duration=first:normalize=0[aout]'
+        )
+    
+    result = subprocess.run([
         'ffmpeg', '-y',
         '-i', video_path,
         '-stream_loop', '-1', '-i', bgm_path,
-        '-filter_complex',
-        f'[1:a]volume={bgm_volume},afade=t=out:st={max(0,dur-2)}:d=2[bgm];'
-        f'[0:a][bgm]amix=inputs=2:duration=first:normalize=0[aout]',
+        '-filter_complex', filter_complex,
         '-map', '0:v',
         '-map', '[aout]',
         '-t', str(dur),
         '-c:v', 'copy',
         '-c:a', 'aac', '-b:a', '192k',
         output_path
-    ], check=True, capture_output=True)
+    ], capture_output=True)
+    
+    if result.returncode != 0:
+        # ダッキング失敗時はシンプルmixにフォールバック
+        subprocess.run([
+            'ffmpeg', '-y',
+            '-i', video_path,
+            '-stream_loop', '-1', '-i', bgm_path,
+            '-filter_complex',
+            f'[1:a]volume={bgm_volume},afade=t=out:st={max(0,dur-2)}:d=2[bgm];'
+            f'[0:a][bgm]amix=inputs=2:duration=first:normalize=0[aout]',
+            '-map', '0:v', '-map', '[aout]',
+            '-t', str(dur), '-c:v', 'copy',
+            '-c:a', 'aac', '-b:a', '192k', output_path
+        ], check=True, capture_output=True)

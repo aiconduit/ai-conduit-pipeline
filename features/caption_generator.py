@@ -114,8 +114,19 @@ def generate_caption_png(text, output_path, font_size=FONT_SIZE, highlight_word=
     img.save(output_path, 'PNG')
     return output_path
 
+# mood別カラーマップ
+MOOD_COLORS = {
+    'hook':      ((255, 230,   0, 255), (20,  20,  20, 255)),   # 黄背景・黒文字
+    'problem':   ((220,  50,  50, 230), (255,255,255, 255)),     # 赤背景・白文字
+    'solution':  (( 30, 180,  80, 220), (255,255,255, 255)),     # 緑背景・白文字
+    'mechanism': ((  0, 120, 220, 220), (255,255,255, 255)),     # 青背景・白文字
+    'result':    ((255, 160,   0, 230), ( 20, 20,  20, 255)),    # オレンジ背景・黒文字
+    'cta':       ((140,  60, 220, 230), (255,255,255, 255)),     # 紫背景・白文字
+    'default':   ((  0,   0,   0, 180), (255,255,255, 255)),     # 黒背景・白文字
+}
+
 def build_caption_pngs(scenes, output_dir):
-    """シーンごとに字幕PNGを生成"""
+    """シーンごとに字幕PNGを生成（mood別カラー対応）"""
     os.makedirs(output_dir, exist_ok=True)
     font, font_path = get_font()
     print(f"   字幕フォント: {font_path or 'デフォルト'}")
@@ -125,11 +136,54 @@ def build_caption_pngs(scenes, output_dir):
         if not text:
             caption_files.append(None)
             continue
+        mood = scene.get('mood', 'default')
+        bg_color, text_color = MOOD_COLORS.get(mood, MOOD_COLORS['default'])
         out_path = os.path.join(output_dir, f"caption_{scene['id']:02d}.png")
-        generate_caption_png(text, out_path)
+        generate_caption_png_colored(text, out_path, bg_color=bg_color, text_color=text_color)
         caption_files.append(out_path)
-        print(f"   Scene {scene['id']}: '{text[:20]}...' → caption_{scene['id']:02d}.png")
+        print(f"   Scene {scene['id']} [{mood}]: '{text[:20]}...' → caption_{scene['id']:02d}.png")
     return caption_files
+
+def generate_caption_png_colored(text, output_path, font_size=FONT_SIZE, bg_color=(0,0,0,180), text_color=(255,255,255,255)):
+    """mood別カラー対応の字幕PNG生成"""
+    text = strip_emoji(text)
+    if not text:
+        return None
+
+    font, _ = get_font(font_size)
+    lines = wrap_text(text, font, MAX_WIDTH)
+
+    dummy_img = Image.new('RGBA', (1, 1))
+    draw_dummy = ImageDraw.Draw(dummy_img)
+    line_heights, line_widths = [], []
+    for line in lines:
+        bbox = draw_dummy.textbbox((0, 0), line, font=font)
+        line_widths.append(bbox[2] - bbox[0])
+        line_heights.append(bbox[3] - bbox[1])
+
+    total_h = sum(line_heights) + LINE_SPACING * (len(lines) - 1)
+    pad = 18
+    max_lw = max(line_widths) if line_widths else MAX_WIDTH
+
+    img = Image.new('RGBA', (VIDEO_W, VIDEO_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    # 背景ボックス（mood色）
+    box_x0 = (VIDEO_W - max_lw) // 2 - pad
+    box_y0 = CAPTION_Y - total_h // 2 - pad
+    box_x1 = (VIDEO_W + max_lw) // 2 + pad
+    box_y1 = CAPTION_Y + total_h // 2 + pad
+    draw.rounded_rectangle([box_x0, box_y0, box_x1, box_y1], radius=14, fill=bg_color)
+
+    y = CAPTION_Y - total_h // 2
+    outline_col = (0, 0, 0, 180) if text_color[0] > 128 else (255, 255, 255, 100)
+    for i, line in enumerate(lines):
+        x = (VIDEO_W - line_widths[i]) // 2
+        draw_text_with_outline(draw, line, x, y, font, text_color, outline_col, OUTLINE_SIZE)
+        y += line_heights[i] + LINE_SPACING
+
+    img.save(output_path, 'PNG')
+    return output_path
 
 def overlay_captions_on_video(video_path, scenes, caption_dir, output_path):
     """字幕PNGをffmpegでoverlay"""
@@ -204,5 +258,37 @@ def generate_hook_png(text, output_path):
                            text_color=(20, 20, 20, 255),
                            outline_color=(0, 0, 0, 100),
                            outline_size=2)
+    img.save(output_path, 'PNG')
+    return output_path
+
+def generate_cta_png(text, output_path):
+    """CTA用オーバーレイPNG生成（紫グラデ風ボックス）"""
+    text = strip_emoji(text) or "AI Conduit をフォロー"
+    font_size = 72
+    font, _ = get_font(font_size)
+
+    dummy_img = Image.new('RGBA', (1, 1))
+    draw_dummy = ImageDraw.Draw(dummy_img)
+    bbox = draw_dummy.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+
+    img = Image.new('RGBA', (VIDEO_W, 200), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    pad = 24
+    x = (VIDEO_W - tw) // 2
+    y = (200 - th) // 2
+
+    # 紫背景ボックス
+    draw.rounded_rectangle(
+        [x - pad, y - pad, x + tw + pad, y + th + pad],
+        radius=16, fill=(140, 60, 220, 220)
+    )
+    # 白テキスト
+    draw_text_with_outline(draw, text, x, y, font,
+                           text_color=(255, 255, 255, 255),
+                           outline_color=(0, 0, 0, 150),
+                           outline_size=3)
     img.save(output_path, 'PNG')
     return output_path

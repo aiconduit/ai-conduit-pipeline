@@ -47,27 +47,33 @@ def _probe_dur(f):
 # === Step 1: シーン単位スクリプト生成 ===
 def generate_scene_script(repo, stars, description):
     print(f"[1/5] 📝 シーン単位スクリプト生成中...")
-    prompt = f"""You are a scriptwriter for a high-retention Japanese AI/GitHub trends channel.
+    prompt = f"""You are a master scriptwriter for a high-retention Japanese AI/GitHub trends channel.
 Topic: {repo} ({stars} stars) - {description}
 
 Create a 12-scene script in Japanese for a 60-second vertical video.
 
-CRITICAL RULE - TWO separate text fields per scene:
-- "narration": Full natural Japanese sentence for voice (20-35 chars). This is SPOKEN.
-- "caption": ONE ultra-short keyword shown on screen (MAX 8 chars). This is DISPLAYED.
+STRUCTURE (follow exactly):
+- Hook(2 scenes): Shocking fact or question. Make viewer STOP scrolling.
+- Problem(2 scenes): Pain point the target audience feels daily.
+- Solution(2 scenes): Introduce the tool as the answer.
+- Mechanism(3 scenes): HOW it works, specific and literal.
+- Result(2 scenes): Outcome, numbers, social proof.
+- CTA(1 scene): Call to action.
 
-Structure: Hook(2) -> Problem(2) -> Solution(3) -> How(3) -> Result(1) -> CTA(1)
-- narration: 3rd person, natural spoken Japanese
-- caption examples: "17,500⭐", "自動化", "3分で完了", "無料"
+RULES:
+- "narration": Natural Japanese sentence for voice (20-35 chars). 3rd person. No fluff.
+- "caption": Ultra-short keyword MAX 8 chars shown on screen.
+- "mood": One of [hook, problem, solution, mechanism, result, cta]
+- "visual_1", "visual_2": TWO Pexels English search terms. STRICTLY cinematic/3D/sci-fi.
+  Good: "cinematic dark technology", "3d hologram interface", "cyber neon city"
+  Bad: "person working", "office desk", "laptop screen"
+- CTA narration must mention "AI Conduit" and ask to follow.
 - CTA caption must be: "conduit"
-- TWO Pexels search terms per scene (English, MUST be cinematic/3D/sci-fi style)
-- visual examples: "cinematic dark technology", "3d hologram interface", "cyber neon city", "matrix code digital", "futuristic sci-fi space", "dark abstract motion", "holographic data stream", "artificial intelligence visualization"
-- NEVER use plain office or coding footage - always cinematic and visually striking
 
-Output ONLY valid JSON array:
+Output ONLY valid JSON array (no markdown):
 [
-  {{"id":1,"narration":"ナレーション文章(20-35文字)","caption":"表示文字(最大8文字)","visual_1":"english term","visual_2":"english term"}},
-  ...
+  {{"id":1,"narration":"就活で何社も落ちて消耗してない？","caption":"就活地獄","mood":"hook","visual_1":"cinematic dark city rain","visual_2":"rejected application paper"}},
+  ...12 scenes total...
 ]"""
 
     r = requests.post(
@@ -345,16 +351,17 @@ def main():
     caption_dir = str(WORK_DIR / "captions")
     build_caption_pngs(scenes, caption_dir)
 
-    # Hook PNG生成（冒頭3秒）
+    # Hook PNG生成（冒頭3秒・フェードイン付き）
     hook_png = str(WORK_DIR / "hook_overlay.png")
-    hook_text = f"⚡ {stars} Stars"
+    hook_text = f"{stars} Stars"
     try:
         generate_hook_png(hook_text, hook_png)
-        # hookを冒頭3秒だけoverlayしてからstackedに合成
         stacked_hook = str(WORK_DIR / "stacked_hook.mp4")
+        # フェードイン0.3秒 + 表示2.5秒 + フェードアウト0.2秒
         _run(["ffmpeg", "-y", "-i", stacked, "-i", hook_png,
               "-filter_complex",
-              "[0:v][1:v]overlay=x=(W-w)/2:y=80:enable='between(t,0,3)'[out]",
+              "[1:v]fade=t=in:st=0:d=0.3:alpha=1,fade=t=out:st=2.5:d=0.2:alpha=1[hook];"
+              "[0:v][hook]overlay=x=(W-w)/2:y=60:enable='between(t,0,2.8)'[out]",
               "-map", "[out]", "-map", "0:a",
               "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-c:a", "aac", "-pix_fmt", "yuv420p", stacked_hook])
@@ -362,6 +369,26 @@ def main():
         print(f"   ✅ Hook強化完了")
     except Exception as e:
         print(f"   ⚠️ Hook失敗: {e}")
+
+    # CTAオーバーレイ（最後2秒）
+    try:
+        from features.caption_generator import generate_cta_png
+        cta_png = str(WORK_DIR / "cta_overlay.png")
+        generate_cta_png("👇 AI Conduit をフォロー", cta_png)
+        total_dur = _probe_dur(stacked)
+        cta_start = max(0, total_dur - 2.5)
+        stacked_cta = str(WORK_DIR / "stacked_cta.mp4")
+        _run(["ffmpeg", "-y", "-i", stacked, "-i", cta_png,
+              "-filter_complex",
+              f"[1:v]fade=t=in:st=0:d=0.3:alpha=1[cta];"
+              f"[0:v][cta]overlay=x=(W-w)/2:y=900:enable='between(t,{cta_start},{total_dur})'[out]",
+              "-map", "[out]", "-map", "0:a",
+              "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-c:a", "aac", "-pix_fmt", "yuv420p", stacked_cta])
+        stacked = stacked_cta
+        print(f"   ✅ CTAオーバーレイ完了")
+    except Exception as e:
+        print(f"   ⚠️ CTA失敗: {e}")
 
     output = str(OUTPUT_DIR / f"{name}_final.mp4")
     overlay_captions_on_video(stacked, scenes, caption_dir, output)
@@ -387,7 +414,7 @@ def main():
     if bgm:
         output_bgm = output.replace(".mp4", "_bgm.mp4")
         try:
-            mix_bgm(output, bgm, output_bgm, bgm_volume=0.12)
+            mix_bgm(output, bgm, output_bgm, bgm_volume=0.10, duck=True)
             output = output_bgm
             print(f"   ✅ BGM追加完了")
         except Exception as e:
