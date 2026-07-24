@@ -119,14 +119,31 @@ Output ONLY valid JSON array (no markdown, no explanation):
     return scenes
 
 # === Step 2: シーン別ナレーション生成 ===
+def _build_ssml(text):
+    """テキストをSSMLに変換（自然な感情表現）"""
+    import re
+    # 感嘆・強調ワードを強調
+    text = re.sub(r'(マジで|ヤバい|めっちゃ|なんと|え、|まさかの|信じられない)', r'<emphasis level="strong">\1</emphasis>', text)
+    # 数字を強調
+    text = re.sub(r'(\d+社|\d+日|\d+分|\d+倍|\d+件)', r'<emphasis level="moderate">\1</emphasis>', text)
+    # 読点で短い間
+    text = text.replace('、', '<break time="120ms"/>')
+    # 句点で長めの間
+    text = text.replace('。', '<break time="200ms"/>')
+    # 感嘆符・疑問符後に間
+    text = text.replace('！', '！<break time="180ms"/>')
+    text = text.replace('？', '？<break time="180ms"/>')
+    return f'<speak>{text}</speak>'
+
 def _tts_scene(text, path):
     import requests, base64
     API_KEY = 'AIzaSyCsrOd3cgi9hcnoOeFXRde9prLAy6Y2vdY'
     url = f'https://texttospeech.googleapis.com/v1/text:synthesize?key={API_KEY}'
+    ssml = _build_ssml(text)
     payload = {
-        'input': {'text': text},
+        'input': {'ssml': ssml},
         'voice': {'languageCode': 'ja-JP', 'name': 'ja-JP-Chirp3-HD-Charon'},
-        'audioConfig': {'audioEncoding': 'MP3'}
+        'audioConfig': {'audioEncoding': 'MP3', 'speakingRate': 1.08}
     }
     r = requests.post(url, json=payload)
     if r.status_code == 200:
@@ -134,7 +151,16 @@ def _tts_scene(text, path):
         with open(path, 'wb') as f:
             f.write(audio)
     else:
-        raise Exception(f'TTS error: {r.json()}')
+        # SSMLが失敗したらプレーンテキストでフォールバック
+        payload['input'] = {'text': text}
+        del payload['audioConfig']['speakingRate'] if 'speakingRate' in payload.get('audioConfig', {}) else None
+        r2 = requests.post(url, json=payload)
+        if r2.status_code == 200:
+            audio = base64.b64decode(r2.json()['audioContent'])
+            with open(path, 'wb') as f:
+                f.write(audio)
+        else:
+            raise Exception(f'TTS error: {r2.json()}')
 
 def generate_scene_narrations(scenes):
     print(f"[2/5] 🎙️ シーン別ナレーション生成中...")
