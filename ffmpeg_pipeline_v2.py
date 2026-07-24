@@ -153,7 +153,7 @@ def _tts_scene(text, path):
     else:
         # SSMLが失敗したらプレーンテキストでフォールバック
         payload['input'] = {'text': text}
-        del payload['audioConfig']['speakingRate'] if 'speakingRate' in payload.get('audioConfig', {}) else None
+        payload['audioConfig'].pop('speakingRate', None)
         r2 = requests.post(url, json=payload)
         if r2.status_code == 200:
             audio = base64.b64decode(r2.json()['audioContent'])
