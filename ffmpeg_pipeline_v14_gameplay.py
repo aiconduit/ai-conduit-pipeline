@@ -202,7 +202,7 @@ def compose_all_scenes(scenes, bg_video):
     audio_concat = str(WORK_DIR/"concat_audio.txt")
     with open(audio_concat,"w") as f:
         for s in scenes: f.write(f"file '{s['audio_path']}'\n")
-    combined_audio = str(WORK_DIR/"combined_audio.mp3")
+    combined_audio = str(WORK_DIR/"combined_audio.aac")
     _run(["ffmpeg","-y","-f","concat","-safe","0","-i",audio_concat,
           "-c:a","aac",combined_audio])
 
