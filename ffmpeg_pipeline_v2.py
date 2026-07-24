@@ -219,12 +219,12 @@ def compose_scene(scene, idx):
     
     loop_a = int(dur_a / max(_probe_dur(broll_a), 1)) + 2
     _run(["ffmpeg", "-y", "-stream_loop", str(loop_a), "-i", broll_a,
-          "-t", str(dur_a), "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
+          "-t", str(dur_a), "-vf", f"scale=1280:2160:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.001,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={int(dur_a*30)}:s=1080x1920:fps=30",  # Ken Burns
           "-c:v", "libx264", "-preset", "fast", "-crf", "23", "-an", "-pix_fmt", "yuv420p", temp_a])
     
     loop_b = int(dur_b / max(_probe_dur(broll_b), 1)) + 2
     _run(["ffmpeg", "-y", "-stream_loop", str(loop_b), "-i", broll_b,
-          "-t", str(dur_b), "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,fps=30",
+          "-t", str(dur_b), "-vf", f"scale=1280:2160:force_original_aspect_ratio=increase,crop=1080:1920,zoompan=z='min(zoom+0.001,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d={int(dur_a*30)}:s=1080x1920:fps=30",  # Ken Burns
           "-c:v", "libx264", "-preset", "fast", "-crf", "23", "-an", "-pix_fmt", "yuv420p", temp_b])
     
     # xfadeで結合
@@ -310,7 +310,12 @@ def main():
     dur = _probe_dur(combined)
     _run(["ffmpeg", "-y", "-loop", "1", "-i", char_path,
           "-t", str(dur),
-          "-vf", "scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2",
+          "-vf", (
+              "scale=1180:1060:force_original_aspect_ratio=decrease,"
+              "pad=1180:1060:(ow-iw)/2:(oh-ih)/2,"
+              "scale=w='1080+20*sin(2*PI*t*0.8)':h='960+18*sin(2*PI*t*0.8)',"
+              "crop=1080:960"
+          ),
           "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", char_video])
     print(f"   ✅ キャラクター静止画動画生成完了")
 
@@ -332,11 +337,29 @@ def main():
           "-c:v", "libx264", "-preset", "fast", "-crf", "22",
           "-c:a", "aac", "-pix_fmt", "yuv420p", stacked])
 
-    # 7. 字幕オーバーレイ (Pillow方式)
-    print(f"[7/7] 📝 字幕オーバーレイ中 (Pillow方式)...")
-    from features.caption_generator import build_caption_pngs, overlay_captions_on_video
+    # 7. Hook強化オーバーレイ + 字幕オーバーレイ
+    print(f"[7/7] 📝 Hook強化 + 字幕オーバーレイ中...")
+    from features.caption_generator import build_caption_pngs, overlay_captions_on_video, generate_hook_png
     caption_dir = str(WORK_DIR / "captions")
     build_caption_pngs(scenes, caption_dir)
+
+    # Hook PNG生成（冒頭3秒）
+    hook_png = str(WORK_DIR / "hook_overlay.png")
+    hook_text = f"⚡ {stars} Stars"
+    try:
+        generate_hook_png(hook_text, hook_png)
+        # hookを冒頭3秒だけoverlayしてからstackedに合成
+        stacked_hook = str(WORK_DIR / "stacked_hook.mp4")
+        _run(["ffmpeg", "-y", "-i", stacked, "-i", hook_png,
+              "-filter_complex",
+              "[0:v][1:v]overlay=x=(W-w)/2:y=80:enable='between(t,0,3)'[out]",
+              "-map", "[out]", "-map", "0:a",
+              "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-c:a", "aac", "-pix_fmt", "yuv420p", stacked_hook])
+        stacked = stacked_hook
+        print(f"   ✅ Hook強化完了")
+    except Exception as e:
+        print(f"   ⚠️ Hook失敗: {e}")
 
     output = str(OUTPUT_DIR / f"{name}_final.mp4")
     overlay_captions_on_video(stacked, scenes, caption_dir, output)

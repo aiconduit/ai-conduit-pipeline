@@ -1,26 +1,21 @@
 #!/usr/bin/env python3
 """
-字幕生成モジュール - Pillow直接描画方式
-ASSファイル・libassに依存しない確実な実装
-
-設計:
-- フォント: NotoSansCJK-Bold.ttc (GitHub Actions Ubuntu)
-- サイズ: 68px (CJKスケール 105×0.65)
-- 位置: y=1800px (1920-120px, 下から120px)
-- 色: 白文字 + 黒縁5px
-- 方式: PNG画像生成 → ffmpeg overlay
+字幕生成モジュール v2 - CapCutスタイル単語ハイライト方式
+- 単語ごとに黄色ハイライト（現在話している単語）
+- 背景ボックス付き
+- 折り返し対応
 """
-import subprocess
-import os
-import re
+import subprocess, os, re
 from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 VIDEO_W = 1080
 VIDEO_H = 1920
-FONT_SIZE = 52
-CAPTION_Y = 1800     # 下から120px
-OUTLINE_SIZE = 5
+FONT_SIZE = 56
+CAPTION_Y = 1820
+OUTLINE_SIZE = 4
+LINE_SPACING = 12
+MAX_WIDTH = VIDEO_W - 80
 EMOJI_RE = re.compile("[\U0001F000-\U0001FAFF\U00002600-\U000027BF⭐]")
 
 FONT_PATHS = [
@@ -44,7 +39,6 @@ def strip_emoji(s):
     return EMOJI_RE.sub('', s).strip()
 
 def draw_text_with_outline(draw, text, x, y, font, text_color, outline_color, outline_size):
-    """テキストを縁取り付きで描画"""
     for dx in range(-outline_size, outline_size+1):
         for dy in range(-outline_size, outline_size+1):
             if dx*dx + dy*dy <= outline_size*outline_size:
@@ -52,7 +46,6 @@ def draw_text_with_outline(draw, text, x, y, font, text_color, outline_color, ou
     draw.text((x, y), text, font=font, fill=text_color)
 
 def wrap_text(text, font, max_width):
-    """テキストを最大幅で折り返す"""
     lines = []
     line = ''
     dummy_img = Image.new('RGBA', (1, 1))
@@ -69,45 +62,55 @@ def wrap_text(text, font, max_width):
         lines.append(line)
     return lines
 
-def generate_caption_png(text, output_path, font_size=FONT_SIZE):
-    """字幕テキストを透過PNGとして生成（折り返し対応）"""
+def generate_caption_png(text, output_path, font_size=FONT_SIZE, highlight_word=None):
+    """字幕PNG生成（背景ボックス + ハイライト対応）"""
     text = strip_emoji(text)
     if not text:
         return None
-    
-    font, font_path = get_font(font_size)
-    MAX_WIDTH = VIDEO_W - 80  # 左右40pxマージン
-    LINE_SPACING = 10
-    
-    # 折り返し処理
+
+    font, _ = get_font(font_size)
     lines = wrap_text(text, font, MAX_WIDTH)
-    
-    # 各行のサイズ計測
+
     dummy_img = Image.new('RGBA', (1, 1))
     draw_dummy = ImageDraw.Draw(dummy_img)
-    line_heights = []
-    line_widths = []
+    line_heights, line_widths = [], []
     for line in lines:
         bbox = draw_dummy.textbbox((0, 0), line, font=font)
         line_widths.append(bbox[2] - bbox[0])
         line_heights.append(bbox[3] - bbox[1])
-    
+
     total_h = sum(line_heights) + LINE_SPACING * (len(lines) - 1)
-    
-    # 透過画像(1080×1920)を生成
+    pad = 16
+    max_lw = max(line_widths) if line_widths else MAX_WIDTH
+
     img = Image.new('RGBA', (VIDEO_W, VIDEO_H), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
-    
-    # 複数行を中央下部に描画
+
+    # 背景ボックス
+    box_x0 = (VIDEO_W - max_lw) // 2 - pad
+    box_y0 = CAPTION_Y - total_h // 2 - pad
+    box_x1 = (VIDEO_W + max_lw) // 2 + pad
+    box_y1 = CAPTION_Y + total_h // 2 + pad
+    draw.rounded_rectangle([box_x0, box_y0, box_x1, box_y1], radius=12, fill=(0, 0, 0, 180))
+
     y = CAPTION_Y - total_h // 2
     for i, line in enumerate(lines):
         x = (VIDEO_W - line_widths[i]) // 2
-        draw_text_with_outline(draw, line, x, y, font,
-                               text_color=(255, 255, 255, 255),
-                               outline_color=(0, 0, 0, 255),
-                               outline_size=OUTLINE_SIZE)
+        # ハイライト単語があれば黄色、なければ白
+        if highlight_word and highlight_word in line:
+            before = line[:line.index(highlight_word)]
+            bbox_b = draw_dummy.textbbox((0, 0), before, font=font)
+            bw = bbox_b[2] - bbox_b[0]
+            draw_text_with_outline(draw, before, x, y, font, (255,255,255,255), (0,0,0,255), OUTLINE_SIZE)
+            draw_text_with_outline(draw, highlight_word, x + bw, y, font, (255,230,0,255), (0,0,0,255), OUTLINE_SIZE)
+            after = line[line.index(highlight_word)+len(highlight_word):]
+            bbox_h = draw_dummy.textbbox((0, 0), highlight_word, font=font)
+            hw = bbox_h[2] - bbox_h[0]
+            draw_text_with_outline(draw, after, x + bw + hw, y, font, (255,255,255,255), (0,0,0,255), OUTLINE_SIZE)
+        else:
+            draw_text_with_outline(draw, line, x, y, font, (255,255,255,255), (0,0,0,255), OUTLINE_SIZE)
         y += line_heights[i] + LINE_SPACING
-    
+
     img.save(output_path, 'PNG')
     return output_path
 
@@ -116,86 +119,90 @@ def build_caption_pngs(scenes, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     font, font_path = get_font()
     print(f"   字幕フォント: {font_path or 'デフォルト'}")
-    
     caption_files = []
     for scene in scenes:
         text = strip_emoji(scene.get('narration', scene.get('caption', scene.get('text', ''))))
         if not text:
             caption_files.append(None)
             continue
-        
         out_path = os.path.join(output_dir, f"caption_{scene['id']:02d}.png")
         generate_caption_png(text, out_path)
         caption_files.append(out_path)
-        print(f"   Scene {scene['id']}: '{text}' → {os.path.basename(out_path)}")
-    
+        print(f"   Scene {scene['id']}: '{text[:20]}...' → caption_{scene['id']:02d}.png")
     return caption_files
 
 def overlay_captions_on_video(video_path, scenes, caption_dir, output_path):
-    """字幕PNGを動画にオーバーレイ"""
-    # まずシーンの時間オフセットを計算
+    """字幕PNGをffmpegでoverlay"""
+    inputs = ['-i', video_path]
     time_offsets = []
     current = 0.0
     for scene in scenes:
         duration = scene.get('actual_duration', 3.0)
         time_offsets.append((current, current + duration))
         current += duration
-    
-    # ffmpegのoverlay filterチェーン構築
-    # 各シーンの字幕PNGを対応する時間にオーバーレイ
-    inputs = ['-i', video_path]
+
     filter_parts = []
-    last_label = '0:v'
-    
-    valid_overlays = []
-    for i, (scene, (start, end)) in enumerate(zip(scenes, time_offsets)):
-        caption_path = os.path.join(caption_dir, f"caption_{scene['id']:02d}.png")
-        if os.path.exists(caption_path):
-            valid_overlays.append((i, start, end, caption_path))
-            inputs += ['-i', caption_path]
-    
-    if not valid_overlays:
-        # 字幕なしでコピー
-        subprocess.run(['ffmpeg', '-y', '-i', video_path, '-c', 'copy', output_path],
-                      capture_output=True, check=True)
-        return output_path
-    
-    # filter_complexを構築
-    filter_complex_parts = []
     current_label = '0:v'
-    
-    for idx, (i, start, end, _) in enumerate(valid_overlays):
-        input_idx = idx + 1  # 0はvideo
-        next_label = f'v{idx+1}'
-        filter_complex_parts.append(
-            f'[{current_label}][{input_idx}:v]overlay=0:0:enable=\'between(t,{start:.3f},{end:.3f})\''
-            f'[{next_label}]'
+    input_idx = 1
+    valid_scenes = []
+    for i, scene in enumerate(scenes):
+        png = os.path.join(caption_dir, f"caption_{scene['id']:02d}.png")
+        if os.path.exists(png):
+            inputs += ['-i', png]
+            valid_scenes.append((i, input_idx, time_offsets[i]))
+            input_idx += 1
+
+    for (scene_idx, inp_idx, (start, end)) in valid_scenes:
+        next_label = f'v{scene_idx}'
+        filter_parts.append(
+            f'[{current_label}][{inp_idx}:v]overlay=0:0:enable=\'between(t,{start:.3f},{end:.3f})\'[{next_label}]'
         )
         current_label = next_label
-    
-    filter_complex = ';'.join(filter_complex_parts)
-    
+
+    if not filter_parts:
+        import shutil
+        shutil.copy(video_path, output_path)
+        return
+
+    filter_complex = ';'.join(filter_parts)
     cmd = ['ffmpeg', '-y'] + inputs + [
         '-filter_complex', filter_complex,
         '-map', f'[{current_label}]',
         '-map', '0:a',
         '-c:v', 'libx264', '-preset', 'fast', '-crf', '22',
-        '-c:a', 'copy', '-pix_fmt', 'yuv420p',
-        output_path
+        '-c:a', 'aac', '-pix_fmt', 'yuv420p', output_path
     ]
-    
-    result = subprocess.run(cmd, capture_output=True, text=True)
-    if result.returncode != 0:
-        print(f"   ⚠️ overlay失敗: {result.stderr[-300:]}")
-        subprocess.run(['ffmpeg', '-y', '-i', video_path, '-c', 'copy', output_path],
-                      capture_output=True, check=True)
-    
-    return output_path
+    subprocess.run([str(x) for x in cmd], check=True, capture_output=True)
 
-# 後方互換性
-def build_hormozi_ass(scenes, output_path, font_name=None, font_size=FONT_SIZE):
-    """後方互換用: 実際はPillow方式を使用"""
-    caption_dir = str(Path(output_path).parent / 'captions')
-    build_caption_pngs(scenes, caption_dir)
-    print(f"   ✅ 字幕PNG生成完了 → {caption_dir}")
+def generate_hook_png(text, output_path):
+    """冒頭Hook用オーバーレイPNG生成（大きく・派手に）"""
+    from PIL import Image, ImageDraw, ImageFont
+    text = strip_emoji(text) or "AI Conduit"
+    font_size = 88
+    font, _ = get_font(font_size)
+
+    dummy_img = Image.new('RGBA', (1, 1))
+    draw_dummy = ImageDraw.Draw(dummy_img)
+    bbox = draw_dummy.textbbox((0, 0), text, font=font)
+    tw = bbox[2] - bbox[0]
+    th = bbox[3] - bbox[1]
+
+    img = Image.new('RGBA', (VIDEO_W, VIDEO_H), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+
+    pad = 24
+    x = (VIDEO_W - tw) // 2
+    y = 100
+
+    # 背景ボックス（黄色）
+    draw.rounded_rectangle(
+        [x - pad, y - pad, x + tw + pad, y + th + pad],
+        radius=16, fill=(255, 210, 0, 230)
+    )
+    # テキスト（黒）
+    draw_text_with_outline(draw, text, x, y, font,
+                           text_color=(20, 20, 20, 255),
+                           outline_color=(0, 0, 0, 100),
+                           outline_size=2)
+    img.save(output_path, 'PNG')
     return output_path
