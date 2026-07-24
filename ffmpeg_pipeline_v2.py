@@ -308,13 +308,15 @@ def main():
     char_path = str(Path(__file__).parent / "assets" / "character_main.png")
     char_video = str(WORK_DIR / "character_lipsync.mp4")
     dur = _probe_dur(combined)
+    # Pulse効果: zoompanで緩やかなズームイン/アウト
+    frames = int(dur * 30)
     _run(["ffmpeg", "-y", "-loop", "1", "-i", char_path,
           "-t", str(dur),
           "-vf", (
-              "scale=1180:1060:force_original_aspect_ratio=decrease,"
-              "pad=1180:1060:(ow-iw)/2:(oh-ih)/2,"
-              "scale=w='1080+20*sin(2*3.14159*t*0.8)':h='960+18*sin(2*3.14159*t*0.8)',"
-              "crop=1080:960"
+              f"scale=1200:1070:force_original_aspect_ratio=decrease,"
+              f"pad=1200:1070:(ow-iw)/2:(oh-ih)/2,"
+              f"zoompan=z='if(lte(mod(on,60),30),1.0+0.02*(mod(on,60)/30),1.02-0.02*((mod(on,60)-30)/30))'"
+              f":x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x960:fps=30"
           ),
           "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", char_video])
     print(f"   ✅ キャラクター静止画動画生成完了")
