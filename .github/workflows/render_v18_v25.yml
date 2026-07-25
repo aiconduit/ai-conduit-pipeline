@@ -1,0 +1,63 @@
+name: Render Video V18-V25
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: 'Pipeline (v18_dialogue/v19_timeline/v20_tierlist/v21_meme/v22_asmr/v23_waveform/v24_mv/v25_photo)'
+        required: true
+        default: 'v18_dialogue'
+      repo:
+        description: 'GitHub repo'
+        required: false
+        default: 'MadsLorentzen/ai-job-search'
+      stars:
+        description: 'Star count'
+        required: false
+        default: '17500'
+      description:
+        description: 'Description'
+        required: false
+        default: 'Claude Codeで就活を自動化するフレームワーク'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
+      - name: Install Python deps
+        run: pip install requests pillow numpy
+      - name: Run pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+        run: |
+          P="${{ github.event.inputs.pipeline }}"
+          R="${{ github.event.inputs.repo }}"
+          S="${{ github.event.inputs.stars }}"
+          D="${{ github.event.inputs.description }}"
+          case "$P" in
+            v18_dialogue)  python3 ffmpeg_pipeline_v18_dialogue.py "$R" "$S" "$D" ;;
+            v19_timeline)  python3 ffmpeg_pipeline_v19_timeline.py "$R" "$S" "$D" ;;
+            v20_tierlist)  python3 ffmpeg_pipeline_v20_tierlist.py "$R" "$S" "$D" ;;
+            v21_meme)      python3 ffmpeg_pipeline_v21_meme.py "$R" "$S" "$D" ;;
+            v22_asmr)      python3 ffmpeg_pipeline_v22_asmr.py "$R" "$S" "$D" ;;
+            v23_waveform)  python3 ffmpeg_pipeline_v23_waveform.py "$R" "$S" "$D" ;;
+            v24_mv)        python3 ffmpeg_pipeline_v24_mv.py "$R" "$S" "$D" ;;
+            v25_photo)     python3 ffmpeg_pipeline_v25_photo.py "$R" "$S" "$D" ;;
+          esac
+      - name: Upload video
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video-${{ github.event.inputs.pipeline }}
+          path: projects/daily/renders/*.mp4
+          retention-days: 7
