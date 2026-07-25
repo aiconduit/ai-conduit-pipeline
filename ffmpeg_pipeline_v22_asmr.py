@@ -58,7 +58,7 @@ def tts_japanese(text,path):
     import base64
     r=requests.post(f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_TTS_KEY}",
         json={"input":{"text":text},"voice":{"languageCode":"ja-JP","name":"ja-JP-Chirp3-HD-Charon"},
-              "audioConfig":{"audioEncoding":"MP3","speakingRate":0.85,"pitch":-2.0}})
+              "audioConfig":{"audioEncoding":"MP3","speakingRate":0.82}})
     if r.status_code==200:
         with open(path,"wb") as f: f.write(base64.b64decode(r.json()["audioContent"]))
     else: raise Exception(f"TTS:{r.json()}")
