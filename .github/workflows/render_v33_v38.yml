@@ -1,0 +1,61 @@
+name: Render Video V33-V38
+
+on:
+  workflow_dispatch:
+    inputs:
+      pipeline:
+        description: 'Pipeline (v33_hormozi/v34_mrbeast/v35_quiz/v36_infographic/v37_3dtext/v38_reaction)'
+        required: true
+        default: 'v33_hormozi'
+      repo:
+        description: 'GitHub repo'
+        required: false
+        default: 'MadsLorentzen/ai-job-search'
+      stars:
+        description: 'Star count'
+        required: false
+        default: '17500'
+      description:
+        description: 'Description'
+        required: false
+        default: 'Claude Codeで就活を自動化するフレームワーク'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
+      - name: Install Python deps
+        run: pip install requests pillow numpy
+      - name: Run pipeline
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+        run: |
+          P="${{ github.event.inputs.pipeline }}"
+          R="${{ github.event.inputs.repo }}"
+          S="${{ github.event.inputs.stars }}"
+          D="${{ github.event.inputs.description }}"
+          case "$P" in
+            v33_hormozi)     python3 ffmpeg_pipeline_v33_hormozi.py "$R" "$S" "$D" ;;
+            v34_mrbeast)     python3 ffmpeg_pipeline_v34_mrbeast.py "$R" "$S" "$D" ;;
+            v35_quiz)        python3 ffmpeg_pipeline_v35_quiz.py "$R" "$S" "$D" ;;
+            v36_infographic) python3 ffmpeg_pipeline_v36_infographic.py "$R" "$S" "$D" ;;
+            v37_3dtext)      python3 ffmpeg_pipeline_v37_3dtext.py "$R" "$S" "$D" ;;
+            v38_reaction)    python3 ffmpeg_pipeline_v38_reaction.py "$R" "$S" "$D" ;;
+          esac
+      - name: Upload video
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-video-${{ github.event.inputs.pipeline }}
+          path: projects/daily/renders/*.mp4
+          retention-days: 7
