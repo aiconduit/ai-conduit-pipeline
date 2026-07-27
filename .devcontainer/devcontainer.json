@@ -1,0 +1,21 @@
+{
+  "name": "AI Conduit Pipeline",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {"version": "20"},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "forwardPorts": [8080],
+  "secrets": {
+    "DEEPSEEK_KEY": {},
+    "GROQ_API_KEY": {},
+    "GOOGLE_TTS_KEY": {},
+    "PEXELS_API_KEY": {},
+    "YOUTUBE_REFRESH_TOKEN": {},
+    "X_API_KEY": {},
+    "X_API_SECRET": {},
+    "X_ACCESS_TOKEN": {},
+    "X_ACCESS_SECRET": {}
+  }
+}
