@@ -1,0 +1,23 @@
+{
+  "generated_at": "2026-07-27T14:03:19.178832+00:00",
+  "timestamp": "2026-07-27T14:03:19.178832+00:00",
+  "source": "github_trending_daily",
+  "topic": "n8nで実現するノーコードAIワークフロー自動化",
+  "repo_name": "n8n-io/n8n",
+  "hook": "毎日のルーティン作業、AIに任せたいと思いませんか？",
+  "script": "毎日のルーティン作業、AIに任せたいと思いませんか？今日紹介するのはn8n。ノーコードでAIワークフローを自動化できるオープンソースツールです。Slackでメッセージが来たら自動でAIが返信、データ収集からレポート生成まで一貫して自動化。AI Conduitのように、あなたも開発者向け自動化ツールを活用して作業効率を劇的に向上させましょう。n8nなら複雑な連携もビジュアルエディタで簡単設定。セルフホストも可能でセキュリティ面も安心。ぜひ今日から試してみてください。",
+  "hashtags": [
+    "#AI",
+    "#自動化",
+    "#n8n",
+    "#ノーコード",
+    "#ワークフロー",
+    "#効率化",
+    "#開発者ツール"
+  ],
+  "output_file": "v1imp_n8n-io_n8n.mp4",
+  "output_path": "/Users/jimmiehayakawa/Desktop/AIRDROP_conduit_set/github_research/OpenMontage/projects/daily/renders/v1imp_n8n-io_n8n.mp4",
+  "duration_seconds": 45.6,
+  "pipeline": "ffmpeg_pipeline_v1_improved",
+  "scenes_count": 8
+}

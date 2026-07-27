@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-07-27T13:23:48.476462+00:00",
+  "collected_at": "2026-07-27T14:03:07.317093+00:00",
   "since": "1-day",
   "total_fetched": 50,
   "relevant_count": 32,
@@ -26,12 +26,12 @@
         "react",
         "teachers"
       ],
-      "stars": 452943,
-      "forks": 45701,
-      "today_stars": 452943,
+      "stars": 452949,
+      "forks": 45700,
+      "today_stars": 452949,
       "owner": "freeCodeCamp",
       "created_at": "2014-12-24T17:49:19Z",
-      "updated_at": "2026-07-27T13:05:54Z"
+      "updated_at": "2026-07-27T14:02:31Z"
     },
     {
       "name": "openclaw/openclaw",
@@ -47,12 +47,12 @@
         "own-your-data",
         "personal"
       ],
-      "stars": 384302,
-      "forks": 80739,
-      "today_stars": 384302,
+      "stars": 384307,
+      "forks": 80741,
+      "today_stars": 384307,
       "owner": "openclaw",
       "created_at": "2025-11-24T10:16:47Z",
-      "updated_at": "2026-07-27T13:23:46Z"
+      "updated_at": "2026-07-27T14:02:38Z"
     },
     {
       "name": "practical-tutorials/project-based-learning",
@@ -69,12 +69,12 @@
         "tutorial",
         "webdevelopment"
       ],
-      "stars": 275425,
+      "stars": 275435,
       "forks": 35483,
-      "today_stars": 275425,
+      "today_stars": 275435,
       "owner": "practical-tutorials",
       "created_at": "2017-04-12T05:07:46Z",
-      "updated_at": "2026-07-27T13:15:34Z"
+      "updated_at": "2026-07-27T14:00:47Z"
     },
     {
       "name": "affaan-m/ECC",
@@ -91,12 +91,12 @@
         "mcp",
         "productivity"
       ],
-      "stars": 233881,
-      "forks": 35655,
-      "today_stars": 233881,
+      "stars": 233898,
+      "forks": 35656,
+      "today_stars": 233898,
       "owner": "affaan-m",
       "created_at": "2026-01-18T00:51:51Z",
-      "updated_at": "2026-07-27T13:21:35Z"
+      "updated_at": "2026-07-27T14:02:22Z"
     },
     {
       "name": "NousResearch/hermes-agent",
@@ -121,12 +121,12 @@
         "openai",
         "openclaw"
       ],
-      "stars": 221228,
-      "forks": 42228,
-      "today_stars": 221228,
+      "stars": 221244,
+      "forks": 42231,
+      "today_stars": 221244,
       "owner": "NousResearch",
       "created_at": "2025-07-22T22:22:28Z",
-      "updated_at": "2026-07-27T13:19:03Z"
+      "updated_at": "2026-07-27T13:59:42Z"
     },
     {
       "name": "n8n-io/n8n",
@@ -155,12 +155,12 @@
         "workflow",
         "workflow-automation"
       ],
-      "stars": 198205,
-      "forks": 59658,
-      "today_stars": 198205,
+      "stars": 198212,
+      "forks": 59660,
+      "today_stars": 198212,
       "owner": "n8n-io",
       "created_at": "2019-06-22T09:24:21Z",
-      "updated_at": "2026-07-27T13:21:20Z"
+      "updated_at": "2026-07-27T14:02:22Z"
     },
     {
       "name": "tensorflow/tensorflow",
@@ -177,12 +177,25 @@
         "python",
         "tensorflow"
       ],
-      "stars": 196565,
-      "forks": 75606,
-      "today_stars": 196565,
+      "stars": 196568,
+      "forks": 75605,
+      "today_stars": 196568,
       "owner": "tensorflow",
       "created_at": "2015-11-07T01:19:20Z",
-      "updated_at": "2026-07-27T13:21:07Z"
+      "updated_at": "2026-07-27T13:34:33Z"
+    },
+    {
+      "name": "mattpocock/skills",
+      "url": "https://github.com/mattpocock/skills",
+      "description": "Skills for Real Engineers. Straight from my .agents directory.",
+      "language": "Shell",
+      "topics": [],
+      "stars": 190901,
+      "forks": 16402,
+      "today_stars": 190901,
+      "owner": "mattpocock",
+      "created_at": "2026-02-03T11:15:53Z",
+      "updated_at": "2026-07-27T14:02:58Z"
     },
     {
       "name": "anomalyco/opencode",
@@ -190,12 +203,12 @@
       "description": "The open source coding agent.",
       "language": "TypeScript",
       "topics": [],
-      "stars": 190139,
-      "forks": 24118,
-      "today_stars": 190139,
+      "stars": 190149,
+      "forks": 24122,
+      "today_stars": 190149,
       "owner": "anomalyco",
       "created_at": "2025-04-30T20:08:00Z",
-      "updated_at": "2026-07-27T13:20:25Z"
+      "updated_at": "2026-07-27T13:57:31Z"
     },
     {
       "name": "ohmyzsh/ohmyzsh",
@@ -219,12 +232,12 @@
         "zsh",
         "zsh-configuration"
       ],
-      "stars": 188859,
+      "stars": 188858,
       "forks": 26490,
-      "today_stars": 188859,
+      "today_stars": 188858,
       "owner": "ohmyzsh",
       "created_at": "2009-08-28T18:15:37Z",
-      "updated_at": "2026-07-27T12:27:01Z"
+      "updated_at": "2026-07-27T14:02:23Z"
     },
     {
       "name": "Significant-Gravitas/AutoGPT",
@@ -249,7 +262,7 @@
       "today_stars": 185709,
       "owner": "Significant-Gravitas",
       "created_at": "2023-03-16T09:21:07Z",
-      "updated_at": "2026-07-27T12:57:54Z"
+      "updated_at": "2026-07-27T13:58:24Z"
     },
     {
       "name": "ollama/ollama",
@@ -273,12 +286,12 @@
         "ollama",
         "qwen"
       ],
-      "stars": 176986,
+      "stars": 176989,
       "forks": 17132,
-      "today_stars": 176986,
+      "today_stars": 176989,
       "owner": "ollama",
       "created_at": "2023-06-26T19:39:32Z",
-      "updated_at": "2026-07-27T13:14:16Z"
+      "updated_at": "2026-07-27T14:00:43Z"
     },
     {
       "name": "f/prompts.chat",
@@ -305,12 +318,12 @@
         "prompts-chat",
         "typescript"
       ],
-      "stars": 166422,
-      "forks": 21500,
-      "today_stars": 166422,
+      "stars": 166423,
+      "forks": 21499,
+      "today_stars": 166423,
       "owner": "f",
       "created_at": "2022-12-05T13:54:13Z",
-      "updated_at": "2026-07-27T13:15:10Z"
+      "updated_at": "2026-07-27T13:46:08Z"
     },
     {
       "name": "huggingface/transformers",
@@ -339,7 +352,7 @@
         "vlm"
       ],
       "stars": 163034,
-      "forks": 34039,
+      "forks": 34040,
       "today_stars": 163034,
       "owner": "huggingface",
       "created_at": "2018-10-29T13:56:00Z",
@@ -365,12 +378,12 @@
         "springai",
         "system-design"
       ],
-      "stars": 157334,
+      "stars": 157337,
       "forks": 46180,
-      "today_stars": 157334,
+      "today_stars": 157337,
       "owner": "Snailclimb",
       "created_at": "2018-05-07T13:27:00Z",
-      "updated_at": "2026-07-27T13:21:49Z"
+      "updated_at": "2026-07-27T13:47:24Z"
     },
     {
       "name": "firecrawl/firecrawl",
@@ -398,12 +411,12 @@
         "web-search",
         "webscraping"
       ],
-      "stars": 156814,
-      "forks": 8918,
-      "today_stars": 156814,
+      "stars": 156833,
+      "forks": 8917,
+      "today_stars": 156833,
       "owner": "firecrawl",
       "created_at": "2024-04-15T21:02:29Z",
-      "updated_at": "2026-07-27T13:23:40Z"
+      "updated_at": "2026-07-27T14:03:04Z"
     },
     {
       "name": "langflow-ai/langflow",
@@ -418,12 +431,12 @@
         "multiagent",
         "react-flow"
       ],
-      "stars": 152480,
-      "forks": 9667,
-      "today_stars": 152480,
+      "stars": 152481,
+      "forks": 9668,
+      "today_stars": 152481,
       "owner": "langflow-ai",
       "created_at": "2023-02-08T22:28:03Z",
-      "updated_at": "2026-07-27T13:12:18Z"
+      "updated_at": "2026-07-27T14:03:02Z"
     },
     {
       "name": "langgenius/dify",
@@ -452,12 +465,12 @@
         "skills",
         "workflow"
       ],
-      "stars": 150419,
-      "forks": 23698,
-      "today_stars": 150419,
+      "stars": 150424,
+      "forks": 23699,
+      "today_stars": 150424,
       "owner": "langgenius",
       "created_at": "2023-04-12T07:40:24Z",
-      "updated_at": "2026-07-27T13:21:39Z"
+      "updated_at": "2026-07-27T13:50:00Z"
     },
     {
       "name": "open-webui/open-webui",
@@ -481,12 +494,12 @@
         "ui",
         "webui"
       ],
-      "stars": 146909,
-      "forks": 21349,
-      "today_stars": 146909,
+      "stars": 146913,
+      "forks": 21348,
+      "today_stars": 146913,
       "owner": "open-webui",
       "created_at": "2023-10-06T22:08:27Z",
-      "updated_at": "2026-07-27T13:14:41Z"
+      "updated_at": "2026-07-27T13:56:32Z"
     },
     {
       "name": "langchain-ai/langchain",
@@ -515,38 +528,12 @@
         "rag",
         "typescript"
       ],
-      "stars": 142680,
-      "forks": 23753,
-      "today_stars": 142680,
+      "stars": 142687,
+      "forks": 23754,
+      "today_stars": 142687,
       "owner": "langchain-ai",
       "created_at": "2022-10-17T02:58:36Z",
-      "updated_at": "2026-07-27T13:07:56Z"
-    },
-    {
-      "name": "microsoft/PowerToys",
-      "url": "https://github.com/microsoft/PowerToys",
-      "description": "Microsoft PowerToys is a collection of utilities that supercharge productivity and customization on Windows",
-      "language": "C",
-      "topics": [
-        "advanced-paste",
-        "color-picker",
-        "command-palette",
-        "desktop",
-        "fancyzones",
-        "keyboard-manager",
-        "microsoft-powertoys",
-        "powerrename",
-        "powertoys",
-        "windows",
-        "windows-10",
-        "windows-11"
-      ],
-      "stars": 136809,
-      "forks": 8332,
-      "today_stars": 136809,
-      "owner": "microsoft",
-      "created_at": "2019-05-01T17:44:02Z",
-      "updated_at": "2026-07-27T12:49:16Z"
+      "updated_at": "2026-07-27T14:00:35Z"
     }
   ]
 }

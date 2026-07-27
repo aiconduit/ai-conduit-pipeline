@@ -1,73 +1,84 @@
 {
-  "generated_at": "2026-07-27T13:24:07.261333+00:00",
+  "generated_at": "2026-07-27T14:03:19.178832+00:00",
   "source": "github_trending_daily",
   "total_plans": 3,
   "plans": [
     {
-      "topic": "ワークフロー自動化ツールn8n",
+      "topic": "n8nで実現するノーコードAIワークフロー自動化",
       "repo_name": "n8n-io/n8n",
-      "reason": "AI Conduitの「自動化」価値提案と完全に合致し、ノーコードでAIワークフローを構築できる点が日本の開発者に刺さる",
-      "hook": "コード一切不要でAIワークフローを自動化？",
-      "script_60s": "今日紹介するのはn8n、ノーコードで使えるワークフロー自動化プラットフォームです。AI機能を内蔵し、直感的なビジュアルエディタで複雑な処理を構築できます。例えば、GitHubのプルリクエストを自動でレビューしたり、Slackに通知を送るといった作業を、ドラッグ＆ドロップだけで実現。セルフホストも可能で、データは完全に自社管理。AI Conduitのように、日々のルーティンワークを自動化し、効率を劇的に向上させたい開発者に最適です。無料で始められるので、ぜひ試してみてください。",
+      "reason": "AI Conduitと同様に自動化・効率化を提供するツールであり、開発者に刺さるノーコードAIの話題だから。",
+      "hook": "毎日のルーティン作業、AIに任せたいと思いませんか？",
+      "script_60s": "毎日のルーティン作業、AIに任せたいと思いませんか？今日紹介するのはn8n。ノーコードでAIワークフローを自動化できるオープンソースツールです。Slackでメッセージが来たら自動でAIが返信、データ収集からレポート生成まで一貫して自動化。AI Conduitのように、あなたも開発者向け自動化ツールを活用して作業効率を劇的に向上させましょう。n8nなら複雑な連携もビジュアルエディタで簡単設定。セルフホストも可能でセキュリティ面も安心。ぜひ今日から試してみてください。",
       "hashtags": [
+        "#AI",
         "#自動化",
         "#n8n",
         "#ノーコード",
-        "#AIワークフロー",
-        "#効率化"
-      ],
-      "tags": [
-        "automation",
-        "n8n",
-        "nocode",
-        "ai-workflow",
-        "productivity"
-      ],
-      "target_audience": "ワークフロー自動化に興味がある日本の開発者やITエンジニア"
-    },
-    {
-      "topic": "個人用AIアシスタントOpenClaw",
-      "repo_name": "openclaw/openclaw",
-      "reason": "AI Conduitの「AIによる自動化」テーマに直結し、個人用AIアシスタントという身近なユースケースで視聴者の興味を引きやすい",
-      "hook": "あなた専用のAIアシスタントを無料で？",
-      "script_60s": "OpenClawは、どんなOSでも動く個人用AIアシスタントです。チャット、タスク管理、スケジュール調整まで、あなたの日常をサポート。クロスプラットフォーム対応で、WindowsでもMacでもLinuxでも使えます。オープンソースなので、自分好みにカスタマイズ可能。AI ConduitがSNS投稿を自動化するように、OpenClawはあなたのデジタルライフを自動化します。開発者にとって、毎日のルーティンを効率化する強力なツールです。GitHubで無料公開中。",
-      "hashtags": [
-        "#AI",
-        "#アシスタント",
-        "#オープンソース",
-        "#自動化",
-        "#生産性向上"
-      ],
-      "tags": [
-        "ai",
-        "assistant",
-        "opensource",
-        "automation",
-        "productivity"
-      ],
-      "target_audience": "AIアシスタントに興味がある日本の開発者やパワーユーザー"
-    },
-    {
-      "topic": "FirecrawlでWebスクレイピング自動化",
-      "repo_name": "firecrawl/firecrawl",
-      "reason": "Webデータ収集の自動化はAI Conduitの価値提案と親和性が高く、データ収集に悩む日本の開発者に具体的な解決策を提示できる",
-      "hook": "Webスクレイピング、もっと簡単にできたら？",
-      "script_60s": "Firecrawlは、Webページの検索、スクレイピング、データ取得をAPI一つで自動化するツールです。従来のスクレイピングと違い、JavaScriptレンダリングにも対応し、動的コンテンツも取得可能。大規模なデータ収集もスケールし、AIモデルのトレーニングデータ取得にも最適。AI Conduitがトレンド情報を自動収集するように、FirecrawlであなたもWeb上のデータを効率的に集められます。オープンソースでセルフホストも可能。開発者のデータ収集作業を劇的に効率化します。",
-      "hashtags": [
-        "#Webスクレイピング",
-        "#自動化",
-        "#API",
-        "#データ収集",
+        "#ワークフロー",
+        "#効率化",
         "#開発者ツール"
       ],
       "tags": [
-        "webscraping",
+        "ai",
         "automation",
-        "api",
-        "datacollection",
-        "devtools"
+        "n8n",
+        "nocode",
+        "workflow",
+        "productivity",
+        "developer-tools"
       ],
-      "target_audience": "データ収集やWebスクレイピングを効率化したい日本の開発者"
+      "target_audience": "自動化に興味がある日本の開発者・エンジニア"
+    },
+    {
+      "topic": "AutoGPTで始める完全自律型AIエージェント",
+      "repo_name": "Significant-Gravitas/AutoGPT",
+      "reason": "自律型AIエージェントはAI自動化の最先端であり、AI Conduitの価値提案と直結するから。",
+      "hook": "AIが自分で考えて動く未来、もう始まっています。",
+      "script_60s": "AIが自分で考えて動く未来、もう始まっています。AutoGPTは与えられた目標を自律的に達成するAIエージェント。例えば「来月のマーケティング戦略を立案して」と指示するだけで、リサーチから資料作成まで自動実行。AI ConduitがGitHubトレンドから動画を自動生成するように、AutoGPTも人間の介入なしにタスクを完遂します。開発者の皆さん、この自律型エージェントを使えばあなたの生産性は格段に向上。ぜひ試して、自動化の可能性を体感してください。",
+      "hashtags": [
+        "#AI",
+        "#AutoGPT",
+        "#自律型AI",
+        "#自動化",
+        "#エージェント",
+        "#開発者",
+        "#効率化"
+      ],
+      "tags": [
+        "ai",
+        "autogpt",
+        "autonomous-agents",
+        "automation",
+        "productivity",
+        "developer"
+      ],
+      "target_audience": "AIエージェントに興味がある日本の開発者・テクノロジー愛好家"
+    },
+    {
+      "topic": "OllamaでローカルLLMを簡単実行",
+      "repo_name": "ollama/ollama",
+      "reason": "ローカルAI実行は開発者に人気のトレンドで、AI Conduitの自動化基盤としても活用可能だから。",
+      "hook": "クラウドに頼らない、あなただけのAIが手に入ります。",
+      "script_60s": "クラウドに頼らない、あなただけのAIが手に入ります。Ollamaを使えば、ローカル環境でLLMを簡単に実行可能。DeepSeekやGemmaなど最新モデルをワンコマンドでダウンロード、チャットやAPIとして利用できます。AI Conduitがコンテンツ生成を自動化するように、Ollamaはあなたの開発環境にAI機能をシームレスに統合。データが外部に漏れる心配もなく、コストも抑えられます。開発者の皆さん、ぜひOllamaでローカルAIの世界を体験してみてください。",
+      "hashtags": [
+        "#AI",
+        "#Ollama",
+        "#ローカルLLM",
+        "#LLM",
+        "#開発者",
+        "#オープンソース",
+        "#効率化"
+      ],
+      "tags": [
+        "ai",
+        "ollama",
+        "local-llm",
+        "llm",
+        "developer",
+        "open-source",
+        "productivity"
+      ],
+      "target_audience": "ローカルAI実行に興味がある日本の開発者・AIエンジニア"
     }
   ]
 }

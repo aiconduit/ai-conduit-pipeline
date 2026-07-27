@@ -216,30 +216,33 @@ def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
 
 def pixabay_search_music(query="upbeat background", min_dur=30):
     """Pixabayからフリーミュージックをスクレイピング（APIキー不要）"""
-    import urllib.request
-    slug = re.sub(r"\s+", "-", query.strip().lower())
-    search_url = f"https://pixabay.com/music/search/{urllib.parse.quote(slug, safe='-')}/"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    }
-    req = urllib.request.Request(search_url, headers=headers)
-    with urllib.request.urlopen(req, timeout=15) as resp:
-        html = resp.read().decode("utf-8", errors="replace")
-    match = re.search(r'window\.__BOOTSTRAP_URL__\s*=\s*["\']([^"\']+)["\']', html)
-    if not match:
+    try:
+        import urllib.request
+        slug = re.sub(r"\s+", "-", query.strip().lower())
+        search_url = f"https://pixabay.com/music/search/{urllib.parse.quote(slug, safe='-')}/"
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        }
+        req = urllib.request.Request(search_url, headers=headers)
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            html = resp.read().decode("utf-8", errors="replace")
+        match = re.search(r'window\.__BOOTSTRAP_URL__\s*=\s*["\']([^"\']+)["\']', html)
+        if not match:
+            return []
+        bootstrap_url = f"https://pixabay.com{match.group(1)}"
+        req2 = urllib.request.Request(bootstrap_url, headers={**headers, "Referer": search_url})
+        with urllib.request.urlopen(req2, timeout=15) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+        tracks = []
+        for item in data.get("page", {}).get("results", []):
+            src = item.get("sources", {}).get("src")
+            dur = item.get("duration")
+            if src and dur and dur >= min_dur:
+                tracks.append({"url": src, "duration": dur, "title": item.get("name", "Unknown")})
+        return tracks
+    except Exception:
         return []
-    bootstrap_url = f"https://pixabay.com{match.group(1)}"
-    req2 = urllib.request.Request(bootstrap_url, headers={**headers, "Referer": search_url})
-    with urllib.request.urlopen(req2, timeout=15) as resp:
-        data = json.loads(resp.read().decode("utf-8"))
-    tracks = []
-    for item in data.get("page", {}).get("results", []):
-        src = item.get("sources", {}).get("src")
-        dur = item.get("duration")
-        if src and dur and dur >= min_dur:
-            tracks.append({"url": src, "duration": dur, "title": item.get("name", "Unknown")})
-    return tracks
 
 def freesound_search_music(query="upbeat", min_dur=30):
     """FreeSound APIフォールバック（APIキー必須だが安定）"""
