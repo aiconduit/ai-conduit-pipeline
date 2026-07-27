@@ -1,0 +1,315 @@
+#!/usr/bin/env python3
+"""
+AI Conduit Core Framework v2.0
+- DeepSeek API対応スクリプト生成
+- Cinema Directorスタイルのシネマティックプロンプト
+- BGM追加（Pexels Audio / 内蔵フォールバック）
+- パターンインタラプト（5-10秒ごとに視覚変化）
+- ループ構造（最後→最初）
+- Hook-Value-CTAフレームワーク強制
+"""
+import os, requests, random, re, subprocess, json
+from pathlib import Path
+
+# === API設定 ===
+DEEPSEEK_KEY = os.environ.get("DEEPSEEK_KEY", "sk-71eab12699f047a5891e62268c66c241")
+GROQ_KEY = os.environ.get("GROQ_API_KEY", "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")
+GOOGLE_TTS_KEY = os.environ.get("GOOGLE_TTS_KEY", "AIzaSyCsrOd3cgi9hcnoOeFXRde9prLAy6Y2vdY")
+PEXELS_KEY = os.environ.get("PEXELS_API_KEY", "LSsE8rcX23VNaFN0M0F19PCMtoLhEyg1NxZpIqwr7aCuvUYInctIexrW")
+
+# === Cinema Director スタイル定義 ===
+CINEMATIC_STYLES = {
+    "heroic_reveal": {
+        "shot": "Low Angle Wide Shot",
+        "movement": "Crane Up with Orbit",
+        "lighting": "Rim Lighting High Contrast Golden Hour",
+        "suffix": "cinematic lighting, dramatic atmosphere, 4K, photorealistic, film grain",
+    },
+    "tense_uneasy": {
+        "shot": "Dutch Angle Close-Up",
+        "movement": "Handheld Shake Push In",
+        "lighting": "Low Key Harsh Shadows Chiaroscuro",
+        "suffix": "dark cinematic tone, high contrast, photorealistic, dramatic chiaroscuro",
+    },
+    "majestic_epic": {
+        "shot": "Extreme Wide Shot Drone",
+        "movement": "Drone Flyover Dolly Out",
+        "lighting": "Golden Hour Volumetric God Rays",
+        "suffix": "epic cinematic shot, hyper-realistic, dramatic shadows, professional photography",
+    },
+    "introspective": {
+        "shot": "Medium Close-Up Profile",
+        "movement": "Slow Push In Rack Focus",
+        "lighting": "Soft Rembrandt Window Light",
+        "suffix": "cinematic, moody lighting, ultra detailed, photorealistic, shallow depth of field",
+    },
+    "cyberpunk_neon": {
+        "shot": "Wide Shot with Foreground",
+        "movement": "Truck Left Pedestal Up",
+        "lighting": "Neon Cyberpunk Rim Lighting Teal Orange Grade",
+        "suffix": "neon-lit cinematic, cyberpunk atmosphere, ultra detailed, photorealistic",
+    },
+    "documentary": {
+        "shot": "Medium Shot Shoulder Level",
+        "movement": "Slow Dolly In Handheld",
+        "lighting": "Natural Overcast Soft Box",
+        "suffix": "documentary style, natural lighting, photorealistic, film grain",
+    },
+}
+
+CINEMATIC_SUFFIXES = [
+    "cinematic lighting, dramatic atmosphere, 4K, photorealistic, film grain",
+    "cinematic, moody lighting, ultra detailed, photorealistic, shallow depth of field",
+    "dramatic lighting, volumetric fog, photorealistic, cinematic composition, 4K",
+    "epic cinematic shot, hyper-realistic, dramatic shadows, professional photography",
+    "neon-lit cinematic, cyberpunk atmosphere, ultra detailed, photorealistic",
+    "atmospheric fog, cinematic color grading, photorealistic, wide angle lens",
+    "dark cinematic tone, high contrast, photorealistic, dramatic chiaroscuro",
+]
+
+# === Hook-Value-CTAフレームワーク ===
+HOOK_TEMPLATES = [
+    "「{topic}」を知らないエンジニアは損している",
+    "え、{topic}って無料なの？",
+    "深夜2時に見つけた{topic}がヤバすぎた",
+    "100社落ちたタクが{topic}で逆転した話",
+    "GitHubで今一番バズってる{topic}を解説する",
+    "誰も教えてくれない{topic}の真実",
+    "これを知った日、就活が変わった",
+    "{topic}を3分で理解する",
+    "AIエンジニアが全員使ってる{topic}とは",
+    "信じられない、{topic}が無料だと？",
+]
+
+PATTERN_INTERRUPTS = [
+    "zoom_punch",    # ズームイン + パンチ効果
+    "color_flash",   # 色フラッシュ
+    "text_pop",      # テキストポップアップ
+    "speed_ramp",    # 速度変化
+    "cut_zoom",      # カット + ズーム
+]
+
+def generate_script_deepseek(repo, stars, description, style="viral_hook", max_scenes=8):
+    """DeepSeek APIでスクリプト生成（Claude品質・低コスト）"""
+    print(f"[Script] DeepSeekでスクリプト生成中... (style={style})")
+    
+    hook = random.choice(HOOK_TEMPLATES).format(
+        topic=repo.split("/")[-1] if "/" in repo else repo
+    )
+    
+    cinematic = random.choice(list(CINEMATIC_STYLES.values()))
+    
+    system_prompt = """You are a viral short-form video script writer for Japanese AI/tech content.
+You specialize in Hook-Value-CTA framework and Cinema Director techniques.
+ALWAYS write in Japanese. ALWAYS output valid JSON only."""
+
+    user_prompt = f"""Write a {max_scenes}-scene viral Japanese short video script about: {repo} ({stars}★) - {description}
+
+VIRAL FRAMEWORK (MUST FOLLOW):
+- Scene 1 (Hook, 0-3s): "{hook}" - STOP SCROLL IMMEDIATELY
+- Scene 2-3 (Pattern Interrupt): Unexpected twist or surprising fact
+- Scene 4-6 (Value): Core information, build curiosity
+- Scene 7 (Secondary Hook): New info to keep watching
+- Scene 8 (CTA): Follow + Share prompt
+
+CINEMA DIRECTOR STYLE:
+- Shot type: {cinematic['shot']}
+- Camera: {cinematic['movement']}
+- Lighting: {cinematic['lighting']}
+
+RULES:
+- "narration": 15-30 chars PUNCHY Japanese. Active voice. Short sentences.
+- "caption": 4-8 chars keyword
+- "visual_prompt": English cinematic Pexels search + "{cinematic['suffix']}"
+- "interrupt": one of [zoom_punch, color_flash, text_pop, speed_ramp, cut_zoom, none]
+- "mood": hook/interrupt/value/secondary_hook/cta
+- FIRST SCENE must have large text visible in first frame
+
+Output ONLY JSON array:
+[
+  {{"id":1,"narration":"聞いてくれ、これヤバい","caption":"衝撃","visual_prompt":"dark dramatic cinematic {cinematic['suffix']}","interrupt":"zoom_punch","mood":"hook"}},
+  ...{max_scenes} scenes...
+]"""
+
+    try:
+        r = requests.post("https://api.deepseek.com/chat/completions",
+            headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
+            json={"model": "deepseek-chat", "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ], "max_tokens": 1500, "temperature": 0.8},
+            timeout=60)
+        resp = r.json()
+        if "choices" not in resp:
+            raise Exception(f"DeepSeek: {resp}")
+        text = resp["choices"][0]["message"]["content"].strip()
+        s=text.find("["); e=text.rfind("]")+1
+        if s>=0 and e>s: text=text[s:e]
+        scenes = json.loads(re.sub(r"[\x00-\x1f]","",text))
+        print(f"   ✅ {len(scenes)}シーン (DeepSeek)")
+        return scenes
+    except Exception as ex:
+        print(f"   ⚠️ DeepSeek失敗、Groqにフォールバック: {ex}")
+        return generate_script_groq(repo, stars, description, max_scenes)
+
+def generate_script_groq(repo, stars, description, max_scenes=8):
+    """Groq APIフォールバック"""
+    prompt = f"""Write {max_scenes} scenes for Japanese viral short video about {repo} ({stars}★) - {description}
+Hook first, value middle, CTA last.
+Output ONLY JSON: [{{"id":1,"narration":"日本語15-30文字","caption":"4-8文字","visual_prompt":"English cinematic search","interrupt":"zoom_punch","mood":"hook"}},...]"""
+    r = requests.post("https://api.groq.com/openai/v1/chat/completions",
+        headers={"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
+        json={"model": "llama-3.3-70b-versatile", "messages": [{"role":"user","content":prompt}], "max_tokens": 900})
+    resp = r.json()
+    if "choices" not in resp: raise Exception(f"Groq: {resp}")
+    text = resp["choices"][0]["message"]["content"].strip()
+    s=text.find("["); e=text.rfind("]")+1
+    if s>=0 and e>s: text=text[s:e]
+    return json.loads(re.sub(r"[\x00-\x1f]","",text))
+
+def tts_japanese(text, path, speed=1.05):
+    """Google Cloud TTS - Chirp3-HD-Charon"""
+    import base64
+    clean = re.sub(r"[\U0001F000-\U0001FAFF]","",text).strip()
+    r = requests.post(f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_TTS_KEY}",
+        json={"input":{"text":clean},
+              "voice":{"languageCode":"ja-JP","name":"ja-JP-Chirp3-HD-Charon"},
+              "audioConfig":{"audioEncoding":"MP3","speakingRate":speed}})
+    if r.status_code == 200:
+        with open(path,"wb") as f: f.write(base64.b64decode(r.json()["audioContent"]))
+    else:
+        raise Exception(f"TTS error: {r.json()}")
+
+def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
+    """シネマティックB-roll取得（Pexels）"""
+    if cache_dir is None:
+        cache_dir = Path("/tmp/pexels_cache")
+    Path(cache_dir).mkdir(parents=True, exist_ok=True)
+    
+    # シネマティックサフィックス追加
+    cinematic_query = f"{query} cinematic"
+    headers = {"Authorization": PEXELS_KEY}
+    try:
+        r = requests.get("https://api.pexels.com/videos/search", headers=headers,
+            params={"query": cinematic_query, "per_page": 10, "orientation": orientation}, timeout=15)
+        if r.status_code != 200: return None
+        videos = [v for v in r.json().get("videos", []) if v.get("duration", 0) >= 4]
+        if not videos:
+            # フォールバック: シネマティックなし
+            r2 = requests.get("https://api.pexels.com/videos/search", headers=headers,
+                params={"query": query, "per_page": 10, "orientation": orientation}, timeout=15)
+            videos = r2.json().get("videos", []) if r2.status_code == 200 else []
+        if not videos: return None
+        v = random.choice(videos[:5])
+        files = sorted([f for f in v["video_files"] if 360 <= f.get("width", 0) <= 1080], key=lambda x: x["width"])
+        url = files[-1]["link"] if files else v["video_files"][0]["link"]
+        safe = re.sub(r"[^\w]","_",query)[:25]
+        fpath = Path(cache_dir) / f"{safe}_{v['id']}.mp4"
+        if not fpath.exists():
+            resp = requests.get(url, stream=True, timeout=30)
+            with open(fpath, "wb") as f:
+                for chunk in resp.iter_content(8192): f.write(chunk)
+        return str(fpath)
+    except Exception as e:
+        print(f"   Pexels取得失敗: {e}")
+        return None
+
+def get_bgm_url():
+    """BGM取得 - Pixabayフリー音楽"""
+    # フリーBGMのURL候補（ループ対応）
+    bgm_urls = [
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+    ]
+    return random.choice(bgm_urls)
+
+def download_bgm(work_dir):
+    """BGMダウンロード"""
+    bgm_path = Path(work_dir) / "bgm.mp3"
+    if bgm_path.exists(): return str(bgm_path)
+    try:
+        url = get_bgm_url()
+        r = requests.get(url, timeout=30, stream=True)
+        if r.status_code == 200:
+            with open(bgm_path, "wb") as f:
+                for chunk in r.iter_content(8192): f.write(chunk)
+            return str(bgm_path)
+    except Exception as e:
+        print(f"   BGMダウンロード失敗: {e}")
+    return None
+
+def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
+    """パターンインタラプトエフェクト適用"""
+    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
+    
+    if interrupt_type == "zoom_punch":
+        # ズームパンチ: 急速ズームイン
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-vf", f"zoompan=z='if(lte(on,15),1.0+on/15*0.15,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+    elif interrupt_type == "color_flash":
+        # カラーフラッシュ: 白フラッシュ
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-vf", f"fade=t=in:st=0:d=0.1:color=white,fade=t=out:st={max(dur-0.3,0)}:d=0.3",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+    elif interrupt_type == "cut_zoom":
+        # カットズーム: 急速スケールアップ
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-vf", "scale=1188:2112,crop=1080:1920:54:96",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+    elif interrupt_type == "speed_ramp":
+        # スピードランプ: 最初0.7xで入り1.0xに
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-vf", "setpts=0.85*PTS",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+    else:
+        # なし: そのままコピー
+        import shutil
+        shutil.copy(bg_path, out_path)
+
+def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08):
+    """BGMをミックス（voice 85% + music 8%）"""
+    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
+    dur_result = subprocess.run(
+        ["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",video_path],
+        capture_output=True, text=True)
+    dur = float(dur_result.stdout.strip())
+    
+    _run(["ffmpeg", "-y",
+          "-i", video_path,
+          "-stream_loop", "-1", "-i", bgm_path,
+          "-filter_complex",
+          f"[0:a]volume={voice_vol}[voice];[1:a]volume={music_vol}[music];[voice][music]amix=inputs=2:duration=first[out]",
+          "-map", "0:v", "-map", "[out]",
+          "-t", str(dur),
+          "-c:v", "copy", "-c:a", "aac",
+          out_path])
+
+def add_loop_ending(concat_file, first_scene_path, output_path):
+    """ループ構造: 最後に最初のシーンを0.5秒追加してループ感を出す"""
+    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
+    loop_clip = output_path.replace(".mp4", "_loop_clip.mp4")
+    _run(["ffmpeg", "-y", "-i", first_scene_path, "-t", "0.8",
+          "-vf", "fade=t=out:st=0.5:d=0.3",
+          "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", loop_clip])
+    return loop_clip
+
+def probe_dur(f):
+    r = subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',f],
+                      capture_output=True, text=True)
+    return float(r.stdout.strip())
+
+# === 設定をGitHubにプッシュ ===
+if __name__ == "__main__":
+    print("AI Conduit Core Framework v2.0")
+    print(f"DeepSeek API: {'✅ 設定済み' if DEEPSEEK_KEY else '❌ 未設定'}")
+    print(f"Google TTS: {'✅ 設定済み' if GOOGLE_TTS_KEY else '❌ 未設定'}")
+    print(f"Pexels: {'✅ 設定済み' if PEXELS_KEY else '❌ 未設定'}")
+    
+    # DeepSeekテスト
+    print("\nDeepSeekテスト中...")
+    scenes = generate_script_deepseek("MadsLorentzen/ai-job-search", "17500", "Claude Codeで就活自動化", max_scenes=3)
+    print(f"生成シーン数: {len(scenes)}")
+    for s in scenes:
+        print(f"  [{s['mood']}] {s['narration']}")
