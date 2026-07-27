@@ -8,7 +8,7 @@ AI Conduit Core Framework v2.0
 - ループ構造（最後→最初）
 - Hook-Value-CTAフレームワーク強制
 """
-import os, requests, random, re, subprocess, json
+import os, requests, random, re, subprocess, json, urllib.parse
 from pathlib import Path
 
 # === API設定 ===
@@ -214,26 +214,81 @@ def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
         print(f"   Pexels取得失敗: {e}")
         return None
 
-def get_bgm_url():
-    """BGM取得 - Pixabayフリー音楽"""
-    # フリーBGMのURL候補（ループ対応）
-    bgm_urls = [
-        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-        "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
-    ]
-    return random.choice(bgm_urls)
+def pixabay_search_music(query="upbeat background", min_dur=30):
+    """Pixabayからフリーミュージックをスクレイピング（APIキー不要）"""
+    import urllib.request
+    slug = re.sub(r"\s+", "-", query.strip().lower())
+    search_url = f"https://pixabay.com/music/search/{urllib.parse.quote(slug, safe='-')}/"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    }
+    req = urllib.request.Request(search_url, headers=headers)
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        html = resp.read().decode("utf-8", errors="replace")
+    match = re.search(r'window\.__BOOTSTRAP_URL__\s*=\s*["\']([^"\']+)["\']', html)
+    if not match:
+        return []
+    bootstrap_url = f"https://pixabay.com{match.group(1)}"
+    req2 = urllib.request.Request(bootstrap_url, headers={**headers, "Referer": search_url})
+    with urllib.request.urlopen(req2, timeout=15) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    tracks = []
+    for item in data.get("page", {}).get("results", []):
+        src = item.get("sources", {}).get("src")
+        dur = item.get("duration")
+        if src and dur and dur >= min_dur:
+            tracks.append({"url": src, "duration": dur, "title": item.get("name", "Unknown")})
+    return tracks
+
+def freesound_search_music(query="upbeat", min_dur=30):
+    """FreeSound APIフォールバック（APIキー必須だが安定）"""
+    fs_key = os.environ.get("FREESOUND_API_KEY", "")
+    if not fs_key:
+        return []
+    try:
+        r = requests.get("https://freesound.org/apiv2/search/text/", params={
+            "query": query, "filter": f"duration:[{min_dur} TO *]", "fields": "id,name,duration,previews",
+            "token": fs_key
+        }, timeout=15)
+        if r.status_code != 200:
+            return []
+        results = r.json().get("results", [])
+        return [{"url": t["previews"]["preview-hq-mp3"], "duration": t.get("duration", 60), "title": t.get("name", "Unknown")} for t in results if "previews" in t and "preview-hq-mp3" in t["previews"]]
+    except Exception:
+        return []
 
 def download_bgm(work_dir):
-    """BGMダウンロード"""
+    """BGMダウンロード（Pixabay→FreeSound→SoundHelixフォールバック連鎖）"""
     bgm_path = Path(work_dir) / "bgm.mp3"
-    if bgm_path.exists(): return str(bgm_path)
+    if bgm_path.exists():
+        return str(bgm_path)
+    bgm_url = None
+    for source_name, search_fn, query in [
+        ("Pixabay", pixabay_search_music, "upbeat corporate background"),
+        ("Pixabay(lo-fi)", pixabay_search_music, "lofi study background"),
+        ("Pixabay(ambient)", pixabay_search_music, "ambient cinematic background"),
+        ("FreeSound", freesound_search_music, "upbeat corporate"),
+    ]:
+        tracks = search_fn(query)
+        if tracks:
+            chosen = random.choice(tracks[:5])
+            bgm_url = chosen["url"]
+            print(f"   BGM: {source_name} → {chosen['title']} ({chosen['duration']}s)")
+            break
+    if not bgm_url:
+        bgm_url = random.choice([
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+            "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+        ])
+        print(f"   BGM: SoundHelix（最終フォールバック）")
     try:
-        url = get_bgm_url()
-        r = requests.get(url, timeout=30, stream=True)
+        r = requests.get(bgm_url, timeout=30, stream=True)
         if r.status_code == 200:
             with open(bgm_path, "wb") as f:
-                for chunk in r.iter_content(8192): f.write(chunk)
+                for chunk in r.iter_content(8192):
+                    f.write(chunk)
             return str(bgm_path)
     except Exception as e:
         print(f"   BGMダウンロード失敗: {e}")
