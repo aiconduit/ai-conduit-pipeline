@@ -1,0 +1,65 @@
+name: AI Conduit Daily Pipeline
+
+on:
+  schedule:
+    - cron: '0 21 * * *'
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'full/content/monitor/post'
+        required: false
+        default: 'full'
+
+env:
+  DEEPSEEK_KEY: ${{ secrets.DEEPSEEK_KEY }}
+  GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+  PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+  GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+  INSTAGRAM_ACCESS_TOKEN: ${{ secrets.INSTAGRAM_ACCESS_TOKEN }}
+  INSTAGRAM_BUSINESS_ID: ${{ secrets.INSTAGRAM_BUSINESS_ID }}
+  GIFT_LINK: ${{ secrets.GIFT_LINK }}
+  X_API_KEY: ${{ secrets.X_API_KEY }}
+  X_API_SECRET: ${{ secrets.X_API_SECRET }}
+  X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+  X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+  TIKTOK_ACCESS_TOKEN: ${{ secrets.TIKTOK_ACCESS_TOKEN }}
+  TIKTOK_OPEN_ID: ${{ secrets.TIKTOK_OPEN_ID }}
+  YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+  YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+  YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+
+jobs:
+  pipeline:
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '0 21 * * *' || github.event.inputs.mode == 'full' || github.event.inputs.mode == 'content' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Collect trending topics
+        run: python sns_automation/scripts/trending_collector.py
+      - name: Generate content plan
+        run: python sns_automation/scripts/content_planner.py
+      - name: Post to X
+        run: python sns_automation/scripts/x_auto_post.py
+      - name: Upload to TikTok
+        run: python sns_automation/scripts/tiktok_uploader.py
+      - name: Upload to YouTube
+        run: python sns_automation/scripts/youtube_uploader.py
+      - name: Distribute free gifts
+        run: python sns_automation/scripts/gift_manager.py
+
+  dm_monitor:
+    if: ${{ github.event_name == 'schedule' && github.event.schedule == '*/15 * * * *' || github.event.inputs.mode == 'monitor' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r requirements.txt
+      - name: Monitor Instagram DM
+        run: python sns_automation/scripts/instagram_dm_bot.py

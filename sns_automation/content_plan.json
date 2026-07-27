@@ -1,0 +1,73 @@
+{
+  "generated_at": "2026-07-27T13:24:07.261333+00:00",
+  "source": "github_trending_daily",
+  "total_plans": 3,
+  "plans": [
+    {
+      "topic": "ワークフロー自動化ツールn8n",
+      "repo_name": "n8n-io/n8n",
+      "reason": "AI Conduitの「自動化」価値提案と完全に合致し、ノーコードでAIワークフローを構築できる点が日本の開発者に刺さる",
+      "hook": "コード一切不要でAIワークフローを自動化？",
+      "script_60s": "今日紹介するのはn8n、ノーコードで使えるワークフロー自動化プラットフォームです。AI機能を内蔵し、直感的なビジュアルエディタで複雑な処理を構築できます。例えば、GitHubのプルリクエストを自動でレビューしたり、Slackに通知を送るといった作業を、ドラッグ＆ドロップだけで実現。セルフホストも可能で、データは完全に自社管理。AI Conduitのように、日々のルーティンワークを自動化し、効率を劇的に向上させたい開発者に最適です。無料で始められるので、ぜひ試してみてください。",
+      "hashtags": [
+        "#自動化",
+        "#n8n",
+        "#ノーコード",
+        "#AIワークフロー",
+        "#効率化"
+      ],
+      "tags": [
+        "automation",
+        "n8n",
+        "nocode",
+        "ai-workflow",
+        "productivity"
+      ],
+      "target_audience": "ワークフロー自動化に興味がある日本の開発者やITエンジニア"
+    },
+    {
+      "topic": "個人用AIアシスタントOpenClaw",
+      "repo_name": "openclaw/openclaw",
+      "reason": "AI Conduitの「AIによる自動化」テーマに直結し、個人用AIアシスタントという身近なユースケースで視聴者の興味を引きやすい",
+      "hook": "あなた専用のAIアシスタントを無料で？",
+      "script_60s": "OpenClawは、どんなOSでも動く個人用AIアシスタントです。チャット、タスク管理、スケジュール調整まで、あなたの日常をサポート。クロスプラットフォーム対応で、WindowsでもMacでもLinuxでも使えます。オープンソースなので、自分好みにカスタマイズ可能。AI ConduitがSNS投稿を自動化するように、OpenClawはあなたのデジタルライフを自動化します。開発者にとって、毎日のルーティンを効率化する強力なツールです。GitHubで無料公開中。",
+      "hashtags": [
+        "#AI",
+        "#アシスタント",
+        "#オープンソース",
+        "#自動化",
+        "#生産性向上"
+      ],
+      "tags": [
+        "ai",
+        "assistant",
+        "opensource",
+        "automation",
+        "productivity"
+      ],
+      "target_audience": "AIアシスタントに興味がある日本の開発者やパワーユーザー"
+    },
+    {
+      "topic": "FirecrawlでWebスクレイピング自動化",
+      "repo_name": "firecrawl/firecrawl",
+      "reason": "Webデータ収集の自動化はAI Conduitの価値提案と親和性が高く、データ収集に悩む日本の開発者に具体的な解決策を提示できる",
+      "hook": "Webスクレイピング、もっと簡単にできたら？",
+      "script_60s": "Firecrawlは、Webページの検索、スクレイピング、データ取得をAPI一つで自動化するツールです。従来のスクレイピングと違い、JavaScriptレンダリングにも対応し、動的コンテンツも取得可能。大規模なデータ収集もスケールし、AIモデルのトレーニングデータ取得にも最適。AI Conduitがトレンド情報を自動収集するように、FirecrawlであなたもWeb上のデータを効率的に集められます。オープンソースでセルフホストも可能。開発者のデータ収集作業を劇的に効率化します。",
+      "hashtags": [
+        "#Webスクレイピング",
+        "#自動化",
+        "#API",
+        "#データ収集",
+        "#開発者ツール"
+      ],
+      "tags": [
+        "webscraping",
+        "automation",
+        "api",
+        "datacollection",
+        "devtools"
+      ],
+      "target_audience": "データ収集やWebスクレイピングを効率化したい日本の開発者"
+    }
+  ]
+}
