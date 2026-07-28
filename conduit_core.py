@@ -326,23 +326,50 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
         import shutil
         shutil.copy(bg_path, out_path)
 
-def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08):
-    """BGMをミックス（voice 85% + music 8%）"""
-    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
-    dur_result = subprocess.run(
-        ["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",video_path],
+def has_audio_stream(path):
+    """ffprobeで音声ストリームの有無を確認"""
+    r = subprocess.run(
+        ["ffprobe", "-v", "error", "-select_streams", "a", "-show_entries", "stream=index",
+         "-of", "csv=p=0", path],
         capture_output=True, text=True)
-    dur = float(dur_result.stdout.strip())
-    
-    _run(["ffmpeg", "-y",
-          "-i", video_path,
-          "-stream_loop", "-1", "-i", bgm_path,
-          "-filter_complex",
-          f"[0:a]volume={voice_vol}[voice];[1:a]volume={music_vol}[music];[voice][music]amix=inputs=2:duration=first[out]",
-          "-map", "0:v", "-map", "[out]",
-          "-t", str(dur),
-          "-c:v", "copy", "-c:a", "aac",
-          out_path])
+    return bool(r.stdout.strip())
+
+def get_video_duration(path):
+    r = subprocess.run(
+        ["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",path],
+        capture_output=True, text=True)
+    return float(r.stdout.strip())
+
+def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08):
+    """BGMをミックス（voice 85% + music 8%）
+    音声がないvideoは音声なしのままコピー、BGM失敗時もフォールバック"""
+    import shutil
+    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
+    dur = get_video_duration(video_path)
+
+    if not has_audio_stream(video_path):
+        print("   ⚠️ raw_output に音声ストリームなし → 音声なしのまま出力")
+        _run(["ffmpeg", "-y", "-i", video_path,
+              "-c", "copy",
+              "-t", str(dur),
+              out_path])
+        return
+
+    try:
+        r = _run(["ffmpeg", "-y",
+              "-i", video_path,
+              "-stream_loop", "-1", "-i", bgm_path,
+              "-filter_complex",
+              f"[0:a]volume={voice_vol}[voice];[1:a]volume={music_vol}[music];[voice][music]amix=inputs=2:duration=first[out]",
+              "-map", "0:v", "-map", "[out]",
+              "-t", str(dur),
+              "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
+              out_path], check=False)
+        if r.returncode != 0:
+            raise RuntimeError(f"mix_bgm failed (stderr below):\n{r.stderr[-500:]}")
+    except Exception as e:
+        print(f"   ⚠️ BGMミックス失敗 ({e}) → 音声なしで出力")
+        shutil.copy(video_path, out_path)
 
 def add_loop_ending(concat_file, first_scene_path, output_path):
     """ループ構造: 最後に最初のシーンを0.5秒追加してループ感を出す"""
@@ -354,9 +381,10 @@ def add_loop_ending(concat_file, first_scene_path, output_path):
     return loop_clip
 
 def probe_dur(f):
-    r = subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0',f],
-                      capture_output=True, text=True)
-    return float(r.stdout.strip())
+    try:
+        return get_video_duration(f)
+    except:
+        return 0.0
 
 # === 設定をGitHubにプッシュ ===
 if __name__ == "__main__":

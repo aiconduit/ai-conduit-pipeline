@@ -123,7 +123,7 @@ print("   ループエンディング追加...")
 loop_clip = str(WORK_DIR / "loop_end.mp4")
 _run(["ffmpeg", "-y", "-i", files[0], "-t", "0.8",
       "-vf", "fade=t=out:st=0.5:d=0.3",
-      "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", loop_clip])
+      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", loop_clip])
 files.append(loop_clip)
 
 # 8. 連結
@@ -133,8 +133,21 @@ with open(concat, "w") as f:
     for sf in files:
         f.write(f"file '{sf}'\n")
 raw_output = str(WORK_DIR / "raw_output.mp4")
+# 全入力を libx264 yuv420p に統一してから concat
+norm_dir = WORK_DIR / "norm"
+norm_dir.mkdir(exist_ok=True)
+norm_list = []
+for i, sf in enumerate(files):
+    norm_path = str(norm_dir / f"norm_{i:02d}.mp4")
+    _run(["ffmpeg", "-y", "-i", sf,
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+          "-pix_fmt", "yuv420p", "-c:a", "aac", norm_path])
+    norm_list.append(norm_path)
+with open(concat, "w") as f:
+    for p in norm_list:
+        f.write(f"file '{p}'\n")
 _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-      "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
+      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
       "-pix_fmt", "yuv420p", raw_output])
 
 # 9. BGM ミックス
