@@ -55,7 +55,8 @@ MOOD_COLORS = {
 
 def gen_overlay(scene, out_path, scene_idx=0):
     """改良版オーバーレイ: 最初のフレームから字幕表示 + Hormoziスタイル"""
-    img = Image.new('RGBA', (1080, 1920), (0,0,0,0))
+    W, H = 960, 1920
+    img = Image.new('RGBA', (W, H), (0,0,0,0))
     draw = ImageDraw.Draw(img)
     font_big = get_font(80)
     font_sub = get_font(56)
@@ -68,7 +69,7 @@ def gen_overlay(scene, out_path, scene_idx=0):
     # ★ 最初のフレームから字幕（フェードなし）
     if text:
         dummy = Image.new('RGBA',(1,1)); dd = ImageDraw.Draw(dummy)
-        max_w = 960; line = ""; lines = []
+        max_w = 820; line = ""; lines = []
         for ch in text:
             test = line+ch; bb = dd.textbbox((0,0),test,font=font_big)
             if bb[2]-bb[0] > max_w and line: lines.append(line); line = ch
@@ -78,15 +79,12 @@ def gen_overlay(scene, out_path, scene_idx=0):
         y = 1650 - total_h//2
         max_lw = max(dd.textbbox((0,0),l,font=font_big)[2] for l in lines)
         pad = 20
-        # 黒背景ボックス（Hormozi風）
-        draw.rounded_rectangle([(1080-max_lw)//2-pad, y-pad, (1080+max_lw)//2+pad, y+total_h+pad],
+        draw.rounded_rectangle([(W-max_lw)//2-pad, y-pad, (W+max_lw)//2+pad, y+total_h+pad],
                                radius=16, fill=(0,0,0,220))
-        # 左カラーライン
-        draw.rectangle([(1080-max_lw)//2-pad, y-pad, (1080-max_lw)//2-pad+8, y+total_h+pad],
+        draw.rectangle([(W-max_lw)//2-pad, y-pad, (W-max_lw)//2-pad+8, y+total_h+pad],
                       fill=(*color, 255))
         for i, line in enumerate(lines):
-            bb = dd.textbbox((0,0),line,font=font_big); x = (1080-bb[2])//2
-            # 縁取り
+            bb = dd.textbbox((0,0),line,font=font_big); x = (W-bb[2])//2
             for dx in range(-4,5):
                 for dy in range(-4,5):
                     if dx*dx+dy*dy<=16: draw.text((x+dx,y+i*lh+dy),line,font=font_big,fill=(0,0,0,220))
@@ -96,16 +94,15 @@ def gen_overlay(scene, out_path, scene_idx=0):
     if mood == "hook" and caption and scene_idx == 0:
         dummy = Image.new('RGBA',(1,1)); dd = ImageDraw.Draw(dummy)
         bb = dd.textbbox((0,0),caption,font=font_big)
-        cw = bb[2]-bb[0]; cx = (1080-cw)//2
-        # グロー効果
+        cw = bb[2]-bb[0]; cx = (W-cw)//2
         for dx in range(-8,9):
             for dy in range(-8,9):
                 if dx*dx+dy*dy<=64: draw.text((cx+dx,800+dy),caption,font=font_big,fill=(*color,40))
         draw.text((cx,800),caption,font=font_big,fill=(*color,255))
 
     # AI Conduitロゴ
-    draw.rectangle([800,20,1070,65], fill=(0,0,0,160))
-    draw.text((815,22),"AI Conduit",font=font_logo,fill=(255,255,255,200))
+    draw.rectangle([W-170,20,W-10,65], fill=(0,0,0,160))
+    draw.text((W-155,22),"AI Conduit",font=font_logo,fill=(255,255,255,200))
     img.save(out_path, 'PNG')
 
 def compose_scene(scene, idx):
@@ -115,44 +112,46 @@ def compose_scene(scene, idx):
     visual = scene.get("visual_prompt","dark cinematic technology")
     out = str(WORK_DIR/f"scene_v1imp_{idx:02d}.mp4")
 
-    # B-roll取得
+    # B-roll取得（上半分用：960x960にクロップ）
     broll = fetch_broll_cinematic(visual, cache_dir=PEXELS_CACHE)
+    broll_top = str(WORK_DIR/f"btop_{idx:02d}.mp4")
     if broll and os.path.exists(broll):
         broll_dur = probe_dur(broll)
         loop = int(dur/max(broll_dur,1))+2
-        bg_raw = str(WORK_DIR/f"bgraw_{idx:02d}.mp4")
         _run(["ffmpeg","-y","-stream_loop",str(loop),"-i",broll,
               "-t",str(dur),
-              "-vf","scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
-              "-c:v","libx264","-preset","fast","-crf","22","-an","-pix_fmt","yuv420p",bg_raw])
+              "-vf","scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+              "-c:v","libx264","-preset","fast","-crf","22","-an","-pix_fmt","yuv420p",broll_top])
     else:
-        bg_raw = str(WORK_DIR/f"bgraw_{idx:02d}.mp4")
-        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=1080x1920:r=30:d={dur}",
-              "-c:v","libx264","-preset","fast","-pix_fmt","yuv420p",bg_raw])
+        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
+              "-c:v","libx264","-preset","fast","-pix_fmt","yuv420p",broll_top])
 
     # ★ パターンインタラプト適用
     bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")
-    apply_pattern_interrupt(bg_raw, interrupt if mood=="interrupt" else "none", bg, dur)
+    apply_pattern_interrupt(broll_top, interrupt if mood=="interrupt" else "none", bg, dur)
 
-    # キャラクター下部PIP（下1/3）
-    char_pip = str(WORK_DIR/f"char_{idx:02d}.mp4")
+    # キャラクター下半分（960x960スケール + 黒背景）
+    char_half = str(WORK_DIR/f"char_{idx:02d}.mp4")
     if CHAR_PATH.exists():
         _run(["ffmpeg","-y","-loop","1","-i",str(CHAR_PATH),"-t",str(dur),
-              "-vf","scale=360:360:force_original_aspect_ratio=decrease,pad=360:360:(ow-iw)/2:(oh-ih)/2",
-              "-c:v","libx264","-preset","fast","-pix_fmt","yuv420p",char_pip])
-        # B-rollにキャラPIPを左下に配置
-        bg_with_char = str(WORK_DIR/f"bgchar_{idx:02d}.mp4")
-        _run(["ffmpeg","-y","-i",bg,"-i",char_pip,
-              "-filter_complex","[0:v][1:v]overlay=20:1540[out]",
-              "-map","[out]","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg_with_char])
-        bg = bg_with_char
+              "-vf","scale=960:960:force_original_aspect_ratio=decrease,pad=960:960:(ow-iw)/2:(oh-ih)/2:color=black",
+              "-c:v","libx264","-preset","fast","-pix_fmt","yuv420p",char_half])
+    else:
+        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
+              "-c:v","libx264","-preset","fast","-pix_fmt","yuv420p",char_half])
+
+    # vstackで上下分割（上半分=B-roll / 下半分=キャラ）
+    bg_with_char = str(WORK_DIR/f"bgchar_{idx:02d}.mp4")
+    _run(["ffmpeg","-y","-i",bg,"-i",char_half,
+          "-filter_complex","[0:v][1:v]vstack=inputs=2[out]",
+          "-map","[out]","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg_with_char])
 
     # オーバーレイ
     ovr = str(WORK_DIR/f"ovr_{idx:02d}.png")
     gen_overlay(scene, ovr, idx)
 
     composed = str(WORK_DIR/f"comp_{idx:02d}.mp4")
-    _run(["ffmpeg","-y","-i",bg,"-i",ovr,
+    _run(["ffmpeg","-y","-i",bg_with_char,"-i",ovr,
           "-filter_complex","[0:v][1:v]overlay=0:0[out]",
           "-map","[out]","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
 

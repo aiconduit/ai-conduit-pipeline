@@ -22,14 +22,42 @@ with open(plan_path, "r", encoding="utf-8") as f:
 
 first = plan["plans"][0]
 topic = first["topic"]
-repo_name = first["repo_name"]
-script_60s = first["script_60s"]
-hook = first["hook"]
 hashtags = first["hashtags"]
 
-print(f"\n🚀 最初のトピック: {topic}")
-print(f"   リポジトリ: {repo_name}")
-print(f"   60sスクリプト: {script_60s[:50]}...")
+# ランダムテーマ選択（就活テーマは完全排除）
+THEMES = [
+    "AI開発", "副業", "自動化", "生産性", "投資", "フリーランス", "節約"
+]
+theme = random.choice(THEMES)
+
+# 強フック生成
+HOOKS = [
+    f"え、マジ？{topic}で{theme}がこんなに変わるなんて",
+    f"ヤバい…{topic}を使ったら{theme}の常識が崩れた",
+    f"信じられない…{topic}が{theme}を完全に変えてしまった",
+    f"え、マジ？これだけで{theme}が劇的に変わる",
+    f"ヤバすぎる…{topic}で{theme}する方法がやばい",
+    f"信じられないくらい{theme}が楽になる{topic}の使い方",
+    f"え、{topic}って{theme}に使えるの？やばい",
+]
+hook_text = random.choice(HOOKS)
+
+# ダミースクリプト生成（generate_script_deepseekを使わずローカル生成）
+script_lines = [
+    f"{hook_text}。",
+    f"今日は{topic}を使って{theme}を効率化する方法を解説する。",
+    f"普通の人なら知らないかもしれないけど、この{topic}を使えば{theme}の生産性が3倍になる。",
+    f"例えば、週に10時間かかっていた作業が一瞬で終わる。",
+    f"しかも、インストールはたったの1コマンド。",
+    f"実際に使ってみると、驚くほどシンプルで直感的だ。",
+    f"これは2025年現在、最も注目すべき{theme}ツールの一つと言える。",
+    "Instagramの@aiconduitをフォローして、最新のAI情報をゲットしよう。",
+]
+script_60s = "".join(script_lines)
+
+print(f"\n🚀 テーマ: {theme}")
+print(f"   トピック: {topic}")
+print(f"   フック: {hook_text}")
 
 # 2. スクリプトを scene に分割（句読点/改行ベース）
 sentences = re.split(r'[。！？\n]+', script_60s)
@@ -40,13 +68,13 @@ scenes = []
 moods = ["hook", "interrupt", "value", "secondary_hook", "value", "value", "interrupt", "cta"]
 interrupts = ["zoom_punch", "color_flash", "text_pop", "speed_ramp", "cut_zoom", "none"]
 visual_queries = [
-    f"{topic} futuristic technology concept",
-    f"{repo_name} open source dashboard",
+    f"{topic} futuristic {theme} concept",
+    f"{topic} open source dashboard {theme}",
     "AI automation workflow interface dark mode",
     "programming developer coding setup desk",
-    "freelance side business laptop workspace",
+    f"freelance {theme} laptop workspace",
     "tech startup innovation concept art",
-    "investment crypto trading dashboard",
+    f"investment crypto {theme} dashboard",
     "productivity app minimalist workspace",
 ]
 
@@ -63,7 +91,7 @@ for i, sent in enumerate(sentences[:8]):
 
 # hook は最初のシーンの caption に使う
 if scenes:
-    scenes[0]["caption"] = hook[:30]
+    scenes[0]["caption"] = hook_text[:30]
 
 print(f"   {len(scenes)} シーン生成済み")
 
@@ -110,7 +138,7 @@ _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
       "-pix_fmt", "yuv420p", raw_output])
 
 # 9. BGM ミックス
-final_filename = f"v1imp_{repo_name.replace('/', '_')}.mp4"
+final_filename = f"v1imp_{topic.replace('/', '_').replace(' ', '_')}.mp4"
 final_output = str(OUTPUT_DIR / final_filename)
 if bgm_path and os.path.exists(bgm_path):
     mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08)
@@ -129,8 +157,8 @@ log_entry = {
     "timestamp": plan["generated_at"],
     "source": plan["source"],
     "topic": topic,
-    "repo_name": repo_name,
-    "hook": hook,
+    "theme": theme,
+    "hook": hook_text,
     "script": script_60s,
     "hashtags": hashtags,
     "output_file": final_filename,

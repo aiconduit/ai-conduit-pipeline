@@ -1,10 +1,80 @@
 #!/usr/bin/env python3
 """GitHub Actions用YouTube自動アップロード"""
-import os, json, glob, sys
+import os, json, glob, sys, io, textwrap
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload
+from PIL import Image, ImageDraw, ImageFont
+
+def generate_thumbnail(hook_text, repo_name=""):
+    W, H = 1280, 720
+    img = Image.new("RGB", (W, H), (10, 10, 10))
+    draw = ImageDraw.Draw(img)
+
+    try:
+        font_main = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 64)
+        font_small = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 32)
+    except:
+        font_main = ImageFont.load_default()
+        font_small = ImageFont.load_default()
+
+    # 黄色い太字テキスト（hookを表示）
+    lines = textwrap.wrap(f"「{hook_text}」", width=20)
+    y_start = 120
+    for line in lines[:3]:
+        bbox = draw.textbbox((0, 0), line, font=font_main)
+        tw = bbox[2] - bbox[0]
+        draw.text(((W - tw) / 2, y_start), line, fill=(255, 220, 20), font=font_main)
+        y_start += 80
+
+    # repo名があれば2行目に表示
+    if repo_name:
+        bbox = draw.textbbox((0, 0), f"github.com/{repo_name}", font=font_small)
+        tw = bbox[2] - bbox[0]
+        draw.text(((W - tw) / 2, y_start + 20), f"github.com/{repo_name}", fill=(200, 200, 200), font=font_small)
+
+    # AI Conduitロゴ（右下）
+    logo_text = "AI Conduit"
+    try:
+        font_logo = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 28)
+    except:
+        font_logo = ImageFont.load_default()
+    bbox = draw.textbbox((0, 0), logo_text, font=font_logo)
+    lw = bbox[2] - bbox[0]
+    draw.text((W - lw - 30, H - 60), logo_text, fill=(255, 220, 20), font=font_logo)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
+
+
+def upload_thumbnail(youtube, video_id, image_buf):
+    media = MediaIoBaseUpload(image_buf, mimetype="image/png")
+    youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
+    print(f"  サムネイル設定完了")
+
+
+def reply_to_comments(youtube, video_id):
+    comments = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=10).execute()
+    reply_text = "ありがとうございます！🎁無料プレゼントはInstagramで@aiconduitをフォローしてコメントに『AI』と書いてください！"
+    for item in comments.get("items", []):
+        comment_id = item["snippet"]["topLevelComment"]["id"]
+        try:
+            youtube.comments().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "parentId": comment_id,
+                        "textOriginal": reply_text,
+                    }
+                },
+            ).execute()
+            print(f"  コメント返信完了: {comment_id}")
+        except Exception as e:
+            print(f"  コメント返信スキップ: {e}")
+
 
 def get_youtube():
     token_json = os.environ.get("YOUTUBE_TOKEN_JSON","")
@@ -13,7 +83,7 @@ def get_youtube():
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             f.write(token_json); f.flush()
             creds = Credentials.from_authorized_user_file(f.name,
-                ["https://www.googleapis.com/auth/youtube.upload"])
+                ["https://www.googleapis.com/auth/youtube", "https://www.googleapis.com/auth/youtube.force-ssl"])
     else:
         creds = Credentials(
             token=None,
@@ -81,6 +151,14 @@ def main():
     youtube = get_youtube()
     vid_id = upload(youtube, video_file, title, description, tags)
     print(f"✅ https://youtube.com/shorts/{vid_id}")
+
+    # サムネイル生成・アップロード
+    hook_text = topic.get("hook", title.replace("【AI】","").replace("#Shorts","").strip())
+    thumb_buf = generate_thumbnail(hook_text, repo_name)
+    upload_thumbnail(youtube, vid_id, thumb_buf)
+
+    # コメント自動返信
+    reply_to_comments(youtube, vid_id)
     
     # ログ保存
     with open("output/youtube_upload_log.json", "w") as f:
