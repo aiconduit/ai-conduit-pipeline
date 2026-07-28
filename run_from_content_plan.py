@@ -40,14 +40,14 @@ scenes = []
 moods = ["hook", "interrupt", "value", "secondary_hook", "value", "value", "interrupt", "cta"]
 interrupts = ["zoom_punch", "color_flash", "text_pop", "speed_ramp", "cut_zoom", "none"]
 visual_queries = [
-    f"{topic} AI automation technology",
-    f"{repo_name} workflow coding",
-    "AI workflow dashboard technology",
-    "automation tools programming coding",
-    "nocode visual editor tech",
-    "AI agent autonomous technology",
-    "open source developer tools",
-    "subscribe follow tech channel",
+    f"{topic} futuristic technology concept",
+    f"{repo_name} open source dashboard",
+    "AI automation workflow interface dark mode",
+    "programming developer coding setup desk",
+    "freelance side business laptop workspace",
+    "tech startup innovation concept art",
+    "investment crypto trading dashboard",
+    "productivity app minimalist workspace",
 ]
 
 for i, sent in enumerate(sentences[:8]):
