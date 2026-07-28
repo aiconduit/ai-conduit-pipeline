@@ -34,7 +34,7 @@ def fetch_trending_repos(language: str = "", days: int = 1) -> list[dict[str, An
     headers = {
         "Accept": "application/vnd.github.v3+json",
         "User-Agent": "AI-Conduit-Trending-Collector/1.0",
-        "Authorization": "Bearer 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",
+        "Authorization": "Bearer " + os.environ.get("GH_PAT", "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"),
     }
 
     for attempt in range(3):
