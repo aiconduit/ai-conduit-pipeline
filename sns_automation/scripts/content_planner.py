@@ -22,6 +22,39 @@ from config.settings import (
 logging.basicConfig(level=logging.INFO, format=LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
 logger = logging.getLogger("content_planner")
 
+GIFT_TOOLS_PATH = Path(__file__).resolve().parent.parent.parent / "gift_content" / "ai_tools_top50.md"
+
+
+def load_gift_tools() -> list[str]:
+    if not GIFT_TOOLS_PATH.exists():
+        logger.warning("gift content not found at %s", GIFT_TOOLS_PATH)
+        return []
+    text = GIFT_TOOLS_PATH.read_text(encoding="utf-8")
+    tools = []
+    for line in text.splitlines():
+        line = line.strip()
+        if line.startswith("|") and not line.startswith("|---") and not line.startswith("| #"):
+            cols = [c.strip() for c in line.split("|")]
+            if len(cols) >= 3:
+                name = cols[2].strip()
+                if name and name != "ツール名":
+                    tools.append(name)
+    logger.info("Loaded %d gift tools from ai_tools_top50.md", len(tools))
+    return tools
+
+
+def build_gift_prompt_suffix(tools: list[str]) -> str:
+    tools_list = "\n".join(f"  - {t}" for t in tools)
+    return f"""\n\n【重要: プレゼント連動ルール】
+紹介するツールは必ず以下のプレゼントリストから選ぶこと:
+
+{tools_list}
+
+動画の最後に以下の文言を必ず入れること:
+「詳しいリストはInstagramの@aiconduitをフォローしてDMで受け取れます！」
+"""
+
+
 BRAND_PROMPT = """あなたは「AI Conduit」のSNSコンテンツプランナーです。
 AI Conduitは、GitHubトレンドを自動収集→動画生成→SNS投稿までを完全自動化するツールです。
 
@@ -141,7 +174,9 @@ def plan_and_save() -> None:
         return
 
     trend_summary = build_trend_summary(topics)
-    full_prompt = f"{BRAND_PROMPT}\n\n{trend_summary}"
+    gift_tools = load_gift_tools()
+    gift_suffix = build_gift_prompt_suffix(gift_tools) if gift_tools else ""
+    full_prompt = f"{BRAND_PROMPT}\n\n{trend_summary}{gift_suffix}"
 
     logger.info("Sending trending topics to DeepSeek for content planning")
     llm_response = call_deepseek(full_prompt)
