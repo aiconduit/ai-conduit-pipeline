@@ -20,6 +20,24 @@ plan_path = ROOT_DIR / "sns_automation" / "content_plan.json"
 with open(plan_path, "r", encoding="utf-8") as f:
     plan = json.load(f)
 
+if not plan.get("plans"):
+    print("⚠️ content_plan.jsonが空です。デフォルトトピックを使用します。")
+    plan = {"plans": [{
+        "topic": "LangChain",
+        "repo_name": "langchain-ai/langchain",
+        "hook": "え、マジ？LangChainでAI開発がここまで変わるなんて",
+        "hashtags": ["#AI", "#LangChain", "#自動化", "#エンジニア", "#Shorts"]
+    }]}
+
+if not plan.get("plans"):
+    plan = {"plans": [{
+        "topic": "LangChain",
+        "repo_name": "langchain-ai/langchain",
+        "hook": "え、マジ？LangChainでAI開発がここまで変わるなんて",
+        "hashtags": ["#AI", "#LangChain", "#自動化", "#エンジニア", "#Shorts"]
+    }]}
+    print("⚠️ content_plan.jsonが空 → デフォルトトピック使用")
+
 first = plan["plans"][0]
 topic = first["topic"]
 hashtags = first["hashtags"]
