@@ -72,33 +72,14 @@ script_lines = [
     "コメント欄にAIconduitと書くと、1分以内に無料プレゼントの受け取り方法をお届けします！",
 ]
 
-# ナレーションを15文字以内に分割（句読点+15文字ルール）
-def split_narration_short(text, max_chars=15):
-    segments = []
-    for part in re.split(r'[。！？\n]+', text):
-        part = part.strip()
-        if not part:
-            continue
-        while len(part) > max_chars:
-            # 句読点で切れる位置を探す
-            cut = -1
-            for sep in ['、', '，', ' ', '　']:
-                pos = part.find(sep, max_chars // 2)
-                if 0 < pos <= max_chars:
-                    cut = pos
-                    break
-            if cut < 0:
-                cut = max_chars
-            segments.append(part[:cut])
-            part = part[cut:].lstrip('、， ')
-        if part:
-            segments.append(part)
-    return segments
+# 各ナレーションを最大40文字に制限
+def truncate_narration(text, max_chars=40):
+    clean = re.sub(r"[\U0001F000-\U0001FAFF]", "", text).strip()
+    if len(clean) > max_chars:
+        clean = clean[:max_chars]
+    return clean
 
-shortened_lines = []
-for line in script_lines:
-    shortened_lines.extend(split_narration_short(line))
-script_lines = shortened_lines
+script_lines = [truncate_narration(line, 40) for line in script_lines]
 script_60s = "".join(script_lines)
 
 print(f"\n🚀 テーマ: {theme}")
@@ -143,22 +124,13 @@ print(f"   {len(scenes)} シーン生成済み")
 
 # 4. TTS 生成（各セグメントを分割後、個別のシーンとして処理）
 print("\n[1/4] 🎙️ TTS 生成中...")
-expanded_scenes = []
 for s in scenes:
-    raw = re.sub(r"[\U0001F000-\U0001FAFF]", "", s.get("narration", ""))
-    segments = split_narration_short(raw, max_chars=20)
-    for j, seg in enumerate(segments):
-        new_s = dict(s)
-        new_s["id"] = s["id"] * 100 + j + 1
-        new_s["narration"] = seg
-        p = str(WORK_DIR / f"narr_{new_s['id']:04d}.mp3")
-        tts_japanese(seg, p, speed=1.08)
-        dur = probe_dur(p)
-        new_s["audio_path"] = p
-        new_s["duration"] = dur
-        expanded_scenes.append(new_s)
-        print(f"   Scene {new_s['id']}: '{seg}' ({dur:.1f}s)")
-scenes = expanded_scenes
+    p = str(WORK_DIR / f"narr_{s['id']:04d}.mp3")
+    tts_japanese(s["narration"], p, speed=1.08)
+    dur = probe_dur(p)
+    s["audio_path"] = p
+    s["duration"] = dur
+    print(f"   Scene {s['id']}: '{s['narration']}' ({dur:.1f}s)")
 
 # 5. BGM ダウンロード
 print("\n[2/4] 🎵 BGM ダウンロード中...")
