@@ -274,11 +274,39 @@ def _pexels_download(query, cache_dir, orientation="portrait"):
 
 
 def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
-    """単一B-roll取得: 指定クエリから1つのclipを返す"""
+    """単一B-roll取得: 指定クエリから1つのclipを返す
+    検索は英語のままPexelsに送信。失敗時はフォールバッククエリで再試行。
+    """
     if cache_dir is None:
         cache_dir = Path("/tmp/pexels_cache")
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
-    return _pexels_download(query, cache_dir, orientation)
+
+    fallback_queries = [
+        "technology abstract",
+        "computer code",
+        "artificial intelligence",
+        "futuristic technology dark",
+        "tech workspace modern",
+    ]
+
+    result = _pexels_download(query, cache_dir, orientation)
+    if result:
+        return result
+
+    for fq in fallback_queries:
+        result = _pexels_download(fq, cache_dir, orientation)
+        if result:
+            print(f"   ⚠️ 本来のクエリ'{query}'が空 → フォールバック: '{fq}'")
+            return result
+
+    # 最終フォールバック: tech系別クエリで再試行
+    for fq in fallback_queries:
+        result = _pexels_download(fq + " cinematic", cache_dir, orientation)
+        if result:
+            print(f"   ⚠️ 全フォールバック失敗 → '{fq} cinematic' で再試行")
+            return result
+
+    return None
 
 def pixabay_search_music(query="upbeat background", min_dur=30):
     """Pixabayからフリーミュージックをスクレイピング（APIキー不要）"""

@@ -105,7 +105,7 @@ def compose_scene(scene, idx):
     dur = scene["duration"]; audio = scene["audio_path"]
     mood = scene.get("mood","default")
     interrupt = scene.get("interrupt","none")
-    visual = scene.get("visual_prompt","dark cinematic technology")
+    visual = scene.get("visual_1") or scene.get("visual_prompt", "dark cinematic technology")
     timestamps = scene.get("word_timestamps", [])
     out = str(WORK_DIR/f"scene_v1imp_{idx:02d}.mp4")
 

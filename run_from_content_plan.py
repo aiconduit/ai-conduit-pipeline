@@ -107,14 +107,21 @@ visual_queries = [
 
 for i, sent in enumerate(sentences[:8]):
     mood = moods[i] if i < len(moods) else "value"
-    scenes.append({
+    scene = {
         "id": i + 1,
-        "narration": sent,
         "caption": re.sub(r"[^\w\s]", "", sent)[:8],
         "visual_prompt": visual_queries[i] if i < len(visual_queries) else visual_queries[-1],
         "interrupt": random.choice(interrupts) if mood == "interrupt" else "none",
         "mood": mood,
-    })
+    }
+    if mood == "hook":
+        scene["visual_1"] = "cyberpunk city neon rain dark cinematic"
+    elif mood in ("value", "secondary_hook"):
+        scene["visual_1"] = "AI technology circuit board futuristic"
+    else:
+        scene["visual_1"] = "code programming digital abstract"
+    scene["narration"] = sent
+    scenes.append(scene)
 
 # hook は最初のシーンの caption に使う
 if scenes:
@@ -126,11 +133,12 @@ print(f"   {len(scenes)} シーン生成済み")
 print("\n[1/4] 🎙️ TTS 生成中...")
 for s in scenes:
     p = str(WORK_DIR / f"narr_{s['id']:04d}.mp3")
-    tts_japanese(s["narration"], p, speed=1.08)
+    narration_text = s.get("narration") or s.get("narraton") or s["narration"]
+    tts_japanese(narration_text, p, speed=1.08)
     dur = probe_dur(p)
     s["audio_path"] = p
     s["duration"] = dur
-    print(f"   Scene {s['id']}: '{s['narration']}' ({dur:.1f}s)")
+    print(f"   Scene {s['id']}: '{narration_text}' ({dur:.1f}s)")
 
 # 5. BGM ダウンロード
 print("\n[2/4] 🎵 BGM ダウンロード中...")
