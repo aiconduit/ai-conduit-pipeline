@@ -145,7 +145,7 @@ def main():
 チャンネル登録で最新AI情報をゲット👇
 
 💎 無料プレゼント「GitHubトップ50 AIツールリスト」
-👉 コメントに「AI」と書いてDMを受け取ってください！
+👉 コメントに「AIconduit」と書いてDMで受け取ってください！
 🎁 プレゼントページ: {os.environ.get('GIFT_LINK','https://aiconduit.github.io/ai-conduit-pipeline/gift_content/')}
 
 #AI #GitHub #エンジニア #プログラミング #自動化 #Shorts"""
