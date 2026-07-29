@@ -50,13 +50,13 @@ theme = random.choice(THEMES)
 
 # 強フック生成
 HOOKS = [
-    f"え、マジ？{topic}で{theme}がこんなに変わるなんて",
-    f"ヤバい…{topic}を使ったら{theme}の常識が崩れた",
-    f"信じられない…{topic}が{theme}を完全に変えてしまった",
-    f"え、マジ？これだけで{theme}が劇的に変わる",
-    f"ヤバすぎる…{topic}で{theme}する方法がやばい",
-    f"信じられないくらい{theme}が楽になる{topic}の使い方",
-    f"え、{topic}って{theme}に使えるの？やばい",
+    f"{topic}を知らないエンジニアは損してる",
+    f"え、{topic}が無料？信じられない",
+    f"97%の開発者が知らない{topic}の真実",
+    f"深夜2時に発見した{topic}がヤバすぎる",
+    f"これを見た後、{topic}を使わない理由がなくなる",
+    f"{topic}を使ったら残業がゼロになった話",
+    f"97%の開発者が知らない{topic}の真実",
 ]
 hook_text = random.choice(HOOKS)
 
@@ -71,6 +71,34 @@ script_lines = [
     f"これは2025年現在、最も注目すべき{theme}ツールの一つと言える。",
     "コメント欄にAIconduitと書くと、1分以内に無料プレゼントの受け取り方法をお届けします！",
 ]
+
+# ナレーションを15文字以内に分割（句読点+15文字ルール）
+def split_narration_short(text, max_chars=15):
+    segments = []
+    for part in re.split(r'[。！？\n]+', text):
+        part = part.strip()
+        if not part:
+            continue
+        while len(part) > max_chars:
+            # 句読点で切れる位置を探す
+            cut = -1
+            for sep in ['、', '，', ' ', '　']:
+                pos = part.find(sep, max_chars // 2)
+                if 0 < pos <= max_chars:
+                    cut = pos
+                    break
+            if cut < 0:
+                cut = max_chars
+            segments.append(part[:cut])
+            part = part[cut:].lstrip('、， ')
+        if part:
+            segments.append(part)
+    return segments
+
+shortened_lines = []
+for line in script_lines:
+    shortened_lines.extend(split_narration_short(line))
+script_lines = shortened_lines
 script_60s = "".join(script_lines)
 
 print(f"\n🚀 テーマ: {theme}")

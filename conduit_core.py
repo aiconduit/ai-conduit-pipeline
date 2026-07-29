@@ -246,39 +246,56 @@ def get_audio_duration(path):
         return 3.0
 
 
+def _pexels_download(query, cache_dir, orientation="portrait"):
+    headers = {"Authorization": PEXELS_KEY}
+    r = requests.get("https://api.pexels.com/videos/search", headers=headers,
+        params={"query": f"{query} cinematic", "per_page": 10, "orientation": orientation}, timeout=15)
+    if r.status_code != 200:
+        r = requests.get("https://api.pexels.com/videos/search", headers=headers,
+            params={"query": query, "per_page": 10, "orientation": orientation}, timeout=15)
+    if r.status_code != 200:
+        return None
+    videos = [v for v in r.json().get("videos", []) if v.get("duration", 0) >= 4]
+    if not videos:
+        return None
+    v = random.choice(videos[:5])
+    files = sorted([f for f in v["video_files"] if 360 <= f.get("width", 0) <= 1080], key=lambda x: x["width"])
+    url = files[-1]["link"] if files else v["video_files"][0]["link"]
+    safe = re.sub(r"[^\w]", "_", query)[:25]
+    fpath = Path(cache_dir) / f"{safe}_{v['id']}.mp4"
+    if not fpath.exists():
+        resp = requests.get(url, stream=True, timeout=30)
+        with open(fpath, "wb") as f:
+            for chunk in resp.iter_content(8192):
+                f.write(chunk)
+    return str(fpath)
+
+
 def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
-    """シネマティックB-roll取得（Pexels）"""
+    """A/BスプリットB-roll取得: 1シーンに2つのクエリでB-rollを取得
+    戻り値: (clip_a_path, clip_b_path) または (path, None)
+    """
+    from conduit_core import _pexels_download
     if cache_dir is None:
         cache_dir = Path("/tmp/pexels_cache")
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
-    
-    # シネマティックサフィックス追加
-    cinematic_query = f"{query} cinematic"
-    headers = {"Authorization": PEXELS_KEY}
-    try:
-        r = requests.get("https://api.pexels.com/videos/search", headers=headers,
-            params={"query": cinematic_query, "per_page": 10, "orientation": orientation}, timeout=15)
-        if r.status_code != 200: return None
-        videos = [v for v in r.json().get("videos", []) if v.get("duration", 0) >= 4]
-        if not videos:
-            # フォールバック: シネマティックなし
-            r2 = requests.get("https://api.pexels.com/videos/search", headers=headers,
-                params={"query": query, "per_page": 10, "orientation": orientation}, timeout=15)
-            videos = r2.json().get("videos", []) if r2.status_code == 200 else []
-        if not videos: return None
-        v = random.choice(videos[:5])
-        files = sorted([f for f in v["video_files"] if 360 <= f.get("width", 0) <= 1080], key=lambda x: x["width"])
-        url = files[-1]["link"] if files else v["video_files"][0]["link"]
-        safe = re.sub(r"[^\w]","_",query)[:25]
-        fpath = Path(cache_dir) / f"{safe}_{v['id']}.mp4"
-        if not fpath.exists():
-            resp = requests.get(url, stream=True, timeout=30)
-            with open(fpath, "wb") as f:
-                for chunk in resp.iter_content(8192): f.write(chunk)
-        return str(fpath)
-    except Exception as e:
-        print(f"   Pexels取得失敗: {e}")
-        return None
+
+    # 2つの異なるクエリを生成
+    words = query.split()
+    if len(words) >= 3:
+        mid = len(words) // 2
+        query_a = " ".join(words[:mid])
+        query_b = " ".join(words[mid:])
+    else:
+        fallback_suffixes = ["technology", "future", "digital", "abstract", "data"]
+        random.shuffle(fallback_suffixes)
+        query_a = query
+        query_b = f"{query} {fallback_suffixes[0]}"
+
+    clip_a = _pexels_download(query_a, cache_dir, orientation)
+    clip_b = _pexels_download(query_b, cache_dir, orientation)
+
+    return (clip_a, clip_b) if (clip_a and clip_b) else (clip_a or clip_b, None)
 
 def pixabay_search_music(query="upbeat background", min_dur=30):
     """Pixabayからフリーミュージックをスクレイピング（APIキー不要）"""
