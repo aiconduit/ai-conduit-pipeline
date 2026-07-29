@@ -55,11 +55,11 @@ MOOD_COLORS = {
 }
 
 def gen_overlay(scene, out_path, scene_idx=0):
-    """字幕: 縁取りのみ、背景ボックスなし、キャラ上部表示"""
+    """字幕: 縁取りのみ、背景ボックスなし、キャラ上部（下半分の上端）に配置"""
     W, H = 960, 1920
     img = Image.new('RGBA', (W, H), (0,0,0,0))
     draw = ImageDraw.Draw(img)
-    font_big = get_font(52)
+    font_big = get_font(48)
     font_logo = get_font(20)
     mood = scene.get("mood", "default")
     color = MOOD_COLORS.get(mood, MOOD_COLORS['default'])
@@ -68,7 +68,7 @@ def gen_overlay(scene, out_path, scene_idx=0):
 
     if text:
         dummy = Image.new('RGBA',(1,1)); dd = ImageDraw.Draw(dummy)
-        max_w = 840; line = ""; lines = []
+        max_w = 800; line = ""; lines = []
         for ch in text:
             test = line+ch; bb = dd.textbbox((0,0),test,font=font_big)
             if bb[2]-bb[0] > max_w and line:
@@ -78,14 +78,14 @@ def gen_overlay(scene, out_path, scene_idx=0):
         if line: lines.append(line)
         lh = font_big.size + 10
         total_h = len(lines) * lh
-        y = 1550 - total_h // 2
+        y = 1050 - total_h // 2
         for i, line in enumerate(lines):
             bb = dd.textbbox((0,0),line,font=font_big)
             x = (W - (bb[2]-bb[0])) // 2
             for dx in range(-3,4):
                 for dy in range(-3,4):
                     if dx*dx+dy*dy <= 9:
-                        draw.text((x+dx, y+i*lh+dy), line, font=font_big, fill=(0,0,0,200))
+                        draw.text((x+dx, y+i*lh+dy), line, font=font_big, fill=(0,0,0,230))
             draw.text((x, y+i*lh), line, font=font_big, fill=(255,255,255,255))
 
     if mood == "hook" and caption and scene_idx == 0:
@@ -95,7 +95,7 @@ def gen_overlay(scene, out_path, scene_idx=0):
         for dx in range(-4,5):
             for dy in range(-4,5):
                 if dx*dx+dy*dy <= 16:
-                    draw.text((cx+dx, 800+dy), caption, font=font_big, fill=(0,0,0,180))
+                    draw.text((cx+dx, 800+dy), caption, font=font_big, fill=(0,0,0,200))
         draw.text((cx, 800), caption, font=font_big, fill=(255,255,255,255))
 
     draw.text((W-120, 16), "AI Conduit", font=font_logo, fill=(255,255,255,120))
