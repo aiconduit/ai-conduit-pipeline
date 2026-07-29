@@ -91,6 +91,7 @@ def get_youtube():
             token_uri="https://oauth2.googleapis.com/token",
             client_id=os.environ.get("YOUTUBE_CLIENT_ID",""),
             client_secret=os.environ.get("YOUTUBE_CLIENT_SECRET",""),
+            scopes=["https://www.googleapis.com/auth/youtube.upload"],
         )
     if not creds.valid:
         creds.refresh(Request())
