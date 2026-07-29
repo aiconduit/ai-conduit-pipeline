@@ -109,12 +109,9 @@ def compose_scene(scene, idx):
     timestamps = scene.get("word_timestamps", [])
     out = str(WORK_DIR/f"scene_v1imp_{idx:02d}.mp4")
 
-    # B-roll取得（A/Bスプリット対応）
+    # B-roll取得（単一クリップ）
     broll = fetch_broll_cinematic(visual, cache_dir=PEXELS_CACHE)
-    broll_top = str(WORK_DIR/f"btop_{idx:02d}.mp4")
-
-    split_dur = dur / 2
-    clip_a, clip_b = broll if isinstance(broll, tuple) else (broll, None)
+    broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
 
     def _make_clip(src, out, t):
         if src and os.path.exists(src):
@@ -128,17 +125,7 @@ def compose_scene(scene, idx):
             _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=black:s=960x960:r=30:d={t}",
                   "-r", "30", "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", out])
 
-    if clip_b:
-        clip_a_half = str(WORK_DIR / f"btop_{idx:02d}_a.mp4")
-        clip_b_half = str(WORK_DIR / f"btop_{idx:02d}_b.mp4")
-        _make_clip(clip_a, clip_a_half, split_dur)
-        _make_clip(clip_b, clip_b_half, split_dur)
-        _run(["ffmpeg", "-y", "-i", clip_a_half, "-i", clip_b_half,
-              "-filter_complex", "[0:v][1:v]concat=n=2:v=1[out]",
-              "-map", "[out]", "-r", "30", "-c:v", "libx264", "-preset", "fast",
-              "-crf", "22", "-pix_fmt", "yuv420p", broll_top])
-    else:
-        _make_clip(clip_a if isinstance(clip_a, str) else broll, broll_top, dur)
+    _make_clip(broll, broll_top, dur)
 
     # ★ パターンインタラプト適用
     bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")

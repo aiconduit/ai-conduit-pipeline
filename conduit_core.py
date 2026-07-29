@@ -274,30 +274,11 @@ def _pexels_download(query, cache_dir, orientation="portrait"):
 
 
 def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
-    """A/BスプリットB-roll取得: 1シーンに2つのクエリでB-rollを取得
-    戻り値: (clip_a_path, clip_b_path) または (path, None)
-    """
-    from conduit_core import _pexels_download
+    """単一B-roll取得: 指定クエリから1つのclipを返す"""
     if cache_dir is None:
         cache_dir = Path("/tmp/pexels_cache")
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
-
-    # 2つの異なるクエリを生成
-    words = query.split()
-    if len(words) >= 3:
-        mid = len(words) // 2
-        query_a = " ".join(words[:mid])
-        query_b = " ".join(words[mid:])
-    else:
-        fallback_suffixes = ["technology", "future", "digital", "abstract", "data"]
-        random.shuffle(fallback_suffixes)
-        query_a = query
-        query_b = f"{query} {fallback_suffixes[0]}"
-
-    clip_a = _pexels_download(query_a, cache_dir, orientation)
-    clip_b = _pexels_download(query_b, cache_dir, orientation)
-
-    return (clip_a, clip_b) if (clip_a and clip_b) else (clip_a or clip_b, None)
+    return _pexels_download(query, cache_dir, orientation)
 
 def pixabay_search_music(query="upbeat background", min_dur=30):
     """Pixabayからフリーミュージックをスクレイピング（APIキー不要）"""
