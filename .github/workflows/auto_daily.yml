@@ -20,7 +20,7 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra -q
-          pip install requests pillow numpy google-auth google-auth-oauthlib google-api-python-client -q
+          pip install requests pillow numpy google-auth google-auth-oauthlib google-api-python-client pycaps faster-whisper -q
       - name: Step1 GitHubトレンド収集
         env:
           DEEPSEEK_KEY: ${{ secrets.DEEPSEEK_KEY }}

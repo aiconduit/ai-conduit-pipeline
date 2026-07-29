@@ -181,6 +181,18 @@ total = probe_dur(final_output)
 print(f"\n✅ 完成: {final_output} ({total:.1f}s)")
 print(f"   特徴: content_plan トピック / BGM ミックス / パターンインタラプト / ループ構造")
 
+# 11. pycaps ワードバイワード字幕焼き込み
+print("\n[5/4] 📝 字幕焼き込み中...")
+subtitled_output = str(OUTPUT_DIR / f"sub_{final_filename}")
+try:
+    sys.path.insert(0, str(ROOT_DIR / "sns_automation" / "scripts"))
+    from add_subtitles import add_word_focus_subtitles
+    add_word_focus_subtitles(final_output, subtitled_output)
+    final_output = subtitled_output
+    print(f"   字幕追加完了: {final_output}")
+except Exception as e:
+    print(f"   ⚠️ 字幕焼き込み失敗（元の動画を維持）: {e}")
+
 # 10. output/auto_log.json に記録
 log_path = ROOT_DIR / "output" / "auto_log.json"
 log_entry = {
