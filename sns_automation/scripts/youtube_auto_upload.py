@@ -83,7 +83,7 @@ def get_youtube():
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             f.write(token_json); f.flush()
             creds = Credentials.from_authorized_user_file(f.name,
-                ["https://www.googleapis.com/auth/youtube", "https://www.googleapis.com/auth/youtube.force-ssl"])
+                ["https://www.googleapis.com/auth/youtube.upload"])
     else:
         creds = Credentials(
             token=None,
