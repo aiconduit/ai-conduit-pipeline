@@ -171,6 +171,8 @@ def tts_japanese(text, path, speed=1.05):
     """Google Cloud TTS - Chirp3-HD-Charon"""
     import base64
     clean = re.sub(r"[\U0001F000-\U0001FAFF]","",text).strip()
+    if len(clean) > 100:
+        clean = clean[:80]
     r = requests.post(f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_TTS_KEY}",
         json={"input":{"text":clean},
               "voice":{"languageCode":"ja-JP","name":"ja-JP-Chirp3-HD-Charon"},

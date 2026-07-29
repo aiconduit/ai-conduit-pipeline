@@ -141,15 +141,24 @@ if scenes:
 
 print(f"   {len(scenes)} シーン生成済み")
 
-# 4. TTS 生成
+# 4. TTS 生成（各セグメントを分割後、個別のシーンとして処理）
 print("\n[1/4] 🎙️ TTS 生成中...")
+expanded_scenes = []
 for s in scenes:
-    p = str(WORK_DIR / f"narr_{s['id']:02d}.mp3")
-    tts_japanese(re.sub(r"[\U0001F000-\U0001FAFF]", "", s.get("narration", "")), p, speed=1.08)
-    dur = probe_dur(p)
-    s["audio_path"] = p
-    s["duration"] = dur
-    print(f"   Scene {s['id']}: {dur:.1f}s")
+    raw = re.sub(r"[\U0001F000-\U0001FAFF]", "", s.get("narration", ""))
+    segments = split_narration_short(raw, max_chars=20)
+    for j, seg in enumerate(segments):
+        new_s = dict(s)
+        new_s["id"] = s["id"] * 100 + j + 1
+        new_s["narration"] = seg
+        p = str(WORK_DIR / f"narr_{new_s['id']:04d}.mp3")
+        tts_japanese(seg, p, speed=1.08)
+        dur = probe_dur(p)
+        new_s["audio_path"] = p
+        new_s["duration"] = dur
+        expanded_scenes.append(new_s)
+        print(f"   Scene {new_s['id']}: '{seg}' ({dur:.1f}s)")
+scenes = expanded_scenes
 
 # 5. BGM ダウンロード
 print("\n[2/4] 🎵 BGM ダウンロード中...")
