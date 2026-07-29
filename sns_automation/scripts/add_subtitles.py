@@ -14,7 +14,7 @@ def add_word_focus_subtitles(input_path: str, output_path: str) -> str:
         raise FileNotFoundError(f"input video not found: {input_path}")
 
     cmd = [
-        "pycaps",
+        sys.executable, "-m", "pycaps",
         "--template", "word-focus",
         "--language", "ja",
         input_path,
