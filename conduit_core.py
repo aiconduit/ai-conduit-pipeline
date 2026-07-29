@@ -416,9 +416,9 @@ def get_video_duration(path):
         capture_output=True, text=True)
     return float(r.stdout.strip())
 
-def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08):
-    """BGMをミックス（voice 85% + music 8%）
-    music_vol=0.08 (オーバーライドで変更可、旧デフォルト0.3から低減)
+def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.18):
+    """BGMをミックス（voice 85% + music 18%）
+    music_vol=0.18 (改定: 旧0.08から増強)
     音声がないvideoは音声なしのままコピー、BGM失敗時もフォールバック"""
     import shutil
     _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)

@@ -52,7 +52,7 @@ def get_bgm(mood="upbeat"):
     
     return None
 
-def mix_bgm(video_path, bgm_path, output_path, bgm_volume=0.10, duck=False):
+def mix_bgm(video_path, bgm_path, output_path, bgm_volume=0.18, duck=False):
     """BGMを動画に低音量でmix（ダッキング対応）"""
     dur = float(subprocess.run(
         ['ffprobe', '-v', 'error', '-show_entries', 'format=duration',

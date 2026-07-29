@@ -3,7 +3,7 @@
 AI Conduit パイプライン v1 IMPROVED
 - DeepSeekスクリプト生成
 - Cinema Directorスタイルシネマティックプロンプト
-- BGMミックス（voice 85% + music 8%）
+- BGMミックス（voice 85% + music 18%）
 - パターンインタラプト（ズームパンチ/カラーフラッシュ等）
 - ループ構造（最後→最初）
 - Hook-Value-CTAフレームワーク強制
@@ -152,16 +152,28 @@ def compose_scene(scene, idx):
         ass_path = str(WORK_DIR / f"sub_{idx:02d}.ass")
         word_timings = []
         for t in timestamps:
-            if hasattr(t, "word"):
-                word_timings.append({"word": t.word, "start": t.start_sec, "end": t.end_sec})
-            elif isinstance(t, dict):
-                word_timings.append(t)
+            if isinstance(t, dict):
+                if "word" in t and "start_ms" in t and "duration_ms" in t:
+                    word_timings.append(t)
+                elif "word" in t and "start" in t:
+                    word_timings.append({
+                        "word": t["word"],
+                        "start_ms": t["start"] * 1000,
+                        "duration_ms": (t.get("end", t["start"] + 0.3) - t["start"]) * 1000,
+                    })
+                else:
+                    word_timings.append(t)
+            elif hasattr(t, "word"):
+                word_timings.append({
+                    "word": t.word,
+                    "start_ms": t.start_sec * 1000,
+                    "duration_ms": (t.end_sec - t.start_sec) * 1000,
+                })
         generate_ass_subtitles(word_timings, ass_path)
 
-        ass_escaped = ass_path.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
         composed = str(WORK_DIR / f"comp_{idx:02d}.mp4")
         _run(["ffmpeg", "-y", "-i", bg_with_char,
-              "-vf", f"ass={ass_escaped}",
+              "-vf", f"ass={ass_path}",
               "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", composed])
     else:
         # 従来のstatic overlay
@@ -255,10 +267,10 @@ def main():
     _run(["ffmpeg","-y","-f","concat","-safe","0","-i",concat,
           "-r","30","-c:v","libx264","-preset","fast","-crf","22","-c:a","aac","-pix_fmt","yuv420p",raw_output])
 
-    # BGMミックス (music_vol=0.08)
+    # BGMミックス (music_vol=0.18)
     final_output = str(OUTPUT_DIR/"pipeline_v1_improved.mp4")
     if bgm_path and os.path.exists(bgm_path):
-        mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08)
+        mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.18)
     else:
         import shutil; shutil.copy(raw_output, final_output)
 

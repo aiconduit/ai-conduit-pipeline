@@ -84,11 +84,8 @@ def generate_speech_with_timestamps(text: str, output_path: str):
     for wb in word_boundaries:
         result.append({
             "word": wb["text"],
-            "start": round(wb["start"] / 1000, 3),
-            "end": round((wb["start"] + wb["dur"]) / 1000, 3),
             "start_ms": round(wb["start"], 1),
             "duration_ms": round(wb["dur"], 1),
-            "offset_ms": round(wb["start"], 1),
         })
 
     return output_path, result
