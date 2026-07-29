@@ -163,7 +163,10 @@ def main():
         print(f"⚠️ サムネイルスキップ: {e}")
 
     # コメント自動返信
-    reply_to_comments(youtube, vid_id)
+    try:
+        reply_to_comments(youtube, vid_id)
+    except Exception as e:
+        print(f"⚠️ コメント返信スキップ: {e}")
     
     # ログ保存
     with open("output/youtube_upload_log.json", "w") as f:
