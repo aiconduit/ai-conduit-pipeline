@@ -58,13 +58,13 @@ def generate_ass_subtitles(word_timings: list, output_path: str) -> str:
             f.write(ASS_HEADER)
         return output_path
 
-    # 5文字ごとにグループ化
+    # 5〜6文字ごとにグループ化
     groups = []
     current = []
     cur_chars = 0
     for wt in normalized:
         wlen = len(wt["word"])
-        if current and cur_chars + wlen > 6:
+        if current and cur_chars + wlen > 5:
             groups.append(current)
             current = []
             cur_chars = 0

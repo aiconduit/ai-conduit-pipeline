@@ -176,11 +176,11 @@ def tts_japanese(text, path, speed=1.05):
         audio_path, timestamps = generate_speech_with_timestamps(text, path)
         return audio_path, timestamps
     except Exception as e:
-        print(f"   ⚠️ Edge TTS失敗 ({e}), Groq TTSにフォールバック")
-        return _tts_groq_fallback(text, path, speed)
+        print(f"   ⚠️ Edge TTS失敗 ({e}), Google TTSにフォールバック")
+        return _tts_google_fallback(text, path, speed)
 
-def _tts_groq_fallback(text, path, speed=1.05):
-    """Google Cloud TTSフォールバック"""
+def _tts_google_fallback(text, path, speed=1.05):
+    """Google Cloud TTSフォールバック（タイムスタンプなし → 空リスト[]）"""
     import base64
     clean = re.sub(r"[\U0001F000-\U0001FAFF]","",text).strip()[:200]
     key = os.environ.get("GOOGLE_TTS_KEY","")
@@ -441,7 +441,7 @@ def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08):
               "-map", "0:v", "-map", "[out]",
               "-t", str(dur),
               "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
-              out_path], check=False)
+              out_path])
         if r.returncode != 0:
             raise RuntimeError(f"mix_bgm failed (stderr below):\n{r.stderr[-500:]}")
     except Exception as e:

@@ -153,7 +153,7 @@ def compose_scene(scene, idx):
         word_timings = []
         for t in timestamps:
             if hasattr(t, "word"):
-                word_timings.append({"word": t.word, "offset_ms": t.start_sec * 1000, "duration_ms": (t.end_sec - t.start_sec) * 1000})
+                word_timings.append({"word": t.word, "start": t.start_sec, "end": t.end_sec})
             elif isinstance(t, dict):
                 word_timings.append(t)
         generate_ass_subtitles(word_timings, ass_path)
