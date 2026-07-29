@@ -14,10 +14,14 @@ logger = logging.getLogger("daily_post_kit")
 OUTPUT_BASE = Path.home() / "Desktop" / "AI_Conduit_Today"
 GIVEAWAY_CTA = (
     "🎁 【プレゼントキャンペーン】\n"
-    "この投稿をいいね＆リポストして、フォローしてくれた方の中から抽選で3名様に\n"
-    "「AI Conduit限定・開発者向け自動化テンプレート集」をプレゼント！\n"
+    "この投稿をいいね＆リポスト＆フォローで、\n"
+    "「AI Conduit限定・開発者向け自動化テンプレート集」を3名様にプレゼント！\n"
     "応募締切: 投稿から48時間後\n"
-    "当選発表: 本アカウントのDMにて連絡\n"
+    "\n"
+    "---\n"
+    "AI Conduit は厳選AIツールを毎日発信中 🔔\n"
+    "Instagram: https://www.instagram.com/ai.conduit/\n"
+    "YouTube: https://www.youtube.com/@AIConduit\n"
     "\n"
     "＃プレゼント ＃キャンペーン ＃AI自動化"
 )
@@ -41,32 +45,18 @@ def build_instagram_caption(plan: dict) -> str:
     return "\n".join(lines)
 
 
-def build_x_thread(plan: dict) -> str:
+def build_x_post(plan: dict) -> str:
     repo_url = f"https://github.com/{plan['repo_name']}"
-    lines = [
-        f"🧵 {plan['topic']} について解説します",
-        "",
-        f"1/5 {plan['hook']}",
-        f"{plan['script_60s'][:200]}",
-        "",
-        f"2/5 リポジトリ: {plan['repo_name']}",
-        f"→ {repo_url}",
-        f"スター数や最新リリースをチェック！",
-        "",
-        f"3/5 なぜ注目すべき？",
-        f"{plan.get('reason', '開発効率を大幅に向上できるからです。')}",
-        "",
-        f"4/5 こんな方におすすめ",
-        f"{plan['target_audience']}",
-        "",
-        f"5/5 🎁 プレゼントのお知らせ",
-        "この投稿をいいね＆リポスト＆フォローで、",
-        "「AI Conduit限定・開発者向け自動化テンプレート集」を3名様にプレゼント！",
-        "締切: 48時間後",
-        "",
-        "#AI #自動化 #開発者 #プレゼント",
-    ]
-    return "\n".join(lines)
+    text = (
+        f"{plan['hook']}\n\n"
+        f"{plan['script_60s'][:150]}\n\n"
+        f"🔗 {repo_url}\n"
+        f"🎁 いいね＆RP＆フォローで自動化テンプレート集を3名様にプレゼント！\n\n"
+        f"{' '.join(plan['hashtags'][:4])}"
+    )
+    if len(text) > 280:
+        text = text[:277] + "..."
+    return text
 
 
 def build_tiktok_caption(plan: dict) -> str:
@@ -76,7 +66,7 @@ def build_tiktok_caption(plan: dict) -> str:
         plan["script_60s"],
         "",
         "📍 リンクはプロフィールから！",
-        f"GitHub: {plan['repo_name']}",
+        f"GitHub: https://github.com/{plan['repo_name']}",
         "",
         "🎁 プレゼント応募方法",
         "1. この動画をいいね",
@@ -84,7 +74,41 @@ def build_tiktok_caption(plan: dict) -> str:
         "3. コメントで「参加」と投稿",
         "→ 抽選で3名様に自動化テンプレート集をプレゼント！",
         "",
+        "---",
+        "AI Conduit は厳選AIツールを毎日発信中 🔔",
+        "Instagram: https://www.instagram.com/ai.conduit/",
+        "YouTube: https://www.youtube.com/@AIConduit",
+        "",
         " ".join(plan["hashtags"]),
+    ]
+    return "\n".join(lines)
+
+
+def build_video_info(plan: dict) -> str:
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    lines = [
+        f"AI Conduit - 本日の動画情報",
+        f"日付: {today}",
+        "",
+        f"【タイトル】",
+        f"{plan['topic']}",
+        "",
+        f"【説明】",
+        f"{plan['hook']}",
+        f"{plan['script_60s']}",
+        "",
+        f"【紹介リポジトリ】",
+        f"https://github.com/{plan['repo_name']}",
+        "",
+        f"【ターゲット】",
+        f"{plan['target_audience']}",
+        "",
+        f"【関連リンク】",
+        f"YouTube: https://www.youtube.com/@AIConduit",
+        f"Instagram: https://www.instagram.com/ai.conduit/",
+        "",
+        "---",
+        f"#AI #自動化 #{plan['repo_name'].split('/')[0]} #AIConduit",
     ]
     return "\n".join(lines)
 
@@ -119,8 +143,8 @@ def build_readme(plans: list[dict]) -> str:
         "【STEP 2】X (Twitter)",
         "  1. Xを開く",
         "  2. 新規ポスト作成",
-        "  3. x_thread.txt の内容を1ツイートずつコピーして貼り付け",
-        "  4. スレッドとして投稿",
+        "  3. x_post.txt の内容をコピーして貼り付け",
+        "  3. 投稿する",
         "",
         "【STEP 3】TikTok",
         "  1. TikTokアプリを開く",
@@ -168,8 +192,9 @@ def main() -> None:
 
     files = {
         "instagram_caption.txt": build_instagram_caption,
-        "x_thread.txt": build_x_thread,
+        "x_post.txt": build_x_post,
         "tiktok_caption.txt": build_tiktok_caption,
+        "video_info.txt": build_video_info,
     }
 
     for filename, builder in files.items():
@@ -185,8 +210,9 @@ def main() -> None:
 
     print(f"\n✅ 投稿キットを生成しました: {output_dir}")
     print(f"   - instagram_caption.txt")
-    print(f"   - x_thread.txt")
+    print(f"   - x_post.txt")
     print(f"   - tiktok_caption.txt")
+    print(f"   - video_info.txt")
     print(f"   - README.txt")
     print(f"\n📌 今日のトピック: {primary_plan['topic']}")
     print(f"📌 その他トピック: {', '.join(p['topic'] for p in plans[1:])}")
