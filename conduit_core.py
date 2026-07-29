@@ -433,11 +433,19 @@ def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.18):
         return
 
     try:
+        import random
+        bgm_dur = get_video_duration(bgm_path)
+        max_start = max(0, bgm_dur - dur - 2)
+        rand_start = round(random.uniform(0, max_start), 2) if max_start > 0 else 0
+        voice_end = dur
+        music_fade_out = max(0, dur - 1.5)
         r = _run(["ffmpeg", "-y",
               "-i", video_path,
-              "-stream_loop", "-1", "-i", bgm_path,
+              "-ss", str(rand_start), "-stream_loop", "-1", "-i", bgm_path,
               "-filter_complex",
-              f"[0:a]volume={voice_vol}[voice];[1:a]volume={music_vol}[music];[voice][music]amix=inputs=2:duration=first[out]",
+              f"[0:a]volume={voice_vol},afade=t=in:st=0:d=0.1,afade=t=out:st={voice_end-0.25}:d=0.25[voice];"
+              f"[1:a]volume={music_vol},afade=t=in:st=0:d=1.0,afade=t=out:st={music_fade_out}:d=1.5[music];"
+              f"[music][voice]amix=inputs=2:duration=first[out]",
               "-map", "0:v", "-map", "[out]",
               "-t", str(dur),
               "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",

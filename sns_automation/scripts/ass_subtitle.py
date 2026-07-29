@@ -1,13 +1,20 @@
 """
 ASS subtitle generation using kf karaoke (word-by-word highlight).
-Based on w4seem_captions.py approach, adapted for Japanese.
+Chunking logic adapted from shortsmith's group_words.
 """
+import random
+
 from pathlib import Path
 
-MAX_CHUNK_CHARS = 8
-MAX_CHUNK_WORDS = 3
+# shortsmith-style config (tuned for Japanese)
+MAX_WORDS_PER_GROUP = 5
+MIN_WORDS_PER_GROUP = 3
+MAX_GROUP_SECONDS = 1.25
+MAX_GROUP_CHARS = 28
 PAUSE_BREAK_MS = 300
 MAX_TAIL_MS = 350
+
+_SENTENCE_END = (".", ",", "!", "?", ":", ";", "。", "！", "？", "、")
 
 ASS_HEADER = """\
 [Script Info]
@@ -20,7 +27,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Pop,Noto Sans CJK JP,52,&H0000FFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,1,0,1,6,3,2,30,30,80,1
+Style: Pop,Noto Sans CJK JP,52,&H0000FFFF,&H00FFFFFF,&H00000000,&H64000000,-1,0,0,0,100,100,1,0,1,6,3,2,30,30,650,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -36,21 +43,45 @@ def _ass_timestamp(ms: float) -> str:
     return f"{h}:{m:02d}:{s:02d}.{cs:02d}"
 
 
+def _word_targets() -> list[int]:
+    low = max(1, MIN_WORDS_PER_GROUP)
+    high = max(low, MAX_WORDS_PER_GROUP)
+    if high == low:
+        return [low]
+    middle = (low + high) // 2
+    return [low, middle, middle, high]
+
+
 def _chunk_boundaries(boundaries):
-    chunks, current, cur_len = [], [], 0
+    chunks, current, cur_start, start_i = [], [], None, None
+    rng = random.Random()
+    word_targets = _word_targets()
+
     for i, b in enumerate(boundaries):
-        wlen = len(b["text"].strip())
-        if current and (cur_len + 1 + wlen > MAX_CHUNK_CHARS
-                        or len(current) >= MAX_CHUNK_WORDS):
-            chunks.append(current)
-            current, cur_len = [], 0
+        if cur_start is None:
+            cur_start = b["start_ms"]
+            start_i = i
         current.append(b)
-        cur_len += (1 if cur_len else 0) + wlen
+
+        text = " ".join(w["text"] for w in current)
+        elapsed = (b["start_ms"] + b["dur"]) - cur_start
+        hit_word_limit = len(current) >= rng.choice(word_targets)
+        hit_time_limit = elapsed >= MAX_GROUP_SECONDS * 1000
+        hit_char_limit = len(text) >= MAX_GROUP_CHARS
+        hit_punctuation = str(b["text"]).rstrip().endswith(_SENTENCE_END) and len(
+            current
+        ) >= max(2, MIN_WORDS_PER_GROUP - 1)
+
+        if hit_word_limit or hit_time_limit or hit_char_limit or hit_punctuation:
+            chunks.append(current)
+            current, cur_start, start_i = [], None, None
+            continue
 
         nxt = boundaries[i + 1] if i + 1 < len(boundaries) else None
-        if nxt and nxt["start_ms"] - (b["start_ms"] + b["duration_ms"]) > PAUSE_BREAK_MS:
+        if nxt and nxt["start_ms"] - (b["start_ms"] + b["dur"]) > PAUSE_BREAK_MS:
             chunks.append(current)
-            current, cur_len = [], 0
+            current, cur_start, start_i = [], None, None
+
     if current:
         chunks.append(current)
     return chunks
