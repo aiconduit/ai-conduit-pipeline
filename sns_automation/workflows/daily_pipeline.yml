@@ -39,6 +39,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - run: pip install edge-tts
       - name: Collect trending topics
         run: python sns_automation/scripts/trending_collector.py
       - name: Generate content plan
@@ -61,5 +62,6 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - run: pip install edge-tts
       - name: Monitor Instagram DM
         run: python sns_automation/scripts/instagram_dm_bot.py

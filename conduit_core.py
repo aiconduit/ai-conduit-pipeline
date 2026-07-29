@@ -168,72 +168,40 @@ Output ONLY JSON: [{{"id":1,"narration":"日本語15-30文字","caption":"4-8文
     return json.loads(re.sub(r"[\x00-\x1f]","",text))
 
 def tts_japanese(text, path, speed=1.05):
-    """Google Cloud TTS - Chirp3-HD-Charon"""
-    import base64
+    """Edge TTS - ja-JP-NanamiNeural with word timestamps"""
+    import sys
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "sns_automation", "scripts"))
+    try:
+        from edge_tts_service import generate_speech_with_timestamps
+        audio_path, timestamps = generate_speech_with_timestamps(text, path)
+        return audio_path, timestamps
+    except Exception as e:
+        print(f"   ⚠️ Edge TTS失敗 ({e}), Groq TTSにフォールバック")
+        return _tts_groq_fallback(text, path, speed)
+
+def _tts_groq_fallback(text, path, speed=1.05):
+    """Groq TTSフォールバック"""
     clean = re.sub(r"[\U0001F000-\U0001FAFF]","",text).strip()
-    if len(clean) > 100:
-        clean = clean[:80]
-    r = requests.post(f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_TTS_KEY}",
-        json={"input":{"text":clean},
-              "voice":{"languageCode":"ja-JP","name":"ja-JP-Chirp3-HD-Charon"},
-              "audioConfig":{"audioEncoding":"MP3","speakingRate":speed}})
+    r = requests.post("https://api.groq.com/openai/v1/audio/speech",
+        headers={"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
+        json={"model": "playai-tts", "input": clean, "voice": "Zejin-PlayAI", "response_format": "mp3", "speed": speed})
     if r.status_code == 200:
-        with open(path,"wb") as f: f.write(base64.b64decode(r.json()["audioContent"]))
-    else:
-        raise Exception(f"TTS error: {r.json()}")
+        with open(path,"wb") as f: f.write(r.content)
+        return path, []
+    raise Exception(f"Groq TTS error: {r.status_code}")
 
 def generate_word_subtitle_audio(text, path, speed=1.05, keywords=None):
-    """Google TTS + SSML mark names for word-level timestamps. Returns (audio_path, WordTimestamps)"""
-    import base64
-
-    words = text.split()
-    ssml_parts = []
-    for i, w in enumerate(words):
-        ssml_parts.append(f'<mark name="w{i}"/>{w}')
-    ssml = '<speak>' + ' '.join(ssml_parts) + '</speak>'
-
-    clean = re.sub(r"[\U0001F000-\U0001FAFF]", "", text).strip()
-    r = requests.post(
-        f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_TTS_KEY}",
-        json={
-            "input": {"ssml": ssml},
-            "voice": {"languageCode": "ja-JP", "name": "ja-JP-Neural2-B"},
-            "audioConfig": {"audioEncoding": "LINEAR16", "speakingRate": speed},
-            "enableTimePointing": ["SSML_MARK"],
-        },
-    )
-    if r.status_code != 200:
-        raise Exception(f"TTS error: {r.json()}")
-
-    with open(path, "wb") as f:
-        f.write(base64.b64decode(r.json()["audioContent"]))
-
-    r2 = r.json()
-    timepoints = r2.get("timepoints", [])
+    """Edge TTS based word-level subtitle audio generation. Returns (audio_path, list[WordTimestamp])"""
+    audio_path, raw_timestamps = tts_japanese(text, path, speed)
     from word_sync_subtitle import WordTimestamp
-
     result = []
-    for i, w in enumerate(words):
-        mark_name = f"w{i}"
-        matching = [t for t in timepoints if t.get("markName") == mark_name]
-        if not matching:
-            continue
-        start = float(matching[0]["timeSeconds"])
-        end = start + 0.3
-        if result:
-            prev_end = result[-1].end_sec
-            if start < prev_end:
-                start = prev_end
-            end = start + 0.3
-        result.append(WordTimestamp(word=w, start_sec=start, end_sec=end))
-
-    for i in range(len(result) - 1):
-        result[i].end_sec = result[i + 1].start_sec
-
-    if result:
-        result[-1].end_sec = get_audio_duration(path)
-
-    return path, result
+    for t in raw_timestamps:
+        result.append(WordTimestamp(
+            word=t.get("word", t.get("text", "")),
+            start_sec=t.get("start", 0),
+            end_sec=t.get("end", 0.3),
+        ))
+    return audio_path, result
 
 
 def get_audio_duration(path):
@@ -442,6 +410,7 @@ def get_video_duration(path):
 
 def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08):
     """BGMをミックス（voice 85% + music 8%）
+    music_vol=0.08 (オーバーライドで変更可、旧デフォルト0.3から低減)
     音声がないvideoは音声なしのままコピー、BGM失敗時もフォールバック"""
     import shutil
     _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)

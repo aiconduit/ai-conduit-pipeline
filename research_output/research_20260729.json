@@ -1,0 +1,446 @@
+{
+  "collected_at": "2026-07-29T17:12:46.765232",
+  "github": [
+    {
+      "source": "github",
+      "name": "DarmorGamz/Youtube-Shorts-Generator",
+      "stars": 35,
+      "description": "Harness OpenAI's power to effortlessly create YouTube Shorts with this project. Includes tools for generating catchy titles, scripting content, converting text to speech (TTS), performing speech-to-text (STT), and assembling videos in MP4 format.",
+      "url": "https://github.com/DarmorGamz/Youtube-Shorts-Generator",
+      "updated": "2026-07-13T05:28:53Z"
+    },
+    {
+      "source": "github",
+      "name": "DarkPancakes/clipforge",
+      "stars": 14,
+      "description": "AI-powered short-form video generator. Create viral YouTube Shorts & TikTok videos with AI visuals, natural voices, and cinematic effects — from a single command. ~$0.01/video.",
+      "url": "https://github.com/DarkPancakes/clipforge",
+      "updated": "2026-07-18T01:57:11Z"
+    },
+    {
+      "source": "github",
+      "name": "indiser/ViralContent-Factory",
+      "stars": 13,
+      "description": "Autonomous AI pipeline that transforms Reddit stories into viral TikTok/YouTube Shorts. Features LLM-powered content curation, neural voice synthesis, and automated video composition. Built with Python, MoviePy, and Edge-TTS.",
+      "url": "https://github.com/indiser/ViralContent-Factory",
+      "updated": "2026-07-29T07:54:17Z"
+    },
+    {
+      "source": "github",
+      "name": "jastfan/AutoShortAi",
+      "stars": 5,
+      "description": "Multi-platform AI Shorts automation tool for YouTube, TikTok, Instagram Reels & Facebook. Local browser-based video editing pipeline with automatic cutting, AI video upscaling, and Edge TTS voiceover. 100% local, private, and free forever.",
+      "url": "https://github.com/jastfan/AutoShortAi",
+      "updated": "2026-07-18T22:02:42Z"
+    },
+    {
+      "source": "github",
+      "name": "CodeSarthak/autopilot-shorts",
+      "stars": 4,
+      "description": "Fully automated YouTube Shorts pipeline with a self-improving feedback loop. Generates topics, scripts, AI images, TTS, renders video, uploads to YouTube, and learns from its own performance.",
+      "url": "https://github.com/CodeSarthak/autopilot-shorts",
+      "updated": "2026-06-16T02:24:51Z"
+    },
+    {
+      "source": "github",
+      "name": "IgorShadurin/app.yumcut.com",
+      "stars": 837,
+      "description": "YumCut - free AI video generator to turn a prompt into ready vertical videos for TikTok, Reels and YouTube Shorts. Auto script, scenes, voiceover, subtitles and watermark. Built with Next.js. Local-first pipeline + templates, batch rendering and API hooks for creators and indie makers. Self-hosted, FFmpeg-ready, multi-language output. Low cost fast",
+      "url": "https://github.com/IgorShadurin/app.yumcut.com",
+      "updated": "2026-07-27T17:55:08Z"
+    },
+    {
+      "source": "github",
+      "name": "SaarD00/AI-Youtube-Shorts-Generator",
+      "stars": 183,
+      "description": "Infinite content, zero manual editing. A fully automated 'faceless' video factory that turns trending topics into engaging YouTube Shorts using Gemini AI, Edge-TTS, and dynamic FFmpeg editing",
+      "url": "https://github.com/SaarD00/AI-Youtube-Shorts-Generator",
+      "updated": "2026-07-29T06:01:55Z"
+    },
+    {
+      "source": "github",
+      "name": "iliasaberkane6-lab/claude-skill-media-pipeline",
+      "stars": 2,
+      "description": "🎬 AI-powered Claude Code skill for faceless YouTube video production — images, voiceover, ffmpeg assembly, shorts, upload. One command.",
+      "url": "https://github.com/iliasaberkane6-lab/claude-skill-media-pipeline",
+      "updated": "2026-07-14T09:03:02Z"
+    },
+    {
+      "source": "github",
+      "name": "basedentropy/grok-ai-pulse",
+      "stars": 1,
+      "description": "Fully automated AI news update channel powered by Grok 4.5. Everything as code: news aggregation, Grok-powered summarization & analysis, custom visuals with Grok Imagine, video production (FFmpeg), auto-posting to X and YouTube. Continuously enhanced. Open-source pipeline for faceless high-quality AI content brands.",
+      "url": "https://github.com/basedentropy/grok-ai-pulse",
+      "updated": "2026-07-14T06:01:46Z"
+    },
+    {
+      "source": "github",
+      "name": "obendaoud/faceless-video-pipeline",
+      "stars": 0,
+      "description": "🎬 Open-source AI pipeline for faceless video creation (YouTube Shorts, TikTok, Instagram Reels) — Claude + Flux + Edge-TTS + FFmpeg",
+      "url": "https://github.com/obendaoud/faceless-video-pipeline",
+      "updated": "2026-06-07T07:22:31Z"
+    },
+    {
+      "source": "github",
+      "name": "YoussefBechara/AI-Automated-Short-Video-Generator-Editor-Uploader-For-Views",
+      "stars": 22,
+      "description": "Python automation tool that creates, edits, and uploads TikTok videos using AI. Generates scripts, text-to-speech, captions, and visual content. Fully automated pipeline from idea to published video.",
+      "url": "https://github.com/YoussefBechara/AI-Automated-Short-Video-Generator-Editor-Uploader-For-Views",
+      "updated": "2026-07-27T06:45:56Z"
+    },
+    {
+      "source": "github",
+      "name": "progremzion/viral-reel-ai",
+      "stars": 3,
+      "description": "An AI-powered web application that automatically generates short-form videos for TikTok, Instagram Reels, and YouTube Shorts. Simply provide a topic, and ViralReel AI handles everything: script writing, voiceovers, visuals, and video assembly.",
+      "url": "https://github.com/progremzion/viral-reel-ai",
+      "updated": "2026-03-03T10:59:34Z"
+    },
+    {
+      "source": "github",
+      "name": "amadeobonde/viralreels",
+      "stars": 2,
+      "description": "AI pipeline: trending topic → comedy script → B-roll → captions → music → ready-to-post Reel. Claude + Pexels + MoviePy + Telegram review bot.",
+      "url": "https://github.com/amadeobonde/viralreels",
+      "updated": "2026-06-16T13:49:24Z"
+    },
+    {
+      "source": "github",
+      "name": "Masif512/ReelForge-AI",
+      "stars": 1,
+      "description": "ReelForge AI is an AI-powered creator platform for generating viral hooks, captions, hashtags, faceless video scripts, thumbnail text, and SEO content. Designed for YouTube Shorts, TikTok, Instagram Reels, and social media creators to create high-engagement content faster using AI automation.",
+      "url": "https://github.com/Masif512/ReelForge-AI",
+      "updated": "2026-04-29T10:05:12Z"
+    },
+    {
+      "source": "github",
+      "name": "IgorShadurin/yumcut-characters",
+      "stars": 1,
+      "description": "YumCut Characters is an open-source toolkit for generating animated-character videos from user request by orchestrating multiple AI tools for script drafting, visual style preparation, voice and scene workflows, and production helpers. It is designed for modular automation, configuration with .env secrets, and integration with yumcut.com pipelines.",
+      "url": "https://github.com/IgorShadurin/yumcut-characters",
+      "updated": "2026-07-07T15:40:28Z"
+    },
+    {
+      "source": "github",
+      "name": "SaarD00/AI-Youtube-Shorts-Generator",
+      "stars": 183,
+      "description": "Infinite content, zero manual editing. A fully automated 'faceless' video factory that turns trending topics into engaging YouTube Shorts using Gemini AI, Edge-TTS, and dynamic FFmpeg editing",
+      "url": "https://github.com/SaarD00/AI-Youtube-Shorts-Generator",
+      "updated": "2026-07-29T06:01:55Z"
+    },
+    {
+      "source": "github",
+      "name": "dhruvsharma777/polaris-AI-Shorts-Generator",
+      "stars": 3,
+      "description": "Pollaris AI Video Generator is a Python-based automation pipeline. It transforms simple text prompts or uploaded documents (PDF/DOCX) into fully edited videos. The system handles script generation, AI voiceovers (Edge-TTS), image generation (Flux via Pollinations), dynamic subtitle syncing (Whisper), and automated YouTube scheduling.",
+      "url": "https://github.com/dhruvsharma777/polaris-AI-Shorts-Generator",
+      "updated": "2026-06-24T02:24:45Z"
+    },
+    {
+      "source": "github",
+      "name": "rahul-1066/youtube-shorts-automation",
+      "stars": 2,
+      "description": "Automated YouTube Shorts generator using Gemini Flash AI, Edge TTS, and MoviePy. Runs on GitHub Actions to create quiz videos automatically.",
+      "url": "https://github.com/rahul-1066/youtube-shorts-automation",
+      "updated": "2026-02-08T09:13:17Z"
+    },
+    {
+      "source": "github",
+      "name": "GrecuAlexandru/ShortGen",
+      "stars": 2,
+      "description": "Automated short-form video generator using Reddit content, AI voiceovers, and professional editing. Multi-channel YouTube management with scheduling and GUI interface.",
+      "url": "https://github.com/GrecuAlexandru/ShortGen",
+      "updated": "2026-04-30T11:15:55Z"
+    },
+    {
+      "source": "github",
+      "name": "HisenseYin-renlab-ai/keycut",
+      "stars": 1,
+      "description": "Generic short-promo + master-demo video generator (HyperFrames + edge-tts)",
+      "url": "https://github.com/HisenseYin-renlab-ai/keycut",
+      "updated": "2026-05-25T07:05:09Z"
+    },
+    {
+      "source": "github",
+      "name": "OrangeViolin/content-pipeline",
+      "stars": 207,
+      "description": "AI-powered content production pipeline for creators. One prompt → multi-platform publishing. Claude Code Skill.",
+      "url": "https://github.com/OrangeViolin/content-pipeline",
+      "updated": "2026-07-28T05:21:37Z"
+    },
+    {
+      "source": "github",
+      "name": "FuturewithAI-us/AI-YouTube-Channel-Automation",
+      "stars": 13,
+      "description": "Modular, containerized blueprint for AI-powered YouTube automation. Automates trending topic research, scriptwriting, planning, voiceover, video editing, SEO, and social media. Ideal for content creators & developers",
+      "url": "https://github.com/FuturewithAI-us/AI-YouTube-Channel-Automation",
+      "updated": "2026-07-22T16:49:47Z"
+    },
+    {
+      "source": "github",
+      "name": "CharacterMageReside/TikTok-View-Booster-2026-AI-Powered-Growth-Tool-for-Content-Creators",
+      "stars": 12,
+      "description": "TikTok View Booster is an advanced automation tool designed to increase views and engagement on TikTok content. Perfect for creators, marketers, and influencers seeking organic growth acceleration. Lightweight, easy to use, and compatible with all devices. Updated for 2026.",
+      "url": "https://github.com/CharacterMageReside/TikTok-View-Booster-2026-AI-Powered-Growth-Tool-for-Content-Creators",
+      "updated": "2026-07-27T07:22:22Z"
+    },
+    {
+      "source": "github",
+      "name": "obaskly/AutoWP",
+      "stars": 10,
+      "description": "About AutoWP  AutoWP is an all-in-one content automation platform that uses AI to generate, publish, and distribute high-quality content across WordPress and social media channels. We help content creators save time while maintaining a consistent and engaging online presence.",
+      "url": "https://github.com/obaskly/AutoWP",
+      "updated": "2026-07-08T12:33:16Z"
+    },
+    {
+      "source": "github",
+      "name": "UjjwalSaini07/NexGen-Quillix",
+      "stars": 7,
+      "description": "NexGen-Quillix 🌟 is an AI-powered content platform that quickly generates customized, trend-based posts for LinkedIn, Instagram, X, and more. It helps marketers and creators boost engagement, maintain brand voice, and grow their social media presence with ease and efficiency.",
+      "url": "https://github.com/UjjwalSaini07/NexGen-Quillix",
+      "updated": "2026-04-10T23:08:03Z"
+    }
+  ],
+  "huggingface": [
+    {
+      "source": "huggingface",
+      "name": "ArtelTaleb/3d-comics-tone",
+      "likes": 7,
+      "description": "",
+      "url": "https://huggingface.co/spaces/ArtelTaleb/3d-comics-tone"
+    },
+    {
+      "source": "huggingface",
+      "name": "Agents-MCP-Hackathon/gradio_overlay_video",
+      "likes": 4,
+      "description": "",
+      "url": "https://huggingface.co/spaces/Agents-MCP-Hackathon/gradio_overlay_video"
+    },
+    {
+      "source": "huggingface",
+      "name": "francozanardi/pycaps-new",
+      "likes": 3,
+      "description": "",
+      "url": "https://huggingface.co/spaces/francozanardi/pycaps-new"
+    },
+    {
+      "source": "huggingface",
+      "name": "gokul00060/EduVid-LLM",
+      "likes": 2,
+      "description": "",
+      "url": "https://huggingface.co/spaces/gokul00060/EduVid-LLM"
+    },
+    {
+      "source": "huggingface",
+      "name": "lerobot/video-benchmark",
+      "likes": 2,
+      "description": "",
+      "url": "https://huggingface.co/spaces/lerobot/video-benchmark"
+    },
+    {
+      "source": "huggingface",
+      "name": "assile/roop-unleashednew",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/assile/roop-unleashednew"
+    },
+    {
+      "source": "huggingface",
+      "name": "BladeSzaSza/gradio_overlay_video",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/BladeSzaSza/gradio_overlay_video"
+    },
+    {
+      "source": "huggingface",
+      "name": "francozanardi/pycaps",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/francozanardi/pycaps"
+    },
+    {
+      "source": "huggingface",
+      "name": "theeducationtree11/scripttgenn",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/theeducationtree11/scripttgenn"
+    },
+    {
+      "source": "huggingface",
+      "name": "relaimposter/ai-video-arena",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/relaimposter/ai-video-arena"
+    },
+    {
+      "source": "huggingface",
+      "name": "Nuzhatwa/_my_lip_sync_tool_",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/Nuzhatwa/_my_lip_sync_tool_"
+    },
+    {
+      "source": "huggingface",
+      "name": "Nomnommish/Music_Reel",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/Nomnommish/Music_Reel"
+    },
+    {
+      "source": "huggingface",
+      "name": "ParaVT/ParaVT",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/ParaVT/ParaVT"
+    },
+    {
+      "source": "huggingface",
+      "name": "build-small-hackathon/sketchnote",
+      "likes": 1,
+      "description": "",
+      "url": "https://huggingface.co/spaces/build-small-hackathon/sketchnote"
+    },
+    {
+      "source": "huggingface",
+      "name": "vanshikaa11/scripttt",
+      "likes": 0,
+      "description": "",
+      "url": "https://huggingface.co/spaces/vanshikaa11/scripttt"
+    },
+    {
+      "source": "huggingface",
+      "name": "MogensR/VideoBackgroundReplacer2",
+      "likes": 0,
+      "description": "",
+      "url": "https://huggingface.co/spaces/MogensR/VideoBackgroundReplacer2"
+    },
+    {
+      "source": "huggingface",
+      "name": "prasanacodes/Indic-Translation-Toolkit",
+      "likes": 0,
+      "description": "",
+      "url": "https://huggingface.co/spaces/prasanacodes/Indic-Translation-Toolkit"
+    },
+    {
+      "source": "huggingface",
+      "name": "mayank0789/Aiprep2.0",
+      "likes": 0,
+      "description": "",
+      "url": "https://huggingface.co/spaces/mayank0789/Aiprep2.0"
+    },
+    {
+      "source": "huggingface",
+      "name": "Kamini25/video",
+      "likes": 0,
+      "description": "",
+      "url": "https://huggingface.co/spaces/Kamini25/video"
+    },
+    {
+      "source": "huggingface",
+      "name": "sr4/audioyvideoyoutubeplaylist",
+      "likes": 0,
+      "description": "",
+      "url": "https://huggingface.co/spaces/sr4/audioyvideoyoutubeplaylist"
+    }
+  ],
+  "hackernews": [
+    {
+      "source": "hackernews",
+      "title": "Launch HN: Screenpipe (YC S26) – Record how you work and turn that into agents",
+      "points": 86,
+      "url": "",
+      "date": "2026-07-23T16:48:38Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Launch HN: Patterns (YC S21) – A much faster way to build and deploy data apps",
+      "points": 149,
+      "url": "",
+      "date": "2022-11-30T14:37:36Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: Skyvern – Browser automation using LLMs and computer vision",
+      "points": 422,
+      "url": "https://github.com/Skyvern-AI/skyvern",
+      "date": "2024-03-14T16:31:34Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Launch HN: AgentHub (YC W24) – A no-code automation platform",
+      "points": 162,
+      "url": "",
+      "date": "2024-02-08T15:17:05Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Show HN: RowboatX – open-source Claude Code for everyday automations",
+      "points": 131,
+      "url": "https://github.com/rowboatlabs/rowboat",
+      "date": "2025-11-18T18:50:00Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Launch HN: Lume (YC W23) – Generate custom data integrations with AI",
+      "points": 115,
+      "url": "",
+      "date": "2023-03-20T14:40:35Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Launch HN: Minicor (YC P26) – Windows desktop automations at scale",
+      "points": 105,
+      "url": "https://www.minicor.com/",
+      "date": "2026-05-26T14:57:27Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Launch HN: Twill.ai (YC S25) – Delegate to cloud agents, get back PRs",
+      "points": 77,
+      "url": "https://twill.ai",
+      "date": "2026-04-10T16:22:13Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Launch HN: BrowserBook (YC F24) – IDE for deterministic browser automation",
+      "points": 77,
+      "url": "",
+      "date": "2025-12-11T15:18:51Z"
+    },
+    {
+      "source": "hackernews",
+      "title": "Launch HN: Segments.ai (YC W21) – Build better datasets for image segmentation",
+      "points": 64,
+      "url": "",
+      "date": "2021-03-09T13:24:04Z"
+    }
+  ],
+  "arxiv": [
+    {
+      "source": "arxiv",
+      "title": "Wonder: Video World Model Done Better",
+      "url": "http://arxiv.org/abs/2607.26037v1"
+    },
+    {
+      "source": "arxiv",
+      "title": "Parallel Decoding Distillation for Fast Image and Video Generation",
+      "url": "http://arxiv.org/abs/2607.26004v1"
+    },
+    {
+      "source": "arxiv",
+      "title": "Knowledge-Guided Multimodal Reasoning over Interacting Streams for Video-Level Ambivalence and Hesitancy Recognition",
+      "url": "http://arxiv.org/abs/2607.25961v1"
+    },
+    {
+      "source": "arxiv",
+      "title": "Evaluating VLMs for Autonomous Agent-Driven Geometry Clipping Detection in Video Game QA",
+      "url": "http://arxiv.org/abs/2607.25921v1"
+    },
+    {
+      "source": "arxiv",
+      "title": "How Do LLMs Read Bug Reports? An Empirical Study of Attention in LLMs for Automated Program Repair",
+      "url": "http://arxiv.org/abs/2607.25873v1"
+    }
+  ]
+}

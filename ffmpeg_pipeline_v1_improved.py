@@ -22,6 +22,7 @@ from conduit_core import (
     CINEMATIC_STYLES
 )
 from word_sync_subtitle import create_subtitle_frames, SubtitleFrame
+from sns_automation.scripts.ass_subtitle import generate_ass_subtitles
 
 CHAR_PATH = ROOT_DIR / "assets" / "character_main.png"
 OUTPUT_DIR = ROOT_DIR / "projects" / "daily" / "renders"
@@ -148,43 +149,20 @@ def compose_scene(scene, idx):
           "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg_with_char])
 
     if timestamps:
-        # ワードバイワード字幕をoverlay filterで合成
-        mood_keywords = {
-            "hook": ["衝撃", "無料", "ヤバい", "バズ", "秘密", "神", "革命", "無駄"],
-            "interrupt": ["嘘", "本当", "なぜ", "実は", "でも"],
-            "value": ["重要", "方法", "コツ", "理由", "ポイント", "仕組み", "違い"],
-            "secondary_hook": ["しかも", "さらに", "実は"],
-            "cta": ["保存", "フォロー", "シェア", "今すぐ", "チャンス"],
-        }
-        kws = mood_keywords.get(mood, [])
-        from word_sync_subtitle import create_subtitle_frames
-        sub_frames = create_subtitle_frames(timestamps, style="hormozi", keywords=kws)
+        ass_path = str(WORK_DIR / f"sub_{idx:02d}.ass")
+        word_timings = []
+        for t in timestamps:
+            if hasattr(t, "word"):
+                word_timings.append({"word": t.word, "offset_ms": t.start_sec * 1000, "duration_ms": (t.end_sec - t.start_sec) * 1000})
+            elif isinstance(t, dict):
+                word_timings.append(t)
+        generate_ass_subtitles(word_timings, ass_path)
 
-        filter_parts = []
-        for i, sf in enumerate(sub_frames):
-            dur_s = sf.end_sec - sf.start_sec
-            if dur_s <= 0:
-                dur_s = 0.1
-            filter_parts.append(
-                f"movie={sf.png_path}:loop=1:format=png,"
-                f"setpts=PTS-STARTPTS+{sf.start_sec}/TB,"
-                f"trim=duration={dur_s}[sub{i}]"
-            )
-
-        composed = str(WORK_DIR/f"comp_{idx:02d}.mp4")
-        if filter_parts:
-            ov_inputs = "".join(f"[sub{i}]" for i in range(len(sub_frames)))
-            filter_complex = (
-                f"[0:v]format=rgba[base];"
-                + ";".join(filter_parts)
-                + f";[base]{ov_inputs}overlay=0:0:shortest=1[outv]"
-            )
-            _run(["ffmpeg","-y","-i",bg_with_char,
-                  "-filter_complex", filter_complex,
-                  "-map","[outv]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
-        else:
-            _run(["ffmpeg","-y","-i",bg_with_char,
-                  "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
+        ass_escaped = ass_path.replace("\\", "\\\\").replace(":", "\\:").replace("'", "\\'")
+        composed = str(WORK_DIR / f"comp_{idx:02d}.mp4")
+        _run(["ffmpeg", "-y", "-i", bg_with_char,
+              "-vf", f"ass={ass_escaped}",
+              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", composed])
     else:
         # 従来のstatic overlay
         ovr = str(WORK_DIR/f"ovr_{idx:02d}.png")
@@ -277,7 +255,7 @@ def main():
     _run(["ffmpeg","-y","-f","concat","-safe","0","-i",concat,
           "-r","30","-c:v","libx264","-preset","fast","-crf","22","-c:a","aac","-pix_fmt","yuv420p",raw_output])
 
-    # BGMミックス
+    # BGMミックス (music_vol=0.08)
     final_output = str(OUTPUT_DIR/"pipeline_v1_improved.mp4")
     if bgm_path and os.path.exists(bgm_path):
         mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08)
