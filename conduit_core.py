@@ -316,7 +316,7 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     elif interrupt_type == "cut_zoom":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "scale=1188:2112,crop=1080:1920:54:96",
+              "-vf", "scale=1056:1056,crop=960:960:48:48",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "speed_ramp":
