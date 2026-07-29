@@ -17,10 +17,11 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT_DIR = Path(__file__).parent
 sys.path.insert(0, str(ROOT_DIR))
 from conduit_core import (
-    generate_script_deepseek, tts_japanese, fetch_broll_cinematic,
-    download_bgm, apply_pattern_interrupt, mix_bgm, probe_dur,
+    generate_script_deepseek, tts_japanese, generate_word_subtitle_audio,
+    fetch_broll_cinematic, download_bgm, apply_pattern_interrupt, mix_bgm, probe_dur,
     CINEMATIC_STYLES
 )
+from word_sync_subtitle import create_subtitle_frames, SubtitleFrame
 
 CHAR_PATH = ROOT_DIR / "assets" / "character_main.png"
 OUTPUT_DIR = ROOT_DIR / "projects" / "daily" / "renders"
@@ -105,6 +106,7 @@ def compose_scene(scene, idx):
     mood = scene.get("mood","default")
     interrupt = scene.get("interrupt","none")
     visual = scene.get("visual_prompt","dark cinematic technology")
+    timestamps = scene.get("word_timestamps", [])
     out = str(WORK_DIR/f"scene_v1imp_{idx:02d}.mp4")
 
     # B-roll取得（上半分用：960x960にクロップ）
@@ -141,14 +143,52 @@ def compose_scene(scene, idx):
           "-filter_complex","[0:v][1:v]vstack=inputs=2[out]",
           "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg_with_char])
 
-    # オーバーレイ
-    ovr = str(WORK_DIR/f"ovr_{idx:02d}.png")
-    gen_overlay(scene, ovr, idx)
+    if timestamps:
+        # ワードバイワード字幕をoverlay filterで合成
+        mood_keywords = {
+            "hook": ["衝撃", "無料", "ヤバい", "バズ", "秘密", "神", "革命", "無駄"],
+            "interrupt": ["嘘", "本当", "なぜ", "実は", "でも"],
+            "value": ["重要", "方法", "コツ", "理由", "ポイント", "仕組み", "違い"],
+            "secondary_hook": ["しかも", "さらに", "実は"],
+            "cta": ["保存", "フォロー", "シェア", "今すぐ", "チャンス"],
+        }
+        kws = mood_keywords.get(mood, [])
+        from word_sync_subtitle import create_subtitle_frames
+        sub_frames = create_subtitle_frames(timestamps, style="hormozi", keywords=kws)
 
-    composed = str(WORK_DIR/f"comp_{idx:02d}.mp4")
-    _run(["ffmpeg","-y","-i",bg_with_char,"-i",ovr,
-          "-filter_complex","[0:v][1:v]overlay=0:0[out]",
-          "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
+        filter_parts = []
+        for i, sf in enumerate(sub_frames):
+            dur_s = sf.end_sec - sf.start_sec
+            if dur_s <= 0:
+                dur_s = 0.1
+            filter_parts.append(
+                f"movie={sf.png_path}:loop=1:format=png,"
+                f"setpts=PTS-STARTPTS+{sf.start_sec}/TB,"
+                f"trim=duration={dur_s}[sub{i}]"
+            )
+
+        composed = str(WORK_DIR/f"comp_{idx:02d}.mp4")
+        if filter_parts:
+            ov_inputs = "".join(f"[sub{i}]" for i in range(len(sub_frames)))
+            filter_complex = (
+                f"[0:v]format=rgba[base];"
+                + ";".join(filter_parts)
+                + f";[base]{ov_inputs}overlay=0:0:shortest=1[outv]"
+            )
+            _run(["ffmpeg","-y","-i",bg_with_char,
+                  "-filter_complex", filter_complex,
+                  "-map","[outv]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
+        else:
+            _run(["ffmpeg","-y","-i",bg_with_char,
+                  "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
+    else:
+        # 従来のstatic overlay
+        ovr = str(WORK_DIR/f"ovr_{idx:02d}.png")
+        gen_overlay(scene, ovr, idx)
+        composed = str(WORK_DIR/f"comp_{idx:02d}.mp4")
+        _run(["ffmpeg","-y","-i",bg_with_char,"-i",ovr,
+              "-filter_complex","[0:v][1:v]overlay=0:0[out]",
+              "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
 
     _run(["ffmpeg","-y","-i",composed,"-i",audio,
           "-r","30","-c:v","libx264","-preset","fast","-crf","22","-c:a","aac","-map","0:v","-map","1:a","-shortest",out])
@@ -164,14 +204,34 @@ def main():
     # スクリプト生成（DeepSeek）
     scenes = generate_script_deepseek(repo, stars, desc, max_scenes=8)
 
-    # TTS生成
+    # TTS生成（タイムスタンプ付き）
     print("[2/5] 🎙️ TTS生成中...")
+    mood_keywords = {
+        "hook": ["衝撃", "無料", "ヤバい", "バズ", "秘密", "神", "革命", "無駄"],
+        "interrupt": ["嘘", "本当", "なぜ", "実は", "でも", "実は"],
+        "value": ["重要", "方法", "コツ", "理由", "ポイント", "仕組み", "違い"],
+        "secondary_hook": ["しかも", "さらに", "実は"],
+        "cta": ["保存", "フォロー", "シェア", "今すぐ", "チャンス"],
+    }
     for s in scenes:
-        p = str(WORK_DIR/f"narr_{s['id']:02d}.mp3")
-        tts_japanese(re.sub(r"[\U0001F000-\U0001FAFF]","",s.get("narration","")), p, speed=1.08)
-        dur = probe_dur(p)
-        s["audio_path"]=p; s["duration"]=dur
-        print(f"   Scene {s['id']}: {dur:.1f}s")
+        p = str(WORK_DIR/f"narr_{s['id']:02d}.wav")
+        text = re.sub(r"[\U0001F000-\U0001FAFF]","",s.get("narration",""))
+        mood = s.get("mood", "default")
+        kws = mood_keywords.get(mood, [])
+        try:
+            audio_path, timestamps = generate_word_subtitle_audio(text, p, speed=1.08, keywords=kws)
+            dur = timestamps[-1].end_sec if timestamps else probe_dur(p)
+        except Exception as e:
+            print(f"   ⚠️ タイムスタンプTTS失敗 ({e}), 通常TTSでフォールバック")
+            mp3_p = p.replace(".wav", ".mp3")
+            tts_japanese(text, mp3_p, speed=1.08)
+            dur = probe_dur(mp3_p)
+            audio_path = mp3_p
+            timestamps = []
+        s["audio_path"] = audio_path
+        s["duration"] = dur
+        s["word_timestamps"] = timestamps
+        print(f"   Scene {s['id']}: {dur:.1f}s ({len(timestamps)} words)")
 
     # BGMダウンロード
     print("[3/5] 🎵 BGMダウンロード中...")

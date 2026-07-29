@@ -180,6 +180,72 @@ def tts_japanese(text, path, speed=1.05):
     else:
         raise Exception(f"TTS error: {r.json()}")
 
+def generate_word_subtitle_audio(text, path, speed=1.05, keywords=None):
+    """Google TTS + SSML mark names for word-level timestamps. Returns (audio_path, WordTimestamps)"""
+    import base64
+
+    words = text.split()
+    ssml_parts = []
+    for i, w in enumerate(words):
+        ssml_parts.append(f'<mark name="w{i}"/>{w}')
+    ssml = '<speak>' + ' '.join(ssml_parts) + '</speak>'
+
+    clean = re.sub(r"[\U0001F000-\U0001FAFF]", "", text).strip()
+    r = requests.post(
+        f"https://texttospeech.googleapis.com/v1/text:synthesize?key={GOOGLE_TTS_KEY}",
+        json={
+            "input": {"ssml": ssml},
+            "voice": {"languageCode": "ja-JP", "name": "ja-JP-Neural2-B"},
+            "audioConfig": {"audioEncoding": "LINEAR16", "speakingRate": speed},
+            "enableTimePointing": ["SSML_MARK"],
+        },
+    )
+    if r.status_code != 200:
+        raise Exception(f"TTS error: {r.json()}")
+
+    with open(path, "wb") as f:
+        f.write(base64.b64decode(r.json()["audioContent"]))
+
+    r2 = r.json()
+    timepoints = r2.get("timepoints", [])
+    from word_sync_subtitle import WordTimestamp
+
+    result = []
+    for i, w in enumerate(words):
+        mark_name = f"w{i}"
+        matching = [t for t in timepoints if t.get("markName") == mark_name]
+        if not matching:
+            continue
+        start = float(matching[0]["timeSeconds"])
+        end = start + 0.3
+        if result:
+            prev_end = result[-1].end_sec
+            if start < prev_end:
+                start = prev_end
+            end = start + 0.3
+        result.append(WordTimestamp(word=w, start_sec=start, end_sec=end))
+
+    for i in range(len(result) - 1):
+        result[i].end_sec = result[i + 1].start_sec
+
+    if result:
+        result[-1].end_sec = get_audio_duration(path)
+
+    return path, result
+
+
+def get_audio_duration(path):
+    try:
+        r = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration",
+             "-of", "csv=p=0", path],
+            capture_output=True, text=True, timeout=10,
+        )
+        return float(r.stdout.strip())
+    except:
+        return 3.0
+
+
 def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
     """シネマティックB-roll取得（Pexels）"""
     if cache_dir is None:
