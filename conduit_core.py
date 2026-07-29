@@ -180,15 +180,23 @@ def tts_japanese(text, path, speed=1.05):
         return _tts_groq_fallback(text, path, speed)
 
 def _tts_groq_fallback(text, path, speed=1.05):
-    """Groq TTSフォールバック"""
-    clean = re.sub(r"[\U0001F000-\U0001FAFF]","",text).strip()
-    r = requests.post("https://api.groq.com/openai/v1/audio/speech",
-        headers={"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
-        json={"model": "playai-tts", "input": clean, "voice": "Zejin-PlayAI", "response_format": "mp3", "speed": speed})
+    """Google Cloud TTSフォールバック"""
+    import base64
+    clean = re.sub(r"[\U0001F000-\U0001FAFF]","",text).strip()[:200]
+    key = os.environ.get("GOOGLE_TTS_KEY","")
+    if not key:
+        raise Exception("GOOGLE_TTS_KEY not set")
+    r = requests.post(
+        f"https://texttospeech.googleapis.com/v1/text:synthesize?key={key}",
+        headers={"Content-Type": "application/json"},
+        json={"input":{"text":clean},
+              "voice":{"languageCode":"ja-JP","name":"ja-JP-Chirp3-HD-Charon"},
+              "audioConfig":{"audioEncoding":"MP3","speakingRate":speed}})
     if r.status_code == 200:
-        with open(path,"wb") as f: f.write(r.content)
+        audio = base64.b64decode(r.json()["audioContent"])
+        with open(path,"wb") as f: f.write(audio)
         return path, []
-    raise Exception(f"Groq TTS error: {r.status_code}")
+    raise Exception(f"Google TTS error: {r.status_code}")
 
 def generate_word_subtitle_audio(text, path, speed=1.05, keywords=None):
     """Edge TTS based word-level subtitle audio generation. Returns (audio_path, list[WordTimestamp])"""
