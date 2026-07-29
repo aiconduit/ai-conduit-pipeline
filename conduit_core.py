@@ -304,30 +304,31 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     if interrupt_type == "zoom_punch":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "scale=iw*1.1:ih*1.1,crop=iw/1.1:ih/1.1",
+               "-vf", "scale=iw*1.1:ih*1.1,crop=iw/1.1:ih/1.1,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "color_flash":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", f"fade=t=in:st=0:d=0.1:color=white,fade=t=out:st={max(dur-0.3,0)}:d=0.3",
+               "-vf", f"fade=t=in:st=0:d=0.1:color=white,fade=t=out:st={max(dur-0.3,0)}:d=0.3,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "cut_zoom":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "scale=1056:1056,crop=960:960:48:48",
+               "-vf", "scale=1056:1056,crop=960:960:48:48,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "speed_ramp":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "setpts=0.85*PTS",
+               "-vf", "setpts=0.85*PTS,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     else:
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
+              "-vf", "scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
 
