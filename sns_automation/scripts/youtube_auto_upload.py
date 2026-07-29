@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """GitHub Actions用YouTube自動アップロード"""
-import os, json, glob, sys, io, textwrap
+import os, json, glob, sys, io, textwrap, random
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
@@ -122,7 +122,17 @@ def main():
         with open("sns_automation/content_plan.json") as f:
             plan = json.load(f)
         topic = plan["plans"][0]
-        title = f"【AI】{topic.get('hook','GitHubトレンド紹介')} #Shorts"
+        hook = topic.get("hook", "ルーティン作業、AIに任せよう")
+        topic_text = topic.get("topic", "GitHubトレンドAIツール")
+        patterns = [
+            f"え、マジ？{hook}",
+            f"【衝撃】{topic_text}がヤバすぎた",
+            f"知らないと損！{hook}",
+            f"{topic_text}を3分で理解する",
+            f"AIエンジニアが全員使ってる{topic_text}",
+        ]
+        raw = random.choice(patterns)
+        title = f"{raw[:45]}#Shorts" if len(raw) > 45 else f"{raw} #Shorts"
         tags = [t.replace("#","") for t in topic.get("hashtags",[])] + ["AI","GitHub","Shorts","エンジニア"]
         repo_name = topic.get("repo_name","")
     except:
