@@ -55,6 +55,13 @@ def build_gift_prompt_suffix(tools: list[str]) -> str:
 """
 
 
+HOOK_PATTERNS = [
+    "「97%のエンジニアが知らない〇〇」",
+    "「深夜2時に見つけた〇〇がヤバすぎる」",
+    "「〇〇スターのGitHubツールを誰も使っていない理由」",
+    "「これを知ったら残業がゼロになる」",
+]
+
 BRAND_PROMPT = """あなたは「AI Conduit」のSNSコンテンツプランナーです。
 AI Conduitは、GitHubトレンドを自動収集→動画生成→SNS投稿までを完全自動化するツールです。
 
@@ -79,20 +86,72 @@ AI Conduitは、GitHubトレンドを自動収集→動画生成→SNS投稿ま�
 
 ```json
 [
-  {
+  {{
     "topic": "トピック名（日本語、タイトルにもなるので思わずクリックしたくなるもの）",
     "repo_name": "関連GitHubリポジトリ名",
     "reason": "なぜこのトピックを選んだか（日本語1文）",
-    "hook": "動画冒頭3秒のフック（日本語。「え、マジ？」「ヤバい」「信じられないけど」「今すぐ知るべき」など強い興味喚起ワードを含める）",
-    "script_60s": "60秒用の台本（日本語、約300字、改行・絵文字なし、ナレーションとして読める自然な文章）",
+    "hook": "動画冒頭3秒のフック（日本語。バイラルパターンから選び、〇〇を具体的な内容で置き換えること）",
+    "scenes": [
+      {{
+        "scene_title": "Hook",
+        "duration_sec": 5,
+        "narration": "（バイラルフック、20文字以内）",
+        "visual_1": "（英語、シーン前半のB-roll検索クエリ）",
+        "visual_2": "（英語、シーン後半のB-roll検索クエリ）"
+      }},
+      {{
+        "scene_title": "Context",
+        "duration_sec": 5,
+        "narration": "（問題提起、30文字以内）",
+        "visual_1": "（英語）",
+        "visual_2": "（英語）"
+      }},
+      {{
+        "scene_title": "Mechanism_1",
+        "duration_sec": 10,
+        "narration": "（仕組み解説、30文字以内）",
+        "visual_1": "（英語）",
+        "visual_2": "（英語）"
+      }},
+      {{
+        "scene_title": "Mechanism_2",
+        "duration_sec": 10,
+        "narration": "（仕組み解説、30文字以内）",
+        "visual_1": "（英語）",
+        "visual_2": "（英語）"
+      }},
+      {{
+        "scene_title": "Mechanism_3",
+        "duration_sec": 10,
+        "narration": "（仕組み解説、30文字以内）",
+        "visual_1": "（英語）",
+        "visual_2": "（英語）"
+      }},
+      {{
+        "scene_title": "Twist",
+        "duration_sec": 10,
+        "narration": "（驚きの事実、30文字以内）",
+        "visual_1": "（英語）",
+        "visual_2": "（英語）"
+      }},
+      {{
+        "scene_title": "CTA",
+        "duration_sec": 5,
+        "narration": "（行動喚起、30文字以内）",
+        "visual_1": "（英語）",
+        "visual_2": "（英語）"
+      }}
+    ],
     "hashtags": ["#AI", "#自動化", ...],
     "tags": ["ai", "automation", ...],
     "target_audience": "ターゲット視聴者層"
-  }
+  }}
 ]
 ```
 
-台本は必ず日本語で、60秒（約300字）に収めてください。
+台本は必ず日本語で出力してください。
+各シーンのnarrationは30文字以内に厳守してください。
+visual_1とvisual_2は必ず英語で、具体的なビジュアルシーンを指定してください。
 余計な説明は不要で、JSONのみを出力してください。"""
 
 
@@ -167,6 +226,28 @@ def build_trend_summary(topics: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def build_scene_structure_instructions() -> str:
+    patterns_str = "\n".join(f"  - {p}" for p in HOOK_PATTERNS)
+    return f"""## 8シーン構成（Hook → Context → Mechanism → Twist → Outro）
+
+各シーンは以下を含む:
+- scene_title: シーン名（英語: Hook / Context / Mechanism_1 / Mechanism_2 / Mechanism_3 / Twist / CTA）
+- duration_sec: 秒数（合計60秒になること）
+- narration: ナレーション（日本語、30文字以内）
+- visual_1: シーン前半のB-roll検索クエリ（英語、具体的なビジュアルを指定）
+- visual_2: シーン後半のB-roll検索クエリ（英語、具体的なビジュアルを指定）
+
+シーン定義:
+1. Hook (5秒): 冒頭フック。narrationは20文字以内。以下のバイラルパターンから選び、〇〇を具体的な内容に置き換えること:
+{patterns_str}
+2. Context (5秒): 問題提起・共感
+3. Mechanism_1 (10秒): 仕組み解説
+4. Mechanism_2 (10秒): 仕組み解説
+5. Mechanism_3 (10秒): 仕組み解説
+6. Twist (10秒): 驚きの事実・裏ワザ
+7. CTA (5秒): 行動喚起・フォロー促進"""
+
+
 def plan_and_save() -> None:
     topics = load_trending()
     if not topics:
@@ -174,9 +255,10 @@ def plan_and_save() -> None:
         return
 
     trend_summary = build_trend_summary(topics)
+    scene_instructions = build_scene_structure_instructions()
     gift_tools = load_gift_tools()
     gift_suffix = build_gift_prompt_suffix(gift_tools) if gift_tools else ""
-    full_prompt = f"{BRAND_PROMPT}\n\n{trend_summary}{gift_suffix}"
+    full_prompt = f"{BRAND_PROMPT}\n\n{scene_instructions}\n\n{trend_summary}{gift_suffix}"
 
     logger.info("Sending trending topics to DeepSeek for content planning")
     llm_response = call_deepseek(full_prompt)
