@@ -298,33 +298,38 @@ def download_bgm(work_dir):
     return None
 
 def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
-    """パターンインタラプトエフェクト適用"""
+    """パターンインタラプトエフェクト適用 (zoompan不使用, -r 30固定)"""
     _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
     
     if interrupt_type == "zoom_punch":
-        # ズームパンチ: 急速ズームイン
         _run(["ffmpeg", "-y", "-i", bg_path,
-              "-vf", f"zoompan=z='if(lte(on,15),1.0+on/15*0.15,1.15)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1080x1920:fps=30",
-              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+              "-r", "30",
+              "-vf", "scale=iw*1.1:ih*1.1,crop=iw/1.1:ih/1.1",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "color_flash":
-        # カラーフラッシュ: 白フラッシュ
         _run(["ffmpeg", "-y", "-i", bg_path,
+              "-r", "30",
               "-vf", f"fade=t=in:st=0:d=0.1:color=white,fade=t=out:st={max(dur-0.3,0)}:d=0.3",
-              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "cut_zoom":
-        # カットズーム: 急速スケールアップ
         _run(["ffmpeg", "-y", "-i", bg_path,
+              "-r", "30",
               "-vf", "scale=1188:2112,crop=1080:1920:54:96",
-              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "speed_ramp":
-        # スピードランプ: 最初0.7xで入り1.0xに
         _run(["ffmpeg", "-y", "-i", bg_path,
+              "-r", "30",
               "-vf", "setpts=0.85*PTS",
-              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", out_path])
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
     else:
-        # なし: そのままコピー
-        import shutil
-        shutil.copy(bg_path, out_path)
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-r", "30",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
 
 def has_audio_stream(path):
     """ffprobeで音声ストリームの有無を確認"""
