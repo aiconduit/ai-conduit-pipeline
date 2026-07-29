@@ -155,8 +155,12 @@ def main():
 
     # サムネイル生成・アップロード
     hook_text = topic.get("hook", title.replace("【AI】","").replace("#Shorts","").strip())
-    thumb_buf = generate_thumbnail(hook_text, repo_name)
-    upload_thumbnail(youtube, vid_id, thumb_buf)
+    try:
+        thumb_buf = generate_thumbnail(hook_text, repo_name)
+        upload_thumbnail(youtube, vid_id, thumb_buf)
+        print("✅ サムネイル設定完了")
+    except Exception as e:
+        print(f"⚠️ サムネイルスキップ: {e}")
 
     # コメント自動返信
     reply_to_comments(youtube, vid_id)
