@@ -10,8 +10,8 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,Noto Sans CJK JP,80,&H00FFFFFF,&H0000D7FF,&H00000000,&H64000000,-1,0,0,0,100,100,1,0,1,6,3,2,80,80,500,1
-Style: Highlight,Noto Sans CJK JP,80,&H0000D7FF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,1,0,1,6,3,2,80,80,500,1
+Style: Default,Noto Sans CJK JP,56,&H00FFFFFF,&H0000D7FF,&H00000000,&H64000000,-1,0,0,0,100,100,1,0,1,4,2,2,40,40,200,1
+Style: Highlight,Noto Sans CJK JP,56,&H0000D7FF,&H000000FF,&H00000000,&H64000000,-1,0,0,0,100,100,1,0,1,4,2,2,40,40,200,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
