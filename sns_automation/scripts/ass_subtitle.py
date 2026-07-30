@@ -19,12 +19,12 @@ MAX_TAIL_MS = 350
 _SENTENCE_END = (".", ",", "!", "?", ":", ";", "。", "！", "？", "、")
 
 # === PlayRes 1920 (Reference: autocaption_ass_builder REF_H=1920) ===
-PLAY_RES_X = 1080
+PLAY_RES_X = 960
 PLAY_RES_Y = 1920
 
 # pos_y = 0.68 → MarginV = 1920 * (1 - 0.68) = 615 (bottom-aligned, Alignment=2)
-MARGIN_V = 615
-FONT_SIZE = 90
+MARGIN_V = 200
+FONT_SIZE = 72
 FONT_NAME = "Noto Sans CJK JP"
 
 # colours in ASS &HBBGGRR format
