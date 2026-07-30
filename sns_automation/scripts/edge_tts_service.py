@@ -9,7 +9,7 @@ log = logging.getLogger("edge_tts_service")
 TICKS_PER_MS = 10_000
 SYNC_OFFSET = -0.1
 
-VOICE = "ja-JP-NanamiNeural"
+VOICE = "ja-JP-KeitaNeural"
 TTS_ATTEMPTS = 3
 MIN_AUDIO_BYTES = 20_000
 EDGE_TTS_KBPS = 48

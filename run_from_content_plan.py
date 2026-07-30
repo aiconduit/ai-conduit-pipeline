@@ -201,6 +201,17 @@ total = probe_dur(final_output)
 print(f"\n✅ 完成: {final_output} ({total:.1f}s)")
 print(f"   特徴: content_plan トピック / BGM ミックス / パターンインタラプト / ループ構造")
 
+# 字幕はffmpeg_pipeline内でASS形式で焼き込み済み
+
+# 10. output/auto_log.json に記録
+log_path = ROOT_DIR / "output" / "auto_log.json"
+log_entry = {
+    "generated_at": plan["generated_at"],
+    "timestamp": plan["generated_at"],
+    "source": plan["source"],
+    "topic": topic,
+    "theme": theme,
+    "hook": hook_text,
     "output_file": final_filename,
     "output_path": final_output,
     "duration_seconds": round(total, 1),
