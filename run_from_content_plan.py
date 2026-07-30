@@ -142,7 +142,8 @@ for s in scenes:
 
 # 5. BGM ダウンロード
 print("\n[2/4] 🎵 BGM ダウンロード中...")
-bgm_path = download_bgm(str(WORK_DIR))
+bgm_result = download_bgm(str(WORK_DIR))
+bgm_path = bgm_result[0] if isinstance(bgm_result, tuple) else bgm_result
 print(f"   BGM: {'✅' if bgm_path else '❌ スキップ'}")
 
 # 6. シーン合成
