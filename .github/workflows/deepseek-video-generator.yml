@@ -1,6 +1,8 @@
 name: DeepSeek Video Generator
 
 on:
+  push:
+    branches: [ deepseek-pipeline ]
   workflow_dispatch:
     inputs:
       topic:
