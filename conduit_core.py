@@ -203,24 +203,8 @@ def _tts_google_fallback(text, path, speed=1.05):
     raise Exception(f"Google TTS error: {r.status_code}")
 
 def generate_word_subtitle_audio(text, path, speed=1.05, keywords=None):
-    """Edge TTSでTTS生成し、タイムスタンプをdictリストで返す。WordTimestamp不使用。"""
-    audio_path, raw_timestamps = tts_japanese(text, path, speed)
-    # raw_timestamps: list[dict] with start_ms, duration_ms, word
-    # ffmpeg_pipeline側でstart_ms/duration_msを直接使用
-    result = []
-    for t in raw_timestamps:
-        word = t.get("word", t.get("text", ""))
-        if "start_ms" in t and "duration_ms" in t:
-            start_s = t["start_ms"] / 1000.0
-            end_s = (t["start_ms"] + t["duration_ms"]) / 1000.0
-        elif "start" in t:
-            start_s = float(t.get("start", 0))
-            end_s = float(t.get("end", start_s + 0.3))
-        else:
-            start_s = 0.0
-            end_s = 0.3
-        result.append({"word": word, "start_ms": start_s * 1000, "duration_ms": (end_s - start_s) * 1000})
-    return audio_path, result
+    """Edge TTS生成。戻り値: (audio_path, list[dict{word,start_ms,duration_ms}])"""
+    return tts_japanese(text, path, speed)
 
 def get_audio_duration(path):
     try:
