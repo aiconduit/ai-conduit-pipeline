@@ -203,10 +203,19 @@ def compose_scene(scene, idx):
         except Exception as _e:
             print(f"   ⚠️ apply_pattern_interrupt失敗({_e}) → コピーで代替")
             import shutil; shutil.copy(broll_lut, bg)
-    # bgが存在しない場合は確実にbroll_lutをコピー
+    # bgが存在しない場合は確実に黒画面で代替
     if not os.path.exists(bg):
-        print(f"   ⚠️ bg_{idx:02d}.mp4なし → broll_lutをコピー")
-        import shutil; shutil.copy(broll_lut if os.path.exists(broll_lut) else broll_top, bg)
+        print(f"   ⚠️ bg_{idx:02d}.mp4なし → 黒画面で代替")
+        src = None
+        for candidate in [broll_lut, broll_top]:
+            if candidate and os.path.exists(str(candidate)):
+                src = str(candidate)
+                break
+        if src:
+            import shutil; shutil.copy(src, bg)
+        else:
+            _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
+                  "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg])
 
     # キャラクター下半分（960x960スケール + 黒背景）
     char_half = str(WORK_DIR/f"char_{idx:02d}.mp4")
