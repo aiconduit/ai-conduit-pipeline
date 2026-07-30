@@ -8,7 +8,7 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
 sys.path.insert(0, str(ROOT_DIR))
-from conduit_core import tts_japanese, fetch_broll_cinematic, download_bgm, probe_dur, mix_bgm
+from conduit_core import tts_japanese, fetch_broll_cinematic, download_bgm, probe_dur, mix_bgm, generate_word_subtitle_audio
 from ffmpeg_pipeline_v1_improved import (
     WORK_DIR, OUTPUT_DIR, PEXELS_CACHE, CHAR_PATH, FONT_PATHS,
     MOOD_COLORS, compose_scene as _original_compose_scene,
@@ -134,13 +134,22 @@ print(f"   {len(scenes)} シーン生成済み")
 # 4. TTS 生成（各セグメントを分割後、個別のシーンとして処理）
 print("\n[1/4] 🎙️ TTS 生成中...")
 for s in scenes:
-    p = str(WORK_DIR / f"narr_{s['id']:04d}.mp3")
+    p = str(WORK_DIR / f"narr_{s['id']:04d}.wav")
     narration_text = s.get("narration") or s.get("narraton") or s["narration"]
-    tts_japanese(narration_text, p, speed=1.08)
-    dur = probe_dur(p)
-    s["audio_path"] = p
+    try:
+        audio_path, timestamps = generate_word_subtitle_audio(narration_text, p, speed=1.08)
+        dur = (timestamps[-1]["start_ms"] + timestamps[-1]["duration_ms"]) / 1000.0 if timestamps else probe_dur(audio_path)
+    except Exception as e:
+        print(f"   ⚠️ TTS失敗({e}), フォールバック")
+        mp3_p = p.replace(".wav", ".mp3")
+        tts_japanese(narration_text, mp3_p, speed=1.08)
+        audio_path = mp3_p
+        timestamps = []
+        dur = probe_dur(audio_path)
+    s["audio_path"] = audio_path
     s["duration"] = dur
-    print(f"   Scene {s['id']}: '{narration_text}' ({dur:.1f}s)")
+    s["word_timestamps"] = timestamps
+    print(f"   Scene {s['id']}: '{narration_text}' ({dur:.1f}s, {len(timestamps)} words)")
 
 # 5. BGM ダウンロード
 print("\n[2/4] 🎵 BGM ダウンロード中...")
