@@ -115,12 +115,28 @@ def compose_scene(scene, idx):
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
 
     def _make_clip(src, out, t):
+        _camera_moves = ["zoom_in", "zoom_out", "pan_left", "pan_right"]
+        if mood == "hook":
+            cam_move = "zoom_punch"
+        else:
+            cam_move = random.choice(_camera_moves)
         if src and os.path.exists(src):
             d = probe_dur(src)
             loop = int(t / max(d, 1)) + 2
+            if cam_move == "zoom_in":
+                vf = f"zoompan=z='min(zoom+0.002,1.15)':d={int(t*30)}:s=960x960:fps=30"
+            elif cam_move == "zoom_out":
+                vf = f"zoompan=z='max(zoom-0.002,0.85)':d={int(t*30)}:s=960x960:fps=30"
+            elif cam_move == "pan_left":
+                vf = f"zoompan=x='min(0.5+0.004*on,1)':d={int(t*30)}:s=960x960:fps=30"
+            elif cam_move == "pan_right":
+                vf = f"zoompan=x='max(0.5-0.004*on,0)':d={int(t*30)}:s=960x960:fps=30"
+            elif cam_move == "zoom_punch":
+                vf = f"zoompan=z='1+0.6*min(on/10,1)':d={int(t*30)}:s=960x960:fps=30"
+            else:
+                vf = "scale=960:960:force_original_aspect_ratio=increase,crop=960:960"
             _run(["ffmpeg", "-y", "-stream_loop", str(loop), "-i", src,
-                  "-t", str(t),
-                  "-vf", "scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+                  "-t", str(t), "-vf", vf,
                   "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-an", "-pix_fmt", "yuv420p", out])
         else:
             _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=black:s=960x960:r=30:d={t}",
@@ -247,11 +263,8 @@ def main():
           "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",loop_clip])
     files.append(loop_clip)
 
-    # 連結
+    # 連結（xfadeトランジション付き）
     print("[5/5] 🔗 連結+BGMミックス中...")
-    concat = str(WORK_DIR/"concat.txt")
-    with open(concat,"w") as f:
-        for sf in files: f.write(f"file '{sf}'\n")
     raw_output = str(WORK_DIR/"raw_output.mp4")
     norm_dir = WORK_DIR / "norm"
     norm_dir.mkdir(exist_ok=True)
@@ -262,10 +275,28 @@ def main():
               "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-c:a", "aac", norm_path])
         norm_list.append(norm_path)
-    with open(concat,"w") as f:
-        for p in norm_list: f.write(f"file '{p}'\n")
-    _run(["ffmpeg","-y","-f","concat","-safe","0","-i",concat,
-          "-r","30","-c:v","libx264","-preset","fast","-crf","22","-c:a","aac","-pix_fmt","yuv420p",raw_output])
+    # xfade=slideleft でシーン間を連結
+    if len(norm_list) == 1:
+        _run(["ffmpeg","-y","-i",norm_list[0],
+              "-r","30","-c:v","libx264","-preset","fast","-crf","22","-c:a","aac","-pix_fmt","yuv420p",raw_output])
+    else:
+        xfade_dur = 0.2
+        durations = [probe_dur(p) for p in norm_list]
+        inputs = []
+        for p in norm_list:
+            inputs.extend(["-i", p])
+        filter_parts = []
+        running = durations[0] - xfade_dur
+        filter_parts.append(f"[0:v][1:v]xfade=transition=slideleft:duration={xfade_dur}:offset={running}[v0];")
+        for i in range(2, len(norm_list)):
+            running += durations[i-1] - xfade_dur
+            filter_parts.append(f"[v{i-2}][{i}:v]xfade=transition=slideleft:duration={xfade_dur}:offset={running}[v{i-1}];")
+        last_tag = f"v{len(norm_list)-2}" if len(norm_list) > 2 else "v0"
+        filter_str = "".join(filter_parts) + f"[{last_tag}]format=yuv420p[out]"
+        _run(["ffmpeg","-y"] + inputs +
+              ["-filter_complex", filter_str,
+               "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22",
+               "-c:a","aac","-pix_fmt","yuv420p","-map","0:a?", raw_output])
 
     # BGMミックス (music_vol=0.18)
     final_output = str(OUTPUT_DIR/"pipeline_v1_improved.mp4")

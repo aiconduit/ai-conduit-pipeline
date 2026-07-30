@@ -83,11 +83,14 @@ HOOK_TEMPLATES = [
 ]
 
 PATTERN_INTERRUPTS = [
-    "zoom_punch",    # ズームイン + パンチ効果
-    "color_flash",   # 色フラッシュ
-    "text_pop",      # テキストポップアップ
-    "speed_ramp",    # 速度変化
-    "cut_zoom",      # カット + ズーム
+    "zoom_punch",       # ズームイン + パンチ効果
+    "color_flash",      # 色フラッシュ
+    "text_pop",         # テキストポップアップ
+    "speed_ramp",       # 速度変化
+    "cut_zoom",         # カット + ズーム
+    "zoom_punch_hook",  # 激しいズームパンチ（hook専用）
+    "pan_left",         # 左パン
+    "pan_right",        # 右パン
 ]
 
 def generate_script_deepseek(repo, stars, description, style="viral_hook", max_scenes=8):
@@ -538,6 +541,24 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
                "-vf", "setpts=0.85*PTS,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
+    elif interrupt_type == "zoom_punch_hook":
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-r", "30",
+              "-vf", "scale=iw*1.25:ih*1.25,crop=iw/1.25:ih/1.25,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
+    elif interrupt_type == "pan_left":
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-r", "30",
+              "-vf", "scale=1280:960,crop=960:960:0:0",
+              "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-pix_fmt", "yuv420p", "-r", "30", out_path])
+    elif interrupt_type == "pan_right":
+        _run(["ffmpeg", "-y", "-i", bg_path,
+              "-r", "30",
+              "-vf", "scale=1280:960,crop=960:960:320:0",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     else:
