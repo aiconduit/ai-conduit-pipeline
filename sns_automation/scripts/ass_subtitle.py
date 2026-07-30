@@ -1,14 +1,16 @@
 """
-ASS subtitle generation using kf karaoke (word-by-word highlight).
-Chunking logic adapted from shortsmith's group_words.
+ASS subtitle generation — karaoke \kf sweep (SecondaryColour → PrimaryColour).
+Grouping: shortsmith jitter+4 conditions.
+Layout: pos_y=0.68 (1920*0.68=1305 → MarginV=615 for PlayResY=1920, 308 for 960).
+Font: Noto Sans CJK JP 90px.
+Reference: autocaption_ass_builder.py build_ass(), shortsmith_group.py group_words().
 """
 import random
-
 from pathlib import Path
 
-# shortsmith-style config (tuned for Japanese)
-MAX_WORDS_PER_GROUP = 5
+# === shortsmith jitter+4 grouping config (tuned for Japanese) ===
 MIN_WORDS_PER_GROUP = 3
+MAX_WORDS_PER_GROUP = 5
 MAX_GROUP_SECONDS = 1.25
 MAX_GROUP_CHARS = 28
 PAUSE_BREAK_MS = 300
@@ -16,18 +18,33 @@ MAX_TAIL_MS = 350
 
 _SENTENCE_END = (".", ",", "!", "?", ":", ";", "。", "！", "？", "、")
 
-ASS_HEADER = """\
+# === PlayRes 1920 (Reference: autocaption_ass_builder REF_H=1920) ===
+PLAY_RES_X = 1080
+PLAY_RES_Y = 1920
+
+# pos_y = 0.68 → MarginV = 1920 * (1 - 0.68) = 615 (bottom-aligned, Alignment=2)
+MARGIN_V = 615
+FONT_SIZE = 90
+FONT_NAME = "Noto Sans CJK JP"
+
+# colours in ASS &HBBGGRR format
+_PRIMARY_COLOR = "&H00FFFFFF"    # white (standing colour after sweep)
+_SECONDARY_COLOR = "&H0000D7FF"  # cyan (sweep fill — sweeps TO PrimaryColour)
+_OUTLINE_COLOR = "&H00000000"    # black
+_BACK_COLOR = "&H80000000"       # semi-transparent black shadow
+
+ASS_HEADER = f"""\
 [Script Info]
 Title: AI Conduit Subtitles
 ScriptType: v4.00+
-PlayResX: 960
-PlayResY: 1920
+PlayResX: {PLAY_RES_X}
+PlayResY: {PLAY_RES_Y}
 WrapStyle: 0
 ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Pop,Noto Sans CJK JP,90,&H00FFFFFF,&H0000D7FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,4,2,2,40,40,615,1
+Style: Pop,{FONT_NAME},{FONT_SIZE},{_PRIMARY_COLOR},{_SECONDARY_COLOR},{_OUTLINE_COLOR},{_BACK_COLOR},-1,0,0,0,100,100,0,0,1,4,2,2,40,40,{MARGIN_V},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -44,6 +61,7 @@ def _ass_timestamp(ms: float) -> str:
 
 
 def _word_targets() -> list[int]:
+    """Jittered word-count targets — weighted toward middle (shortsmith group.py)."""
     low = max(1, MIN_WORDS_PER_GROUP)
     high = max(low, MAX_WORDS_PER_GROUP)
     if high == low:
@@ -52,15 +70,17 @@ def _word_targets() -> list[int]:
     return [low, middle, middle, high]
 
 
-def _chunk_boundaries(boundaries):
-    chunks, current, cur_start, start_i = [], [], None, None
+def _chunk_boundaries(boundaries: list[dict]) -> list[list[dict]]:
+    """Group word boundaries into caption chunks (jitter+4 conditions from shortsmith)."""
+    chunks: list[list[dict]] = []
+    current: list[dict] = []
+    cur_start: float | None = None
     rng = random.Random()
     word_targets = _word_targets()
 
     for i, b in enumerate(boundaries):
         if cur_start is None:
             cur_start = b["start_ms"]
-            start_i = i
         current.append(b)
 
         text = " ".join(w["text"] for w in current)
@@ -74,13 +94,13 @@ def _chunk_boundaries(boundaries):
 
         if hit_word_limit or hit_time_limit or hit_char_limit or hit_punctuation:
             chunks.append(current)
-            current, cur_start, start_i = [], None, None
+            current, cur_start = [], None
             continue
 
         nxt = boundaries[i + 1] if i + 1 < len(boundaries) else None
         if nxt and nxt["start_ms"] - (b["start_ms"] + b["dur"]) > PAUSE_BREAK_MS:
             chunks.append(current)
-            current, cur_start, start_i = [], None, None
+            current, cur_start = [], None
 
     if current:
         chunks.append(current)
@@ -91,6 +111,11 @@ def generate_ass_subtitles(word_timings: list, output_path: str) -> str:
     """
     word_timings: [{"word": str, "start_ms": float, "duration_ms": float}, ...]
     または [{"word": str, "start": float(sec), "end": float(sec)}, ...]
+
+    Uses autocaption_ass_builder's karaoke approach:
+    - One line per chunk with \\kf sweep
+    - SecondaryColour→PrimaryColour (cyan→white)
+    - pos_y=0.68 (bottom third of frame)
     """
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
@@ -134,6 +159,7 @@ def generate_ass_subtitles(word_timings: list, output_path: str) -> str:
         else:
             chunk_end += MAX_TAIL_MS
 
+        # Build karaoke line: \kf{duration_cs}word for each word
         parts = []
         for j, w in enumerate(chunk):
             text = w["text"]
@@ -148,7 +174,7 @@ def generate_ass_subtitles(word_timings: list, output_path: str) -> str:
 
         if not parts:
             continue
-        line_text = "".join(parts)
+        line_text = " ".join(parts)
         events.append(
             f"Dialogue: 0,{_ass_timestamp(start_ms)},{_ass_timestamp(chunk_end)},"
             f"Pop,,0,0,0,,{line_text}"

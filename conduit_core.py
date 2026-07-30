@@ -208,10 +208,20 @@ def generate_word_subtitle_audio(text, path, speed=1.05, keywords=None):
     from word_sync_subtitle import WordTimestamp
     result = []
     for t in raw_timestamps:
+        word = t.get("word", t.get("text", ""))
+        if "start_ms" in t and "duration_ms" in t:
+            start_s = t["start_ms"] / 1000.0
+            end_s = (t["start_ms"] + t["duration_ms"]) / 1000.0
+        elif "start" in t:
+            start_s = float(t["start"])
+            end_s = float(t.get("end", start_s + 0.3))
+        else:
+            start_s = 0.0
+            end_s = 0.3
         result.append(WordTimestamp(
-            word=t.get("word", t.get("text", "")),
-            start_sec=t.get("start", 0),
-            end_sec=t.get("end", 0.3),
+            word=word,
+            start_sec=start_s,
+            end_sec=end_s,
         ))
     return audio_path, result
 

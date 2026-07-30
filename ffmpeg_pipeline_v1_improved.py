@@ -114,47 +114,59 @@ def compose_scene(scene, idx):
     broll = fetch_broll_cinematic(visual, cache_dir=PEXELS_CACHE)
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
 
-    # motion_effects.jsonを読み込んでカメラムーブ・カラーエフェクトを選択
-    me_path = ROOT_DIR / "assets" / "motion_effects.json"
-    _camera_moves = {}
-    _color_effects = {}
-    if me_path.exists():
-        with open(me_path) as _f:
-            _me = json.load(_f)
-        _camera_moves = _me.get("camera_moves", {})
-        _color_effects = _me.get("color_effects", {})
+        # motion_effects.jsonを読み込み（カメラムーブ・カラー・トランジション）
+        me_path = ROOT_DIR / "assets" / "motion_effects.json"
+        _camera_moves = {}
+        _color_effects = {}
+        _transitions = {}
+        if me_path.exists():
+            with open(me_path) as _f:
+                _me = json.load(_f)
+            _camera_moves = _me.get("camera_moves", {})
+            _color_effects = _me.get("color_effects", {})
+            _transitions = _me.get("transitions", {})
 
-    def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
-        nonlocal _camera_moves, _color_effects
-        # mood / scene_idx に応じてcamera_moveを選択
-        if _camera_moves:
-            if scene_mood == "hook":
-                cam_keys = ["zoom_in_slow"]
-            elif scene_mood == "interrupt":
-                cam_keys = ["shake_light", "shake_heavy"]
+        # zoompan_patterns.py のMOOD_CAMERA_MAP
+        _MOOD_CAMERA_MAP = {
+            "hook": "zoom_in_slow",
+            "interrupt": "shake_light",
+            "value": "zoom_out_slow",
+            "secondary_hook": "pan_left",
+            "cta": "zoom_in_slow",
+        }
+
+        def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
+            nonlocal _camera_moves, _color_effects
+            # moodに応じてcamera_moveを選択（zoompan_patterns.py準拠）
+            cam_key = _MOOD_CAMERA_MAP.get(scene_mood, "zoom_in_slow")
+            if _camera_moves and cam_key in _camera_moves:
+                vf = _camera_moves[cam_key]
             else:
-                cam_keys = list(_camera_moves.keys())
-            cam_move_key = random.choice(cam_keys)
-            vf = _camera_moves[cam_move_key]
-        else:
-            cam_move_key = "zoom_in_slow"
-            vf = "zoompan=z='min(zoom+0.0015,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+                cam_key = "zoom_in_slow"
+                vf = "zoompan=z='min(zoom+0.0015,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
 
-        # color_effectsからランダムに1つ選択
-        if _color_effects:
-            color_key = random.choice(list(_color_effects.keys()))
-            color_vf = _color_effects[color_key]
-            vf = vf + "," + color_vf
+            # moodに応じてcolor_effectsから1つ選択
+            _MOOD_COLOR_MAP = {
+                "hook": "contrast_boost",
+                "interrupt": "glitch_rgb",
+                "value": "cinematic",
+                "secondary_hook": "hue_cycle",
+                "cta": "contrast_boost",
+            }
+            color_key = _MOOD_COLOR_MAP.get(scene_mood)
+            if color_key and color_key in _color_effects:
+                color_vf = _color_effects[color_key]
+                vf = vf + "," + color_vf
 
-        if src and os.path.exists(src):
-            d = probe_dur(src)
-            loop = int(t / max(d, 1)) + 2
-            _run(["ffmpeg", "-y", "-stream_loop", str(loop), "-i", src,
-                  "-t", str(t), "-vf", vf,
-                  "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-an", "-pix_fmt", "yuv420p", out])
-        else:
-            _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=black:s=960x960:r=30:d={t}",
-                  "-r", "30", "-c:v", "libx264", "-preset", "fast", "-pix_fmt", "yuv420p", out])
+            if src and os.path.exists(src):
+                d = probe_dur(src)
+                loop = int(t / max(d, 1)) + 2
+                _run(["ffmpeg", "-y", "-stream_loop", str(loop), "-i", src,
+                      "-t", str(t), "-vf", vf,
+                      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-an", "-pix_fmt", "yuv420p", out])
+            else:
+                _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=black:s=960x960:r=30:d={t}",
+                      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p", out])
 
     _make_clip(broll, broll_top, dur)
 
@@ -176,16 +188,16 @@ def compose_scene(scene, idx):
     if CHAR_PATH.exists():
         _run(["ffmpeg","-y","-loop","1","-i",str(CHAR_PATH),"-t",str(dur),
               "-vf","scale=960:960:force_original_aspect_ratio=decrease,pad=960:960:(ow-iw)/2:(oh-ih)/2:color=black",
-              "-r","30","-c:v","libx264","-preset","fast","-pix_fmt","yuv420p",char_half])
+              "-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",char_half])
     else:
         _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
-              "-r","30","-c:v","libx264","-preset","fast","-pix_fmt","yuv420p",char_half])
+              "-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",char_half])
 
     # vstackで上下分割（上半分=B-roll / 下半分=キャラ）
     bg_with_char = str(WORK_DIR/f"bgchar_{idx:02d}.mp4")
     _run(["ffmpeg","-y","-i",bg,"-i",char_half,
           "-filter_complex","[0:v][1:v]vstack=inputs=2[out]",
-          "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg_with_char])
+          "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",bg_with_char])
 
     if timestamps:
         ass_path = str(WORK_DIR / f"sub_{idx:02d}.ass")
@@ -213,7 +225,7 @@ def compose_scene(scene, idx):
         composed = str(WORK_DIR / f"comp_{idx:02d}.mp4")
         _run(["ffmpeg", "-y", "-i", bg_with_char,
               "-vf", f"ass={ass_path}",
-              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", composed])
+              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p", composed])
     else:
         # 従来のstatic overlay
         ovr = str(WORK_DIR/f"ovr_{idx:02d}.png")
@@ -221,23 +233,23 @@ def compose_scene(scene, idx):
         composed = str(WORK_DIR/f"comp_{idx:02d}.mp4")
         _run(["ffmpeg","-y","-i",bg_with_char,"-i",ovr,
               "-filter_complex","[0:v][1:v]overlay=0:0[out]",
-              "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",composed])
+              "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",composed])
 
     _run(["ffmpeg","-y","-i",composed,"-i",audio,
-          "-r","30","-c:v","libx264","-preset","fast","-crf","22","-c:a","aac","-map","0:v","-map","1:a","-shortest",out])
+          "-r","30","-c:v","libx264","-preset","fast","-crf","18","-c:a","aac","-map","0:v","-map","1:a","-shortest",out])
     return out
 
 def main():
     repo = sys.argv[1] if len(sys.argv)>1 else "MadsLorentzen/ai-job-search"
     stars = sys.argv[2] if len(sys.argv)>2 else "17500"
     desc = sys.argv[3] if len(sys.argv)>3 else "Claude Codeで就活を自動化"
-    print(f"\n🚀 AI Conduit Pipeline v1 IMPROVED")
-    print(f"   DeepSeek + BGM + PatternInterrupt + Loop")
+    print(f"\n🚀 AI Conduit Pipeline v1 IMPROVED (最終統合版)")
+    print(f"   DeepSeek + EdgeTTS kf字幕 + BGM優先Mixkit + MotionEffects + xfade mood")
 
     # スクリプト生成（DeepSeek）
     scenes = generate_script_deepseek(repo, stars, desc, max_scenes=8)
 
-    # TTS生成（タイムスタンプ付き）
+    # TTS生成（Edge TTS WordBoundary → ass字幕）
     print("[2/5] 🎙️ TTS生成中...")
     mood_keywords = {
         "hook": ["衝撃", "無料", "ヤバい", "バズ", "秘密", "神", "革命", "無駄"],
@@ -255,7 +267,7 @@ def main():
             audio_path, timestamps = generate_word_subtitle_audio(text, p, speed=1.08, keywords=kws)
             dur = timestamps[-1].end_sec if timestamps else probe_dur(p)
         except Exception as e:
-            print(f"   ⚠️ タイムスタンプTTS失敗 ({e}), 通常TTSでフォールバック")
+            print(f"   ⚠️ タイムスタンプTTS失敗 ({e}), Google TTSでフォールバック")
             mp3_p = p.replace(".wav", ".mp3")
             tts_japanese(text, mp3_p, speed=1.08)
             dur = probe_dur(mp3_p)
@@ -266,7 +278,7 @@ def main():
         s["word_timestamps"] = timestamps
         print(f"   Scene {s['id']}: {dur:.1f}s ({len(timestamps)} words)")
 
-    # BGMダウンロード
+    # BGMダウンロード（Mixkit優先）
     print("[3/5] 🎵 BGMダウンロード中...")
     bgm_result = download_bgm(str(WORK_DIR))
     if bgm_result and bgm_result[0]:
@@ -275,7 +287,7 @@ def main():
     else:
         bgm_path, bgm_bpm = None, 120.0
         print(f"   BGM: ❌ スキップ")
-    
+
     # BPMに応じてシーン長を調整
     beat_dur = 60.0 / max(bgm_bpm, 60) * 2  # 1小節
     for s in scenes:
@@ -283,7 +295,7 @@ def main():
             current = s.get("duration", 3.0)
             bar_aligned = round(current / beat_dur) * beat_dur
             s["duration"] = max(2.0, min(8.0, bar_aligned))
-    
+
     # シーン合成
     print("[4/5] 🎬 シーン合成中...")
     files = []
@@ -296,10 +308,10 @@ def main():
     loop_clip = str(WORK_DIR/"loop_end.mp4")
     _run(["ffmpeg","-y","-i",files[0],"-t","0.8",
           "-vf","fade=t=out:st=0.5:d=0.3",
-          "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",loop_clip])
+          "-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",loop_clip])
     files.append(loop_clip)
 
-    # 連結（xfadeトランジション付き）
+    # 連結（mood-based xfadeトランジション from motion_effects.json）
     print("[5/5] 🔗 連結+BGMミックス中...")
     raw_output = str(WORK_DIR/"raw_output.mp4")
     norm_dir = WORK_DIR / "norm"
@@ -308,13 +320,23 @@ def main():
     for i, sf in enumerate(files):
         norm_path = str(norm_dir / f"norm_{i:02d}.mp4")
         _run(["ffmpeg", "-y", "-i", sf,
-              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "18",
               "-pix_fmt", "yuv420p", "-c:a", "aac", norm_path])
         norm_list.append(norm_path)
-    # xfade=slideleft でシーン間を連結
+
+    # motion_effects.jsonからmood_mapトランジションを読み込む
+    _mood_xfade = {
+        "hook": "zoomin",
+        "interrupt": "diagtl",
+        "value": "fade",
+        "secondary_hook": "slideleft",
+        "cta": "fadeblack",
+    }
     if len(norm_list) == 1:
         _run(["ffmpeg","-y","-i",norm_list[0],
-              "-r","30","-c:v","libx264","-preset","fast","-crf","22","-c:a","aac","-pix_fmt","yuv420p",raw_output])
+              "-r","30","-c:v","libx264","-preset","fast","-crf","18","-c:a","aac","-pix_fmt","yuv420p",
+              "-movflags","+faststart",
+              raw_output])
     else:
         xfade_dur = 0.2
         durations = [probe_dur(p) for p in norm_list]
@@ -322,17 +344,24 @@ def main():
         for p in norm_list:
             inputs.extend(["-i", p])
         filter_parts = []
+        # xfadeをmoodごとに変化させる
         running = durations[0] - xfade_dur
-        filter_parts.append(f"[0:v][1:v]xfade=transition=slideleft:duration={xfade_dur}:offset={running}[v0];")
+        first_mood = scenes[1]["mood"] if len(scenes) > 1 else "value"
+        xf1 = _mood_xfade.get(first_mood, "fade")
+        filter_parts.append(f"[0:v][1:v]xfade=transition={xf1}:duration={xfade_dur}:offset={running}[v0];")
         for i in range(2, len(norm_list)):
             running += durations[i-1] - xfade_dur
-            filter_parts.append(f"[v{i-2}][{i}:v]xfade=transition=slideleft:duration={xfade_dur}:offset={running}[v{i-1}];")
+            mood_i = scenes[i]["mood"] if i < len(scenes) else "value"
+            xfi = _mood_xfade.get(mood_i, "fade")
+            filter_parts.append(f"[v{i-2}][{i}:v]xfade=transition={xfi}:duration={xfade_dur}:offset={running}[v{i-1}];")
         last_tag = f"v{len(norm_list)-2}" if len(norm_list) > 2 else "v0"
         filter_str = "".join(filter_parts) + f"[{last_tag}]format=yuv420p[out]"
         _run(["ffmpeg","-y"] + inputs +
               ["-filter_complex", filter_str,
-               "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","22",
-               "-c:a","aac","-pix_fmt","yuv420p","-map","0:a?", raw_output])
+               "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","18",
+               "-c:a","aac","-pix_fmt","yuv420p","-map","0:a?",
+               "-movflags","+faststart",
+               raw_output])
 
     # BGMミックス (music_vol=0.18)
     final_output = str(OUTPUT_DIR/"pipeline_v1_improved.mp4")
@@ -343,7 +372,7 @@ def main():
 
     total = probe_dur(final_output)
     print(f"\n✅ 完成: {final_output} ({total:.1f}s)")
-    print(f"   特徴: DeepSeek生成 / BGMミックス / パターンインタラプト / ループ構造")
+    print(f"   特徴: DeepSeek / EdgeTTS+kf字幕 / MixkitBGM / MotionEffects / xfade mood")
 
 if __name__ == "__main__":
     main()
