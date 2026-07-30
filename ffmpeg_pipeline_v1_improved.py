@@ -127,59 +127,22 @@ def compose_scene(scene, idx):
     else:
         broll = str(broll)
 
-    # motion_effects.jsonを読み込み（カメラムーブ・カラー・トランジション）
-    me_path = ROOT_DIR / "assets" / "motion_effects.json"
-    _camera_moves = {}
-    _color_effects = {}
-    _transitions = {}
-    if me_path.exists():
-        with open(me_path) as _f:
-            _me = json.load(_f)
-        _camera_moves = _me.get("camera_moves", {})
-        _color_effects = _me.get("color_effects", {})
-        _transitions = _me.get("transitions", {})
-
-    # zoompan_patterns.py のMOOD_CAMERA_MAP
-    _MOOD_CAMERA_MAP = {
-        "hook": "zoom_in_slow",
-        "interrupt": "shake_light",
-        "value": "zoom_out_slow",
-        "secondary_hook": "pan_left",
-        "cta": "zoom_in_slow",
-    }
-
     def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
-        nonlocal _camera_moves, _color_effects
-        # moodに応じてcamera_moveを選択（zoompan_patterns.py準拠）
-        cam_key = _MOOD_CAMERA_MAP.get(scene_mood, "zoom_in_slow")
-        if _camera_moves and cam_key in _camera_moves:
-            vf = _camera_moves[cam_key]
+        vf = 'scale=960:960:force_original_aspect_ratio=increase,crop=960:960'
+        if src and os.path.exists(str(src)):
+            d = probe_dur(str(src))
+            loop = int(t / max(d, 0.5)) + 2
+            r = _run(['ffmpeg', '-y', '-stream_loop', str(loop), '-i', str(src),
+                      '-t', str(t), '-vf', vf,
+                      '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-an', '-pix_fmt', 'yuv420p', out])
+            if r.returncode != 0:
+                print(f'   ⚠️ _make_clip失敗')
+                _run(['ffmpeg', '-y', '-f', 'lavfi', '-i', f'color=black:s=960x960:r=30:d={t}',
+                      '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-pix_fmt', 'yuv420p', out])
         else:
-            cam_key = "zoom_in_slow"
-            vf = "zoompan=z='min(zoom+0.0015,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
-
-            # moodに応じてcolor_effectsから1つ選択
-            _MOOD_COLOR_MAP = {
-                "hook": "contrast_boost",
-                "interrupt": "glitch_rgb",
-                "value": "cinematic",
-                "secondary_hook": "hue_cycle",
-                "cta": "contrast_boost",
-            }
-            color_key = _MOOD_COLOR_MAP.get(scene_mood)
-            if color_key and color_key in _color_effects:
-                color_vf = _color_effects[color_key]
-                vf = vf + "," + color_vf
-
-            if src and os.path.exists(src):
-                d = probe_dur(src)
-                loop = int(t / max(d, 1)) + 2
-                _run(["ffmpeg", "-y", "-stream_loop", str(loop), "-i", src,
-                      "-t", str(t), "-vf", vf,
-                      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-an", "-pix_fmt", "yuv420p", out])
-            else:
-                _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=black:s=960x960:r=30:d={t}",
-                      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p", out])
+            print(f'   ⚠️ src存在しない: {src}')
+            _run(['ffmpeg', '-y', '-f', 'lavfi', '-i', f'color=black:s=960x960:r=30:d={t}',
+                  '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-pix_fmt', 'yuv420p', out])
 
     if not _broll_fallback:
         _make_clip(broll, broll_top, dur)
