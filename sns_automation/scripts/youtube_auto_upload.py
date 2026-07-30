@@ -88,7 +88,7 @@ def get_youtube():
         with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
             f.write(token_json); f.flush()
             creds = Credentials.from_authorized_user_file(f.name,
-                ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.force-ssl"])
+                ["https://www.googleapis.com/auth/youtube.upload"])
     else:
         creds = Credentials(
             token=None,
@@ -96,7 +96,7 @@ def get_youtube():
             token_uri="https://oauth2.googleapis.com/token",
             client_id=os.environ.get("YOUTUBE_CLIENT_ID",""),
             client_secret=os.environ.get("YOUTUBE_CLIENT_SECRET",""),
-            scopes=["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube.force-ssl"],
+            scopes=["https://www.googleapis.com/auth/youtube.upload"],
         )
     if not creds.valid:
         creds.refresh(Request())
