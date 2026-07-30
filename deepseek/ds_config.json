@@ -1,0 +1,37 @@
+{
+  "version": "1.0",
+  "name": "DeepSeek Video Pipeline",
+  "description": "DeepSeek専用の動画生成パイプライン（GitHub Actions用）",
+  "settings": {
+    "video_duration": 18,
+    "voice": "ja-JP-KeitaNeural",
+    "speech_rate": "-8%",
+    "video_resolution": "1080x1920",
+    "broll_fallback": true,
+    "max_retries": 3
+  },
+  "topics": [
+    "n8n",
+    "ai-job-search",
+    "meetily",
+    "openwiki",
+    "strix"
+  ],
+  "fallback_repos": [
+    {
+      "name": "n8n-io/n8n",
+      "stars": 45200,
+      "description": "ノーコードAIワークフロー自動化ツール"
+    },
+    {
+      "name": "MadsLorentzen/ai-job-search",
+      "stars": 17500,
+      "description": "AIを活用した就活自動化フレームワーク"
+    },
+    {
+      "name": "meetily/meetily",
+      "stars": 607,
+      "description": "ローカルで動作するAI議事録ツール"
+    }
+  ]
+}
