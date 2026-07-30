@@ -120,6 +120,8 @@ for i, sent in enumerate(sentences[:8]):
         scene["visual_1"] = "AI technology circuit board futuristic"
     else:
         scene["visual_1"] = "code programming digital abstract"
+    sent = sent[:40]
+    sent = re.sub(r'。.*', '', sent)
     scene["narration"] = sent
     scenes.append(scene)
 

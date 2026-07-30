@@ -243,12 +243,15 @@ def _pexels_download(query, cache_dir, orientation="portrait"):
     r = requests.get("https://api.pexels.com/videos/search", headers=headers,
         params={"query": f"{query} cinematic", "per_page": 10, "orientation": orientation}, timeout=15)
     if r.status_code != 200:
+        print(f"   [Pexels] query='{query} cinematic' → HTTP {r.status_code}, try bare query")
         r = requests.get("https://api.pexels.com/videos/search", headers=headers,
             params={"query": query, "per_page": 10, "orientation": orientation}, timeout=15)
     if r.status_code != 200:
+        print(f"   [Pexels] bare query='{query}' → HTTP {r.status_code}, giving up")
         return None
     videos = [v for v in r.json().get("videos", []) if v.get("duration", 0) >= 4]
     if not videos:
+        print(f"   [Pexels] query='{query}' → 0 videos returned (or all <4s)")
         return None
     v = random.choice(videos[:5])
     files = sorted([f for f in v["video_files"] if 360 <= f.get("width", 0) <= 1080], key=lambda x: x["width"])
@@ -279,33 +282,39 @@ def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
         "tech workspace modern",
     ]
 
+    print(f"   [fetch_broll] クエリ '{query}' でPexels検索...")
     result = _pexels_download(query, cache_dir, orientation)
     if result:
+        print(f"   [fetch_broll] ✅ Pexels hit: {result}")
         return result
 
+    print(f"   [fetch_broll] ⚠️ Pexels空 → fallback_queriesで再試行")
     for fq in fallback_queries:
         result = _pexels_download(fq, cache_dir, orientation)
         if result:
-            print(f"   ⚠️ 本来のクエリ'{query}'が空 → フォールバック: '{fq}'")
+            print(f"   [fetch_broll] ✅ fallback '{fq}' → {result}")
             return result
 
-    # 最終フォールバック: tech系別クエリで再試行
+    print(f"   [fetch_broll] ⚠️ 全fallback_queries失敗 → '{fq} cinematic' で再試行")
     for fq in fallback_queries:
         result = _pexels_download(fq + " cinematic", cache_dir, orientation)
         if result:
-            print(f"   ⚠️ 全フォールバック失敗 → '{fq} cinematic' で再試行")
+            print(f"   [fetch_broll] ✅ fallback+cinematic '{fq}' → {result}")
             return result
 
-    # Pixabayフォールバック（高品質・APIキー必要）
+    print(f"   [fetch_broll] ⚠️ Pexels全滅 → Pixabayにフォールバック")
     pixabay_result = _pixabay_download(query, cache_dir)
     if pixabay_result:
+        print(f"   [fetch_broll] ✅ Pixabay hit: {pixabay_result}")
         return pixabay_result
 
-    # Mixkitフォールバック（無料・高品質・APIキー不要）
+    print(f"   [fetch_broll] ⚠️ Pixabayも空 → Mixkitにフォールバック")
     mixkit_result = _mixkit_fallback(query, cache_dir)
     if mixkit_result:
+        print(f"   [fetch_broll] ✅ Mixkit hit: {mixkit_result}")
         return mixkit_result
 
+    print(f"   [fetch_broll] ❌ 全ソース空 → Noneを返す")
     return None
 
 def _pixabay_download(query, cache_dir):
