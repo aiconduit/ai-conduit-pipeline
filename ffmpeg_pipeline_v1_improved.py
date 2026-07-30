@@ -114,27 +114,41 @@ def compose_scene(scene, idx):
     broll = fetch_broll_cinematic(visual, cache_dir=PEXELS_CACHE)
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
 
-    def _make_clip(src, out, t):
-        _camera_moves = ["zoom_in", "zoom_out", "pan_left", "pan_right"]
-        if mood == "hook":
-            cam_move = "zoom_punch"
+    # motion_effects.jsonを読み込んでカメラムーブ・カラーエフェクトを選択
+    me_path = ROOT_DIR / "assets" / "motion_effects.json"
+    _camera_moves = {}
+    _color_effects = {}
+    if me_path.exists():
+        with open(me_path) as _f:
+            _me = json.load(_f)
+        _camera_moves = _me.get("camera_moves", {})
+        _color_effects = _me.get("color_effects", {})
+
+    def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
+        nonlocal _camera_moves, _color_effects
+        # mood / scene_idx に応じてcamera_moveを選択
+        if _camera_moves:
+            if scene_mood == "hook":
+                cam_keys = ["zoom_in_slow"]
+            elif scene_mood == "interrupt":
+                cam_keys = ["shake_light", "shake_heavy"]
+            else:
+                cam_keys = list(_camera_moves.keys())
+            cam_move_key = random.choice(cam_keys)
+            vf = _camera_moves[cam_move_key]
         else:
-            cam_move = random.choice(_camera_moves)
+            cam_move_key = "zoom_in_slow"
+            vf = "zoompan=z='min(zoom+0.0015,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+
+        # color_effectsからランダムに1つ選択
+        if _color_effects:
+            color_key = random.choice(list(_color_effects.keys()))
+            color_vf = _color_effects[color_key]
+            vf = vf + "," + color_vf
+
         if src and os.path.exists(src):
             d = probe_dur(src)
             loop = int(t / max(d, 1)) + 2
-            if cam_move == "zoom_in":
-                vf = f"zoompan=z='min(zoom+0.002,1.15)':d={int(t*30)}:s=960x960:fps=30"
-            elif cam_move == "zoom_out":
-                vf = f"zoompan=z='max(zoom-0.002,0.85)':d={int(t*30)}:s=960x960:fps=30"
-            elif cam_move == "pan_left":
-                vf = f"zoompan=x='min(0.5+0.004*on,1)':d={int(t*30)}:s=960x960:fps=30"
-            elif cam_move == "pan_right":
-                vf = f"zoompan=x='max(0.5-0.004*on,0)':d={int(t*30)}:s=960x960:fps=30"
-            elif cam_move == "zoom_punch":
-                vf = f"zoompan=z='1+0.6*min(on/10,1)':d={int(t*30)}:s=960x960:fps=30"
-            else:
-                vf = "scale=960:960:force_original_aspect_ratio=increase,crop=960:960"
             _run(["ffmpeg", "-y", "-stream_loop", str(loop), "-i", src,
                   "-t", str(t), "-vf", vf,
                   "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-an", "-pix_fmt", "yuv420p", out])
@@ -144,9 +158,18 @@ def compose_scene(scene, idx):
 
     _make_clip(broll, broll_top, dur)
 
+    # ★ LUTカラーグレーディングをB-rollに適用
+    lut_style = {"hook": "vintage", "interrupt": "cool", "value": "cinematic", "secondary_hook": "warm", "cta": "cinematic"}.get(mood, "cinematic")
+    broll_lut = str(WORK_DIR / f"btop_lut_{idx:02d}.mp4")
+    try:
+        from conduit_core import apply_lut_to_video
+        apply_lut_to_video(broll_top, broll_lut, style=lut_style, dur=dur)
+    except Exception as _e:
+        broll_lut = broll_top
+
     # ★ パターンインタラプト適用
     bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")
-    apply_pattern_interrupt(broll_top, interrupt if mood=="interrupt" else "none", bg, dur)
+    apply_pattern_interrupt(broll_lut, interrupt if mood=="interrupt" else "none", bg, dur)
 
     # キャラクター下半分（960x960スケール + 黒背景）
     char_half = str(WORK_DIR/f"char_{idx:02d}.mp4")
@@ -245,9 +268,22 @@ def main():
 
     # BGMダウンロード
     print("[3/5] 🎵 BGMダウンロード中...")
-    bgm_path = download_bgm(str(WORK_DIR))
-    print(f"   BGM: {'✅' if bgm_path else '❌ スキップ'}")
-
+    bgm_result = download_bgm(str(WORK_DIR))
+    if bgm_result and bgm_result[0]:
+        bgm_path, bgm_bpm = bgm_result
+        print(f"   BGM: ✅ ({bgm_bpm} BPM)")
+    else:
+        bgm_path, bgm_bpm = None, 120.0
+        print(f"   BGM: ❌ スキップ")
+    
+    # BPMに応じてシーン長を調整
+    beat_dur = 60.0 / max(bgm_bpm, 60) * 2  # 1小節
+    for s in scenes:
+        if s.get("auto_adjust_duration", True):
+            current = s.get("duration", 3.0)
+            bar_aligned = round(current / beat_dur) * beat_dur
+            s["duration"] = max(2.0, min(8.0, bar_aligned))
+    
     # シーン合成
     print("[4/5] 🎬 シーン合成中...")
     files = []

@@ -474,15 +474,20 @@ def freesound_search_music(query="upbeat", min_dur=30):
         return []
 
 def download_bgm(work_dir):
-    """BGMダウンロード（Mixkit→Pixabay→FreeSound→SoundHelixフォールバック連鎖）"""
+    """BGMダウンロード（Mixkit→Pixabay→FreeSound→SoundHelixフォールバック連鎖）
+    Returns (bgm_path, bpm) — bpmを同時に推定して返す
+    """
     bgm_path = Path(work_dir) / "bgm.mp3"
     if bgm_path.exists():
-        return str(bgm_path)
+        bpm = estimate_bpm_simple(str(bgm_path))
+        return str(bgm_path), bpm
     
     # Mixkit音楽を最初に試す（無料・高品質・APIキー不要）
     mixkit_bgm = _download_mixkit_music(cache_dir=work_dir)
     if mixkit_bgm:
-        return mixkit_bgm
+        bpm = estimate_bpm_simple(mixkit_bgm)
+        print(f"   BPM: {bpm}")
+        return mixkit_bgm, bpm
     
     bgm_url = None
     for source_name, search_fn, query in [
@@ -510,10 +515,12 @@ def download_bgm(work_dir):
             with open(bgm_path, "wb") as f:
                 for chunk in r.iter_content(8192):
                     f.write(chunk)
-            return str(bgm_path)
+            bpm = estimate_bpm_simple(str(bgm_path))
+            print(f"   BPM: {bpm}")
+            return str(bgm_path), bpm
     except Exception as e:
         print(f"   BGMダウンロード失敗: {e}")
-    return None
+    return None, 120.0
 
 def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     """パターンインタラプトエフェクト適用 (zoompan不使用, -r 30固定)"""
@@ -630,6 +637,142 @@ def add_loop_ending(concat_file, first_scene_path, output_path):
           "-vf", "fade=t=out:st=0.5:d=0.3",
           "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p", loop_clip])
     return loop_clip
+
+def generate_lut_cube(style="cinematic", size=33):
+    """.cube LUTファイルを生成（ffmpeg lut3dフィルター用）
+    スタイル: cinematic, warm, cool, vintage
+    仕様: 33x33x33 3D LUT (Adobe Cube format)
+    """
+    size = max(16, min(65, size))
+    lut = []
+    for b in range(size):
+        for g in range(size):
+            for r_ in range(size):
+                nr = r_ / (size - 1)
+                ng = g / (size - 1)
+                nb = b / (size - 1)
+                if style == "cinematic":
+                    out_r = nr ** (1/2.2)
+                    out_g = ng ** (1/2.2)
+                    out_b = nb ** (1/2.2)
+                    contrast = 1.15
+                    out_r = (out_r - 0.5) * contrast + 0.5
+                    out_g = (out_g - 0.5) * contrast + 0.5
+                    out_b = (out_b - 0.5) * contrast + 0.5
+                    out_r += 0.02
+                    out_b -= 0.02
+                elif style == "warm":
+                    out_r = nr ** 0.95
+                    out_g = ng ** 0.98
+                    out_b = nb ** 1.05
+                    out_r += 0.04
+                    out_g += 0.01
+                    out_b -= 0.02
+                elif style == "cool":
+                    out_r = nr ** 1.05
+                    out_g = ng ** 0.98
+                    out_b = nb ** 0.92
+                    out_r -= 0.03
+                    out_g += 0.01
+                    out_b += 0.05
+                elif style == "vintage":
+                    out_r = nr * 0.9 + 0.05
+                    out_g = ng * 0.85 + 0.03
+                    out_b = nb * 0.7 + 0.02
+                    sepia = out_r * 0.393 + out_g * 0.769 + out_b * 0.189
+                    out_r = out_r * 0.8 + sepia * 0.2
+                    out_g = out_g * 0.85 + sepia * 0.15
+                    out_b = out_b * 0.7 + sepia * 0.3
+                else:
+                    out_r, out_g, out_b = nr, ng, nb
+                out_r = max(0.0, min(1.0, out_r))
+                out_g = max(0.0, min(1.0, out_g))
+                out_b = max(0.0, min(1.0, out_b))
+                lut.append(f"{out_r:.6f} {out_g:.6f} {out_b:.6f}")
+    lines = [
+        "TITLE \"OpenMontage LUT\"",
+        f"LUT_3D_SIZE {size}",
+        "DOMAIN_MIN 0.0 0.0 0.0",
+        "DOMAIN_MAX 1.0 1.0 1.0",
+        "",
+    ] + lut
+    return "\n".join(lines)
+
+def apply_lut_to_video(input_path, output_path, style="cinematic", dur=None):
+    """LUTカラーグレーディングを動画に適用"""
+    lut_cube = generate_lut_cube(style)
+    lut_path = output_path.replace(".mp4", ".cube")
+    with open(lut_path, "w") as f:
+        f.write(lut_cube)
+    cmd = ["ffmpeg", "-y", "-i", input_path,
+           "-vf", f"lut3d={lut_path}",
+           "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-pix_fmt", "yuv420p"]
+    if dur:
+        cmd.extend(["-t", str(dur)])
+    cmd.append(output_path)
+    subprocess.run([str(a) for a in cmd], capture_output=True, text=True, check=True)
+
+def estimate_bpm_simple(audio_path):
+    """BPM推定（librosa不使用・軽量版）
+    ffmpeg ashowinfo + 波形エンベロープ解析でBPMを推定。
+    失敗時はデフォルト120BPMを返す。
+    """
+    import struct, math
+    try:
+        r = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "stream=codec_name,sample_rate",
+             "-of", "json", audio_path],
+            capture_output=True, text=True, timeout=10
+        )
+        info = json.loads(r.stdout)
+        streams = info.get("streams", [])
+        if not streams:
+            return 120.0
+        sr = int(streams[0].get("sample_rate", 44100))
+        tmp_wav = audio_path + ".bpm_tmp.wav"
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", audio_path,
+             "-ac", "1", "-ar", str(sr), "-t", "30",
+             "-f", "wav", tmp_wav],
+            capture_output=True, text=True, timeout=30
+        )
+        if not os.path.exists(tmp_wav):
+            return 120.0
+        with open(tmp_wav, "rb") as f:
+            f.read(44)
+            raw = f.read()
+        samples = struct.unpack(f"<{len(raw)//2}h", raw)
+        samples = [float(s) / 32768.0 for s in samples]
+
+        hop = int(sr * 0.02)
+        env = []
+        for i in range(0, len(samples) - hop, hop):
+            seg = samples[i:i + hop]
+            env.append(math.sqrt(sum(s * s for s in seg) / max(len(seg), 1)))
+
+        min_bpm, max_bpm = 60, 180
+        min_interval = int(60.0 / max_bpm * sr / hop)
+        max_interval = int(60.0 / min_bpm * sr / hop)
+
+        best_bpm = 120.0
+        best_score = 0.0
+        for lag in range(min_interval, max_interval + 1):
+            score = 0.0
+            for i in range(0, len(env) - lag, lag):
+                score += env[i] * env[i + lag]
+            if score > best_score:
+                best_score = score
+                best_bpm = 60.0 / (lag * hop / sr)
+
+        try:
+            os.remove(tmp_wav)
+        except:
+            pass
+
+        best_bpm = max(min_bpm, min(max_bpm, best_bpm))
+        return round(best_bpm, 1)
+    except Exception:
+        return 120.0
 
 def probe_dur(f):
     try:
