@@ -198,7 +198,11 @@ def compose_scene(scene, idx):
     # ★ パターンインタラプト適用
     bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")
     if not _broll_fallback:
-        apply_pattern_interrupt(broll_lut, interrupt if mood=="interrupt" else "none", bg, dur)
+        try:
+            apply_pattern_interrupt(broll_lut, interrupt if mood=="interrupt" else "none", bg, dur)
+        except Exception as _e:
+            print(f"   ⚠️ apply_pattern_interrupt失敗({_e}) → コピーで代替")
+            import shutil; shutil.copy(broll_lut, bg)
 
     # キャラクター下半分（960x960スケール + 黒背景）
     char_half = str(WORK_DIR/f"char_{idx:02d}.mp4")
