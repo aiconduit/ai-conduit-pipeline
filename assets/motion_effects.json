@@ -1,0 +1,53 @@
+{
+  "camera_moves": {
+    "zoom_in_slow": "zoompan=z='min(zoom+0.0015,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'",
+    "zoom_out_slow": "zoompan=z='if(lte(on,1),1.3,max(1.3-0.003*on,1.0))':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'",
+    "pan_left": "zoompan=z=1.2:x='iw*on/500':y='ih/2-(ih/zoom/2)'",
+    "pan_right": "zoompan=z=1.2:x='max(0,iw-(iw*on/500))':y='ih/2-(ih/zoom/2)'",
+    "shake_light": "crop=iw-20:ih-20:10+10*sin(n*0.5):10+10*cos(n*0.7)",
+    "shake_heavy": "crop=iw-40:ih-40:20+20*sin(n*2):20+20*cos(n*3)"
+  },
+  "color_effects": {
+    "glitch_rgb": "rgbashift=rh=8:gh=-3:bh=-8:rv=3:gv=-3:bv=0",
+    "vhs_noise": "noise=alls=8:allf=t+u",
+    "hue_cycle": "hue=h='10*sin(n/15)':s=1.1",
+    "contrast_boost": "eq=contrast=1.3:brightness=0.05:saturation=1.2",
+    "cinematic": "colorlevels=rimin=0.05:gimin=0.02:bimin=0.1:rimax=0.95:gimax=0.98:bimax=0.9"
+  },
+  "speed_effects": {
+    "speed_up": "setpts=0.5*PTS",
+    "slow_down": "setpts=2.0*PTS",
+    "speed_ramp": "setpts=if(lt(T,1),0.5*PTS,PTS)"
+  },
+  "transitions": {
+    "builtin": [
+      "fade",
+      "slideleft",
+      "slideright",
+      "slideup",
+      "slidedown",
+      "diagtl",
+      "diagtr",
+      "diagbl",
+      "diagbr",
+      "zoomin",
+      "fadeblack",
+      "fadewhite",
+      "radial",
+      "dissolve",
+      "coverleft",
+      "coverright",
+      "revealleft",
+      "revealright",
+      "circleopen",
+      "circleclose"
+    ],
+    "mood_map": {
+      "hook": "zoomin",
+      "interrupt": "diagtl",
+      "value": "fade",
+      "secondary_hook": "slideleft",
+      "cta": "fadeblack"
+    }
+  }
+}
