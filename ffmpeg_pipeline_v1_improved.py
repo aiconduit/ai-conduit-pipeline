@@ -224,13 +224,8 @@ def compose_scene(scene, idx):
               "-vf", f"ass={ass_path}",
               "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p", composed])
     else:
-        # 従来のstatic overlay
-        ovr = str(WORK_DIR/f"ovr_{idx:02d}.png")
-        gen_overlay(scene, ovr, idx)
-        composed = str(WORK_DIR/f"comp_{idx:02d}.mp4")
-        _run(["ffmpeg","-y","-i",bg_with_char,"-i",ovr,
-              "-filter_complex","[0:v][1:v]overlay=0:0[out]",
-              "-map","[out]","-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",composed])
+        # タイムスタンプなし → そのままbg_with_charを使用（オーバーレイなし）
+        composed = bg_with_char
 
     _run(["ffmpeg","-y","-i",composed,"-i",audio,
           "-r","30","-c:v","libx264","-preset","fast","-crf","18","-c:a","aac","-map","0:v","-map","1:a","-shortest",out])
