@@ -1,0 +1,31 @@
+name: Generate 8 Video Patterns
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+jobs:
+  generate-videos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+          pip install -r requirements.txt
+      - name: Generate all 8 patterns
+        run: |
+          for config in configs/openwiki_terminal.json configs/strix_comparison.json configs/grok-hook.json configs/meetily-story.json configs/cursor-comparison.json configs/continue-tutorial.json configs/copilot-fact.json configs/claude-code-emotion.json; do
+            echo "🎬 Generating: $(basename $config)"
+            python3 daily_content_pipeline.py "$config"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: all-8-pattern-videos
+          path: projects/daily/renders/*.mp4
+          retention-days: 7
