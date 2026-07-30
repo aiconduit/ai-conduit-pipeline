@@ -381,6 +381,48 @@ def _mixkit_fallback(query, cache_dir):
             continue
     return None
 
+def _download_mixkit_music(mood="default", cache_dir=None):
+    """Mixkit無料音楽をダウンロード（209件・APIキー不要）"""
+    import json, random
+    music_file = os.path.join(os.path.dirname(__file__), "assets", "mixkit_music.json")
+    if not os.path.exists(music_file):
+        return None
+    with open(music_file) as f:
+        music_db = json.load(f)
+    
+    mood_cat = {
+        "hook": "electronic",
+        "interrupt": "hip-hop", 
+        "value": "corporate",
+        "cta": "cinematic",
+        "default": "cinematic",
+    }
+    cat = mood_cat.get(mood, "cinematic")
+    ids = music_db.get(cat, music_db.get("cinematic", []))
+    if not ids:
+        return None
+    
+    music_id = random.choice(ids)
+    cache_path = Path(cache_dir) if cache_dir else Path("/tmp/bgm_cache")
+    cache_path.mkdir(exist_ok=True)
+    out = cache_path / f"mixkit_music_{music_id}.mp3"
+    
+    if out.exists():
+        return str(out)
+    
+    url = f"https://assets.mixkit.co/music/{music_id}/{music_id}.mp3"
+    try:
+        r = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=30, stream=True)
+        if r.status_code == 200:
+            with open(out, "wb") as f:
+                for chunk in r.iter_content(8192):
+                    f.write(chunk)
+            print(f"   Mixkit音楽 ✅ {music_id}")
+            return str(out)
+    except Exception as e:
+        print(f"   Mixkit音楽失敗: {e}")
+    return None
+
 def pixabay_search_music(query="upbeat background", min_dur=30):
     """Pixabayからフリーミュージックをスクレイピング（APIキー不要）"""
     try:
@@ -429,10 +471,16 @@ def freesound_search_music(query="upbeat", min_dur=30):
         return []
 
 def download_bgm(work_dir):
-    """BGMダウンロード（Pixabay→FreeSound→SoundHelixフォールバック連鎖）"""
+    """BGMダウンロード（Mixkit→Pixabay→FreeSound→SoundHelixフォールバック連鎖）"""
     bgm_path = Path(work_dir) / "bgm.mp3"
     if bgm_path.exists():
         return str(bgm_path)
+    
+    # Mixkit音楽を最初に試す（無料・高品質・APIキー不要）
+    mixkit_bgm = _download_mixkit_music(cache_dir=work_dir)
+    if mixkit_bgm:
+        return mixkit_bgm
+    
     bgm_url = None
     for source_name, search_fn, query in [
         ("Pixabay", pixabay_search_music, "upbeat corporate background"),
