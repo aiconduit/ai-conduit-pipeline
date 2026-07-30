@@ -113,6 +113,17 @@ def compose_scene(scene, idx):
     # B-roll取得（単一クリップ）
     broll = fetch_broll_cinematic(visual, cache_dir=PEXELS_CACHE)
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
+    
+    # B-roll取得失敗時は黒画面で代替
+    if not broll or not os.path.exists(str(broll)):
+        print(f"   ⚠️ B-roll取得失敗 → 黒画面で代替")
+        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
+              "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p", broll_top])
+        broll_lut = broll_top
+        bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")
+        _run(["ffmpeg","-y","-i",broll_top,"-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg])
+    else:
+        broll = str(broll)
 
     # motion_effects.jsonを読み込み（カメラムーブ・カラー・トランジション）
     me_path = ROOT_DIR / "assets" / "motion_effects.json"
