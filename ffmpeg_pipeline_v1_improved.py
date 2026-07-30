@@ -114,36 +114,36 @@ def compose_scene(scene, idx):
     broll = fetch_broll_cinematic(visual, cache_dir=PEXELS_CACHE)
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
 
-        # motion_effects.jsonを読み込み（カメラムーブ・カラー・トランジション）
-        me_path = ROOT_DIR / "assets" / "motion_effects.json"
-        _camera_moves = {}
-        _color_effects = {}
-        _transitions = {}
-        if me_path.exists():
-            with open(me_path) as _f:
-                _me = json.load(_f)
-            _camera_moves = _me.get("camera_moves", {})
-            _color_effects = _me.get("color_effects", {})
-            _transitions = _me.get("transitions", {})
+    # motion_effects.jsonを読み込み（カメラムーブ・カラー・トランジション）
+    me_path = ROOT_DIR / "assets" / "motion_effects.json"
+    _camera_moves = {}
+    _color_effects = {}
+    _transitions = {}
+    if me_path.exists():
+        with open(me_path) as _f:
+            _me = json.load(_f)
+        _camera_moves = _me.get("camera_moves", {})
+        _color_effects = _me.get("color_effects", {})
+        _transitions = _me.get("transitions", {})
 
-        # zoompan_patterns.py のMOOD_CAMERA_MAP
-        _MOOD_CAMERA_MAP = {
-            "hook": "zoom_in_slow",
-            "interrupt": "shake_light",
-            "value": "zoom_out_slow",
-            "secondary_hook": "pan_left",
-            "cta": "zoom_in_slow",
-        }
+    # zoompan_patterns.py のMOOD_CAMERA_MAP
+    _MOOD_CAMERA_MAP = {
+        "hook": "zoom_in_slow",
+        "interrupt": "shake_light",
+        "value": "zoom_out_slow",
+        "secondary_hook": "pan_left",
+        "cta": "zoom_in_slow",
+    }
 
-        def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
-            nonlocal _camera_moves, _color_effects
-            # moodに応じてcamera_moveを選択（zoompan_patterns.py準拠）
-            cam_key = _MOOD_CAMERA_MAP.get(scene_mood, "zoom_in_slow")
-            if _camera_moves and cam_key in _camera_moves:
-                vf = _camera_moves[cam_key]
-            else:
-                cam_key = "zoom_in_slow"
-                vf = "zoompan=z='min(zoom+0.0015,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
+    def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
+        nonlocal _camera_moves, _color_effects
+        # moodに応じてcamera_moveを選択（zoompan_patterns.py準拠）
+        cam_key = _MOOD_CAMERA_MAP.get(scene_mood, "zoom_in_slow")
+        if _camera_moves and cam_key in _camera_moves:
+            vf = _camera_moves[cam_key]
+        else:
+            cam_key = "zoom_in_slow"
+            vf = "zoompan=z='min(zoom+0.0015,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'"
 
             # moodに応じてcolor_effectsから1つ選択
             _MOOD_COLOR_MAP = {
