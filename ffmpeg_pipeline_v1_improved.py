@@ -257,7 +257,11 @@ def main():
         kws = mood_keywords.get(mood, [])
         try:
             audio_path, timestamps = generate_word_subtitle_audio(text, p, speed=1.08, keywords=kws)
-            dur = timestamps[-1].end_sec if timestamps else probe_dur(p)
+            if timestamps:
+                last = timestamps[-1]
+                dur = (last["start_ms"] + last["duration_ms"]) / 1000.0 if isinstance(last, dict) else last.end_sec
+            else:
+                dur = probe_dur(p)
         except Exception as e:
             print(f"   ⚠️ タイムスタンプTTS失敗 ({e}), Google TTSでフォールバック")
             mp3_p = p.replace(".wav", ".mp3")
