@@ -16,6 +16,7 @@ DEEPSEEK_KEY = os.environ.get("DEEPSEEK_KEY", "sk-71eab12699f047a5891e62268c66c2
 GROQ_KEY = os.environ.get("GROQ_API_KEY", "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")
 GOOGLE_TTS_KEY = os.environ.get("GOOGLE_TTS_KEY", "AIzaSyCsrOd3cgi9hcnoOeFXRde9prLAy6Y2vdY")
 PEXELS_KEY = os.environ.get("PEXELS_API_KEY", "LSsE8rcX23VNaFN0M0F19PCMtoLhEyg1NxZpIqwr7aCuvUYInctIexrW")
+PIXABAY_KEY = os.environ.get("PIXABAY_API_KEY", "")
 
 # === Cinema Director スタイル定義 ===
 CINEMATIC_STYLES = {
@@ -282,11 +283,58 @@ def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
             print(f"   ⚠️ 全フォールバック失敗 → '{fq} cinematic' で再試行")
             return result
 
+    # Pixabayフォールバック（高品質・APIキー必要）
+    pixabay_result = _pixabay_download(query, cache_dir)
+    if pixabay_result:
+        return pixabay_result
+
     # Mixkitフォールバック（無料・高品質・APIキー不要）
     mixkit_result = _mixkit_fallback(query, cache_dir)
     if mixkit_result:
         return mixkit_result
 
+    return None
+
+def _pixabay_download(query, cache_dir):
+    """Pixabay無料動画を取得（高品質・500件以上）"""
+    if not PIXABAY_KEY:
+        return None
+    try:
+        r = requests.get("https://pixabay.com/api/videos/", params={
+            "key": PIXABAY_KEY,
+            "q": query,
+            "per_page": 10,
+            "video_type": "film",
+            "safesearch": "true",
+        }, timeout=10)
+        if r.status_code != 200:
+            return None
+        hits = r.json().get("hits", [])
+        if not hits:
+            return None
+        import random
+        v = random.choice(hits[:5])
+        videos = v.get("videos", {})
+        best = max(videos.values(), key=lambda x: x.get("width", 0), default=None)
+        if not best:
+            return None
+        url = best.get("url", "")
+        if not url:
+            return None
+        cache_dir = Path(cache_dir) if cache_dir else Path("/tmp/pexels_cache")
+        cache_dir.mkdir(exist_ok=True)
+        out = cache_dir / f"pixabay_{v['id']}.mp4"
+        if out.exists():
+            return str(out)
+        resp = requests.get(url, timeout=30, stream=True)
+        if resp.status_code == 200:
+            with open(out, "wb") as f:
+                for chunk in resp.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            print(f"   Pixabay ✅ {v['id']}")
+            return str(out)
+    except Exception as e:
+        print(f"   Pixabay error: {e}")
     return None
 
 def _mixkit_fallback(query, cache_dir):
