@@ -57,9 +57,14 @@ def upload_thumbnail(youtube, video_id, image_buf):
 
 
 def reply_to_comments(youtube, video_id):
-    comments = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=10).execute()
-    reply_text = "ありがとうございます！🎁無料プレゼントはInstagramで@aiconduitをフォローしてコメントに『AI』と書いてください！"
+    gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/gift_content/")
+    reply_text = f"ありがとうございます！🎁無料プレゼントはこちらから受け取れます👉 {gift_link}"
+    comments = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=20).execute()
     for item in comments.get("items", []):
+        top = item["snippet"]["topLevelComment"]["snippet"]
+        # AIconduitを含むコメントのみ返信
+        if "aiconduit" not in top.get("textOriginal", "").lower():
+            continue
         comment_id = item["snippet"]["topLevelComment"]["id"]
         try:
             youtube.comments().insert(
