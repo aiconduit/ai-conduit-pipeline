@@ -282,6 +282,55 @@ def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
             print(f"   ⚠️ 全フォールバック失敗 → '{fq} cinematic' で再試行")
             return result
 
+    # Mixkitフォールバック（無料・高品質・APIキー不要）
+    mixkit_result = _mixkit_fallback(query, cache_dir)
+    if mixkit_result:
+        return mixkit_result
+
+    return None
+
+def _mixkit_fallback(query, cache_dir):
+    """Mixkit無料動画をキーワードマッチングで取得"""
+    import json, random
+    mixkit_file = os.path.join(os.path.dirname(__file__), "assets", "mixkit_videos.json")
+    if not os.path.exists(mixkit_file):
+        return None
+    with open(mixkit_file) as f:
+        videos = json.load(f)
+    cat_map = {
+        "technology": ["technology","computer","future","ai","tech","digital","code"],
+        "business": ["business","work","office","meeting","finance"],
+        "city": ["city","urban","street","building","people"],
+        "science": ["science","research","lab","data","analysis"],
+        "abstract": ["abstract","background","pattern","light"],
+    }
+    q_lower = query.lower()
+    selected_cat = "technology"
+    for cat, keywords in cat_map.items():
+        if any(kw in q_lower for kw in keywords):
+            selected_cat = cat
+            break
+    ids = videos.get(selected_cat, videos.get("technology", []))
+    if not ids:
+        return None
+    video_id = random.choice(ids)
+    cache_dir = Path(cache_dir) if cache_dir else Path("/tmp/pexels_cache")
+    cache_dir.mkdir(exist_ok=True)
+    out = cache_dir / f"mixkit_{video_id}.mp4"
+    if out.exists():
+        return str(out)
+    for res in ["1080", "720"]:
+        url = f"https://assets.mixkit.co/videos/{video_id}/{video_id}-{res}.mp4"
+        try:
+            r = requests.get(url, timeout=30, stream=True)
+            if r.status_code == 200:
+                with open(out, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=8192):
+                        f.write(chunk)
+                print(f"   Mixkit ✅ {video_id} ({res}p)")
+                return str(out)
+        except:
+            continue
     return None
 
 def pixabay_search_music(query="upbeat background", min_dur=30):
