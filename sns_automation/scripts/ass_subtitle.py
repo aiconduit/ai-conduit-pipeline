@@ -9,10 +9,10 @@ import random
 from pathlib import Path
 
 # === shortsmith jitter+4 grouping config (tuned for Japanese) ===
-MIN_WORDS_PER_GROUP = 2
-MAX_WORDS_PER_GROUP = 3
-MAX_GROUP_SECONDS = 1.25
-MAX_GROUP_CHARS = 10
+MIN_WORDS_PER_GROUP = 4
+MAX_WORDS_PER_GROUP = 10
+MAX_GROUP_SECONDS = 1.5
+MAX_GROUP_CHARS = 12
 PAUSE_BREAK_MS = 300
 MAX_TAIL_MS = 350
 
