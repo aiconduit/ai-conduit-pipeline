@@ -1,0 +1,27 @@
+{
+  "name": "copilot-fact",
+  "hook_text": "GitHub Copilot、実は46%のコードを自動生成してる",
+  "hook_subtitle": "開発者の46%が使用中",
+  "terminal_title": "copilot",
+  "prompt": "$",
+  "accentColor": "#F97316",
+  "steps": [
+    {"kind": "cmd", "text": "# GitHub Copilot の実力", "typeSpeed": 0.02},
+    {"kind": "pill", "text": "📊 46% のコードを自動生成", "color": "#F97316", "durationSeconds": 2},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "# 対応言語: 40+ 言語"},
+    {"kind": "out", "text": "> Python, JavaScript, Java, Go, Rust..."},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "# 導入企業: 1,000社以上"},
+    {"kind": "out", "text": "> Fortune 500企業も導入済み"}
+  ],
+  "kpi_title": "GitHub Copilot の衝撃事実",
+  "kpi_data": [
+    {"label": "コード自動生成", "value": 46, "change": 0, "suffix": "%"},
+    {"label": "開発者利用", "value": 46, "change": 0, "suffix": "%"},
+    {"label": "対応言語", "value": 40, "change": 0, "suffix": "+"}
+  ],
+  "narration_text": "GitHub Copilot、実は46%のコードを自動生成しているって知ってましたか？開発者の46%が使用していて、40以上の言語に対応。Fortune 500企業も導入済みの実力派ツールです。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 200,
+  "say_voice": "ja-JP-KeitaNeural"
+}

@@ -1,0 +1,28 @@
+{
+  "name": "strix-comparison",
+  "hook_text": "AIがコードレビューを自動でやってくれる！",
+  "hook_subtitle": "開発時間を70%削減",
+  "terminal_title": "strix",
+  "prompt": "$",
+  "accentColor": "#34D399",
+  "steps": [
+    {"kind": "cmd", "text": "pip install strix-ai", "typeSpeed": 0.02},
+    {"kind": "out", "text": "+ strix-ai installed"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "strix review app.py"},
+    {"kind": "out", "text": "> Found 3 issues, 2 security risks"},
+    {"kind": "pill", "text": "従来: 2時間 → たった5分", "color": "#34D399", "durationSeconds": 2},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "strix fix --auto"},
+    {"kind": "out", "text": "> 3 issues fixed automatically"}
+  ],
+  "kpi_title": "コードレビュー自動化の効果",
+  "kpi_data": [
+    {"label": "時間削減", "value": 70, "change": 0, "suffix": "%"},
+    {"label": "バグ発見率", "value": 95, "change": 0, "suffix": "%"},
+    {"label": "自動修正", "value": 100, "change": 0, "suffix": "%"}
+  ],
+  "narration_text": "AIがコードレビューを自動でやってくれるツールです。従来2時間かかっていたレビューが、たった5分で完了。セキュリティリスクも自動で検出して修正までしてくれます。開発チームの生産性が劇的に向上します。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 195,
+  "say_voice": "ja-JP-KeitaNeural"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "grok-hook",
+  "hook_text": "【衝撃】xAIのコーディングエージェントが無料で使える！",
+  "hook_subtitle": "23,433 Stars 獲得中",
+  "terminal_title": "grok-build",
+  "prompt": "$",
+  "accentColor": "#EC4899",
+  "steps": [
+    {"kind": "cmd", "text": "pip install grok-ai", "typeSpeed": 0.02},
+    {"kind": "out", "text": "+ grok-ai installed"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "grok ask 'Write a Python function'"},
+    {"kind": "out", "text": "> Here's your code..."},
+    {"kind": "pill", "text": "🔥 1日で10倍の生産性", "color": "#EC4899", "durationSeconds": 2}
+  ],
+  "kpi_title": "grok-build 実績",
+  "kpi_data": [
+    {"label": "Stars", "value": 23433, "change": 0, "suffix": ""},
+    {"label": "フォーク", "value": 1200, "change": 0, "suffix": ""},
+    {"label": "生産性", "value": 10, "change": 0, "suffix": "倍"}
+  ],
+  "narration_text": "xAIが開発したコーディングエージェントgrok-buildが話題です。なんと無料で使えて、コーディングの生産性が10倍に。23,433スターを獲得している注目のツールを今すぐ試してみましょう。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 195,
+  "say_voice": "ja-JP-KeitaNeural"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "openwiki-terminal",
+  "hook_text": "オープンソースのWikiを3分で構築！",
+  "hook_subtitle": "本日GitHubトレンド 1.2k Stars",
+  "terminal_title": "openwiki",
+  "prompt": "$",
+  "accentColor": "#F59E0B",
+  "steps": [
+    {"kind": "cmd", "text": "git clone github.com/openwiki/openwiki", "typeSpeed": 0.02},
+    {"kind": "out", "text": "+ openwiki cloned"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "cd openwiki && npm install"},
+    {"kind": "out", "text": "+ 324 packages installed"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "pill", "text": "3分でWikiが完成", "color": "#F59E0B", "durationSeconds": 2},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "npm run dev"},
+    {"kind": "out", "text": "> Server running at http://localhost:3000"}
+  ],
+  "kpi_title": "オープンソースWikiの実力",
+  "kpi_data": [
+    {"label": "Stars", "value": 1200, "change": 0, "suffix": ""},
+    {"label": "インストール", "value": 3, "change": 0, "suffix": "分"},
+    {"label": "カスタマイズ", "value": 100, "change": 0, "suffix": "%自由"}
+  ],
+  "narration_text": "オープンソースのWikiを3分で構築できるツールです。git cloneしてnpm installするだけで、すぐに動くWikiが立ち上がります。完全にカスタマイズ可能で、チームのナレッジ管理に最適です。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 190,
+  "say_voice": "ja-JP-KeitaNeural"
+}

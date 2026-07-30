@@ -1,0 +1,28 @@
+{
+  "name": "cursor-comparison",
+  "hook_text": "VS Codeより10倍速いって知ってた？",
+  "hook_subtitle": "AI搭載エディタの実力",
+  "terminal_title": "cursor",
+  "prompt": "$",
+  "accentColor": "#F97316",
+  "steps": [
+    {"kind": "cmd", "text": "brew install --cask cursor", "typeSpeed": 0.02},
+    {"kind": "out", "text": "+ cursor installed"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "cursor ."},
+    {"kind": "out", "text": "> AI suggestions ready"},
+    {"kind": "pill", "text": "⚡ 従来の10倍の速度", "color": "#F97316", "durationSeconds": 2},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "# コードを書くだけでAIが補完"},
+    {"kind": "out", "text": "> Generating 3 suggestions..."}
+  ],
+  "kpi_title": "VS Code vs Cursor",
+  "kpi_data": [
+    {"label": "開発速度", "value": 10, "change": 0, "suffix": "倍"},
+    {"label": "バグ削減", "value": 60, "change": 0, "suffix": "%"},
+    {"label": "学習コスト", "value": 0, "change": 0, "suffix": "時間"}
+  ],
+  "narration_text": "VS Codeより10倍速いって知ってましたか？CursorはAI搭載の次世代エディタで、コードを書くだけで賢い補完が効きます。バグも60%削減され、学習コストはほぼゼロ。今すぐ乗り換えて、開発速度を劇的に上げましょう。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 195,
+  "say_voice": "ja-JP-KeitaNeural"
+}

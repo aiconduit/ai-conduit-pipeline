@@ -1,0 +1,28 @@
+{
+  "name": "meetily-story",
+  "hook_text": "会議の議事録、もう書かなくていいんだよ",
+  "hook_subtitle": "AIが全部やってくれる時代",
+  "terminal_title": "meetily",
+  "prompt": "$",
+  "accentColor": "#8B5CF6",
+  "steps": [
+    {"kind": "cmd", "text": "brew install meetily", "typeSpeed": 0.02},
+    {"kind": "out", "text": "+ meetily installed"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "meetily start --local"},
+    {"kind": "out", "text": "> Listening... (100% local, no cloud)"},
+    {"kind": "pill", "text": "📝 議事録が自動で完成", "color": "#8B5CF6", "durationSeconds": 2},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "meetily summary"},
+    {"kind": "out", "text": "> 3 action items, 2 decisions found"}
+  ],
+  "kpi_title": "会議の効率化",
+  "kpi_data": [
+    {"label": "議事録作成", "value": 100, "change": 0, "suffix": "%自動化"},
+    {"label": "プライバシー", "value": 100, "change": 0, "suffix": "%ローカル"},
+    {"label": "話者識別", "value": 4, "change": 0, "suffix": "人"}
+  ],
+  "narration_text": "会議の議事録をAIが自動で取ってくれる時代が来ました。meetilyは完全ローカルで動作し、クラウドにデータを送りません。話者を自動で識別し、決定事項やタスクをまとめてくれます。もう議事録を書く手間から解放されます。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 190,
+  "say_voice": "ja-JP-KeitaNeural"
+}

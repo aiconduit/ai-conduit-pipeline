@@ -1,0 +1,28 @@
+{
+  "name": "continue-tutorial",
+  "hook_text": "IDEでAIアシスタントを使う方法",
+  "hook_subtitle": "3ステップで導入完了",
+  "terminal_title": "continue",
+  "prompt": "$",
+  "accentColor": "#06B6D4",
+  "steps": [
+    {"kind": "cmd", "text": "# Step 1: 拡張機能をインストール", "typeSpeed": 0.02},
+    {"kind": "out", "text": "> VS Code Marketplace で 'Continue' を検索"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "# Step 2: APIキーを設定"},
+    {"kind": "out", "text": "> 設定画面で API Key を入力"},
+    {"kind": "pill", "text": "✅ 3分でセットアップ完了", "color": "#06B6D4", "durationSeconds": 2},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "# Step 3: AIと会話開始"},
+    {"kind": "out", "text": "> Cmd+I でAIアシスタントを起動"}
+  ],
+  "kpi_title": "Continue 導入効果",
+  "kpi_data": [
+    {"label": "セットアップ", "value": 3, "change": 0, "suffix": "分"},
+    {"label": "生産性", "value": 50, "change": 0, "suffix": "%向上"},
+    {"label": "対応AI", "value": 15, "change": 0, "suffix": "種類"}
+  ],
+  "narration_text": "IDEでAIアシスタントを使う方法を3ステップで解説します。まず拡張機能をインストール、次にAPIキーを設定、そしてAIと会話を始めるだけ。たった3分でセットアップ完了し、生産性が50%向上します。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 185,
+  "say_voice": "ja-JP-KeitaNeural"
+}

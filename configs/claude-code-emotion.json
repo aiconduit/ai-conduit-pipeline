@@ -1,0 +1,26 @@
+{
+  "name": "claude-code-emotion",
+  "hook_text": "もう悩まなくていい。Claudeが全部やってくれる",
+  "hook_subtitle": "あなたの開発をサポート",
+  "terminal_title": "claude-code",
+  "prompt": "$",
+  "accentColor": "#8B5CF6",
+  "steps": [
+    {"kind": "cmd", "text": "# 難しいコーディングもClaudeに任せよう", "typeSpeed": 0.02},
+    {"kind": "out", "text": "> あなたのパートナーがここに"},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "pill", "text": "💪 あなたの開発を支えます", "color": "#8B5CF6", "durationSeconds": 2},
+    {"kind": "pause", "seconds": 0.3},
+    {"kind": "cmd", "text": "# もう一人で悩まなくていい"},
+    {"kind": "out", "text": "> コードレビュー、デバッグ、設計..."}
+  ],
+  "kpi_title": "Claude Code の効果",
+  "kpi_data": [
+    {"label": "開発効率", "value": 80, "change": 0, "suffix": "%向上"},
+    {"label": "ストレス", "value": 70, "change": 0, "suffix": "%軽減"},
+    {"label": "学習速度", "value": 3, "change": 0, "suffix": "倍"}
+  ],
+  "narration_text": "もう一人でコーディングに悩まなくていいんです。Claudeがあなたの開発パートナーとして、レビューもデバッグも設計も全部サポートします。開発効率は80%向上し、ストレスは70%軽減。コメントにconduitと入れてくれた方にテンプレートプレゼントします。",
+  "say_rate": 185,
+  "say_voice": "ja-JP-KeitaNeural"
+}
