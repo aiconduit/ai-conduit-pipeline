@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-07-31T12:43:14.491044+00:00",
+  "source": "news_hn_hf_mit_trends_daily",
+  "news_item": {
+    "title": "Advancing the price-performance frontier with GPT‑5.6",
+    "url": "https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/",
+    "source": "hackernews",
+    "score": 586
+  },
+  "plan": {
+    "selected_title": "Advancing the price-performance frontier with GPT‑5.6",
+    "source": "hackernews",
+    "reason": "GPT-5.6の発表は速報性が高く、性能向上とコスト削減というエンジニアに直結する事実を短い動画で伝えられるため。",
+    "hashtags": [
+      "#GPT5",
+      "#AI",
+      "#OpenAI",
+      "#自動化",
+      "#効率化",
+      "#AIニュース",
+      "#エンジニア"
+    ],
+    "tags": [
+      "ai news",
+      "gpt-5.6",
+      "openai",
+      "llm",
+      "artificial intelligence",
+      "machine learning",
+      "tech news",
+      "ai automation",
+      "AIツール",
+      "AI動画",
+      "自動化",
+      "効率化",
+      "最新AI",
+      "AIニュース"
+    ],
+    "target_audience": "日本のエンジニア（学生〜現役〜フリーランス）",
+    "script": {
+      "total_duration_sec": 38,
+      "scenes": [
+        {
+          "scene_title": "Hook",
+          "duration_sec": 4,
+          "narration": "GPT-5.6発表!",
+          "visual_1": "breaking news alert",
+          "visual_2": "OpenAI logo animation"
+        },
+        {
+          "scene_title": "Fact_1",
+          "duration_sec": 8,
+          "narration": "性能は大幅向上",
+          "visual_1": "AI model performance graph",
+          "visual_2": "speedometer fast motion"
+        },
+        {
+          "scene_title": "Fact_2",
+          "duration_sec": 8,
+          "narration": "コストは劇的低下",
+          "visual_1": "cost reduction chart",
+          "visual_2": "falling coins animation"
+        },
+        {
+          "scene_title": "Twist",
+          "duration_sec": 8,
+          "narration": "開発が加速する",
+          "visual_1": "developer coding fast",
+          "visual_2": "automation pipeline"
+        },
+        {
+          "scene_title": "CTA",
+          "duration_sec": 6,
+          "narration": "詳細はAI Conduitで",
+          "visual_1": "AI Conduit logo",
+          "visual_2": "subscribe button animation"
+        }
+      ]
+    }
+  },
+  "review_issues": []
+}
