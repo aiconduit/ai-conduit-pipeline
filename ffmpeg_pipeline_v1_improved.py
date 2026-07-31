@@ -18,7 +18,7 @@ ROOT_DIR = Path(__file__).parent
 sys.path.insert(0, str(ROOT_DIR))
 from conduit_core import (
     generate_script_deepseek, tts_japanese, generate_word_subtitle_audio,
-    fetch_broll_cinematic, download_bgm, apply_pattern_interrupt, mix_bgm, probe_dur,
+    fetch_broll_cinematic, fetch_broll_from_topic, download_bgm, apply_pattern_interrupt, mix_bgm, probe_dur,
     CINEMATIC_STYLES
 )
 from word_sync_subtitle import create_subtitle_frames, SubtitleFrame
@@ -111,7 +111,9 @@ def compose_scene(scene, idx):
     out = str(WORK_DIR/f"scene_v1imp_{idx:02d}.mp4")
 
     # B-roll取得（単一クリップ）
-    broll = fetch_broll_cinematic(visual, cache_dir=PEXELS_CACHE)
+    # トピックに合った実画像+AI画像のスライドショーを優先、失敗時はPexels
+    topic_str = scene.get("topic", "") or scene.get("narration", "")[:20]
+    broll = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE)
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
     
     # B-roll取得失敗時は黒画面で代替
