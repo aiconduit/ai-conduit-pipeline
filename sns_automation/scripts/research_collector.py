@@ -135,5 +135,127 @@ def main():
     print(f"   Arxiv: {len(all_results['arxiv'])}件")
     print(f"   保存先: {output_file}")
 
+# ---------------------------------------------------------------------------
+# 追加実装: ニューストピック収集（collect_all_sources）
+# ---------------------------------------------------------------------------
+import xml.etree.ElementTree as ET
+
+AI_KEYWORDS_HN = ["ai", "llm", "gpt", "claude", "model", "agent", "openai", "anthropic"]
+AI_KEYWORDS_TRENDS = ["AI", "ChatGPT", "Claude", "GPT", "LLM", "生成", "自動化", "Python", "エンジニア"]
+
+
+def _parse_rss(url, num):
+    """汎用RSS取得。item要素の辞書リストを返す。"""
+    items = []
+    try:
+        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        if r.status_code != 200:
+            return items
+        root = ET.fromstring(r.content)
+        for item in list(root.iter("item"))[:num]:
+            entry = {}
+            for child in item:
+                tag = child.tag.rsplit("}", 1)[-1]
+                entry[tag] = (child.text or "").strip()
+            items.append(entry)
+    except Exception as e:
+        print(f"RSS error ({url}): {e}")
+    return items
+
+
+def fetch_hacker_news_ai(max_items=10):
+    """HN topstoriesからAI関連記事を高スコア順に収集"""
+    results = []
+    try:
+        r = requests.get("https://hacker-news.firebaseio.com/v0/topstories.json", timeout=10)
+        if r.status_code != 200:
+            return results
+        for story_id in r.json()[:50]:
+            sr = requests.get(
+                f"https://hacker-news.firebaseio.com/v0/item/{story_id}.json",
+                timeout=10,
+            )
+            if sr.status_code != 200:
+                continue
+            story = sr.json()
+            title = story.get("title", "")
+            score = story.get("score", 0)
+            url = story.get("url", f"https://news.ycombinator.com/item?id={story_id}")
+            low = title.lower()
+            if score >= 50 and any(kw in low for kw in AI_KEYWORDS_HN):
+                results.append({
+                    "title": title,
+                    "url": url,
+                    "score": score,
+                    "source": "hackernews",
+                })
+                if len(results) >= max_items:
+                    break
+    except Exception as e:
+        print(f"Hacker News AI error: {e}")
+    return results
+
+
+def fetch_google_trends_jp():
+    """Googleトレンド（日本）のRSSからAI関連トピックを収集"""
+    results = []
+    items = _parse_rss("https://trends.google.com/trending/rss?geo=JP", 30)
+    for item in items:
+        title = item.get("title", "")
+        if any(kw in title for kw in AI_KEYWORDS_TRENDS):
+            results.append({"title": title, "source": "google_trends"})
+    return results
+
+
+def fetch_huggingface_blog(max_items=5):
+    """HuggingFaceブログのRSSから最新記事を収集"""
+    results = []
+    for item in _parse_rss("https://huggingface.co/blog/feed.xml", max_items):
+        results.append({
+            "title": item.get("title", ""),
+            "url": item.get("link", ""),
+            "source": "huggingface",
+        })
+    return results
+
+
+def fetch_mit_tech_review(max_items=5):
+    """MIT Technology ReviewのRSSから最新記事を収集"""
+    results = []
+    for item in _parse_rss("https://www.technologyreview.com/feed/", max_items):
+        results.append({
+            "title": item.get("title", ""),
+            "url": item.get("link", ""),
+            "source": "mit_tech",
+        })
+    return results
+
+
+def collect_all_sources():
+    """全ソースを収集し、重複URLを除去して news_topics.json に保存"""
+    all_items = []
+    all_items += fetch_hacker_news_ai()
+    all_items += fetch_google_trends_jp()
+    all_items += fetch_huggingface_blog()
+    all_items += fetch_mit_tech_review()
+
+    seen = set()
+    unique = []
+    for item in all_items:
+        key = item.get("url", item.get("title", ""))
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(item)
+
+    topics_dir = Path(__file__).resolve().parent.parent
+    topics_file = topics_dir / "news_topics.json"
+    with open(topics_file, "w", encoding="utf-8") as f:
+        json.dump({"collected_at": datetime.now().isoformat(), "items": unique},
+                  f, ensure_ascii=False, indent=2)
+    print(f"💾 news_topics.json に {len(unique)}件保存: {topics_file}")
+    return unique
+
+
 if __name__ == "__main__":
     main()
