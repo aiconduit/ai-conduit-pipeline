@@ -68,20 +68,22 @@ print(f"   スクリプト: {script_60s}")
 #    Scene 3 (value)     : 次の40文字
 #    Scene 4 (value)     : 残り（最大40文字）
 #    Scene 5 (cta)       : 固定CTA
-segs = {
-    "hook": script_60s[:30],
-    "interrupt": script_60s[30:60],
-    "value_1": script_60s[60:100],
-    "value_2": script_60s[100:140],
-}
-
-scene_specs = [
-    {"shot": "hook", "mood": "hook", "narration": segs["hook"]},
-    {"shot": "interrupt", "mood": "interrupt", "narration": segs["interrupt"]},
-    {"shot": "value_1", "mood": "value", "narration": segs["value_1"]},
-    {"shot": "value_2", "mood": "value", "narration": segs["value_2"]},
-    {"shot": "cta", "mood": "cta", "narration": CTA_TEXT},
-]
+# scenesのnarrationを直接使用
+CTA_TEXT = "コメントにAIconduitと書いてプレゼントをゲットしよう！"
+raw_scenes = plan.get("script", {}).get("scenes", [])
+mood_map = {"Hook": "hook", "Fact_1": "interrupt", "Fact_2": "value", "Twist": "value", "CTA": "cta"}
+scene_specs = []
+for s in raw_scenes:
+    title = s.get("scene_title", "value")
+    narration = s.get("narration", "").strip()
+    if not narration or len(narration) < 3:
+        continue
+    mood = mood_map.get(title, "value")
+    if title == "CTA":
+        narration = CTA_TEXT
+    scene_specs.append({"shot": title.lower(), "mood": mood, "narration": narration})
+if not scene_specs:
+    scene_specs = [{"shot": "hook", "mood": "hook", "narration": script_60s[:50] or "AIニュース速報"}]
 
 MOOD_VISUAL_QUERIES = {
     "hook": f"{topic} breaking news alert futuristic",
