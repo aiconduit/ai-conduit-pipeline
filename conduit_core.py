@@ -395,30 +395,79 @@ def _github_readme_images(repo, cache_dir, max_images=4):
         return []
 
 
+GITHUB_REPO_MAP = {
+    "n8n": "n8n-io/n8n",
+    "langchain": "langchain-ai/langchain",
+    "claude": "anthropics/claude-code",
+    "claude code": "anthropics/claude-code",
+    "claude code 日本語": "anthropics/claude-code",
+    "claude desktop": "anthropics/claude-desktop",
+    "llamaindex": "run-llama/llama_index",
+    "llama": "run-llama/llama_index",
+    "autogpt": "Significant-Gravitas/AutoGPT",
+    "auto gpt": "Significant-Gravitas/AutoGPT",
+    "agentops": "AgentOps-AI/agentops",
+    "openinterpreter": "OpenInterpreter/open-interpreter",
+    "open interpreter": "OpenInterpreter/open-interpreter",
+    "dify": "langgenius/dify",
+    "flowise": "FlowiseAI/Flowise",
+    "supabase": "supabase/supabase",
+    "openhands": "All-Hands-AI/OpenHands",
+    "open hands": "All-Hands-AI/OpenHands",
+    "browser use": "browser-use/browser-use",
+    "browser-use": "browser-use/browser-use",
+    "comfyui": "comfyanonymous/ComfyUI",
+    "stable diffusion": "AUTOMATIC1111/stable-diffusion-webui",
+    "ai job": "MadsLorentzen/ai-job-search",
+    "ai-job": "MadsLorentzen/ai-job-search",
+    "ai job search": "MadsLorentzen/ai-job-search",
+    "ui": "shadcn-ui/ui",
+    "shadcn": "shadcn-ui/ui",
+    "bazel": "bazelbuild/bazel",
+    "opencv": "opencv/opencv",
+    "tensorflow": "tensorflow/tensorflow",
+    "pytorch": "pytorch/pytorch",
+    "kubernetes": "kubernetes/kubernetes",
+    "k8s": "kubernetes/kubernetes",
+    "docker": "moby/moby",
+    "vscode": "microsoft/vscode",
+    "asdf": "asdf-vm/asdf",
+    "nodejs": "nodejs/node",
+    "node.js": "nodejs/node",
+    "next.js": "vercel/next.js",
+    "nextjs": "vercel/next.js",
+    "react": "facebook/react",
+    "vue": "vuejs/core",
+    "svelte": "sveltejs/svelte",
+    "fastapi": "fastapi/fastapi",
+    "flask": "pallets/flask",
+    "django": "django/django",
+    "rust": "rust-lang/rust",
+    "golang": "golang/go",
+    "android": "android/architecture-samples",
+    "flutter": "flutter/flutter",
+    "remotion": "remotion-dev/remotion",
+    "opencode": "anomalyco/opencode",
+    "ruff": "astral-sh/ruff",
+    "pyenv": "pyenv/pyenv",
+    "uv": "astral-sh/uv",
+    "deepse": "deepseek-ai/DeepSeek-V3",
+    "deepseek": "deepseek-ai/DeepSeek-V3",
+    "llama.cpp": "ggml-org/llama.cpp",
+    "ollama": "ollama/ollama",
+    "openai": "openai/openai-python",
+    "whisper": "openai/whisper",
+    "huggingface": "huggingface/transformers",
+    "transformers": "huggingface/transformers",
+    "gitlens": "gitkraken/vscode-gitlens",
+    "brew": "Homebrew/brew",
+    "homebrew": "Homebrew/brew",
+}
+
 def _match_github_repo(topic):
-    """topicから紹介対象のGitHubリポジトリを特定する"""
-    known = {
-        "n8n": "n8n-io/n8n",
-        "langchain": "langchain-ai/langchain",
-        "claude": "anthropics/claude-code",
-        "claude code": "anthropics/claude-code",
-        "llamaindex": "run-llama/llama_index",
-        "llama": "run-llama/llama_index",
-        "autogpt": "Significant-Gravitas/AutoGPT",
-        "agentops": "AgentOps-AI/agentops",
-        "openinterpreter": "OpenInterpreter/open-interpreter",
-        "dify": "langgenius/dify",
-        "flowise": "FlowiseAI/Flowise",
-        "supabase": "supabase/supabase",
-        "openhands": "All-Hands-AI/OpenHands",
-        "browser use": "browser-use/browser-use",
-        "comfyui": "comfyanonymous/ComfyUI",
-        "stable diffusion": "AUTOMATIC1111/stable-diffusion-webui",
-        "ai job": "MadsLorentzen/ai-job-search",
-        "ai-job": "MadsLorentzen/ai-job-search",
-    }
+    """topicから紹介対象のGitHubリポジトリを特定する（GITHUB_REPO_MAP参照・大文字小文字無視）"""
     t = (topic or "").lower()
-    for key, repo in known.items():
+    for key, repo in GITHUB_REPO_MAP.items():
         if key in t:
             return repo
     if t.count("/") == 1 and "/" in t:
@@ -441,103 +490,122 @@ def _fetch_github_readme_images(repo_name, cache_dir=None, max_images=2):
     return _github_readme_images(repo_name, cache_dir, max_images=max_images)
 
 
-def _generate_pollinations_images(visual_query, cache_dir, count=3):
-    """Pollinations.aiでAI画像をcount枚生成する（スライドショー変換なし、画像リストのみ返す）"""
-    cache_dir = Path(cache_dir)
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    # 日本語クエリを英語に変換（シンプルなキーワードに絞る）
-    import re as _re
-    # 日本語を除去して英語部分のみ抽出
-    en_query = _re.sub(r'[^-]+', ' ', visual_query).strip()
-    if len(en_query) < 10:
-        # 英語が少ない場合はデフォルトプロンプト
-        en_query = "AI software interface dark dramatic modern"
-    visual_query = en_query[:120]
-    images = []
-    for i in range(count):
-        import re as _re
-        en_q = _re.sub(r"[^\x00-\x7F]+", " ", visual_query).strip()
-        if len(en_q) < 10: en_q = "AI software automation dark modern cinematic"
-        visual_query_en = en_q[:100]
-        prompt = urllib.parse.quote(visual_query_en)
-        url = f"https://image.pollinations.ai/prompt/{prompt}?width=960&height=960&nologo=true"
-        out = cache_dir / f"poll_{i}.png"
-        if not out.exists() or out.stat().st_size == 0:
-            try:
-                resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
-                if resp.status_code == 200:
-                    with open(out, "wb") as f:
-                        f.write(resp.content)
-            except Exception:
-                continue
-        if out.exists() and out.stat().st_size > 0:
-            images.append(str(out))
-    return images
+def _make_kenburns(image, output_path, dur=3.0, size=960):
+    """単一画像をKen Burns動画（ズームイン）に変換する。
+
+    zoompan: 3秒間で緩やかにズームイン（1.0 → 1.3）、中心固定。
+    画像は先に 960x960 に crop/scale してから zoompan を適用する。
+    Returns: 成功時 output_path (str)、失敗時 None
+    """
+    try:
+        cmd = [
+            "ffmpeg", "-y",
+            "-loop", "1", "-i", str(image),
+            "-vf",
+            f"scale={size}:{size}:force_original_aspect_ratio=increase,"
+            f"crop={size}:{size},"
+            f"zoompan=z='min(zoom+0.001,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'",
+            "-t", str(dur),
+            "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+            "-pix_fmt", "yuv420p",
+            str(output_path),
+        ]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode == 0 and os.path.exists(str(output_path)):
+            return str(output_path)
+        print(f"   ⚠️ Ken Burns変換失敗: {r.stderr[-300:]}")
+    except Exception as e:
+        print(f"   ⚠️ Ken Burns変換例外: {e}")
+    return None
 
 
-def _generate_pollinations_slideshow(visual_query, cache_dir, count=4):
-    """Pollinations.aiでAI画像を生成しスライドショー化（フォールバック）"""
-    images = _generate_pollinations_images(visual_query, cache_dir, count=count)
-    if len(images) >= 3:
-        out_video = cache_dir / "pollinations_slideshow.mp4"
-        return _make_slideshow(images, out_video)
+def _extract_english_query(visual_query):
+    """visual_queryから英語部分のみ抽出する。短すぎる場合は技術系デフォルト。
+    Returns: 簡潔な英語検索クエリ（str）
+    """
+    if not visual_query:
+        return "technology abstract"
+    en = " ".join(re.findall(r"[A-Za-z][A-Za-z0-9 .\-_/]*", visual_query)).strip()
+    en = re.sub(r"\s+", " ", en).strip()
+    if len(en) < 3:
+        en = "technology abstract"
+    tokens = [t for t in re.split(r"[\s,._\-/]+", en) if t]
+    stopwords = {"a", "an", "the", "and", "or", "of", "for", "to", "with", "on", "in", "it", "that", "this", "is", "are"}
+    clean = [t for t in tokens if t.lower() not in stopwords][:4]
+    if not clean:
+        clean = ["technology", "abstract"]
+    return " ".join(clean)
+
+
+def _make_black_screen(output_path, dur=8.0, size=960):
+    """最終フォールバック: 真っ黒な960x960動画を生成する。"""
+    try:
+        cmd = [
+            "ffmpeg", "-y",
+            "-f", "lavfi", "-i", "color=c=black:s=960x960:d=%s" % dur,
+            "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+            "-pix_fmt", "yuv420p",
+            str(output_path),
+        ]
+        r = subprocess.run(cmd, capture_output=True, text=True)
+        if r.returncode == 0 and os.path.exists(str(output_path)):
+            return str(output_path)
+    except Exception as e:
+        print(f"   ⚠️ 黒画面生成失敗: {e}")
     return None
 
 
 def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
-    """B-rollを「汎用映像」から「紹介トピックに合った画像スライドショー」に変更
+    """B-roll取得（優先順位でフォールバック）。
 
-    画像の順序:
-      1. まず GitHub README の実際のツール画像を取得（1〜2枚）→ 先頭に配置
-      2. 残りを Pollinations.ai のAI生成画像で補完（2〜3枚）
-      3. images_to_slideshow() で合体して1本のスライドショー動画に
-      4. 画像が揃わない場合のみ Pexels 動画にフォールバック
+    優先順位:
+      1. GitHub READMEの実際のツール画像 → Ken Burns動画（最優先）
+      2. Pexelsでシンプルな英語クエリ検索（フォールバック1）
+      3. 黒画面（最終フォールバック）
+
     Returns: 動画ファイルパス or None
     """
     if cache_dir is None:
         cache_dir = Path("/tmp/broll_topic_cache")
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
-    combined = []
-
-    # 1. GitHub READMEから実際のツール画像（1〜2枚）を先頭に取得
+    # 1. GitHub READMEの実画像 → Ken Burns動画（最優先）
     repo = _match_github_repo(topic)
     if repo:
         print(f"   [fetch_broll_from_topic] GitHub README画像取得: {repo}")
         gh_images = _fetch_github_readme_images(repo, cache_dir, max_images=2)
         if gh_images:
-            combined.extend(gh_images)
-            print(f"   ✅ GitHub README画像 {len(gh_images)}枚")
-        else:
-            print(f"   ⚠️ GitHub README画像を取得できませんでした")
-
-    # 2. 残りをPollinationsで補完（目標: 合計5枚、GitHub 2枚 + Poll 3枚）
-    if visual_query:
-        need = 5 - len(combined)
-        if need > 0:
-            print(f"   [fetch_broll_from_topic] Pollinations.ai補完: '{visual_query}' ({need}枚)")
-            poll_images = _generate_pollinations_images(visual_query, cache_dir, count=need)
-            if poll_images:
-                combined.extend(poll_images)
-                print(f"   ✅ Pollinations画像 {len(poll_images)}枚")
+            img = gh_images[0]
+            out = Path(cache_dir) / f"{repo.split('/')[-1]}_kenburns.mp4"
+            if not out.exists() or out.stat().st_size == 0:
+                result = _make_kenburns(img, out, dur=8.0)
             else:
-                print(f"   ⚠️ Pollinations画像を生成できませんでした")
+                result = str(out)
+            if result and os.path.exists(result):
+                print(f"   ✅ GitHub README → Ken Burns動画: {result}")
+                return result
+            print(f"   ⚠️ GitHub README画像のKen Burns変換に失敗 → フォールバック")
 
-    # 3. images_to_slideshow() で合体
-    if len(combined) >= 3:
-        out = Path(cache_dir) / "combined_slideshow.mp4"
-        if not out.exists() or out.stat().st_size == 0:
-            result = images_to_slideshow(combined, out)
-        else:
-            result = str(out)
-        if result and os.path.exists(result):
-            print(f"   ✅ 合成スライドショー ({len(combined)}枚): {result}")
-            return result
-        print(f"   ⚠️ スライドショー合体に失敗 ({len(combined)}枚)")
+    # 2. Pexelsでシンプルな英語クエリ（フォールバック1）
+    en_query = _extract_english_query(visual_query)
+    print(f"   [fetch_broll_from_topic] Pexels検索: '{en_query} cinematic'")
+    result = _pexels_download(en_query, cache_dir)
+    if result:
+        print(f"   ✅ Pexels hit: {result}")
+        return result
+    print(f"   [fetch_broll_from_topic] ⚠️ Pexels空 → 黒画面へフォールバック")
 
-    # 4. 最終フォールバック: 既存Pexels動画
-    print(f"   [fetch_broll_from_topic] ⚠️ 画像スライドショー失敗 → Pexels動画にフォールバック")
-    return fetch_broll_cinematic(visual_query, cache_dir=cache_dir)
+    # 3. 黒画面（最終フォールバック）
+    out = Path(cache_dir) / "black_screen.mp4"
+    if not out.exists() or out.stat().st_size == 0:
+        result = _make_black_screen(out, dur=8.0)
+    else:
+        result = str(out)
+    if result and os.path.exists(result):
+        print(f"   ✅ 黒画面B-roll: {result}")
+        return result
+
+    return None
 
 
 def _pixabay_download(query, cache_dir):
