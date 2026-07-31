@@ -8,7 +8,11 @@ from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
 sys.path.insert(0, str(ROOT_DIR))
-from conduit_core import tts_japanese, fetch_broll_cinematic, download_bgm, probe_dur, mix_bgm, generate_word_subtitle_audio
+from conduit_core import (
+    tts_japanese, fetch_broll_cinematic, fetch_broll_from_topic,
+    download_bgm, probe_dur, mix_bgm, generate_word_subtitle_audio,
+)
+import ffmpeg_pipeline_v1_improved as _pipeline_mod
 from ffmpeg_pipeline_v1_improved import (
     WORK_DIR, OUTPUT_DIR, PEXELS_CACHE, CHAR_PATH, FONT_PATHS,
     MOOD_COLORS, compose_scene as _original_compose_scene,
@@ -105,21 +109,31 @@ visual_queries = [
     "productivity app minimalist workspace",
 ]
 
+MOOD_VISUAL_QUERIES = {
+    "hook": f"{topic} app interface dark dramatic screenshot",
+    "value": f"{topic} workflow automation diagram tutorial",
+    "interrupt": f"{topic} results output success achievement",
+    "cta": "AI automation futuristic digital abstract",
+}
+
+
+def mood_visual_query(topic, mood):
+    """topicとmoodに応じてvisual_queryを生成する"""
+    return MOOD_VISUAL_QUERIES.get(mood, MOOD_VISUAL_QUERIES["value"])
+
+
 for i, sent in enumerate(sentences[:8]):
     mood = moods[i] if i < len(moods) else "value"
+    visual_query = mood_visual_query(topic, mood)
     scene = {
         "id": i + 1,
         "caption": re.sub(r"[^\w\s]", "", sent)[:8],
         "visual_prompt": visual_queries[i] if i < len(visual_queries) else visual_queries[-1],
         "interrupt": random.choice(interrupts) if mood == "interrupt" else "none",
         "mood": mood,
+        "visual_1": visual_query,
     }
-    if mood == "hook":
-        scene["visual_1"] = "cyberpunk city neon rain dark cinematic"
-    elif mood in ("value", "secondary_hook"):
-        scene["visual_1"] = "AI technology circuit board futuristic"
-    else:
-        scene["visual_1"] = "code programming digital abstract"
+    scene["topic"] = topic
     sent = sent[:40]
     sent = re.sub(r'。.*', '', sent)
     scene["narration"] = sent
@@ -161,6 +175,7 @@ print(f"   BGM: {'✅' if bgm_path else '❌ スキップ'}")
 print("\n[3/4] 🎬 シーン合成中...")
 files = []
 for i, s in enumerate(scenes):
+    s["visual_1"] = mood_visual_query(s["topic"], s["mood"])
     f = _original_compose_scene(s, i)
     files.append(f)
     print(f"   Scene {s['id']} [{s['mood']}]: done")

@@ -297,6 +297,203 @@ def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
     print(f"   [fetch_broll] ❌ 全ソース空 → Noneを返す")
     return None
 
+# === B-roll: トピック連動スライドショー ===
+
+def _make_slideshow(images, output_path, dur_per=3.0, size=960):
+    """画像リストをスライドショー動画化（960x960, 3秒/枚）"""
+    cache_dir = Path(os.path.dirname(output_path))
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    clips = []
+    for i, img in enumerate(images):
+        clip = cache_dir / f"slide_{i}.mp4"
+        subprocess.run(
+            ["ffmpeg", "-y", "-loop", "1", "-i", str(img), "-t", str(dur_per),
+             "-vf", f"scale={size}:{size}:force_original_aspect_ratio=increase,crop={size}:{size}",
+             "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+             "-pix_fmt", "yuv420p", str(clip)],
+            capture_output=True, text=True)
+        if clip.exists():
+            clips.append(str(clip))
+    if len(clips) < 2:
+        return None
+    list_file = cache_dir / "slideshow_list.txt"
+    with open(list_file, "w") as f:
+        for p in clips:
+            f.write(f"file '{p}'\n")
+    r = subprocess.run(
+        ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", str(list_file),
+         "-c", "copy", str(output_path)],
+        capture_output=True, text=True)
+    if r.returncode == 0 and os.path.exists(str(output_path)):
+        return str(output_path)
+    return None
+
+
+def images_to_slideshow(images, output_path, dur_per=3.0, size=960):
+    """公開API: 画像リストをスライドショー動画化する。
+    images: 画像ファイルパスのリスト
+    output_path: 出力mp4パス
+    dur_per: 1枚あたりの表示秒数
+    size: 正方形キャンバスサイズ（px）
+    Returns: 成功時 output_path（str）、失敗時 None
+    """
+    return _make_slideshow(images, output_path, dur_per=dur_per, size=size)
+
+
+def _github_readme_images(repo, cache_dir, max_images=4):
+    """GitHub公開リポジトリのREADMEから画像URLを収集しダウンロードする（認証不要）"""
+    try:
+        r = requests.get(
+            f"https://api.github.com/repos/{repo}/readme",
+            headers={"Accept": "application/vnd.github.raw+json"}, timeout=15)
+        if r.status_code != 200:
+            return []
+        readme = r.text
+        img_urls = []
+        for m in re.finditer(r'!\[[^\]]*\]\(([^)]+)\)', readme):
+            img_urls.append(m.group(1))
+        for m in re.finditer(r'(?:src|srcset)="([^"]+)"', readme):
+            if "srcset" in m.group(0).lower():
+                first = m.group(1).split(",")[0].strip().split(" ")[0]
+                img_urls.append(first)
+            else:
+                img_urls.append(m.group(1))
+        seen = set()
+        downloads = []
+        for u in img_urls:
+            u = u.strip().strip('"').strip()
+            if (not u) or u.startswith("data:") or "{" in u:
+                continue
+            if u.startswith("http://") or u.startswith("https://"):
+                full = u
+            else:
+                full = f"https://raw.githubusercontent.com/{repo}/HEAD/{u.lstrip('/')}"
+            if full in seen:
+                continue
+            seen.add(full)
+            try:
+                resp = requests.get(full, timeout=20, stream=True, headers={"User-Agent": "Mozilla/5.0"})
+                if resp.status_code != 200:
+                    continue
+                probe = full.split("?")[0]
+                ext = probe.split(".")[-1].lower() if "." in probe.split("/")[-1] else "png"
+                if ext not in ("png", "jpg", "jpeg", "gif", "webp"):
+                    ext = "png"
+                out = Path(cache_dir) / f"github_{repo.split('/')[-1]}_{len(downloads)}.{ext}"
+                if not out.exists():
+                    with open(out, "wb") as f:
+                        for chunk in resp.iter_content(8192):
+                            f.write(chunk)
+                if out.stat().st_size > 0:
+                    downloads.append(str(out))
+                if len(downloads) >= max_images:
+                    break
+            except Exception:
+                continue
+        return downloads
+    except Exception:
+        return []
+
+
+def _match_github_repo(topic):
+    """topicから紹介対象のGitHubリポジトリを特定する"""
+    known = {
+        "n8n": "n8n-io/n8n",
+        "langchain": "langchain-ai/langchain",
+        "claude": "anthropics/claude-code",
+        "claude code": "anthropics/claude-code",
+        "llamaindex": "run-llama/llama_index",
+        "llama": "run-llama/llama_index",
+        "autogpt": "Significant-Gravitas/AutoGPT",
+        "agentops": "AgentOps-AI/agentops",
+        "openinterpreter": "OpenInterpreter/open-interpreter",
+        "dify": "langgenius/dify",
+        "flowise": "FlowiseAI/Flowise",
+        "supabase": "supabase/supabase",
+        "openhands": "All-Hands-AI/OpenHands",
+        "browser use": "browser-use/browser-use",
+        "comfyui": "comfyanonymous/ComfyUI",
+        "stable diffusion": "AUTOMATIC1111/stable-diffusion-webui",
+        "ai job": "MadsLorentzen/ai-job-search",
+        "ai-job": "MadsLorentzen/ai-job-search",
+    }
+    t = (topic or "").lower()
+    for key, repo in known.items():
+        if key in t:
+            return repo
+    if t.count("/") == 1 and "/" in t:
+        return t.strip()
+    return None
+
+
+def _generate_pollinations_slideshow(visual_query, cache_dir, count=4):
+    """Pollinations.aiでAI画像を生成しスライドショー化（フォールバック）"""
+    cache_dir = Path(cache_dir)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    images = []
+    for i in range(count):
+        prompt = urllib.parse.quote(visual_query)
+        url = f"https://image.pollinations.ai/prompt/{prompt}?width=960&height=960&nologo=true"
+        out = cache_dir / f"poll_{i}.png"
+        if not out.exists() or out.stat().st_size == 0:
+            try:
+                resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
+                if resp.status_code == 200:
+                    with open(out, "wb") as f:
+                        f.write(resp.content)
+            except Exception:
+                continue
+        if out.exists() and out.stat().st_size > 0:
+            images.append(str(out))
+    if len(images) >= 3:
+        out_video = cache_dir / "pollinations_slideshow.mp4"
+        return _make_slideshow(images, out_video)
+    return None
+
+
+def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
+    """B-rollを「汎用映像」から「紹介トピックに合った画像スライドショー」に変更
+
+    優先順位:
+      1. GitHub README画像スライドショー（topicがリポジトリ名を含む場合）
+      2. Pollinations.ai AI画像生成スライドショー（visual_query由来の英語プロンプト）
+      3. 既存Pexels動画（最終フォールバック: fetch_broll_cinematic）
+    Returns: 動画ファイルパス or None
+    """
+    if cache_dir is None:
+        cache_dir = Path("/tmp/broll_topic_cache")
+    Path(cache_dir).mkdir(parents=True, exist_ok=True)
+
+    # 1. GitHub README画像 → スライドショー
+    repo = _match_github_repo(topic)
+    if repo:
+        print(f"   [fetch_broll_from_topic] GitHub README画像取得: {repo}")
+        imgs = _github_readme_images(repo, cache_dir)
+        if len(imgs) >= 2:
+            out = Path(cache_dir) / f"github_{repo.split('/')[-1]}_slideshow.mp4"
+            if not out.exists() or out.stat().st_size == 0:
+                try:
+                    _make_slideshow(imgs, out)
+                except Exception as e:
+                    print(f"   ⚠️ GitHubスライドショー生成失敗: {e}")
+            if out.exists() and out.stat().st_size > 0:
+                print(f"   ✅ GitHub READMEスライドショー: {out}")
+                return str(out)
+        print(f"   ⚠️ GitHub README画像が少なすぎる({len(imgs)}枚) → 次へ")
+
+    # 2. Pollinations.ai AI画像生成 → スライドショー
+    if visual_query:
+        print(f"   [fetch_broll_from_topic] Pollinations.ai画像生成: '{visual_query}'")
+        poll = _generate_pollinations_slideshow(visual_query, cache_dir)
+        if poll and os.path.exists(poll):
+            print(f"   ✅ Pollinationsスライドショー: {poll}")
+            return poll
+
+    # 3. 最終フォールバック: 既存Pexels動画
+    print(f"   [fetch_broll_from_topic] ⚠️ 画像スライドショー失敗 → Pexels動画にフォールバック")
+    return fetch_broll_cinematic(visual_query, cache_dir=cache_dir)
+
+
 def _pixabay_download(query, cache_dir):
     """Pixabay無料動画を取得（高品質・500件以上）"""
     if not PIXABAY_KEY:
