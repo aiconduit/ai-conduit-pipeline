@@ -426,8 +426,23 @@ def _match_github_repo(topic):
     return None
 
 
-def _generate_pollinations_slideshow(visual_query, cache_dir, count=4):
-    """Pollinations.aiでAI画像を生成しスライドショー化（フォールバック）"""
+def _fetch_github_readme_images(repo_name, cache_dir=None, max_images=2):
+    """GitHubのREADMEから実際のツール画像を取得する（1〜2枚）
+
+    Args:
+        repo_name: 'owner/repo' 形式のリポジトリ名
+        cache_dir: 画像保存先ディレクトリ（デフォルト /tmp/broll_topic_cache）
+        max_images: 取得する最大画像数
+    Returns:
+        ダウンロード済み画像ファイルパスのリスト
+    """
+    if cache_dir is None:
+        cache_dir = Path("/tmp/broll_topic_cache")
+    return _github_readme_images(repo_name, cache_dir, max_images=max_images)
+
+
+def _generate_pollinations_images(visual_query, cache_dir, count=3):
+    """Pollinations.aiでAI画像をcount枚生成する（スライドショー変換なし、画像リストのみ返す）"""
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
     images = []
@@ -445,6 +460,12 @@ def _generate_pollinations_slideshow(visual_query, cache_dir, count=4):
                 continue
         if out.exists() and out.stat().st_size > 0:
             images.append(str(out))
+    return images
+
+
+def _generate_pollinations_slideshow(visual_query, cache_dir, count=4):
+    """Pollinations.aiでAI画像を生成しスライドショー化（フォールバック）"""
+    images = _generate_pollinations_images(visual_query, cache_dir, count=count)
     if len(images) >= 3:
         out_video = cache_dir / "pollinations_slideshow.mp4"
         return _make_slideshow(images, out_video)
@@ -454,42 +475,55 @@ def _generate_pollinations_slideshow(visual_query, cache_dir, count=4):
 def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
     """B-rollを「汎用映像」から「紹介トピックに合った画像スライドショー」に変更
 
-    優先順位:
-      1. GitHub README画像スライドショー（topicがリポジトリ名を含む場合）
-      2. Pollinations.ai AI画像生成スライドショー（visual_query由来の英語プロンプト）
-      3. 既存Pexels動画（最終フォールバック: fetch_broll_cinematic）
+    画像の順序:
+      1. まず GitHub README の実際のツール画像を取得（1〜2枚）→ 先頭に配置
+      2. 残りを Pollinations.ai のAI生成画像で補完（2〜3枚）
+      3. images_to_slideshow() で合体して1本のスライドショー動画に
+      4. 画像が揃わない場合のみ Pexels 動画にフォールバック
     Returns: 動画ファイルパス or None
     """
     if cache_dir is None:
         cache_dir = Path("/tmp/broll_topic_cache")
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
-    # 1. GitHub README画像 → スライドショー
+    combined = []
+
+    # 1. GitHub READMEから実際のツール画像（1〜2枚）を先頭に取得
     repo = _match_github_repo(topic)
     if repo:
         print(f"   [fetch_broll_from_topic] GitHub README画像取得: {repo}")
-        imgs = _github_readme_images(repo, cache_dir)
-        if len(imgs) >= 2:
-            out = Path(cache_dir) / f"github_{repo.split('/')[-1]}_slideshow.mp4"
-            if not out.exists() or out.stat().st_size == 0:
-                try:
-                    _make_slideshow(imgs, out)
-                except Exception as e:
-                    print(f"   ⚠️ GitHubスライドショー生成失敗: {e}")
-            if out.exists() and out.stat().st_size > 0:
-                print(f"   ✅ GitHub READMEスライドショー: {out}")
-                return str(out)
-        print(f"   ⚠️ GitHub README画像が少なすぎる({len(imgs)}枚) → 次へ")
+        gh_images = _fetch_github_readme_images(repo, cache_dir, max_images=2)
+        if gh_images:
+            combined.extend(gh_images)
+            print(f"   ✅ GitHub README画像 {len(gh_images)}枚")
+        else:
+            print(f"   ⚠️ GitHub README画像を取得できませんでした")
 
-    # 2. Pollinations.ai AI画像生成 → スライドショー
+    # 2. 残りをPollinationsで補完（目標: 合計5枚、GitHub 2枚 + Poll 3枚）
     if visual_query:
-        print(f"   [fetch_broll_from_topic] Pollinations.ai画像生成: '{visual_query}'")
-        poll = _generate_pollinations_slideshow(visual_query, cache_dir)
-        if poll and os.path.exists(poll):
-            print(f"   ✅ Pollinationsスライドショー: {poll}")
-            return poll
+        need = 5 - len(combined)
+        if need > 0:
+            print(f"   [fetch_broll_from_topic] Pollinations.ai補完: '{visual_query}' ({need}枚)")
+            poll_images = _generate_pollinations_images(visual_query, cache_dir, count=need)
+            if poll_images:
+                combined.extend(poll_images)
+                print(f"   ✅ Pollinations画像 {len(poll_images)}枚")
+            else:
+                print(f"   ⚠️ Pollinations画像を生成できませんでした")
 
-    # 3. 最終フォールバック: 既存Pexels動画
+    # 3. images_to_slideshow() で合体
+    if len(combined) >= 3:
+        out = Path(cache_dir) / "combined_slideshow.mp4"
+        if not out.exists() or out.stat().st_size == 0:
+            result = images_to_slideshow(combined, out)
+        else:
+            result = str(out)
+        if result and os.path.exists(result):
+            print(f"   ✅ 合成スライドショー ({len(combined)}枚): {result}")
+            return result
+        print(f"   ⚠️ スライドショー合体に失敗 ({len(combined)}枚)")
+
+    # 4. 最終フォールバック: 既存Pexels動画
     print(f"   [fetch_broll_from_topic] ⚠️ 画像スライドショー失敗 → Pexels動画にフォールバック")
     return fetch_broll_cinematic(visual_query, cache_dir=cache_dir)
 
