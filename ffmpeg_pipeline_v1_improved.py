@@ -112,7 +112,7 @@ def compose_scene(scene, idx):
 
     # B-roll取得（単一クリップ）
     # トピックに合った実画像+AI画像のスライドショーを優先、失敗時はPexels
-    topic_str = scene.get("topic", "") or scene.get("narration", "")[:20]
+    topic_str = scene.get("repo_name", "") or scene.get("topic", "") or scene.get("narration", "")[:20]
     broll = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE)
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
     
