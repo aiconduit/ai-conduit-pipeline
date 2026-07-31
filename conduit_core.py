@@ -986,6 +986,145 @@ def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.18):
         print(f"   ⚠️ BGMミックス失敗 ({e}) → 音声なしで出力")
         shutil.copy(video_path, out_path)
 
+def add_sfx_to_scene(input_path, out_path, mood="default", dur=None, add_cut=True, sfx_dir=None):
+    """シーン完成動画にSFXを追加（BGMと別トラックで管理）。
+
+    - mood == "hook"      : assets/sfx/zoom_hit.wav を動画冒頭0.0sに追加
+    - mood == "interrupt" : assets/sfx/whoosh.wav  を動画冒頭0.0sに追加
+    - シーン切替時(add_cut)  : assets/sfx/cut.wav   を動画末尾に追加
+    - SFXファイルが存在しない場合はスキップ（音声なし時もそのまま出力）
+    Returns: 出力パス（out_path）
+    """
+    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
+    if sfx_dir is None:
+        sfx_dir = Path(__file__).parent / "assets" / "sfx"
+    if dur is None:
+        dur = get_video_duration(input_path)
+
+    # --- 使用するSFXキューの決定（ファイル存在時のみ）---
+    cues = []  # [(sfx_path, 開始位置秒)]
+    lead = {"hook": "zoom_hit.wav", "interrupt": "whoosh.wav"}.get(mood)
+    if lead:
+        p = Path(sfx_dir) / lead
+        if p.exists():
+            cues.append((str(p), 0.0))
+    if add_cut:
+        cut_p = Path(sfx_dir) / "cut.wav"
+        if cut_p.exists():
+            try:
+                cut_dur = get_video_duration(str(cut_p))
+            except Exception:
+                cut_dur = 0.2
+            cues.append((str(cut_p), max(0.0, dur - cut_dur)))
+
+    if not cues or not has_audio_stream(input_path):
+        # SFXなし or 元音声なし → そのままコピー
+        r = _run(["ffmpeg", "-y", "-i", input_path, "-c", "copy", "-t", str(dur), out_path])
+        if r.returncode != 0:
+            import shutil; shutil.copy(input_path, out_path)
+        return out_path
+
+    try:
+        cmd = ["ffmpeg", "-y", "-i", input_path]
+        for p, _pos in cues:
+            cmd += ["-i", p]
+        parts = ["[0:a]aformat=channel_layouts=stereo[voice];"]
+        for i, (p, pos) in enumerate(cues):
+            adelay_ms = int(pos * 1000)
+            parts.append(
+                f"[{i + 1}:a]aformat=channel_layouts=stereo,volume=1.0,"
+                f"adelay={adelay_ms}|{adelay_ms}[sfx{i}];"
+            )
+        tags = "".join(f"[sfx{i}]" for i in range(len(cues)))
+        parts.append(f"[voice]{tags}amix=inputs={len(cues) + 1}:duration=first:normalize=0[out]")
+        cmd += ["-filter_complex", "".join(parts),
+                "-map", "0:v", "-map", "[out]",
+                "-t", str(dur), "-c:v", "copy", "-c:a", "aac",
+                out_path]
+        r = _run(cmd)
+        if r.returncode != 0:
+            raise RuntimeError(f"add_sfx_to_scene:\n{r.stderr[-400:]}")
+        print(f"   🔊 SFX追加: mood={mood}, cues={[os.path.basename(p) for p, _ in cues]}")
+    except Exception as e:
+        print(f"   ⚠️ add_sfx_to_scene失敗 ({e}) → 元音声のまま出力")
+        import shutil; shutil.copy(input_path, out_path)
+    return out_path
+
+
+def apply_zoom_pulse(input_path, out_path, dur=None, fps=30):
+    """ズームパルス: シーン冒頭1秒（30フレーム）で1.0→1.06倍にゆっくりズームイン。
+
+    zoompan: on<=30(最初の1秒)は1.0+on*0.002で徐々にズーム、以降は1.06倍で静止。
+    既存のscale/cropされた960x960入力に適用する。
+    Returns: 出力パス（out_path）
+    """
+    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
+    if dur is None:
+        dur = get_video_duration(input_path)
+    cmd = [
+        "ffmpeg", "-y", "-i", input_path,
+        "-vf",
+        "zoompan=z='if(lte(on,30),1.0+on*0.002,1.06)':d=1:"
+        "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=960x960:fps=%d" % fps,
+        "-r", str(fps), "-t", str(dur),
+        "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+        "-pix_fmt", "yuv420p", "-an", out_path,
+    ]
+    r = _run(cmd)
+    if r.returncode != 0:
+        raise RuntimeError(f"apply_zoom_pulse:\n{r.stderr[-400:]}")
+    return out_path
+
+
+def beat_sync_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.18, bpm=None):
+    """BGMビート同期（シンプル版）: mix_bgm()の代わりに使用。
+
+    estimate_bpm_simple()でBPMを取得し、そのビート周期に合わせてBGMボリュームを
+    動的に変化させる（ダッキング）。
+    実装を複雑化しないため、BPM→1拍の長さから正弦波ベースの音量エンベロープを
+    volumeフィルタ（eval=frame, t変数）で簡易適用する。
+    失敗時はmix_bgm()にフォールバック。
+    """
+    import shutil
+    _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
+    dur = get_video_duration(video_path)
+    if bpm is None:
+        bpm = estimate_bpm_simple(bgm_path)
+    if not bpm or bpm <= 0:
+        bpm = 120.0
+    beat_dur = 60.0 / bpm
+
+    if not has_audio_stream(video_path):
+        print("   ⚠️ raw_output に音声ストリームなし → 音声なしのまま出力")
+        _run(["ffmpeg", "-y", "-i", video_path, "-c", "copy", "-t", str(dur), out_path])
+        return
+
+    try:
+        import random
+        bgm_dur = get_video_duration(bgm_path)
+        max_start = max(0, bgm_dur - dur - 2)
+        rand_start = round(random.uniform(0, max_start), 2) if max_start > 0 else 0
+        voice_end = dur
+        music_fade_out = max(0, dur - 1.5)
+        r = _run(["ffmpeg", "-y",
+              "-i", video_path,
+              "-ss", str(rand_start), "-stream_loop", "-1", "-i", bgm_path,
+              "-filter_complex",
+              f"[0:a]volume={voice_vol},afade=t=in:st=0:d=0.1,afade=t=out:st={voice_end-0.25}:d=0.25[voice];"
+              f"[1:a]volume={music_vol},afade=t=in:st=0:d=1.0,afade=t=out:st={music_fade_out}:d=1.5[music];"
+              f"[music]volume='0.6+0.4*abs(sin(2*PI*t/{beat_dur}))':eval=frame[duck];"
+              f"[duck][voice]amix=inputs=2:duration=first[out]",
+              "-map", "0:v", "-map", "[out]",
+              "-t", str(dur),
+              "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
+              out_path])
+        if r.returncode != 0:
+            raise RuntimeError(f"beat_sync_bgm failed:\n{r.stderr[-500:]}")
+        print(f"   🎧 BGMビート同期適用 ({bpm:.0f} BPM, 1拍={beat_dur:.2f}s)")
+    except Exception as e:
+        print(f"   ⚠️ beat_sync_bgm失敗 ({e}) → 通常mix_bgmでフォールバック")
+        mix_bgm(video_path, bgm_path, out_path, voice_vol=voice_vol, music_vol=music_vol)
+
 def add_loop_ending(concat_file, first_scene_path, output_path):
     """ループ構造: 最後に最初のシーンを0.5秒追加してループ感を出す"""
     _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)

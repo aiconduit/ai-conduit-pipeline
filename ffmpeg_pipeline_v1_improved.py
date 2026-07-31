@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT_DIR))
 from conduit_core import (
     generate_script_deepseek, tts_japanese, generate_word_subtitle_audio,
     fetch_broll_cinematic, fetch_broll_from_topic, download_bgm, apply_pattern_interrupt, mix_bgm, probe_dur,
+    add_sfx_to_scene, apply_zoom_pulse, beat_sync_bgm,
     CINEMATIC_STYLES
 )
 from word_sync_subtitle import create_subtitle_frames, SubtitleFrame
@@ -102,7 +103,7 @@ def gen_overlay(scene, out_path, scene_idx=0):
     draw.text((W-120, 16), "AI Conduit", font=font_logo, fill=(255,255,255,120))
     img.save(out_path, 'PNG')
 
-def compose_scene(scene, idx):
+def compose_scene(scene, idx, is_last=False):
     dur = scene["duration"]; audio = scene["audio_path"]
     mood = scene.get("mood","default")
     interrupt = scene.get("interrupt","none")
@@ -148,6 +149,15 @@ def compose_scene(scene, idx):
 
     if not _broll_fallback:
         _make_clip(broll, broll_top, dur)
+
+    # ★ ズームパルス（シーン冒頭1秒でKen Burns風ズームイン 1.0→1.06）
+    if not _broll_fallback:
+        broll_zoom = str(WORK_DIR / f"btop_zoom_{idx:02d}.mp4")
+        try:
+            apply_zoom_pulse(broll_top, broll_zoom, dur)
+            broll_top = broll_zoom
+        except Exception as _e:
+            print(f"   ⚠️ ズームパルス適用失敗({_e}) → 元のB-rollのまま")
 
     # ★ LUTカラーグレーディングをB-rollに適用（フォールバック時はスキップ）
     if not _broll_fallback:
@@ -231,7 +241,15 @@ def compose_scene(scene, idx):
 
     _run(["ffmpeg","-y","-i",composed,"-i",audio,
           "-r","30","-c:v","libx264","-preset","fast","-crf","18","-c:a","aac","-map","0:v","-map","1:a","-shortest",out])
-    return out
+
+    # ★ SFX追加（シーン動画完成後）: hook/interrupt冒頭 + シーン切替カット
+    sfx_out = str(WORK_DIR / f"scene_sfx_{idx:02d}.mp4")
+    try:
+        add_sfx_to_scene(out, sfx_out, mood=mood, dur=dur, add_cut=(not is_last))
+    except Exception as _e:
+        print(f"   ⚠️ SFX追加失敗({_e}) → そのまま出力")
+        sfx_out = out
+    return sfx_out
 
 def main():
     repo = sys.argv[1] if len(sys.argv)>1 else "MadsLorentzen/ai-job-search"
@@ -298,7 +316,7 @@ def main():
     print("[4/5] 🎬 シーン合成中...")
     files = []
     for i, s in enumerate(scenes):
-        f = compose_scene(s, i); files.append(f)
+        f = compose_scene(s, i, is_last=(i == len(scenes) - 1)); files.append(f)
         print(f"   Scene {s['id']} [{s['mood']}]: done")
 
     # ★ ループ構造: 最初のシーンを最後に0.5秒追加
@@ -361,10 +379,10 @@ def main():
                "-movflags","+faststart",
                raw_output])
 
-    # BGMミックス (music_vol=0.18)
+    # BGMビート同期ミックス (music_vol=0.18, BPMに基づくダッキング)
     final_output = str(OUTPUT_DIR/"pipeline_v1_improved.mp4")
     if bgm_path and os.path.exists(bgm_path):
-        mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.18)
+        beat_sync_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.18, bpm=bgm_bpm)
     else:
         import shutil; shutil.copy(raw_output, final_output)
 
