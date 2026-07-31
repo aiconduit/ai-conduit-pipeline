@@ -134,6 +134,8 @@ for i, sent in enumerate(sentences[:8]):
         "visual_1": visual_query,
     }
     scene["topic"] = topic
+    scene["repo_name"] = first.get("repo_name", "")
+    scene["repo_name"] = first.get("repo_name", "")
     sent = sent[:40]
     sent = re.sub(r'。.*', '', sent)
     scene["narration"] = sent
