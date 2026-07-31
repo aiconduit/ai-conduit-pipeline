@@ -93,28 +93,66 @@ PATTERN_INTERRUPTS = [
     "pan_right",        # 右パン
 ]
 
+def _scenes_pass_quality(scenes):
+    """自己レビュー: 生成されたscenes配列の品質チェック。
+    以下いずれかに該当すればNG（False）を返す。
+    - narrationが20文字未満のsceneが2つ以上ある
+    - 全sceneのnarrationが同じ内容を繰り返している（先頭20文字が3つ以上一致）
+    - CTAシーン（最後のscene）にAIconduitが含まれていない
+    """
+    if not scenes or len(scenes) < 2:
+        return False
+    narrations = [(s.get("narration") or "") for s in scenes]
+    if sum(1 for n in narrations if len(n) < 20) >= 2:
+        return False
+    prefixes = [n[:20] for n in narrations]
+    from collections import Counter
+    if max(Counter(prefixes).values(), default=0) >= 3:
+        return False
+    cta = narrations[-1]
+    if "AIconduit" not in cta:
+        return False
+    return True
+
+
+def _generate_with_review(gen_fn, label, max_attempts=3):
+    """自己レビューループ: 品質チェックNGならprint警告して再生成（最大2回再試行）。
+    2回再試行してもNGの場合は現在の結果をそのまま返す。
+    """
+    scenes = None
+    for attempt in range(1, max_attempts + 1):
+        scenes = gen_fn()
+        if scenes is not None and _scenes_pass_quality(scenes):
+            return scenes
+        if attempt < max_attempts:
+            print(f"   ⚠️ [{label}] 自己レビュー: 品質チェックNG（{attempt}回目）→ 再生成します")
+    print(f"   ⚠️ [{label}] 自己レビュー: 2回再試行しても品質NGのため現在の結果を返します")
+    return scenes
+
+
 def generate_script_deepseek(repo, stars, description, style="viral_hook", max_scenes=8):
-    """DeepSeek APIでスクリプト生成（Claude品質・低コスト）"""
+    """DeepSeek APIでスクリプト生成 + 自己レビューループ（Claude品質・低コスト）"""
     print(f"[Script] DeepSeekでスクリプト生成中... (style={style})")
-    
-    hook = random.choice(HOOK_TEMPLATES).format(
-        topic=repo.split("/")[-1] if "/" in repo else repo
-    )
-    
-    cinematic = random.choice(list(CINEMATIC_STYLES.values()))
-    
-    system_prompt = """You are a viral short-form video script writer for Japanese AI/tech content.
+
+    def _gen_once():
+        hook = random.choice(HOOK_TEMPLATES).format(
+            topic=repo.split("/")[-1] if "/" in repo else repo
+        )
+
+        cinematic = random.choice(list(CINEMATIC_STYLES.values()))
+
+        system_prompt = """You are a viral short-form video script writer for Japanese AI/tech content.
 You specialize in Hook-Value-CTA framework and Cinema Director techniques.
 ALWAYS write in Japanese. ALWAYS output valid JSON only."""
 
-    user_prompt = f"""Write a {max_scenes}-scene viral Japanese short video script about: {repo} ({stars}★) - {description}
+        user_prompt = f"""Write a {max_scenes}-scene viral Japanese short video script about: {repo} ({stars}★) - {description}
 
 VIRAL FRAMEWORK (MUST FOLLOW):
 - Scene 1 (Hook, 0-3s): "{hook}" - STOP SCROLL IMMEDIATELY
 - Scene 2-3 (Pattern Interrupt): Unexpected twist or surprising fact
 - Scene 4-6 (Value): Core information, build curiosity
 - Scene 7 (Secondary Hook): New info to keep watching
-- Scene 8 (CTA): Follow + Share prompt
+- Scene 8 (CTA): Follow AIconduit + Share prompt
 
 CINEMA DIRECTOR STYLE:
 - Shot type: {cinematic['shot']}
@@ -128,6 +166,7 @@ RULES:
 - "interrupt": one of [zoom_punch, color_flash, text_pop, speed_ramp, cut_zoom, none]
 - "mood": hook/interrupt/value/secondary_hook/cta
 - FIRST SCENE must have large text visible in first frame
+- FINAL SCENE (CTA) MUST mention "AIconduit" in its narration
 
 Output ONLY JSON array:
 [
@@ -135,41 +174,49 @@ Output ONLY JSON array:
   ...{max_scenes} scenes...
 ]"""
 
-    try:
-        r = requests.post("https://api.deepseek.com/chat/completions",
-            headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
-            json={"model": "deepseek-chat", "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ], "max_tokens": 1500, "temperature": 0.8},
-            timeout=60)
+        try:
+            r = requests.post("https://api.deepseek.com/chat/completions",
+                headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
+                json={"model": "deepseek-chat", "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ], "max_tokens": 1500, "temperature": 0.8},
+                timeout=60)
+            resp = r.json()
+            if "choices" not in resp:
+                raise Exception(f"DeepSeek: {resp}")
+            text = resp["choices"][0]["message"]["content"].strip()
+            s=text.find("["); e=text.rfind("]")+1
+            if s>=0 and e>s: text=text[s:e]
+            scenes = json.loads(re.sub(r"[\x00-\x1f]","",text))
+            print(f"   ✅ {len(scenes)}シーン (DeepSeek)")
+            return scenes
+        except Exception as ex:
+            print(f"   ⚠️ DeepSeek失敗、Groqにフォールバック: {ex}")
+            return generate_script_groq(repo, stars, description, max_scenes)
+
+    return _generate_with_review(_gen_once, "DeepSeek")
+
+def generate_script_groq(repo, stars, description, max_scenes=8):
+    """Groq APIフォールバック + 自己レビューループ"""
+    def _gen_once():
+        prompt = f"""Write {max_scenes} scenes for Japanese viral short video about {repo} ({stars}★) - {description}
+Hook first, value middle, CTA last.
+FINAL SCENE (CTA) MUST mention "AIconduit" in its narration.
+Output ONLY JSON: [{{"id":1,"narration":"日本語15-30文字","caption":"4-8文字","visual_prompt":"English cinematic search","interrupt":"zoom_punch","mood":"hook"}},...]"""
+        r = requests.post("https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
+            json={"model": "llama-3.3-70b-versatile", "messages": [{"role":"user","content":prompt}], "max_tokens": 900})
         resp = r.json()
-        if "choices" not in resp:
-            raise Exception(f"DeepSeek: {resp}")
+        if "choices" not in resp: raise Exception(f"Groq: {resp}")
         text = resp["choices"][0]["message"]["content"].strip()
         s=text.find("["); e=text.rfind("]")+1
         if s>=0 and e>s: text=text[s:e]
         scenes = json.loads(re.sub(r"[\x00-\x1f]","",text))
-        print(f"   ✅ {len(scenes)}シーン (DeepSeek)")
+        print(f"   ✅ {len(scenes)}シーン (Groq)")
         return scenes
-    except Exception as ex:
-        print(f"   ⚠️ DeepSeek失敗、Groqにフォールバック: {ex}")
-        return generate_script_groq(repo, stars, description, max_scenes)
 
-def generate_script_groq(repo, stars, description, max_scenes=8):
-    """Groq APIフォールバック"""
-    prompt = f"""Write {max_scenes} scenes for Japanese viral short video about {repo} ({stars}★) - {description}
-Hook first, value middle, CTA last.
-Output ONLY JSON: [{{"id":1,"narration":"日本語15-30文字","caption":"4-8文字","visual_prompt":"English cinematic search","interrupt":"zoom_punch","mood":"hook"}},...]"""
-    r = requests.post("https://api.groq.com/openai/v1/chat/completions",
-        headers={"Authorization": f"Bearer {GROQ_KEY}", "Content-Type": "application/json"},
-        json={"model": "llama-3.3-70b-versatile", "messages": [{"role":"user","content":prompt}], "max_tokens": 900})
-    resp = r.json()
-    if "choices" not in resp: raise Exception(f"Groq: {resp}")
-    text = resp["choices"][0]["message"]["content"].strip()
-    s=text.find("["); e=text.rfind("]")+1
-    if s>=0 and e>s: text=text[s:e]
-    return json.loads(re.sub(r"[\x00-\x1f]","",text))
+    return _generate_with_review(_gen_once, "Groq")
 
 def tts_japanese(text, path, speed=1.05):
     """Edge TTS - ja-JP-NanamiNeural with word timestamps"""
