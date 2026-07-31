@@ -31,7 +31,8 @@ news_item = plan.get("news_item", {})
 content = plan.get("plan", {})
 
 # topic = YouTubeタイトル（selected_title → news_item.title の順でフォールバック）
-topic = content.get("selected_title") or news_item.get("title", "")
+plan_data = content.get("plan", content)
+topic = plan_data.get("selected_title") or news_item.get("title", "")
 if not topic:
     print("⚠️ news_content_plan.jsonからタイトルが取得できません。デフォルトを使用します。")
     topic = "AI News"
@@ -47,7 +48,8 @@ generated_at = plan.get("generated_at", "")
 CTA_TEXT = "コメントにAIconduitと書いてプレゼントをゲットしよう！"
 
 # 2. script_60s を構築（plan.script.scenes[].narration を連結）
-scene_narrations = [s.get("narration", "") for s in content.get("script", {}).get("scenes", [])]
+plan = content.get("plan", content)
+scene_narrations = [s.get("narration", "") for s in plan.get("script", {}).get("scenes", [])]
 script_60s = "".join(scene_narrations).strip()
 if not script_60s:
     print("⚠️ scriptが空です。デフォルトナレーションを使用します。")
