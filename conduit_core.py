@@ -445,9 +445,21 @@ def _generate_pollinations_images(visual_query, cache_dir, count=3):
     """Pollinations.aiでAI画像をcount枚生成する（スライドショー変換なし、画像リストのみ返す）"""
     cache_dir = Path(cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
+    # 日本語クエリを英語に変換（シンプルなキーワードに絞る）
+    import re as _re
+    # 日本語を除去して英語部分のみ抽出
+    en_query = _re.sub(r'[^-]+', ' ', visual_query).strip()
+    if len(en_query) < 10:
+        # 英語が少ない場合はデフォルトプロンプト
+        en_query = "AI software interface dark dramatic modern"
+    visual_query = en_query[:120]
     images = []
     for i in range(count):
-        prompt = urllib.parse.quote(visual_query)
+        import re as _re
+        en_q = _re.sub(r"[^\x00-\x7F]+", " ", visual_query).strip()
+        if len(en_q) < 10: en_q = "AI software automation dark modern cinematic"
+        visual_query_en = en_q[:100]
+        prompt = urllib.parse.quote(visual_query_en)
         url = f"https://image.pollinations.ai/prompt/{prompt}?width=960&height=960&nologo=true"
         out = cache_dir / f"poll_{i}.png"
         if not out.exists() or out.stat().st_size == 0:
