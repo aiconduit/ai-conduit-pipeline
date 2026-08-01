@@ -621,15 +621,28 @@ def fetch_broll_playwright(tool_name, cache_dir, direct_url=None):
         async def _capture():
             from playwright.async_api import async_playwright
             async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page(viewport={"width": 1080, "height": 1080})
-                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                await page.wait_for_load_state("domcontentloaded")
-                safe_name = re.sub(r"[^\w]", "_", tool_name)[:20]
+                browser = await p.chromium.launch(
+                    headless=True,
+                    args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-blink-features=AutomationControlled"]
+                )
+                context = await browser.new_context(
+                    viewport={"width": 1280, "height": 900},
+                    user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    locale="ja-JP",
+                )
+                page = await context.new_page()
+                try:
+                    await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                    await page.wait_for_timeout(3000)
+                except Exception:
+                    pass
+                safe_name = re.sub(r"[^\w]", "_", (tool_name or "direct"))[:20]
                 shot = Path(cache_dir) / f"playwright_{safe_name}.png"
-                await page.screenshot(path=str(shot), clip={"x": 0, "y": 0, "width": 1080, "height": 1080})
+                await page.screenshot(path=str(shot), full_page=False)
                 await browser.close()
-                return str(shot) if shot.exists() and shot.stat().st_size > 0 else None
+                size = shot.stat().st_size if shot.exists() else 0
+                print(f"   [DEBUG] Playwright screenshot size={size} url={url}")
+                return str(shot) if shot.exists() and size > 50000 else None
 
         import asyncio
         shot = asyncio.run(_capture())
@@ -689,23 +702,23 @@ def _make_kenburns(image, output_path, dur=3.0, size=960):
             img = img.resize((int(img.width * scale), int(img.height * scale)), PILImage.LANCZOS)
             frame = np.array(img)
 
-        base = mpy.ImageClip(frame).set_duration(dur)
+        base = ImageClip(frame).with_duration(dur)
         zoom_start = 1.0
         zoom_end = 1.08
-        base = base.resize(lambda t: zoom_start + (zoom_end - zoom_start) * (t / max(dur, 0.1)))
+        base = base.resized(lambda t: zoom_start + (zoom_end - zoom_start) * (t / max(dur, 0.1)))
 
         max_dx = min(60, max(0, base.w - target_w) // 4)
         max_dy = min(60, max(0, base.h - target_h) // 4)
         cx = -((base.w - target_w) / 2)
         cy = -((base.h - target_h) / 2)
-        moving = base.set_position(
+        moving = base.with_position(
             lambda t: (
                 cx + max_dx * 0.3 * (t / max(dur, 0.1)),
                 cy + max_dy * 0.2 * (t / max(dur, 0.1)),
             )
         )
-        backdrop = mpy.ColorClip((target_w, target_h), color=(0, 0, 0)).set_duration(dur)
-        comp = mpy.CompositeVideoClip([backdrop, moving], size=(target_w, target_h)).set_duration(dur)
+        backdrop = ColorClip((target_w, target_h), color=(0, 0, 0)).with_duration(dur)
+        comp = CompositeVideoClip([backdrop, moving], size=(target_w, target_h)).with_duration(dur)
         comp.write_videofile(
             str(output_path),
             fps=30, codec="libx264", preset="fast",
