@@ -114,40 +114,61 @@ AI Conduitは、トレンド自動収集→動画生成→SNS投稿を完全自�
   "tags": ["ai news", ...10〜15個の英日タグ],
   "target_audience": "ターゲット視聴者層",
   "script": {{
-    "total_duration_sec": 38,
+    "total_duration_sec": 45,
     "scenes": [
       {{
         "scene_title": "Hook",
-        "duration_sec": 4,
-        "narration": "(15文字以内)",
-        "visual_1": "(英語、シーン前半のB-roll検索クエリ)",
-        "visual_2": "(英語、シーン後半のB-roll検索クエリ)"
+        "duration_sec": 3,
+        "narration": "(20文字以内・最も衝撃的な事実)",
+        "visual_1": "(英語)",
+        "visual_2": "(英語)"
+      }},
+      {{
+        "scene_title": "Why",
+        "duration_sec": 5,
+        "narration": "(25文字以内・なぜ重要か)",
+        "visual_1": "(英語)",
+        "visual_2": "(英語)"
       }},
       {{
         "scene_title": "Fact_1",
-        "duration_sec": 8,
-        "narration": "(15文字以内)",
+        "duration_sec": 6,
+        "narration": "(25文字以内・数字必須)",
         "visual_1": "(英語)",
         "visual_2": "(英語)"
       }},
       {{
         "scene_title": "Fact_2",
-        "duration_sec": 8,
-        "narration": "(15文字以内)",
+        "duration_sec": 6,
+        "narration": "(25文字以内・技術的事実)",
+        "visual_1": "(英語)",
+        "visual_2": "(英語)"
+      }},
+      {{
+        "scene_title": "Impact",
+        "duration_sec": 6,
+        "narration": "(25文字以内・影響)",
         "visual_1": "(英語)",
         "visual_2": "(英語)"
       }},
       {{
         "scene_title": "Twist",
-        "duration_sec": 8,
-        "narration": "(15文字以内)",
+        "duration_sec": 5,
+        "narration": "(20文字以内・驚き)",
+        "visual_1": "(英語)",
+        "visual_2": "(英語)"
+      }},
+      {{
+        "scene_title": "Context",
+        "duration_sec": 5,
+        "narration": "(25文字以内・背景)",
         "visual_1": "(英語)",
         "visual_2": "(英語)"
       }},
       {{
         "scene_title": "CTA",
-        "duration_sec": 6,
-        "narration": "(15文字以内。AI Conduitを含める: 例「詳細はAI Conduitで」)",
+        "duration_sec": 5,
+        "narration": "(20文字以内・AI Conduit行動喚起)",
         "visual_1": "(英語)",
         "visual_2": "(英語)"
       }}
@@ -155,9 +176,8 @@ AI Conduitは、トレンド自動収集→動画生成→SNS投稿を完全自�
   }}
 }}
 ```
-
 台本は必ず日本語で出力してください。
-narration は1文15文字以内に厳守してください。
+narration は各シーンの文字数制限を厳守してください。
 visual_1 / visual_2 は英語で具体的なビジュアルを指定してください。"""
 
 
