@@ -190,10 +190,8 @@ def compose_scene(scene, idx, is_last=False):
 
     # apply_zoom_pulse DISABLED: zoompan d=1で黒画面バグあり
 
-    # ★ LUTカラーグレーディングをB-rollに適用（フォールバック時はスキップ）
-    if not _broll_fallback:
-        pass  # フォールバック時はbg作成済み
-    lut_style = {"hook": "vintage", "interrupt": "cool", "value": "cinematic", "secondary_hook": "warm", "cta": "cinematic"}.get(mood, "cinematic")
+    # ★ LUTカラーグレーディングをB-rollに適用
+    lut_style = scene.get("lut_style") or {"hook": "vintage", "interrupt": "cool", "value": "cinematic", "secondary_hook": "warm", "cta": "cinematic"}.get(mood, "cinematic")
     broll_lut = str(WORK_DIR / f"btop_lut_{idx:02d}.mp4")
     try:
         from conduit_core import apply_lut_to_video

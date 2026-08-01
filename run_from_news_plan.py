@@ -13,7 +13,7 @@ ROOT_DIR = Path(__file__).parent
 sys.path.insert(0, str(ROOT_DIR))
 from conduit_core import (
     tts_japanese, fetch_broll_cinematic, fetch_broll_from_topic,
-    download_bgm, probe_dur, mix_bgm, generate_word_subtitle_audio,
+    download_bgm, probe_dur, mix_bgm, generate_word_subtitle_audio, beat_sync_bgm,
 )
 import ffmpeg_pipeline_v1_improved as _pipeline_mod
 from ffmpeg_pipeline_v1_improved import (
@@ -171,8 +171,45 @@ bgm_result = download_bgm(str(WORK_DIR))
 bgm_path = bgm_result[0] if isinstance(bgm_result, tuple) else bgm_result
 print(f"   BGM: {'✅' if bgm_path else '❌ スキップ'}")
 
-# 6. シーン合成
+# 6. 固定イントロ生成（2秒: AI Conduitロゴ）
 print("\n[3/4] 🎬 シーン合成中...")
+from PIL import Image, ImageDraw, ImageFont as _PILFont
+
+def _load_font(size):
+    for p in ["/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc",
+               "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+               "/System/Library/Fonts/Helvetica.ttc"]:
+        if os.path.exists(p):
+            try: return _PILFont.truetype(p, size)
+            except: pass
+    return _PILFont.load_default()
+
+intro_clip = None
+try:
+    intro_img = Image.new("RGB", (1080, 1920), (10, 10, 15))
+    d = ImageDraw.Draw(intro_img)
+    d.rectangle([0, 0, 1080, 8], fill=(255, 220, 0))
+    d.rectangle([0, 1912, 1080, 1920], fill=(255, 220, 0))
+    for txt, col, y, sz in [
+        ("AI Conduit", (255,220,0), 800, 120),
+        ("AIニュース速報", (200,200,200), 960, 56),
+    ]:
+        f = _load_font(sz)
+        bb = d.textbbox((0,0), txt, font=f)
+        d.text(((1080-(bb[2]-bb[0]))//2, y), txt, fill=col, font=f)
+    intro_png = str(WORK_DIR / "intro.png")
+    intro_img.save(intro_png)
+    intro_clip = str(WORK_DIR / "intro.mp4")
+    _run(["ffmpeg", "-y", "-loop", "1", "-i", intro_png, "-t", "2.0",
+          "-vf", "fade=t=in:st=0:d=0.3,fade=t=out:st=1.5:d=0.5,scale=1080:1920",
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+          "-pix_fmt", "yuv420p", "-an", intro_clip])
+    print("   ✅ イントロ生成完了")
+except Exception as _e:
+    print(f"   ⚠️ イントロスキップ: {_e}")
+    intro_clip = None
+
+# シーン合成
 files = []
 for i, s in enumerate(scenes):
     s["visual_1"] = mood_visual_query(s["topic"], s["mood"])
@@ -180,8 +217,34 @@ for i, s in enumerate(scenes):
     files.append(f)
     print(f"   Scene {s['id']} [{s['mood']}]: done")
 
-# 7. ループエンディング
-print("   ループエンディング追加...")
+# エンディングカード生成（2秒）
+outro_clip = None
+try:
+    outro_img = Image.new("RGB", (1080, 1920), (10, 10, 15))
+    d2 = ImageDraw.Draw(outro_img)
+    d2.rectangle([0, 0, 1080, 8], fill=(255, 220, 0))
+    for txt, col, y, sz in [
+        ("チャンネル登録", (255,220,0), 750, 80),
+        ("コメント & いいね！", (255,255,255), 880, 72),
+        ("概要欄もチェック", (200,200,200), 1010, 60),
+        ("AI Conduit", (150,150,150), 1180, 50),
+    ]:
+        f2 = _load_font(sz)
+        bb2 = d2.textbbox((0,0), txt, font=f2)
+        d2.text(((1080-(bb2[2]-bb2[0]))//2, y), txt, fill=col, font=f2)
+    outro_png = str(WORK_DIR / "outro.png")
+    outro_img.save(outro_png)
+    outro_clip = str(WORK_DIR / "outro.mp4")
+    _run(["ffmpeg", "-y", "-loop", "1", "-i", outro_png, "-t", "2.0",
+          "-vf", "fade=t=in:st=0:d=0.3,scale=1080:1920",
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+          "-pix_fmt", "yuv420p", "-an", outro_clip])
+    print("   ✅ エンディングカード生成完了")
+except Exception as _e:
+    print(f"   ⚠️ エンディングスキップ: {_e}")
+    outro_clip = None
+
+# ループエンディング
 loop_clip = str(WORK_DIR / "loop_end.mp4")
 _run(["ffmpeg", "-y", "-i", files[0], "-t", "0.8",
       "-vf", "fade=t=out:st=0.5:d=0.3",
@@ -198,6 +261,15 @@ raw_output = str(WORK_DIR / "raw_output.mp4")
 # 全入力を libx264 yuv420p に統一してから concat
 norm_dir = WORK_DIR / "norm"
 norm_dir.mkdir(exist_ok=True)
+# イントロ・アウトロをfilesに追加
+all_clips = []
+if intro_clip and os.path.exists(intro_clip):
+    all_clips.append(intro_clip)
+all_clips.extend(files)
+if outro_clip and os.path.exists(outro_clip):
+    all_clips.append(outro_clip)
+files = all_clips
+
 norm_list = []
 for i, sf in enumerate(files):
     norm_path = str(norm_dir / f"norm_{i:02d}.mp4")
@@ -209,15 +281,62 @@ for i, sf in enumerate(files):
 with open(concat, "w") as f:
     for p in norm_list:
         f.write(f"file '{p}'\n")
-_run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
-      "-pix_fmt", "yuv420p", raw_output])
+# xfadeトランジション付きで連結
+import math as _math
+xfade_types = ["fade", "wipeleft", "slideleft", "dissolve", "fadeblack"]
+if len(norm_list) >= 2:
+    try:
+        # 各クリップの長さを取得してxfadeを適用
+        xfade_duration = 0.3
+        # 最初の2クリップでxfadeを試行、失敗したら通常concat
+        xfade_output = str(WORK_DIR / "xfade_output.mp4")
+        # シンプルにfade+concat方式で実装
+        filter_parts = []
+        input_args = []
+        for j, np_ in enumerate(norm_list):
+            input_args += ["-i", np_]
+        # filter_complexでxfade
+        n = len(norm_list)
+        fc = ""
+        for j in range(n):
+            fc += f"[{j}:v]fade=t=in:st=0:d=0.2,fade=t=out:st={max(0.5,0.8)}:d=0.2[v{j}];"
+        fc += "".join(f"[v{j}]" for j in range(n))
+        fc += f"concat=n={n}:v=1:a=0[vout]"
+        _run(["ffmpeg", "-y"] + input_args + [
+            "-filter_complex", fc,
+            "-map", "[vout]",
+            "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+            "-pix_fmt", "yuv420p", xfade_output])
+        # 音声は別途追加
+        _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
+              "-vn", "-c:a", "aac", str(WORK_DIR / "audio_only.aac")])
+        audio_only = str(WORK_DIR / "audio_only.aac")
+        if os.path.exists(audio_only):
+            _run(["ffmpeg", "-y", "-i", xfade_output, "-i", audio_only,
+                  "-c:v", "copy", "-c:a", "aac", "-shortest", raw_output])
+        else:
+            import shutil; shutil.copy(xfade_output, raw_output)
+        print("   ✅ xfadeトランジション適用完了")
+    except Exception as _xe:
+        print(f"   ⚠️ xfadeスキップ ({_xe}) → 通常concat")
+        _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
+              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
+              "-pix_fmt", "yuv420p", raw_output])
+else:
+    _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
+          "-pix_fmt", "yuv420p", raw_output])
 
 # 9. BGM ミックス
 final_filename = f"v2news_{topic[:20]}.mp4"
 final_output = str(OUTPUT_DIR / final_filename)
 if bgm_path and os.path.exists(bgm_path):
-    mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08)
+    try:
+        beat_sync_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08)
+        print("   ✅ ビートシンクBGMミックス完了")
+    except Exception as _be:
+        print(f"   ⚠️ ビートシンクスキップ ({_be}) → 通常ミックス")
+        mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08)
 else:
     import shutil
     shutil.copy(raw_output, final_output)
