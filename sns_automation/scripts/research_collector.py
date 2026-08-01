@@ -230,6 +230,56 @@ def fetch_mit_tech_review(max_items=5):
         })
     return results
 
+def fetch_ai_news_rss():
+    """AI系ニュースサイトのRSSから最新ニュースを収集"""
+    import xml.etree.ElementTree as ET
+    results = []
+    rss_feeds = [
+        ("https://techcrunch.com/feed/", "TechCrunch"),
+        ("https://venturebeat.com/feed/", "VentureBeat"),
+        ("https://www.theverge.com/rss/index.xml", "TheVerge"),
+        ("https://feeds.arstechnica.com/arstechnica/index", "ArsTechnica"),
+        ("https://www.wired.com/feed/rss", "Wired"),
+    ]
+    ai_keywords = ["AI", "artificial intelligence", "ChatGPT", "GPT", "Claude", "Gemini", 
+                   "machine learning", "LLM", "OpenAI", "Anthropic", "Google DeepMind",
+                   "Meta AI", "language model", "generative", "robotics", "automation"]
+    
+    for feed_url, source_name in rss_feeds:
+        try:
+            r = requests.get(feed_url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+            if r.status_code != 200:
+                continue
+            root = ET.fromstring(r.content)
+            ns = {"atom": "http://www.w3.org/2005/Atom"}
+            
+            # RSS形式
+            items = root.findall(".//item")
+            # Atom形式
+            if not items:
+                items = root.findall(".//atom:entry", ns)
+            
+            for item in items[:5]:
+                title = (item.findtext("title") or item.findtext("atom:title", namespaces=ns) or "").strip()
+                link = (item.findtext("link") or item.findtext("atom:link", namespaces=ns) or "").strip()
+                if hasattr(link, 'attrib'):
+                    link = link.get('href', '')
+                
+                # AIキーワードフィルタ
+                if any(kw.lower() in title.lower() for kw in ai_keywords):
+                    results.append({
+                        "source": source_name,
+                        "title": title,
+                        "url": link,
+                        "score": 50,
+                    })
+        except Exception as e:
+            print(f"RSS error {source_name}: {e}")
+    
+    print(f"AI News RSS: {len(results)}件")
+    return results
+
+
 
 def collect_all_sources():
     """全ソースを収集し、重複URLを除去して news_topics.json に保存"""
