@@ -522,6 +522,128 @@ def _match_github_repo(topic):
     return None
 
 
+# === ツール名 → Official URL マッピング（fetch_broll_playwright用） ===
+TOOL_URL_MAP = {
+    "n8n": "https://n8n.io",
+    "langchain": "https://www.langchain.com",
+    "claude": "https://claude.ai",
+    "claude code": "https://docs.anthropic.com/en/docs/claude-code",
+    "claude desktop": "https://claude.ai/download",
+    "llamaindex": "https://www.llamaindex.ai",
+    "llama": "https://www.llama.com",
+    "autogpt": "https://agpt.co",
+    "auto gpt": "https://agpt.co",
+    "agentops": "https://agentops.ai",
+    "openinterpreter": "https://openinterpreter.com",
+    "open interpreter": "https://openinterpreter.com",
+    "dify": "https://dify.ai",
+    "flowise": "https://flowiseai.com",
+    "supabase": "https://supabase.com",
+    "openhands": "https://www.all-hands.dev",
+    "open hands": "https://www.all-hands.dev",
+    "browser use": "https://www.browser-use.com",
+    "browser-use": "https://www.browser-use.com",
+    "comfyui": "https://www.comfy.org",
+    "stable diffusion": "https://stability.ai",
+    "ui": "https://ui.shadcn.com",
+    "shadcn": "https://ui.shadcn.com",
+    "bazel": "https://bazel.build",
+    "opencv": "https://opencv.org",
+    "tensorflow": "https://www.tensorflow.org",
+    "pytorch": "https://pytorch.org",
+    "kubernetes": "https://kubernetes.io",
+    "k8s": "https://kubernetes.io",
+    "docker": "https://www.docker.com",
+    "vscode": "https://code.visualstudio.com",
+    "asdf": "https://asdf-vm.com",
+    "nodejs": "https://nodejs.org",
+    "node.js": "https://nodejs.org",
+    "next.js": "https://nextjs.org",
+    "nextjs": "https://nextjs.org",
+    "react": "https://react.dev",
+    "vue": "https://vuejs.org",
+    "svelte": "https://svelte.dev",
+    "fastapi": "https://fastapi.tiangolo.com",
+    "flask": "https://flask.palletsprojects.com",
+    "django": "https://www.djangoproject.com",
+    "rust": "https://www.rust-lang.org",
+    "golang": "https://go.dev",
+    "android": "https://www.android.com",
+    "flutter": "https://flutter.dev",
+    "remotion": "https://www.remotion.dev",
+    "opencode": "https://opencode.ai",
+    "ruff": "https://docs.astral.sh/ruff",
+    "pyenv": "https://github.com/pyenv/pyenv",
+    "uv": "https://docs.astral.sh/uv",
+    "deepseek": "https://www.deepseek.com",
+    "llama.cpp": "https://github.com/ggml-org/llama.cpp",
+    "ollama": "https://ollama.com",
+    "openai": "https://openai.com",
+    "whisper": "https://openai.com/index/whisper",
+    "huggingface": "https://huggingface.co",
+    "transformers": "https://huggingface.co/docs/transformers",
+    "gitlens": "https://gitkraken.com/gitlens",
+    "brew": "https://brew.sh",
+    "homebrew": "https://brew.sh",
+}
+
+
+def fetch_broll_playwright(tool_name, cache_dir):
+    """ツールの公式HPをヘッドレスChromiumでスクリーンショット → Ken Burns動画化。
+
+    tool_nameからTOOL_URL_MAPを部分マッチで検索し、公式URLをPlaywrightで撮影、
+    960x540にcropして _make_kenburns() で動画化する。
+    失敗時は None を返す。
+    """
+    try:
+        if not tool_name:
+            return None
+        url = None
+        t = tool_name.lower()
+        for key, u in TOOL_URL_MAP.items():
+            if key in t:
+                url = u
+                break
+        if not url:
+            return None
+
+        try:
+            import playwright
+        except ImportError:
+            print(f"   ⚠️ [fetch_broll_playwright] Playwrightが未インストール → None")
+            return None
+
+        if cache_dir is None:
+            cache_dir = Path("/tmp/broll_topic_cache")
+        Path(cache_dir).mkdir(parents=True, exist_ok=True)
+
+        async def _capture():
+            from playwright.async_api import async_playwright
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                page = await browser.new_page(viewport={"width": 1280, "height": 720})
+                await page.goto(url, wait_until="domcontentloaded", timeout=30000)
+                await page.wait_for_load_state("domcontentloaded")
+                shot = Path(cache_dir) / f"playwright_{re.sub(r'[^\\w]', '_', tool_name)[:20]}.png"
+                await page.screenshot(path=str(shot), clip={"x": 0, "y": 0, "width": 960, "height": 540})
+                await browser.close()
+                return str(shot) if shot.exists() and shot.stat().st_size > 0 else None
+
+        import asyncio
+        shot = asyncio.run(_capture())
+        if not shot:
+            return None
+        out = Path(cache_dir) / f"playwright_{re.sub(r'[^\\w]', '_', tool_name)[:20]}_kenburns.mp4"
+        result = _make_kenburns(shot, out, dur=8.0)
+        if result and os.path.exists(result):
+            print(f"   [fetch_broll_playwright] ✅ 公式HP → Ken Burns動画: {result}")
+            return result
+        return None
+    except Exception as e:
+        print(f"   ⚠️ [fetch_broll_playwright] 例外: {e} → None")
+        return None
+
+
 def _fetch_github_readme_images(repo_name, cache_dir=None, max_images=2):
     """GitHubのREADMEから実際のツール画像を取得する（1〜2枚）
 
@@ -606,9 +728,10 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
     """B-roll取得（優先順位でフォールバック）。
 
     優先順位:
-      1. GitHub READMEの実際のツール画像 → Ken Burns動画（最優先）
-      2. Pexelsでシンプルな英語クエリ検索（フォールバック1）
-      3. 黒画面（最終フォールバック）
+      1. Playwrightで公式HPスクリーンショット → Ken Burns動画（最優先）
+      2. GitHub READMEの実際のツール画像 → Ken Burns動画
+      3. Pexelsでシンプルな英語クエリ検索（フォールバック1）
+      4. 黒画面（最終フォールバック）
 
     Returns: 動画ファイルパス or None
     """
@@ -616,7 +739,13 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
         cache_dir = Path("/tmp/broll_topic_cache")
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
-    # 1. GitHub READMEの実画像 → Ken Burns動画（最優先）
+    # 1. Playwrightで公式HP撮影 → Ken Burns動画（最優先）
+    playwright_shot = fetch_broll_playwright(topic, cache_dir)
+    if playwright_shot:
+        print(f"   ✅ Playwright公式HP → Ken Burns動画: {playwright_shot}")
+        return playwright_shot
+
+    # 2. GitHub READMEの実画像 → Ken Burns動画
     repo = _match_github_repo(topic)
     if repo:
         print(f"   [fetch_broll_from_topic] GitHub README画像取得: {repo}")
@@ -633,7 +762,7 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
                 return result
             print(f"   ⚠️ GitHub README画像のKen Burns変換に失敗 → フォールバック")
 
-    # 2. Pexelsでシンプルな英語クエリ（フォールバック1）
+    # 3. Pexelsでシンプルな英語クエリ（フォールバック1）
     en_query = _extract_english_query(visual_query)
     print(f"   [fetch_broll_from_topic] Pexels検索: '{en_query} cinematic'")
     result = _pexels_download(en_query, cache_dir)
@@ -642,7 +771,7 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
         return result
     print(f"   [fetch_broll_from_topic] ⚠️ Pexels空 → 黒画面へフォールバック")
 
-    # 3. 黒画面（最終フォールバック）
+    # 4. 黒画面（最終フォールバック）
     out = Path(cache_dir) / "black_screen.mp4"
     if not out.exists() or out.stat().st_size == 0:
         result = _make_black_screen(out, dur=8.0)
@@ -946,9 +1075,9 @@ def get_video_duration(path):
         capture_output=True, text=True)
     return float(r.stdout.strip())
 
-def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.18):
+def mix_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08):
     """BGMをミックス（voice 85% + music 18%）
-    music_vol=0.18 (改定: 旧0.08から増強)
+    music_vol=0.08 (改定: 旧0.08から増強)
     音声がないvideoは音声なしのままコピー、BGM失敗時もフォールバック"""
     import shutil
     _run = lambda args: subprocess.run([str(a) for a in args], capture_output=True, text=True)
@@ -1076,7 +1205,7 @@ def apply_zoom_pulse(input_path, out_path, dur=None, fps=30):
     return out_path
 
 
-def beat_sync_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.18, bpm=None):
+def beat_sync_bgm(video_path, bgm_path, out_path, voice_vol=0.85, music_vol=0.08, bpm=None):
     """BGMビート同期（シンプル版）: mix_bgm()の代わりに使用。
 
     estimate_bpm_simple()でBPMを取得し、そのビート周期に合わせてBGMボリュームを

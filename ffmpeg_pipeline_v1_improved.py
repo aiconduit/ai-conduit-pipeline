@@ -379,10 +379,10 @@ def main():
                "-movflags","+faststart",
                raw_output])
 
-    # BGMビート同期ミックス (music_vol=0.18, BPMに基づくダッキング)
+    # BGMビート同期ミックス (music_vol=0.08, BPMに基づくダッキング)
     final_output = str(OUTPUT_DIR/"pipeline_v1_improved.mp4")
     if bgm_path and os.path.exists(bgm_path):
-        beat_sync_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.18, bpm=bgm_bpm)
+        beat_sync_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08, bpm=bgm_bpm)
     else:
         import shutil; shutil.copy(raw_output, final_output)
 
