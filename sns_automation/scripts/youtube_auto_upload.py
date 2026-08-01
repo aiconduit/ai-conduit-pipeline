@@ -8,48 +8,61 @@ from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload
 from PIL import Image, ImageDraw, ImageFont
 
 def generate_thumbnail(hook_text, repo_name=""):
+    """Fireship型サムネイル: ダーク背景+高コントラスト+3語以内+数字強調"""
     W, H = 1280, 720
-    img = Image.new("RGB", (W, H), (10, 10, 10))
+    img = Image.new("RGB", (W, H), (10, 10, 15))
     draw = ImageDraw.Draw(img)
 
-    try:
-        font_main = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 64)
-        font_small = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 32)
-    except:
-        font_main = ImageFont.load_default()
-        font_small = ImageFont.load_default()
+    draw.rectangle([0, 0, 6, H], fill=(255, 220, 0))
+    draw.rectangle([0, 0, W, 6], fill=(255, 220, 0))
 
-    # 黄色い太字テキスト（hookを表示）
-    lines = textwrap.wrap(f"「{hook_text}」", width=20)
-    y_start = 120
+    font_paths = [
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc',
+        '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
+        '/System/Library/Fonts/Helvetica.ttc',
+    ]
+    def load_font(size):
+        for p in font_paths:
+            if os.path.exists(p):
+                try: return ImageFont.truetype(p, size)
+                except: pass
+        return ImageFont.load_default()
+
+    font_main = load_font(120)
+    font_sub = load_font(48)
+    font_logo = load_font(32)
+
+    short_text = hook_text[:20].strip()
+    lines = textwrap.wrap(short_text, width=10)
+    y_start = H // 2 - len(lines) * 70
     for line in lines[:3]:
         bbox = draw.textbbox((0, 0), line, font=font_main)
         tw = bbox[2] - bbox[0]
-        draw.text(((W - tw) / 2, y_start), line, fill=(255, 220, 20), font=font_main)
-        y_start += 80
+        x = (W - tw) // 2
+        for dx in range(-4, 5):
+            for dy in range(-4, 5):
+                if dx*dx + dy*dy <= 16:
+                    draw.text((x+dx, y_start+dy), line, fill=(0, 0, 0), font=font_main)
+        has_number = any(c.isdigit() for c in line)
+        color = (255, 220, 0) if has_number else (255, 255, 255)
+        draw.text((x, y_start), line, fill=color, font=font_main)
+        y_start += 140
 
-    # repo名があれば2行目に表示
-    if repo_name:
-        bbox = draw.textbbox((0, 0), f"github.com/{repo_name}", font=font_small)
-        tw = bbox[2] - bbox[0]
-        draw.text(((W - tw) / 2, y_start + 20), f"github.com/{repo_name}", fill=(200, 200, 200), font=font_small)
+    sub_text = "AI Conduit | AI速報"
+    bbox = draw.textbbox((0, 0), sub_text, font=font_sub)
+    tw = bbox[2] - bbox[0]
+    draw.text(((W - tw) // 2, y_start + 20), sub_text, fill=(180, 180, 180), font=font_sub)
 
-    # AI Conduitロゴ（右下）
     logo_text = "AI Conduit"
-    try:
-        font_logo = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 28)
-    except:
-        font_logo = ImageFont.load_default()
     bbox = draw.textbbox((0, 0), logo_text, font=font_logo)
     lw = bbox[2] - bbox[0]
-    draw.text((W - lw - 30, H - 60), logo_text, fill=(255, 220, 20), font=font_logo)
+    draw.rectangle([W - lw - 50, H - 70, W - 10, H - 10], fill=(255, 220, 0))
+    draw.text((W - lw - 30, H - 60), logo_text, fill=(10, 10, 15), font=font_logo)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
     buf.seek(0)
     return buf
-
-
 def upload_thumbnail(youtube, video_id, image_buf):
     media = MediaIoBaseUpload(image_buf, mimetype="image/png")
     youtube.thumbnails().set(videoId=video_id, media_body=media).execute()

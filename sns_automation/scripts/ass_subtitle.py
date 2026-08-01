@@ -11,25 +11,25 @@ from pathlib import Path
 # === shortsmith jitter+4 grouping config (tuned for Japanese) ===
 MIN_WORDS_PER_GROUP = 4
 MAX_WORDS_PER_GROUP = 10
-MAX_GROUP_SECONDS = 1.5
-MAX_GROUP_CHARS = 12
+MAX_GROUP_SECONDS = 1.0
+MAX_GROUP_CHARS = 8
 PAUSE_BREAK_MS = 300
 MAX_TAIL_MS = 350
 
 _SENTENCE_END = (".", ",", "!", "?", ":", ";", "。", "！", "？", "、")
 
 # === PlayRes 1920 (Reference: autocaption_ass_builder REF_H=1920) ===
-PLAY_RES_X = 960
+PLAY_RES_X = 1080
 PLAY_RES_Y = 1920
 
 # pos_y = 0.68 → MarginV = 1920 * (1 - 0.68) = 615 (bottom-aligned, Alignment=2)
-MARGIN_V = 200
-FONT_SIZE = 72
+MARGIN_V = 615
+FONT_SIZE = 95
 FONT_NAME = "Noto Sans CJK JP"
 
 # colours in ASS &HBBGGRR format
 _PRIMARY_COLOR = "&H00FFFFFF"    # white (standing colour after sweep)
-_SECONDARY_COLOR = "&H0000D7FF"  # cyan (sweep fill — sweeps TO PrimaryColour)
+_SECONDARY_COLOR = "&H0000FFFF"  # yellow (sweep fill — sweeps TO PrimaryColour)
 _OUTLINE_COLOR = "&H00000000"    # black
 _BACK_COLOR = "&H80000000"       # semi-transparent black shadow
 
@@ -44,7 +44,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Pop,{FONT_NAME},{FONT_SIZE},{_PRIMARY_COLOR},{_SECONDARY_COLOR},{_OUTLINE_COLOR},{_BACK_COLOR},-1,0,0,0,100,100,0,0,1,4,2,2,40,40,{MARGIN_V},1
+Style: Pop,{FONT_NAME},{FONT_SIZE},{_PRIMARY_COLOR},{_SECONDARY_COLOR},{_OUTLINE_COLOR},{_BACK_COLOR},-1,0,0,0,100,100,0,0,1,6,3,2,40,40,{MARGIN_V},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

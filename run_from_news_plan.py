@@ -45,7 +45,7 @@ source = content.get("source") or news_item.get("source", "news")
 generated_at = plan.get("generated_at", "")
 
 # CTAナレーション（固定）
-CTA_TEXT = "コメントにAIconduitと書いてプレゼントをゲットしよう！"
+CTA_TEXT = f"{topic[:10]}の詳細はInstagramで！コメントにAIconduitと書いてプレゼントをゲット！"
 
 # 2. script_60s を構築（plan.script.scenes[].narration を連結）
 plan = content.get("plan", content)
@@ -69,7 +69,7 @@ print(f"   スクリプト: {script_60s}")
 #    Scene 4 (value)     : 残り（最大40文字）
 #    Scene 5 (cta)       : 固定CTA
 # scenesのnarrationを直接使用
-CTA_TEXT = "コメントにAIconduitと書いてプレゼントをゲットしよう！"
+CTA_TEXT = f"{topic[:10]}の詳細はInstagramで！コメントにAIconduitと書いてプレゼントをゲット！"
 raw_scenes = plan.get("script", {}).get("scenes", [])
 mood_map = {"Hook": "hook", "Fact_1": "interrupt", "Fact_2": "value", "Twist": "value", "CTA": "cta"}
 scene_specs = []
@@ -106,7 +106,7 @@ for i, spec in enumerate(scene_specs):
     mood = spec["mood"]
     visual_query = mood_visual_query(topic, mood)
     # シーンごとにスクロール位置とKen Burnsスタイルを変える
-    scroll_patterns = [0, 300, 700, 1200, 1800]
+    scroll_patterns = [0, 200, 500, 900, 1400]
     kb_styles = ["left_right", "right_left", "up_down", "down_up", "diagonal"]
     scene = {
         "id": i + 1,
@@ -186,7 +186,8 @@ norm_list = []
 for i, sf in enumerate(files):
     norm_path = str(norm_dir / f"norm_{i:02d}.mp4")
     _run(["ffmpeg", "-y", "-i", sf,
-          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+          "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
           "-pix_fmt", "yuv420p", "-c:a", "aac", norm_path])
     norm_list.append(norm_path)
 with open(concat, "w") as f:

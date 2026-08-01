@@ -8,7 +8,7 @@ on:
 jobs:
   generate_news_video:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -q
-          sudo apt-get install -y ffmpeg fonts-noto-cjk
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
           pip install requests edge-tts pillow google-cloud-texttospeech google-auth google-api-python-client google-auth-httplib2 google-auth-oauthlib google-cloud-texttospeech google-auth playwright moviepy numpy moviepy numpy
           python3 -m playwright install chromium
           python3 -m playwright install-deps chromium

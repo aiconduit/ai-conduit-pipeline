@@ -633,7 +633,7 @@ def fetch_broll_playwright(tool_name, cache_dir, direct_url=None, scroll_y=0, ke
                 page = await context.new_page()
                 try:
                     await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                    await page.wait_for_timeout(2000)
+                    await page.wait_for_timeout(2500)
                     # スクロール位置を設定
                     if scroll_y > 0:
                         await page.evaluate(f"window.scrollTo(0, {scroll_y})")
@@ -684,7 +684,7 @@ def _fetch_github_readme_images(repo_name, cache_dir=None, max_images=2):
     return _github_readme_images(repo_name, cache_dir, max_images=max_images)
 
 
-def _make_kenburns(image, output_path, dur=3.0, size=960, ken_burns_style=None):
+def _make_kenburns(image, output_path, dur=3.0, size=1080, ken_burns_style=None):
     """単一画像をKen Burns動画（ズームイン+ドリフト）に変換する。
     shortsmith方式: MoviePy ImageClip + resize(lambda t) でzoompan不使用。
     失敗時はffmpegシンプル変換にフォールバック。
@@ -708,7 +708,7 @@ def _make_kenburns(image, output_path, dur=3.0, size=960, ken_burns_style=None):
 
         base = ImageClip(frame).with_duration(dur)
         zoom_start = 1.0
-        zoom_end = 1.08
+        zoom_end = 1.12
         base = base.resized(lambda t: zoom_start + (zoom_end - zoom_start) * (t / max(dur, 0.1)))
 
         max_dx = min(60, max(0, base.w - target_w) // 4)
@@ -774,7 +774,7 @@ def _extract_english_query(visual_query):
     return " ".join(clean)
 
 
-def _make_black_screen(output_path, dur=8.0, size=960):
+def _make_black_screen(output_path, dur=8.0, size=1080):
     """最終フォールバック: 真っ黒な960x960動画を生成する。"""
     try:
         cmd = [
@@ -1084,7 +1084,7 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     if interrupt_type == "zoom_punch":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-               "-vf", "scale=iw*1.1:ih*1.1,crop=iw/1.1:ih/1.1,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+               "-vf", "scale=iw*1.1:ih*1.1,crop=iw/1.1:ih/1.1,scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "color_flash":
@@ -1096,19 +1096,19 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     elif interrupt_type == "cut_zoom":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-               "-vf", "scale=1056:1056,crop=960:960:48:48,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+               "-vf", "scale=1188:1056,crop=1080:960:48:48,scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "speed_ramp":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-               "-vf", "setpts=0.85*PTS,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+               "-vf", "setpts=0.85*PTS,scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "zoom_punch_hook":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "scale=iw*1.25:ih*1.25,crop=iw/1.25:ih/1.25,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+              "-vf", "scale=iw*1.25:ih*1.25,crop=iw/1.25:ih/1.25,scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "pan_left":
@@ -1126,7 +1126,7 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     else:
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+              "-vf", "scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
 

@@ -32,7 +32,9 @@ PEXELS_CACHE = ROOT_DIR / "assets" / "pexels_cache"
 for d in [OUTPUT_DIR, WORK_DIR, PEXELS_CACHE]: d.mkdir(parents=True, exist_ok=True)
 
 FONT_PATHS = [
+    '/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc',
     '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
+    '/System/Library/Fonts/ヒラギノ角ゴシック W9.ttc',
     '/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc',
 ]
 def get_font(size):
@@ -58,11 +60,11 @@ MOOD_COLORS = {
 
 def gen_overlay(scene, out_path, scene_idx=0):
     """字幕: 縁取りのみ、背景ボックスなし、キャラ上部（下半分の上端）に配置"""
-    W, H = 960, 1920
+    W, H = 1080, 1920
     img = Image.new('RGBA', (W, H), (0,0,0,0))
     draw = ImageDraw.Draw(img)
-    font_big = get_font(48)
-    font_logo = get_font(20)
+    font_big = get_font(90)
+    font_logo = get_font(24)
     mood = scene.get("mood", "default")
     color = MOOD_COLORS.get(mood, MOOD_COLORS['default'])
     text = re.sub(r"[\U0001F000-\U0001FAFF⭐]","",scene.get("narration","")).strip()
@@ -70,7 +72,7 @@ def gen_overlay(scene, out_path, scene_idx=0):
 
     if text:
         dummy = Image.new('RGBA',(1,1)); dd = ImageDraw.Draw(dummy)
-        max_w = 800; line = ""; lines = []
+        max_w = 1000; line = ""; lines = []
         for ch in text:
             test = line+ch; bb = dd.textbbox((0,0),test,font=font_big)
             if bb[2]-bb[0] > max_w and line:
@@ -80,7 +82,7 @@ def gen_overlay(scene, out_path, scene_idx=0):
         if line: lines.append(line)
         lh = font_big.size + 10
         total_h = len(lines) * lh
-        y = 1050 - total_h // 2
+        y = 1150 - total_h // 2
         for i, line in enumerate(lines):
             bb = dd.textbbox((0,0),line,font=font_big)
             x = (W - (bb[2]-bb[0])) // 2
@@ -97,8 +99,8 @@ def gen_overlay(scene, out_path, scene_idx=0):
         for dx in range(-4,5):
             for dy in range(-4,5):
                 if dx*dx+dy*dy <= 16:
-                    draw.text((cx+dx, 800+dy), caption, font=font_big, fill=(0,0,0,200))
-        draw.text((cx, 800), caption, font=font_big, fill=(255,255,255,255))
+                    draw.text((cx+dx, 900+dy), caption, font=font_big, fill=(0,0,0,200))
+        draw.text((cx, 900), caption, font=font_big, fill=(255,255,255,255))
 
     draw.text((W-120, 16), "AI Conduit", font=font_logo, fill=(255,255,255,120))
     img.save(out_path, 'PNG')
@@ -125,8 +127,8 @@ def compose_scene(scene, idx, is_last=False):
     if not broll or not os.path.exists(str(broll)):
         print(f"   ⚠️ B-roll取得失敗 → 黒画面で代替")
         _broll_fallback = True
-        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
-              "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p", broll_top])
+        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=1080x960:r=30:d={dur}",
+              "-r","30","-c:v","libx264","-preset","fast","-crf","20","-pix_fmt","yuv420p", broll_top])
         broll_lut = broll_top
         bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")
         import shutil; shutil.copy(broll_top, bg)
@@ -134,7 +136,7 @@ def compose_scene(scene, idx, is_last=False):
         broll = str(broll)
 
     def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
-        vf = 'scale=960:960:force_original_aspect_ratio=increase,crop=960:960'
+        vf = 'scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960'
         if src and os.path.exists(str(src)):
             d = probe_dur(str(src))
             loop = int(t / max(d, 0.5)) + 2
@@ -150,11 +152,11 @@ def compose_scene(scene, idx, is_last=False):
                           '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-an', '-pix_fmt', 'yuv420p', out])
             if r.returncode != 0:
                 print(f'   ⚠️ _make_clip失敗')
-                _run(['ffmpeg', '-y', '-f', 'lavfi', '-i', f'color=black:s=960x960:r=30:d={t}',
+                _run(['ffmpeg', '-y', '-f', 'lavfi', '-i', f'color=black:s=1080x960:r=30:d={t}',
                       '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-pix_fmt', 'yuv420p', out])
         else:
             print(f'   ⚠️ src存在しない: {src}')
-            _run(['ffmpeg', '-y', '-f', 'lavfi', '-i', f'color=black:s=960x960:r=30:d={t}',
+            _run(['ffmpeg', '-y', '-f', 'lavfi', '-i', f'color=black:s=1080x960:r=30:d={t}',
                   '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-pix_fmt', 'yuv420p', out])
 
     if not _broll_fallback:
@@ -194,17 +196,17 @@ def compose_scene(scene, idx, is_last=False):
         if src:
             import shutil; shutil.copy(src, bg)
         else:
-            _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
+            _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=1080x960:r=30:d={dur}",
                   "-r","30","-c:v","libx264","-preset","fast","-crf","22","-pix_fmt","yuv420p",bg])
 
     # キャラクター下半分（960x960スケール + 黒背景）
     char_half = str(WORK_DIR/f"char_{idx:02d}.mp4")
     if CHAR_PATH.exists():
         _run(["ffmpeg","-y","-loop","1","-i",str(CHAR_PATH),"-t",str(dur),
-              "-vf","scale=960:960:force_original_aspect_ratio=decrease,pad=960:960:(ow-iw)/2:(oh-ih)/2:color=black",
+              "-vf","scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2:color=black",
               "-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",char_half])
     else:
-        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=960x960:r=30:d={dur}",
+        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=1080x960:r=30:d={dur}",
               "-r","30","-c:v","libx264","-preset","fast","-crf","18","-pix_fmt","yuv420p",char_half])
 
     # vstackで上下分割（上半分=B-roll / 下半分=キャラ）
