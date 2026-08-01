@@ -281,38 +281,58 @@ for i, sf in enumerate(files):
 with open(concat, "w") as f:
     for p in norm_list:
         f.write(f"file '{p}'\n")
-# 連結（シンプルfade in/out + concat）
-if len(norm_list) >= 2:
-    try:
-        n = len(norm_list)
-        input_args = []
-        for np_ in norm_list:
-            input_args += ["-i", np_]
-        filter_v = ""
-        filter_a = ""
-        for j in range(n):
-            filter_v += f"[{j}:v]fade=t=in:st=0:d=0.15,fade=t=out:st=0.7:d=0.15[v{j}];"
-            filter_a += f"[{j}:a]" if f"[{j}:a]" else ""
-        filter_v += "".join(f"[v{j}]" for j in range(n))
-        filter_v += f"concat=n={n}:v=1:a=0[vout]"
-        # 音声は別でconcat
-        filter_a = "".join(f"[{j}:a]" for j in range(n))
-        filter_a += f"concat=n={n}:v=0:a=1[aout]"
-        _run(["ffmpeg", "-y"] + input_args + [
-            "-filter_complex", filter_v + ";" + filter_a,
-            "-map", "[vout]", "-map", "[aout]",
-            "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-            "-c:a", "aac", "-pix_fmt", "yuv420p", raw_output])
-        print("   ✅ fade付き連結完了")
-    except Exception as _xe:
-        print(f"   ⚠️ fadeスキップ ({_xe}) → 通常concat")
-        _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
-              "-pix_fmt", "yuv420p", raw_output])
-else:
+# 連結（映像はfade、音声は別途concat）
+import subprocess as _sp
+
+def _has_audio(path):
+    r = _sp.run(["ffprobe", "-v", "error", "-select_streams", "a",
+                 "-show_entries", "stream=index", "-of", "csv=p=0", path],
+                capture_output=True, text=True)
+    return bool(r.stdout.strip())
+
+# 映像のみfade付きで連結
+try:
+    n = len(norm_list)
+    input_args = []
+    for np_ in norm_list:
+        input_args += ["-i", np_]
+    filter_v = ""
+    for j in range(n):
+        filter_v += f"[{j}:v]fade=t=in:st=0:d=0.15,fade=t=out:st=0.65:d=0.15[v{j}];"
+    filter_v += "".join(f"[v{j}]" for j in range(n))
+    filter_v += f"concat=n={n}:v=1:a=0[vout]"
+    video_only = str(WORK_DIR / "video_only.mp4")
+    _run(["ffmpeg", "-y"] + input_args + [
+        "-filter_complex", filter_v,
+        "-map", "[vout]",
+        "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+        "-pix_fmt", "yuv420p", "-an", video_only])
+    print("   ✅ 映像fade連結完了")
+except Exception as _xe:
+    print(f"   ⚠️ fade映像スキップ ({_xe}) → 通常concat映像")
+    video_only = str(WORK_DIR / "video_only.mp4")
     _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
-          "-pix_fmt", "yuv420p", raw_output])
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+          "-pix_fmt", "yuv420p", "-an", video_only])
+
+# 音声ありのクリップだけでconcat
+audio_clips = [f for f in norm_list if _has_audio(f)]
+if audio_clips:
+    audio_concat = str(WORK_DIR / "audio_concat.txt")
+    with open(audio_concat, "w") as _af:
+        for ac in audio_clips:
+            _af.write(f"file '{ac}'\n")
+    audio_only = str(WORK_DIR / "audio_only.mp4")
+    _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", audio_concat,
+          "-vn", "-c:a", "aac", audio_only])
+    # 映像+音声を合成
+    _run(["ffmpeg", "-y", "-i", video_only, "-i", audio_only,
+          "-c:v", "copy", "-c:a", "aac", "-shortest", raw_output])
+    print("   ✅ 映像+音声合成完了")
+else:
+    print("   ⚠️ 音声クリップなし → 映像のみ")
+    import shutil; shutil.copy(video_only, raw_output)
+
 
 # 9. BGM ミックス
 final_filename = f"v2news_{topic[:20]}.mp4"
