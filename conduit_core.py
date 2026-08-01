@@ -588,7 +588,7 @@ TOOL_URL_MAP = {
 }
 
 
-def fetch_broll_playwright(tool_name, cache_dir, direct_url=None):
+def fetch_broll_playwright(tool_name, cache_dir, direct_url=None, scroll_y=0, ken_burns_style=None):
     """ツールの公式HPをヘッドレスChromiumでスクリーンショット → Ken Burns動画化。
 
     direct_urlが指定された場合はそのURLを直接使用。
@@ -633,15 +633,19 @@ def fetch_broll_playwright(tool_name, cache_dir, direct_url=None):
                 page = await context.new_page()
                 try:
                     await page.goto(url, wait_until="domcontentloaded", timeout=30000)
-                    await page.wait_for_timeout(3000)
+                    await page.wait_for_timeout(2000)
+                    # スクロール位置を設定
+                    if scroll_y > 0:
+                        await page.evaluate(f"window.scrollTo(0, {scroll_y})")
+                        await page.wait_for_timeout(1000)
                 except Exception:
                     pass
                 safe_name = re.sub(r"[^\w]", "_", (tool_name or "direct"))[:20]
-                shot = Path(cache_dir) / f"playwright_{safe_name}.png"
+                shot = Path(cache_dir) / f"playwright_{safe_name}_s{scroll_y}.png"
                 await page.screenshot(path=str(shot), full_page=False)
                 await browser.close()
                 size = shot.stat().st_size if shot.exists() else 0
-                print(f"   [DEBUG] Playwright screenshot size={size} url={url}")
+                print(f"   [DEBUG] Playwright screenshot size={size} url={url} scroll_y={scroll_y}")
                 return str(shot) if shot.exists() and size > 50000 else None
 
         import asyncio
@@ -651,8 +655,8 @@ def fetch_broll_playwright(tool_name, cache_dir, direct_url=None):
         shot_size = os.path.getsize(shot) if os.path.exists(shot) else 0
         print(f"   [DEBUG] Playwright PNG: {shot} size={shot_size}")
         safe = re.sub(r"[^\w]", "_", tool_name or "direct")[:20]
-        out = str(Path(cache_dir) / f"playwright_kenburns_{safe}.mp4")
-        result = _make_kenburns(shot, out, dur=8.0)
+        out = str(Path(cache_dir) / f"playwright_kenburns_{safe}_s{scroll_y}.mp4")
+        result = _make_kenburns(shot, out, dur=8.0, ken_burns_style=ken_burns_style)
         print(f"   [DEBUG] kenburns result: {result} size={os.path.getsize(result) if result and os.path.exists(result) else 0}")
         if result and os.path.exists(result):
             print(f"   [fetch_broll_playwright] OK: {result}")
@@ -680,7 +684,7 @@ def _fetch_github_readme_images(repo_name, cache_dir=None, max_images=2):
     return _github_readme_images(repo_name, cache_dir, max_images=max_images)
 
 
-def _make_kenburns(image, output_path, dur=3.0, size=960):
+def _make_kenburns(image, output_path, dur=3.0, size=960, ken_burns_style=None):
     """単一画像をKen Burns動画（ズームイン+ドリフト）に変換する。
     shortsmith方式: MoviePy ImageClip + resize(lambda t) でzoompan不使用。
     失敗時はffmpegシンプル変換にフォールバック。
@@ -711,12 +715,18 @@ def _make_kenburns(image, output_path, dur=3.0, size=960):
         max_dy = min(60, max(0, base.h - target_h) // 4)
         cx = -((base.w - target_w) / 2)
         cy = -((base.h - target_h) / 2)
-        moving = base.with_position(
-            lambda t: (
-                cx + max_dx * 0.3 * (t / max(dur, 0.1)),
-                cy + max_dy * 0.2 * (t / max(dur, 0.1)),
-            )
-        )
+        # スタイルごとにドリフト方向を変える
+        styles = {
+            "left_right":  (lambda t: (cx + max_dx * 0.5 * (t / max(dur, 0.1)), cy)),
+            "right_left":  (lambda t: (cx - max_dx * 0.5 * (t / max(dur, 0.1)), cy)),
+            "up_down":     (lambda t: (cx, cy + max_dy * 0.5 * (t / max(dur, 0.1)))),
+            "down_up":     (lambda t: (cx, cy - max_dy * 0.5 * (t / max(dur, 0.1)))),
+            "diagonal":    (lambda t: (cx + max_dx * 0.4 * (t / max(dur, 0.1)), cy + max_dy * 0.3 * (t / max(dur, 0.1)))),
+        }
+        style_keys = list(styles.keys())
+        import random as _random
+        chosen_style = styles.get(ken_burns_style) or styles[_random.choice(style_keys)]
+        moving = base.with_position(chosen_style)
         backdrop = ColorClip((target_w, target_h), color=(0, 0, 0)).with_duration(dur)
         comp = CompositeVideoClip([backdrop, moving], size=(target_w, target_h)).with_duration(dur)
         comp.write_videofile(
@@ -782,7 +792,7 @@ def _make_black_screen(output_path, dur=8.0, size=960):
     return None
 
 
-def fetch_broll_from_topic(topic, visual_query, cache_dir=None, direct_url=None):
+def fetch_broll_from_topic(topic, visual_query, cache_dir=None, direct_url=None, scroll_y=0, ken_burns_style=None):
     """B-roll取得（優先順位でフォールバック）。
 
     優先順位:
@@ -799,7 +809,7 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None, direct_url=None)
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
     # 1. Playwrightで公式HP撮影 → Ken Burns動画（最優先）
-    playwright_shot = fetch_broll_playwright(topic, cache_dir, direct_url=direct_url)
+    playwright_shot = fetch_broll_playwright(topic, cache_dir, direct_url=direct_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
     if playwright_shot:
         print(f"   ✅ Playwright公式HP → Ken Burns動画: {playwright_shot}")
         return playwright_shot

@@ -105,6 +105,9 @@ for i, spec in enumerate(scene_specs):
     sent = spec["narration"]
     mood = spec["mood"]
     visual_query = mood_visual_query(topic, mood)
+    # シーンごとにスクロール位置とKen Burnsスタイルを変える
+    scroll_patterns = [0, 300, 700, 1200, 1800]
+    kb_styles = ["left_right", "right_left", "up_down", "down_up", "diagonal"]
     scene = {
         "id": i + 1,
         "caption": re.sub(r"[^\w\s]", "", sent)[:8],
@@ -116,6 +119,8 @@ for i, spec in enumerate(scene_specs):
         "repo_name": repo_name,
         "narration": sent,
         "news_url": news_item.get("url", ""),
+        "scroll_y": scroll_patterns[i % len(scroll_patterns)],
+        "ken_burns_style": kb_styles[i % len(kb_styles)],
     }
     scenes.append(scene)
 
