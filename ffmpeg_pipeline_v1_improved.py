@@ -156,6 +156,8 @@ def compose_scene(scene, idx, is_last=False):
 
     if not _broll_fallback:
         _make_clip(broll, broll_top, dur)
+    print(f"   [DEBUG] broll={broll} size={os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0}")
+    print(f"   [DEBUG] broll_top exists={os.path.exists(broll_top)} size={os.path.getsize(broll_top) if os.path.exists(broll_top) else 0}")
 
     # apply_zoom_pulse DISABLED: zoompan d=1で黒画面バグあり
 
