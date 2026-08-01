@@ -281,44 +281,31 @@ for i, sf in enumerate(files):
 with open(concat, "w") as f:
     for p in norm_list:
         f.write(f"file '{p}'\n")
-# xfadeトランジション付きで連結
-import math as _math
-xfade_types = ["fade", "wipeleft", "slideleft", "dissolve", "fadeblack"]
+# 連結（シンプルfade in/out + concat）
 if len(norm_list) >= 2:
     try:
-        # 各クリップの長さを取得してxfadeを適用
-        xfade_duration = 0.3
-        # 最初の2クリップでxfadeを試行、失敗したら通常concat
-        xfade_output = str(WORK_DIR / "xfade_output.mp4")
-        # シンプルにfade+concat方式で実装
-        filter_parts = []
-        input_args = []
-        for j, np_ in enumerate(norm_list):
-            input_args += ["-i", np_]
-        # filter_complexでxfade
         n = len(norm_list)
-        fc = ""
+        input_args = []
+        for np_ in norm_list:
+            input_args += ["-i", np_]
+        filter_v = ""
+        filter_a = ""
         for j in range(n):
-            fc += f"[{j}:v]fade=t=in:st=0:d=0.2,fade=t=out:st={max(0.5,0.8)}:d=0.2[v{j}];"
-        fc += "".join(f"[v{j}]" for j in range(n))
-        fc += f"concat=n={n}:v=1:a=0[vout]"
+            filter_v += f"[{j}:v]fade=t=in:st=0:d=0.15,fade=t=out:st=0.7:d=0.15[v{j}];"
+            filter_a += f"[{j}:a]" if f"[{j}:a]" else ""
+        filter_v += "".join(f"[v{j}]" for j in range(n))
+        filter_v += f"concat=n={n}:v=1:a=0[vout]"
+        # 音声は別でconcat
+        filter_a = "".join(f"[{j}:a]" for j in range(n))
+        filter_a += f"concat=n={n}:v=0:a=1[aout]"
         _run(["ffmpeg", "-y"] + input_args + [
-            "-filter_complex", fc,
-            "-map", "[vout]",
+            "-filter_complex", filter_v + ";" + filter_a,
+            "-map", "[vout]", "-map", "[aout]",
             "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-            "-pix_fmt", "yuv420p", xfade_output])
-        # 音声は別途追加
-        _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-              "-vn", "-c:a", "aac", str(WORK_DIR / "audio_only.aac")])
-        audio_only = str(WORK_DIR / "audio_only.aac")
-        if os.path.exists(audio_only):
-            _run(["ffmpeg", "-y", "-i", xfade_output, "-i", audio_only,
-                  "-c:v", "copy", "-c:a", "aac", "-shortest", raw_output])
-        else:
-            import shutil; shutil.copy(xfade_output, raw_output)
-        print("   ✅ xfadeトランジション適用完了")
+            "-c:a", "aac", "-pix_fmt", "yuv420p", raw_output])
+        print("   ✅ fade付き連結完了")
     except Exception as _xe:
-        print(f"   ⚠️ xfadeスキップ ({_xe}) → 通常concat")
+        print(f"   ⚠️ fadeスキップ ({_xe}) → 通常concat")
         _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
               "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22", "-c:a", "aac",
               "-pix_fmt", "yuv420p", raw_output])
