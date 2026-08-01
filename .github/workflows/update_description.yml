@@ -1,0 +1,68 @@
+name: YouTube概要欄更新
+on:
+  workflow_dispatch:
+    inputs:
+      video_id:
+        description: 'YouTube Video ID'
+        required: true
+        default: '5WjWOQQqrfM'
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install google-api-python-client google-auth google-auth-oauthlib
+      - name: Update description
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          VIDEO_ID: ${{ inputs.video_id }}
+        run: |
+          python3 << 'PYEOF'
+          import os
+          from google.oauth2.credentials import Credentials
+          from googleapiclient.discovery import build
+
+          creds = Credentials(
+              token=None,
+              refresh_token=os.environ['YOUTUBE_REFRESH_TOKEN'],
+              client_id=os.environ['YOUTUBE_CLIENT_ID'],
+              client_secret=os.environ['YOUTUBE_CLIENT_SECRET'],
+              token_uri='https://oauth2.googleapis.com/token',
+              scopes=['https://www.googleapis.com/auth/youtube.force-ssl']
+          )
+          youtube = build('youtube', 'v3', credentials=creds)
+          video_id = os.environ['VIDEO_ID']
+
+          resp = youtube.videos().list(part='snippet', id=video_id).execute()
+          snippet = resp['items'][0]['snippet']
+
+          new_desc = f"""AIツール・最新AIニュースを毎日解説中！
+          チャンネル登録で最新情報をキャッチ
+
+          ━━━━━━━━━━━━━━━
+          🎁 無料プレゼントあり！
+
+          受け取り方法:
+          1. コメントに「AIconduit」と書く
+          2. 下のInstagramをフォロー
+          3. InstagramにDMで「プレゼント」と送る
+
+          Instagram（DM受付中）
+          https://www.instagram.com/aiconduit/
+          ━━━━━━━━━━━━━━━
+
+          #AI #AIニュース #エンジニア #プログラミング #自動化 #Shorts"""
+
+          snippet['description'] = new_desc
+          youtube.videos().update(
+              part='snippet',
+              body={'id': video_id, 'snippet': snippet}
+          ).execute()
+          print(f'完了: {video_id}')
+          PYEOF
