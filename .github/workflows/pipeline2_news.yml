@@ -63,15 +63,12 @@ jobs:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
         continue-on-error: true
 
-      - name: Step 6 - X投稿
-        run: |
-          pip install requests-oauthlib --quiet
-          PIPELINE=p2 python3 sns_automation/scripts/x_video_post.py
+      - name: Step 6 - X投稿（GraphQL方式）
+        run: PIPELINE=p2 python3 sns_automation/scripts/x_graphql_post.py
         env:
-          X_API_KEY: ${{ secrets.X_API_KEY }}
-          X_API_SECRET: ${{ secrets.X_API_SECRET }}
-          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+          X_AUTH_TOKEN: ${{ secrets.X_AUTH_TOKEN }}
+          X_CT0: ${{ secrets.X_CT0 }}
+          X_TWID: ${{ secrets.X_TWID }}
         continue-on-error: true
 
       - name: Upload artifact
