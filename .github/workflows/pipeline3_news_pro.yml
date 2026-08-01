@@ -1,0 +1,63 @@
+name: AI Conduit パイプライン3 プロ品質ニュース動画
+
+on:
+  schedule:
+    - cron: '0 23 * * *'  # 毎日7:00 JST (UTC 22:00)
+  workflow_dispatch:
+
+jobs:
+  generate_news_video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -q
+          sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
+          pip install requests edge-tts pillow google-cloud-texttospeech google-auth google-api-python-client google-auth-httplib2 google-auth-oauthlib google-cloud-texttospeech google-auth playwright moviepy numpy moviepy numpy
+          python3 -m playwright install chromium
+          python3 -m playwright install-deps chromium
+
+      - name: キャッシュクリア
+        run: rm -rf assets/pexels_cache/playwright_kenburns_*.mp4 || true
+
+      - name: Step 1 - ニュース収集
+        run: python3 sns_automation/scripts/research_collector.py
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+
+      - name: Step 2 - スクリプト生成（Fireship型）
+        run: python3 sns_automation/scripts/news_content_planner_p3.py
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+
+      - name: Step 3 - 動画生成
+        run: python3 run_from_news_plan_p3.py
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+
+      - name: Step 4 - YouTube投稿
+        run: python3 sns_automation/scripts/youtube_auto_upload.py
+        env:
+          YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          GIFT_LINK: ${{ secrets.GIFT_LINK }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-video-p3-${{ github.run_number }}
+          path: projects/daily/renders/v3news_*.mp4
+          retention-days: 3
