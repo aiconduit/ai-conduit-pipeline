@@ -665,29 +665,73 @@ def _fetch_github_readme_images(repo_name, cache_dir=None, max_images=2):
 
 
 def _make_kenburns(image, output_path, dur=3.0, size=960):
-    """単一画像をKen Burns動画（ズームイン）に変換する。
-    zoompanは黒画面バグがあるため使用しない。
-    シンプルなscale+cropで静止画動画化。
+    """単一画像をKen Burns動画（ズームイン+ドリフト）に変換する。
+    shortsmith方式: MoviePy ImageClip + resize(lambda t) でzoompan不使用。
+    失敗時はffmpegシンプル変換にフォールバック。
     Returns: 成功時 output_path (str)、失敗時 None
     """
     try:
-        cmd = [
-            "ffmpeg", "-y",
-            "-loop", "1", "-i", str(image),
-            "-vf",
-            f"scale={size}:{size}:force_original_aspect_ratio=increase,"
-            f"crop={size}:{size}",
-            "-t", str(dur),
-            "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-            "-pix_fmt", "yuv420p",
+        import numpy as np
+        from PIL import Image as PILImage
+        try:
+            from moviepy import editor as mpy
+        except ImportError:
+            from moviepy import VideoClip, ImageClip, ColorClip, CompositeVideoClip
+            class mpy:
+                ImageClip = ImageClip
+                ColorClip = ColorClip
+                CompositeVideoClip = CompositeVideoClip
+
+        target_w, target_h = size, size
+        with PILImage.open(str(image)) as handle:
+            img = handle.convert("RGB")
+            scale = max(target_w / img.width, target_h / img.height) * 1.15
+            img = img.resize((int(img.width * scale), int(img.height * scale)), PILImage.LANCZOS)
+            frame = np.array(img)
+
+        base = mpy.ImageClip(frame).set_duration(dur)
+        zoom_start = 1.0
+        zoom_end = 1.08
+        base = base.resize(lambda t: zoom_start + (zoom_end - zoom_start) * (t / max(dur, 0.1)))
+
+        max_dx = min(60, max(0, base.w - target_w) // 4)
+        max_dy = min(60, max(0, base.h - target_h) // 4)
+        cx = -((base.w - target_w) / 2)
+        cy = -((base.h - target_h) / 2)
+        moving = base.set_position(
+            lambda t: (
+                cx + max_dx * 0.3 * (t / max(dur, 0.1)),
+                cy + max_dy * 0.2 * (t / max(dur, 0.1)),
+            )
+        )
+        backdrop = mpy.ColorClip((target_w, target_h), color=(0, 0, 0)).set_duration(dur)
+        comp = mpy.CompositeVideoClip([backdrop, moving], size=(target_w, target_h)).set_duration(dur)
+        comp.write_videofile(
             str(output_path),
+            fps=30, codec="libx264", preset="fast",
+            ffmpeg_params=["-crf", "22", "-pix_fmt", "yuv420p"],
+            logger=None, audio=False
+        )
+        if os.path.exists(str(output_path)) and os.path.getsize(str(output_path)) > 10000:
+            return str(output_path)
+        print(f"   ⚠️ Ken Burns(MoviePy)出力が小さすぎる")
+    except Exception as e:
+        print(f"   ⚠️ Ken Burns(MoviePy)失敗: {e}")
+
+    # フォールバック: ffmpegシンプル変換
+    try:
+        cmd = [
+            "ffmpeg", "-y", "-loop", "1", "-i", str(image),
+            "-vf", f"scale={size}:{size}:force_original_aspect_ratio=increase,crop={size}:{size}",
+            "-t", str(dur), "-r", "30", "-c:v", "libx264", "-preset", "fast",
+            "-crf", "22", "-pix_fmt", "yuv420p", str(output_path),
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
-        if r.returncode == 0 and os.path.exists(str(output_path)) and os.path.getsize(str(output_path)) > 10000:
+        if r.returncode == 0 and os.path.exists(str(output_path)):
             return str(output_path)
-        print(f"   ⚠️ Ken Burns変換失敗: {r.stderr[-300:]}")
-    except Exception as e:
-        print(f"   ⚠️ Ken Burns変換例外: {e}")
+        print(f"   ⚠️ Ken Burns(ffmpeg)失敗: {r.stderr[-200:]}")
+    except Exception as e2:
+        print(f"   ⚠️ Ken Burns(ffmpeg)例外: {e2}")
     return None
 def _extract_english_query(visual_query):
     """visual_queryから英語部分のみ抽出する。短すぎる場合は技術系デフォルト。
