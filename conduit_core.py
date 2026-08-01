@@ -624,7 +624,8 @@ def fetch_broll_playwright(tool_name, cache_dir):
                 page = await browser.new_page(viewport={"width": 1280, "height": 720})
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
                 await page.wait_for_load_state("domcontentloaded")
-                shot = Path(cache_dir) / f"playwright_{re.sub(r'[^\\w]', '_', tool_name)[:20]}.png"
+                safe_name = re.sub(r"[^\w]", "_", tool_name)[:20]
+                shot = Path(cache_dir) / f"playwright_{safe_name}.png"
                 await page.screenshot(path=str(shot), clip={"x": 0, "y": 0, "width": 960, "height": 540})
                 await browser.close()
                 return str(shot) if shot.exists() and shot.stat().st_size > 0 else None
@@ -633,9 +634,6 @@ def fetch_broll_playwright(tool_name, cache_dir):
         shot = asyncio.run(_capture())
         if not shot:
             return None
-        out = Path(cache_dir) / f"playwright_{re.sub(r'[^\\w]', '_', tool_name)[:20]}_kenburns.mp4"
-        result = _make_kenburns(shot, out, dur=8.0)
-        if result and os.path.exists(result):
             print(f"   [fetch_broll_playwright] ✅ 公式HP → Ken Burns動画: {result}")
             return result
         return None
