@@ -666,9 +666,8 @@ def _fetch_github_readme_images(repo_name, cache_dir=None, max_images=2):
 
 def _make_kenburns(image, output_path, dur=3.0, size=960):
     """単一画像をKen Burns動画（ズームイン）に変換する。
-
-    zoompan: 3秒間で緩やかにズームイン（1.0 → 1.3）、中心固定。
-    画像は先に 960x960 に crop/scale してから zoompan を適用する。
+    zoompanは黒画面バグがあるため使用しない。
+    シンプルなscale+cropで静止画動画化。
     Returns: 成功時 output_path (str)、失敗時 None
     """
     try:
@@ -677,22 +676,19 @@ def _make_kenburns(image, output_path, dur=3.0, size=960):
             "-loop", "1", "-i", str(image),
             "-vf",
             f"scale={size}:{size}:force_original_aspect_ratio=increase,"
-            f"crop={size}:{size},"
-            f"zoompan=z='min(zoom+0.001,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s={size}x{size}",
+            f"crop={size}:{size}",
             "-t", str(dur),
             "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
             "-pix_fmt", "yuv420p",
             str(output_path),
         ]
         r = subprocess.run(cmd, capture_output=True, text=True)
-        if r.returncode == 0 and os.path.exists(str(output_path)):
+        if r.returncode == 0 and os.path.exists(str(output_path)) and os.path.getsize(str(output_path)) > 10000:
             return str(output_path)
         print(f"   ⚠️ Ken Burns変換失敗: {r.stderr[-300:]}")
     except Exception as e:
         print(f"   ⚠️ Ken Burns変換例外: {e}")
     return None
-
-
 def _extract_english_query(visual_query):
     """visual_queryから英語部分のみ抽出する。短すぎる場合は技術系デフォルト。
     Returns: 簡潔な英語検索クエリ（str）
