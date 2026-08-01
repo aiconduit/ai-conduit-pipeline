@@ -621,12 +621,12 @@ def fetch_broll_playwright(tool_name, cache_dir):
             from playwright.async_api import async_playwright
             async with async_playwright() as p:
                 browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page(viewport={"width": 1280, "height": 720})
+                page = await browser.new_page(viewport={"width": 1080, "height": 1080})
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
                 await page.wait_for_load_state("domcontentloaded")
                 safe_name = re.sub(r"[^\w]", "_", tool_name)[:20]
                 shot = Path(cache_dir) / f"playwright_{safe_name}.png"
-                await page.screenshot(path=str(shot), clip={"x": 0, "y": 0, "width": 960, "height": 540})
+                await page.screenshot(path=str(shot), clip={"x": 0, "y": 0, "width": 1080, "height": 1080})
                 await browser.close()
                 return str(shot) if shot.exists() and shot.stat().st_size > 0 else None
 
@@ -677,7 +677,7 @@ def _make_kenburns(image, output_path, dur=3.0, size=960):
             "-vf",
             f"scale={size}:{size}:force_original_aspect_ratio=increase,"
             f"crop={size}:{size},"
-            f"zoompan=z='min(zoom+0.001,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)'",
+            f"zoompan=z='min(zoom+0.001,1.3)':d=1:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s={size}x{size}",
             "-t", str(dur),
             "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
             "-pix_fmt", "yuv420p",
