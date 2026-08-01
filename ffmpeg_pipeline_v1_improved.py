@@ -157,14 +157,7 @@ def compose_scene(scene, idx, is_last=False):
     if not _broll_fallback:
         _make_clip(broll, broll_top, dur)
 
-    # ★ ズームパルス（シーン冒頭1秒でKen Burns風ズームイン 1.0→1.06）
-    if not _broll_fallback:
-        broll_zoom = str(WORK_DIR / f"btop_zoom_{idx:02d}.mp4")
-        try:
-            apply_zoom_pulse(broll_top, broll_zoom, dur)
-            broll_top = broll_zoom
-        except Exception as _e:
-            print(f"   ⚠️ ズームパルス適用失敗({_e}) → 元のB-rollのまま")
+    # apply_zoom_pulse DISABLED: zoompan d=1で黒画面バグあり
 
     # ★ LUTカラーグレーディングをB-rollに適用（フォールバック時はスキップ）
     if not _broll_fallback:
