@@ -63,6 +63,58 @@ def generate_thumbnail(hook_text, repo_name=""):
     img.save(buf, format="PNG")
     buf.seek(0)
     return buf
+
+def generate_thumbnail_b(hook_text, repo_name=""):
+    """サムネイルBパターン: 白背景+黒テキスト（ColdFusion型）"""
+    W, H = 1280, 720
+    img = Image.new("RGB", (W, H), (245, 245, 240))
+    draw = ImageDraw.Draw(img)
+    draw.rectangle([0, 0, 8, H], fill=(10, 10, 15))
+    draw.rectangle([0, 0, W, 8], fill=(10, 10, 15))
+
+    font_paths = [
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc",
+        "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+        "/System/Library/Fonts/Helvetica.ttc",
+    ]
+    def load_font(size):
+        for p in font_paths:
+            if os.path.exists(p):
+                try: return ImageFont.truetype(p, size)
+                except: pass
+        return ImageFont.load_default()
+
+    font_main = load_font(100)
+    font_sub = load_font(44)
+    font_logo = load_font(32)
+
+    short_text = hook_text[:20].strip()
+    lines = textwrap.wrap(short_text, width=10)
+    y_start = H // 2 - len(lines) * 60
+    for line in lines[:3]:
+        bbox = draw.textbbox((0, 0), line, font=font_main)
+        tw = bbox[2] - bbox[0]
+        x = (W - tw) // 2
+        has_number = any(c.isdigit() for c in line)
+        color = (220, 0, 0) if has_number else (10, 10, 15)
+        draw.text((x, y_start), line, fill=color, font=font_main)
+        y_start += 120
+
+    sub_text = "AI Conduit | AI速報"
+    bbox2 = draw.textbbox((0, 0), sub_text, font=font_sub)
+    tw2 = bbox2[2] - bbox2[0]
+    draw.text(((W - tw2) // 2, y_start + 20), sub_text, fill=(100, 100, 100), font=font_sub)
+
+    logo_text = "AI Conduit"
+    bbox3 = draw.textbbox((0, 0), logo_text, font=font_logo)
+    lw3 = bbox3[2] - bbox3[0]
+    draw.rectangle([W - lw3 - 50, H - 70, W - 10, H - 10], fill=(10, 10, 15))
+    draw.text((W - lw3 - 30, H - 60), logo_text, fill=(245, 245, 240), font=font_logo)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    buf.seek(0)
+    return buf
 def upload_thumbnail(youtube, video_id, image_buf):
     media = MediaIoBaseUpload(image_buf, mimetype="image/png")
     youtube.thumbnails().set(videoId=video_id, media_body=media).execute()
@@ -71,13 +123,29 @@ def upload_thumbnail(youtube, video_id, image_buf):
 
 def reply_to_comments(youtube, video_id):
     gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/gift_content/")
-    reply_text = f"ありがとうございます！🎁無料プレゼントはこちらから受け取れます👉 {gift_link}"
+    # コメント返信テンプレート
+    reply_templates = [
+        "ありがとうございます！詳細は概要欄をチェックしてください👇",
+        "コメントありがとう！チャンネル登録で最新AI情報をゲット✅",
+        "嬉しいコメントありがとうございます！プレゼントは概要欄から受け取れます🎁",
+        "ありがとうございます！毎日AIニュースを投稿しているのでチャンネル登録お願いします🙏",
+    ]
+    gift_reply_text = f"ありがとうございます！🎁無料プレゼントはこちらから受け取れます👉 {gift_link}"
     comments = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=20).execute()
+    import random as _rand_reply
+    replied_count = 0
     for item in comments.get("items", []):
         top = item["snippet"]["topLevelComment"]["snippet"]
-        # AIconduitを含むコメントのみ返信
-        if "aiconduit" not in top.get("textOriginal", "").lower():
+        text_lower = top.get("textOriginal", "").lower()
+        # AIconduitコメントはプレゼントリプライ
+        if "aiconduit" in text_lower:
+            reply_text = gift_reply_text
+        elif replied_count < 3:
+            # 最初の3件に汎用返信
+            reply_text = _rand_reply.choice(reply_templates)
+        else:
             continue
+        replied_count += 1
         comment_id = item["snippet"]["topLevelComment"]["id"]
         try:
             youtube.comments().insert(
@@ -147,7 +215,10 @@ def main():
                 plan_data = plan_data["plan"]
             selected_title = plan_data.get("selected_title", "") or news_plan.get("news_item", {}).get("title", "")
             hashtags = plan_data.get("hashtags", ["#AI", "#AIニュース"])
-            tags = [t.replace("#","") for t in hashtags] + ["AI", "AIニュース", "Shorts", "エンジニア"]
+            # 固定ハッシュタグ+トピック連動タグ
+            fixed_tags = ["AI", "AIニュース", "Shorts", "エンジニア", "プログラミング", "自動化"]
+            topic_tags = [t.replace("#","") for t in hashtags if t.replace("#","") not in fixed_tags]
+            tags = fixed_tags + topic_tags[:5]
             title = f"{selected_title[:45]} #Shorts" if selected_title else "【AI速報】最新AIニュース #Shorts"
             hook_text = selected_title[:30] if selected_title else "AI速報"
             repo_name = plan_data.get("repo_name", "")
@@ -174,27 +245,31 @@ def main():
         tags = ["AI","GitHub","Shorts","エンジニア","自動化"]
         repo_name = ""
 
+    gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/gift_content/")
+    seo_tags = "#AI #AIニュース #エンジニア #プログラミング #自動化 #Shorts #人工知能 #テクノロジー"
     description = f"""🤖 {title}
 
-AIツール・最新AIニュースを毎日解説中！
-✅ チャンネル登録で最新情報をキャッチ👆
-
 ━━━━━━━━━━━━━━━
-🎁 【無料プレゼントあり】
-この動画に関連した限定資料を無料でお渡しします！
+🎁 無料プレゼントあり！
+コメントに「AIconduit」と書いて概要欄をチェック！
 
 📌 受け取り方法:
-① コメント欄に「AIconduit」と書く
-② 下のInstagramをフォロー
-③ InstagramにDMで「プレゼント」と送る
+① コメントに「AIconduit」と書く
+② Instagramをフォロー
+③ DMで「プレゼント」と送る
 
-📱 Instagram（DM受付中）👇
+📱 Instagram👇
 https://www.instagram.com/aiconduit/
 ━━━━━━━━━━━━━━━
 
-{os.environ.get('GIFT_LINK','')}
+🔔 チャンネル登録で毎日最新AIニュース！
 
-#AI #AIニュース #エンジニア #プログラミング #自動化 #Shorts"""
+📎 プレゼント詳細: {gift_link}
+
+---
+🌐 [EN] Daily AI news in Japanese. Subscribe for the latest AI updates!
+
+{seo_tags}"""
 
     # 最新の動画を探す
     videos = sorted(glob.glob("projects/daily/renders/*.mp4"))
@@ -212,7 +287,15 @@ https://www.instagram.com/aiconduit/
     # サムネイル生成・アップロード
     hook_text = topic.get("hook", title.replace("【AI】","").replace("#Shorts","").strip())
     try:
-        thumb_buf = generate_thumbnail(hook_text, repo_name)
+        # A/Bテスト: run番号の奇偶でA/Bを切り替え
+        import time as _time
+        ab_flag = int(_time.time()) % 2
+        if ab_flag == 0:
+            thumb_buf = generate_thumbnail(hook_text, repo_name)
+            print("   サムネイルA（ダーク）使用")
+        else:
+            thumb_buf = generate_thumbnail_b(hook_text, repo_name)
+            print("   サムネイルB（ライト）使用")
         upload_thumbnail(youtube, vid_id, thumb_buf)
         print("✅ サムネイル設定完了")
     except Exception as e:

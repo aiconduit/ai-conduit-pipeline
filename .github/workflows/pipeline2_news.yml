@@ -2,7 +2,7 @@ name: AI Conduit パイプライン2 ニュース動画
 
 on:
   schedule:
-    - cron: '0 22 * * *'  # 毎日7:00 JST (UTC 22:00)
+    - cron: '0 11 * * *'  # 毎日20:00 JST (UTC 11:00) ※視聴者が最も多い時間帯
   workflow_dispatch:
 
 jobs:
