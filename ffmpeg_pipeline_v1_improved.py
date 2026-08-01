@@ -137,9 +137,7 @@ def compose_scene(scene, idx, is_last=False):
               "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-an", "-pix_fmt", "yuv420p", broll_b_half])
         concat_ab = str(WORK_DIR / f"concat_ab_{idx:02d}.txt")
         with open(concat_ab, "w") as f_ab:
-            f_ab.write(f"file '{broll_a_half}'
-file '{broll_b_half}'
-")
+            f_ab.write(f"file '{broll_a_half}'\nfile '{broll_b_half}'\n")
         _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat_ab,
               "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-pix_fmt", "yuv420p", broll_ab])
         broll = broll_ab
