@@ -93,6 +93,12 @@ MOOD_VISUAL_QUERIES = {
 }
 
 
+MOOD_VISUAL_QUERIES_2 = {
+    "hook": f"{topic} shock impact explosion light",
+    "value": f"{topic} data science machine learning",
+    "interrupt": f"{topic} fast speed motion blur",
+    "cta": "social media phone notification digital",
+}
 def mood_visual_query(topic, mood):
     """topicとmoodに応じてvisual_queryを生成する"""
     return MOOD_VISUAL_QUERIES.get(mood, MOOD_VISUAL_QUERIES["value"])
@@ -121,6 +127,7 @@ for i, spec in enumerate(scene_specs):
         "news_url": news_item.get("url", ""),
         "scroll_y": scroll_patterns[i % len(scroll_patterns)],
         "ken_burns_style": kb_styles[i % len(kb_styles)],
+        "visual_2": MOOD_VISUAL_QUERIES_2.get(spec["mood"], f"{topic} technology abstract"),
     }
     scenes.append(scene)
 

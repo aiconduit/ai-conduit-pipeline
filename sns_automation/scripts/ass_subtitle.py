@@ -10,9 +10,9 @@ from pathlib import Path
 
 # === shortsmith jitter+4 grouping config (tuned for Japanese) ===
 MIN_WORDS_PER_GROUP = 4
-MAX_WORDS_PER_GROUP = 10
-MAX_GROUP_SECONDS = 1.0
-MAX_GROUP_CHARS = 8
+MAX_WORDS_PER_GROUP = 3
+MAX_GROUP_SECONDS = 1.2
+MAX_GROUP_CHARS = 14
 PAUSE_BREAK_MS = 300
 MAX_TAIL_MS = 350
 
@@ -29,7 +29,7 @@ FONT_NAME = "Noto Sans CJK JP"
 
 # colours in ASS &HBBGGRR format
 _PRIMARY_COLOR = "&H00FFFFFF"    # white (standing colour after sweep)
-_SECONDARY_COLOR = "&H0000FFFF"  # yellow (sweep fill — sweeps TO PrimaryColour)
+_SECONDARY_COLOR = "&H0000E5FF"  # yellow-gold (w4seem standard)
 _OUTLINE_COLOR = "&H00000000"    # black
 _BACK_COLOR = "&H80000000"       # semi-transparent black shadow
 
@@ -44,7 +44,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Pop,{FONT_NAME},{FONT_SIZE},{_PRIMARY_COLOR},{_SECONDARY_COLOR},{_OUTLINE_COLOR},{_BACK_COLOR},-1,0,0,0,100,100,0,0,1,6,3,2,40,40,{MARGIN_V},1
+Style: Pop,{FONT_NAME},{FONT_SIZE},{_PRIMARY_COLOR},{_SECONDARY_COLOR},{_OUTLINE_COLOR},{_BACK_COLOR},-1,0,0,0,100,100,1,0,1,6,3,2,80,80,{MARGIN_V},1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

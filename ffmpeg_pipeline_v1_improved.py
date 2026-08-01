@@ -119,7 +119,32 @@ def compose_scene(scene, idx, is_last=False):
     news_url = scene.get("news_url", "") or None
     scroll_y = scene.get("scroll_y", 0)
     ken_burns_style = scene.get("ken_burns_style", None)
-    broll = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE, direct_url=news_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
+    visual_2 = scene.get("visual_2", visual)
+    # A/Bスプリット: 前半はnews_url録画、後半はPexels B-roll
+    broll_a = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE, direct_url=news_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
+    broll_b = fetch_broll_from_topic(topic_str, visual_2, cache_dir=PEXELS_CACHE, direct_url=None, scroll_y=0, ken_burns_style=ken_burns_style)
+    # A/Bスプリット合成: 前半broll_a、後半broll_b
+    if broll_a and broll_b and broll_a != broll_b:
+        half_dur = dur / 2
+        broll_a_half = str(WORK_DIR / f"broll_a_{idx:02d}.mp4")
+        broll_b_half = str(WORK_DIR / f"broll_b_{idx:02d}.mp4")
+        broll_ab = str(WORK_DIR / f"broll_ab_{idx:02d}.mp4")
+        _run(["ffmpeg", "-y", "-i", str(broll_a), "-t", str(half_dur),
+              "-vf", "scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
+              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-an", "-pix_fmt", "yuv420p", broll_a_half])
+        _run(["ffmpeg", "-y", "-i", str(broll_b), "-t", str(half_dur),
+              "-vf", "scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
+              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-an", "-pix_fmt", "yuv420p", broll_b_half])
+        concat_ab = str(WORK_DIR / f"concat_ab_{idx:02d}.txt")
+        with open(concat_ab, "w") as f_ab:
+            f_ab.write(f"file '{broll_a_half}'
+file '{broll_b_half}'
+")
+        _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat_ab,
+              "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-pix_fmt", "yuv420p", broll_ab])
+        broll = broll_ab
+    else:
+        broll = broll_a or broll_b
     broll_top = str(WORK_DIR / f"btop_{idx:02d}.mp4")
     
     # B-roll取得失敗時は黒画面で代替
