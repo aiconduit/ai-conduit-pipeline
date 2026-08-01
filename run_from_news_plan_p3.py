@@ -391,6 +391,17 @@ if bgm_path and os.path.exists(bgm_path):
     except Exception as _be:
         print(f"   ⚠️ ビートシンクスキップ ({_be}) → 通常ミックス")
         mix_bgm(raw_output, bgm_path, final_output, voice_vol=0.85, music_vol=0.08)
+
+# 音声品質向上: モノラル→ステレオ・ビットレート128kbps・映像ビットレート4Mbps
+if os.path.exists(final_output):
+    hq_output = final_output.replace(".mp4", "_hq.mp4")
+    _run(["ffmpeg", "-y", "-i", final_output,
+          "-c:v", "libx264", "-preset", "fast", "-b:v", "4000k", "-maxrate", "4000k",
+          "-c:a", "aac", "-b:a", "128k", "-ac", "2", "-ar", "44100",
+          "-pix_fmt", "yuv420p", hq_output])
+    if os.path.exists(hq_output) and os.path.getsize(hq_output) > 100000:
+        import shutil; shutil.move(hq_output, final_output)
+        print("   ✅ 高品質エンコード完了（ステレオ・4Mbps）")
 else:
     import shutil
     shutil.copy(raw_output, final_output)
