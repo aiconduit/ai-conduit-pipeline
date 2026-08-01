@@ -199,14 +199,36 @@ def pick_top1(items: list[dict[str, Any]]) -> dict[str, Any] | None:
     return top
 
 
+def fetch_page_text(url: str, max_chars: int = 1500) -> str:
+    """URLのページ本文をrequestsで取得（簡易スクレイピング）"""
+    if not url:
+        return ""
+    try:
+        import re as _re
+        r = requests.get(url, timeout=10, headers={"User-Agent": "Mozilla/5.0"})
+        if r.status_code != 200:
+            return ""
+        # HTMLタグ除去
+        text = _re.sub(r"<[^>]+>", " ", r.text)
+        text = _re.sub(r"\s+", " ", text).strip()
+        return text[:max_chars]
+    except Exception as e:
+        logger.warning(f"ページ取得失敗: {e}")
+        return ""
+
 def build_news_summary(top: dict[str, Any]) -> str:
     score = top.get("_score", 0) or top.get("score", 0)
+    url = top.get("url", "")
+    # ページ本文を取得してDeepSeekに渡す
+    page_text = fetch_page_text(url)
+    page_section = f"- page_content（記事本文抜粋）:\n{page_text}\n" if page_text else ""
     return (
         "本日のTop1ニュース:\n"
         f"- title: {top.get('title', '')}\n"
         f"- source: {top.get('source', '')}\n"
         f"- score: {score}\n"
-        f"- url: {top.get('url', '')}\n"
+        f"- url: {url}\n"
+        + page_section
     )
 
 

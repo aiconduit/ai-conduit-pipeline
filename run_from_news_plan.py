@@ -45,7 +45,7 @@ source = content.get("source") or news_item.get("source", "news")
 generated_at = plan.get("generated_at", "")
 
 # CTAナレーション（固定）
-CTA_TEXT = f"{topic[:10]}の詳細はInstagramで！コメントにAIconduitと書いてプレゼントをゲット！"
+CTA_TEXT = f"詳細は概要欄をチェック！コメントにAIconduitと書いてプレゼントをゲット！"
 
 # 2. script_60s を構築（plan.script.scenes[].narration を連結）
 plan = content.get("plan", content)
@@ -69,7 +69,7 @@ print(f"   スクリプト: {script_60s}")
 #    Scene 4 (value)     : 残り（最大40文字）
 #    Scene 5 (cta)       : 固定CTA
 # scenesのnarrationを直接使用
-CTA_TEXT = f"{topic[:10]}の詳細はInstagramで！コメントにAIconduitと書いてプレゼントをゲット！"
+CTA_TEXT = f"詳細は概要欄をチェック！コメントにAIconduitと書いてプレゼントをゲット！"
 raw_scenes = plan.get("script", {}).get("scenes", [])
 mood_map = {"Hook": "hook", "Fact_1": "interrupt", "Fact_2": "value", "Twist": "value", "CTA": "cta"}
 scene_specs = []
@@ -93,11 +93,20 @@ MOOD_VISUAL_QUERIES = {
 }
 
 
+# B-roll B: 内容に関係なくtech系映像に固定（コード画面・PC操作・AI技術）
+import random as _rand_broll
+TECH_BROLL_QUERIES = [
+    "person typing laptop coding",
+    "computer screen code programming",
+    "software developer working keyboard",
+    "AI technology data visualization",
+    "typing fast computer screen dark",
+]
 MOOD_VISUAL_QUERIES_2 = {
-    "hook": f"{topic} shock impact explosion light",
-    "value": f"{topic} data science machine learning",
-    "interrupt": f"{topic} fast speed motion blur",
-    "cta": "social media phone notification digital",
+    "hook": _rand_broll.choice(TECH_BROLL_QUERIES),
+    "value": _rand_broll.choice(TECH_BROLL_QUERIES),
+    "interrupt": _rand_broll.choice(TECH_BROLL_QUERIES),
+    "cta": _rand_broll.choice(TECH_BROLL_QUERIES),
 }
 def mood_visual_query(topic, mood):
     """topicとmoodに応じてvisual_queryを生成する"""

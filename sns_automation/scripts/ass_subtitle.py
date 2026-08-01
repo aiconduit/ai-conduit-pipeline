@@ -23,7 +23,7 @@ PLAY_RES_X = 1080
 PLAY_RES_Y = 1920
 
 # pos_y = 0.68 → MarginV = 1920 * (1 - 0.68) = 615 (bottom-aligned, Alignment=2)
-MARGIN_V = 615
+MARGIN_V = 850
 FONT_SIZE = 95
 FONT_NAME = "Noto Sans CJK JP"
 
