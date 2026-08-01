@@ -139,6 +139,7 @@ def compose_scene(scene, idx, is_last=False):
         with open(concat_ab, "w") as f_ab:
             f_ab.write(f"file '{broll_a_half}'\nfile '{broll_b_half}'\n")
         _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat_ab,
+              "-vf", "scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
               "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20", "-pix_fmt", "yuv420p", broll_ab])
         broll = broll_ab
     else:
