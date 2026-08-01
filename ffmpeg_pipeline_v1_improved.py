@@ -135,9 +135,16 @@ def compose_scene(scene, idx, is_last=False):
         if src and os.path.exists(str(src)):
             d = probe_dur(str(src))
             loop = int(t / max(d, 0.5)) + 2
-            r = _run(['ffmpeg', '-y', '-stream_loop', str(loop), '-i', str(src),
-                      '-t', str(t), '-vf', vf,
-                      '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-an', '-pix_fmt', 'yuv420p', out])
+            # Ken Burns動画（mp4）の場合は-stream_loopでなく-filter_complex tpadでループ
+            if d >= t:
+                # 動画が十分長い場合はそのままカット
+                r = _run(['ffmpeg', '-y', '-i', str(src),
+                          '-t', str(t), '-vf', vf,
+                          '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-an', '-pix_fmt', 'yuv420p', out])
+            else:
+                r = _run(['ffmpeg', '-y', '-stream_loop', str(loop), '-i', str(src),
+                          '-t', str(t), '-vf', vf,
+                          '-r', '30', '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-an', '-pix_fmt', 'yuv420p', out])
             if r.returncode != 0:
                 print(f'   ⚠️ _make_clip失敗')
                 _run(['ffmpeg', '-y', '-f', 'lavfi', '-i', f'color=black:s=960x960:r=30:d={t}',
