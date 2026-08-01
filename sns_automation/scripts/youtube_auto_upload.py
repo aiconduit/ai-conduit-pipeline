@@ -145,15 +145,27 @@ def main():
         tags = ["AI","GitHub","Shorts","エンジニア","自動化"]
         repo_name = ""
 
-    description = f"""🤖 AI Conduit - AIツール・GitHubトレンドを毎日紹介！
+    description = f"""🤖 {title}
 
-チャンネル登録で最新AI情報をゲット👇
+AIツール・最新AIニュースを毎日解説中！
+✅ チャンネル登録で最新情報をキャッチ👆
 
-💎 無料プレゼント「GitHubトップ50 AIツールリスト」
-👉 コメントに「AIconduit」と書いてDMで受け取ってください！
-🎁 プレゼントページ: {os.environ.get('GIFT_LINK','https://aiconduit.github.io/ai-conduit-pipeline/gift_content/')}
+━━━━━━━━━━━━━━━
+🎁 【無料プレゼントあり】
+この動画に関連した限定資料を無料でお渡しします！
 
-#AI #GitHub #エンジニア #プログラミング #自動化 #Shorts"""
+📌 受け取り方法:
+① コメント欄に「AIconduit」と書く
+② 下のInstagramをフォロー
+③ InstagramにDMで「プレゼント」と送る
+
+📱 Instagram（DM受付中）👇
+https://www.instagram.com/aiconduit/
+━━━━━━━━━━━━━━━
+
+{os.environ.get('GIFT_LINK','')}
+
+#AI #AIニュース #エンジニア #プログラミング #自動化 #Shorts"""
 
     # 最新の動画を探す
     videos = sorted(glob.glob("projects/daily/renders/*.mp4"))
@@ -188,4 +200,26 @@ def main():
         json.dump({"video_id": vid_id, "title": title, "file": video_file}, f, ensure_ascii=False, indent=2)
 
 if __name__ == "__main__":
-    main()
+    main()    # トピックに合わせた概要欄
+    gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/gift_content/")
+    description = f"""🤖 {title}
+
+AIツール・最新AIニュースを毎日解説中！
+✅ チャンネル登録で最新情報をキャッチ👆
+
+━━━━━━━━━━━━━━━
+🎁 【無料プレゼントあり】
+この動画に関連した限定資料を無料でお渡しします！
+
+📌 受け取り方法:
+① コメント欄に「AIconduit」と書く
+② 下のInstagramをフォロー
+③ InstagramにDMで「プレゼント」と送る
+
+📱 Instagram（DM受付中）👇
+https://www.instagram.com/aiconduit/
+━━━━━━━━━━━━━━━
+
+🔗 プレゼント詳細: {gift_link}
+
+#AI #AIニュース #エンジニア #プログラミング #自動化 #Shorts"""
