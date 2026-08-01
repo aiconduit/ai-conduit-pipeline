@@ -307,9 +307,29 @@ https://www.instagram.com/aiconduit/
     except Exception as e:
         print(f"⚠️ コメント返信スキップ: {e}")
     
-    # ログ保存
-    with open("output/youtube_upload_log.json", "w") as f:
-        json.dump({"video_id": vid_id, "title": title, "file": video_file}, f, ensure_ascii=False, indent=2)
+    # ログ保存（追記方式・アナリティクス収集用）
+    import datetime as _dt
+    log_path = "output/auto_log.json"
+    log_entry = {
+        "video_id": vid_id,
+        "title": title,
+        "file": str(video_file),
+        "published_at": _dt.datetime.now().strftime("%Y-%m-%dT%H:%M:%S"),
+        "pipeline": "p3" if "v3news" in str(video_file) else "p2",
+    }
+    existing_log = []
+    if os.path.exists(log_path):
+        try:
+            with open(log_path) as _lf:
+                existing = json.load(_lf)
+                existing_log = existing if isinstance(existing, list) else [existing]
+        except: pass
+    existing_log.append(log_entry)
+    existing_log = existing_log[-100:]
+    os.makedirs("output", exist_ok=True)
+    with open(log_path, "w", encoding="utf-8") as f:
+        json.dump(existing_log, f, ensure_ascii=False, indent=2)
+    print(f"   📝 ログ追記完了（合計{len(existing_log)}件）")
 
 if __name__ == "__main__":
     main()
