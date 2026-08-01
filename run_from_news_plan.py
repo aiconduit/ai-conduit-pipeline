@@ -304,9 +304,38 @@ if audio_clips:
     with open(audio_concat, "w") as _af:
         for ac in audio_clips:
             _af.write(f"file '{ac}'\n")
-    audio_only = str(WORK_DIR / "audio_only.mp4")
+    audio_only_raw = str(WORK_DIR / "audio_only_raw.aac")
     _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", audio_concat,
-          "-vn", "-c:a", "aac", audio_only])
+          "-vn", "-c:a", "aac", audio_only_raw])
+
+    # イントロ・アウトロの長さ分の無音を追加してタイミングを合わせる
+    intro_dur = probe_dur(intro_clip) if intro_clip and os.path.exists(str(intro_clip or "")) else 0.0
+    outro_dur = probe_dur(outro_clip) if outro_clip and os.path.exists(str(outro_clip or "")) else 0.0
+    audio_only = str(WORK_DIR / "audio_only.aac")
+    if intro_dur > 0 or outro_dur > 0:
+        silence_intro = str(WORK_DIR / "silence_intro.aac")
+        silence_outro = str(WORK_DIR / "silence_outro.aac")
+        parts = []
+        if intro_dur > 0:
+            _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r=44100:cl=mono",
+                  "-t", str(intro_dur), "-c:a", "aac", silence_intro])
+            parts.append(silence_intro)
+        parts.append(audio_only_raw)
+        if outro_dur > 0:
+            _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"anullsrc=r=44100:cl=mono",
+                  "-t", str(outro_dur), "-c:a", "aac", silence_outro])
+            parts.append(silence_outro)
+        # 無音+音声+無音を連結
+        sil_concat = str(WORK_DIR / "sil_concat.txt")
+        with open(sil_concat, "w") as _sf:
+            for p in parts:
+                _sf.write(f"file '{p}'\n")
+        _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", sil_concat,
+              "-c:a", "aac", audio_only])
+        print(f"   ✅ 無音追加（イントロ{intro_dur:.1f}s + 音声 + アウトロ{outro_dur:.1f}s）")
+    else:
+        import shutil; shutil.copy(audio_only_raw, audio_only)
+
     # 映像+音声を合成
     _run(["ffmpeg", "-y", "-i", video_only, "-i", audio_only,
           "-c:v", "copy", "-c:a", "aac", "-shortest", raw_output])
