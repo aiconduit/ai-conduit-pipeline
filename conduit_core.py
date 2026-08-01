@@ -779,7 +779,7 @@ def _make_black_screen(output_path, dur=8.0, size=1080):
     try:
         cmd = [
             "ffmpeg", "-y",
-            "-f", "lavfi", "-i", "color=c=black:s=960x960:d=%s" % dur,
+            "-f", "lavfi", "-i", "color=c=black:s=1080x960:d=%s" % dur,
             "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
             "-pix_fmt", "yuv420p",
             str(output_path),
@@ -1090,7 +1090,7 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     elif interrupt_type == "color_flash":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-               "-vf", f"fade=t=in:st=0:d=0.1:color=white,fade=t=out:st={max(dur-0.3,0)}:d=0.3,scale=960:960:force_original_aspect_ratio=increase,crop=960:960",
+               "-vf", f"fade=t=in:st=0:d=0.1:color=white,fade=t=out:st={max(dur-0.3,0)}:d=0.3,scale=1080:960:force_original_aspect_ratio=increase,crop=1080:960",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "cut_zoom":
@@ -1114,13 +1114,13 @@ def apply_pattern_interrupt(bg_path, interrupt_type, out_path, dur):
     elif interrupt_type == "pan_left":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "scale=1280:960,crop=960:960:0:0",
+              "-vf", "scale=1280:960,crop=1080:960:0:0",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     elif interrupt_type == "pan_right":
         _run(["ffmpeg", "-y", "-i", bg_path,
               "-r", "30",
-              "-vf", "scale=1280:960,crop=960:960:320:0",
+              "-vf", "scale=1280:960,crop=1080:960:320:0",
               "-t", str(dur), "-c:v", "libx264", "-preset", "fast", "-crf", "22",
               "-pix_fmt", "yuv420p", "-r", "30", out_path])
     else:
@@ -1263,7 +1263,7 @@ def apply_zoom_pulse(input_path, out_path, dur=None, fps=30):
         "ffmpeg", "-y", "-i", input_path,
         "-vf",
         "zoompan=z='if(lte(on,30),1.0+on*0.002,1.06)':d=1:"
-        "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=960x960:fps=%d" % fps,
+        "x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x960:fps=%d" % fps,
         "-r", str(fps), "-t", str(dur),
         "-c:v", "libx264", "-preset", "fast", "-crf", "22",
         "-pix_fmt", "yuv420p", "-an", out_path,
