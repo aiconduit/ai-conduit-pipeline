@@ -635,9 +635,12 @@ def fetch_broll_playwright(tool_name, cache_dir, direct_url=None):
         shot = asyncio.run(_capture())
         if not shot:
             return None
-        safe = re.sub(r"[^\w]", "_", tool_name)[:20]
+        shot_size = os.path.getsize(shot) if os.path.exists(shot) else 0
+        print(f"   [DEBUG] Playwright PNG: {shot} size={shot_size}")
+        safe = re.sub(r"[^\w]", "_", tool_name or "direct")[:20]
         out = str(Path(cache_dir) / f"playwright_kenburns_{safe}.mp4")
         result = _make_kenburns(shot, out, dur=8.0)
+        print(f"   [DEBUG] kenburns result: {result} size={os.path.getsize(result) if result and os.path.exists(result) else 0}")
         if result and os.path.exists(result):
             print(f"   [fetch_broll_playwright] OK: {result}")
             return result
@@ -673,14 +676,11 @@ def _make_kenburns(image, output_path, dur=3.0, size=960):
     try:
         import numpy as np
         from PIL import Image as PILImage
+        # moviepy 2.x系のimport
         try:
-            from moviepy import editor as mpy
+            from moviepy import ImageClip, ColorClip, CompositeVideoClip
         except ImportError:
-            from moviepy import VideoClip, ImageClip, ColorClip, CompositeVideoClip
-            class mpy:
-                ImageClip = ImageClip
-                ColorClip = ColorClip
-                CompositeVideoClip = CompositeVideoClip
+            from moviepy.editor import ImageClip, ColorClip, CompositeVideoClip
 
         target_w, target_h = size, size
         with PILImage.open(str(image)) as handle:
