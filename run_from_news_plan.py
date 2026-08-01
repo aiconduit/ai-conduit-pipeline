@@ -360,7 +360,9 @@ else:
 
 
 # 9. BGM ミックス
-final_filename = f"v2news_{re.sub(chr(58)+chr(47)+chr(92)+chr(42)+chr(63)+chr(34)+chr(60)+chr(62)+chr(124), "", topic[:20])}.mp4"
+safe_topic = re.sub(r"[:/\\*?<>|]", "", topic[:20])
+final_filename = f"v2news_{safe_topic}.mp4"
+final_filename = f"v2news_{safe_topic}.mp4"
 final_output = str(OUTPUT_DIR / final_filename)
 if bgm_path and os.path.exists(bgm_path):
     try:
