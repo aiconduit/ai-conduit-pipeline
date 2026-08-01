@@ -96,13 +96,37 @@ def gen_overlay(scene, out_path, scene_idx=0):
         dummy = Image.new('RGBA',(1,1)); dd = ImageDraw.Draw(dummy)
         bb = dd.textbbox((0,0),caption,font=font_big)
         cw = bb[2]-bb[0]; cx = (W-cw)//2
-        for dx in range(-4,5):
-            for dy in range(-4,5):
-                if dx*dx+dy*dy <= 16:
-                    draw.text((cx+dx, 900+dy), caption, font=font_big, fill=(0,0,0,200))
-        draw.text((cx, 900), caption, font=font_big, fill=(255,255,255,255))
+        # フックテキストフラッシュ: 黄色大文字+太い縁取り
+        for dx in range(-5,6):
+            for dy in range(-5,6):
+                if dx*dx+dy*dy <= 25:
+                    draw.text((cx+dx, 900+dy), caption, font=font_big, fill=(0,0,0,255))
+        draw.text((cx, 900), caption, font=font_big, fill=(255,220,0,255))
+        # 速報バッジ（左上）
+        font_badge = get_font(36)
+        badge_text = "🔴 速報"
+        draw.rectangle([20, 20, 200, 70], fill=(220,0,0,200))
+        draw.text((30, 28), "速 報", font=font_badge, fill=(255,255,255,255))
 
     draw.text((W-120, 16), "AI Conduit", font=font_logo, fill=(255,255,255,120))
+    # 数字インフォグラフィック: ナレーション内の%や倍数を検出して強調表示
+    import re as _re
+    numbers = _re.findall(r'(\d+(?:\.\d+)?)\s*(%|倍|割|円|万|億)', text)
+    if numbers and mood in ("value", "interrupt"):
+        font_num = get_font(110)
+        font_unit = get_font(50)
+        x_start = 40
+        y_num = 430
+        for val, unit in numbers[:2]:
+            for dx in range(-3,4):
+                for dy in range(-3,4):
+                    if dx*dx+dy*dy <= 9:
+                        draw.text((x_start+dx, y_num+dy), val, font=font_num, fill=(0,0,0,200))
+            draw.text((x_start, y_num), val, font=font_num, fill=(255,220,0,255))
+            bb_n = draw.textbbox((0,0), val, font=font_num)
+            nw = bb_n[2]-bb_n[0]
+            draw.text((x_start+nw+5, y_num+60), unit, font=font_unit, fill=(255,255,255,200))
+            x_start += nw + 120
     img.save(out_path, 'PNG')
 
 def compose_scene(scene, idx, is_last=False):

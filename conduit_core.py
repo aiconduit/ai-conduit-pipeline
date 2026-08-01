@@ -218,13 +218,13 @@ Output ONLY JSON: [{{"id":1,"narration":"日本語15-30文字","caption":"4-8文
 
     return _generate_with_review(_gen_once, "Groq")
 
-def tts_japanese(text, path, speed=1.05):
-    """Edge TTS - ja-JP-NanamiNeural with word timestamps"""
+def tts_japanese(text, path, speed=1.05, rate="-5%", pitch="-3Hz"):
+    """Edge TTS - ja-JP-KeitaNeural with word timestamps, mood-aware rate/pitch"""
     import sys
     sys.path.insert(0, os.path.join(os.path.dirname(__file__), "sns_automation", "scripts"))
     try:
         from edge_tts_service import generate_speech_with_timestamps
-        audio_path, timestamps = generate_speech_with_timestamps(text, path)
+        audio_path, timestamps = generate_speech_with_timestamps(text, path, rate=rate, pitch=pitch)
         return audio_path, timestamps
     except Exception as e:
         print(f"   ⚠️ Edge TTS失敗 ({e}), Google TTSにフォールバック")
@@ -249,9 +249,9 @@ def _tts_google_fallback(text, path, speed=1.05):
         return path, []
     raise Exception(f"Google TTS error: {r.status_code}")
 
-def generate_word_subtitle_audio(text, path, speed=1.05, keywords=None):
+def generate_word_subtitle_audio(text, path, speed=1.05, keywords=None, rate="-5%", pitch="-3Hz"):
     """Edge TTS生成。戻り値: (audio_path, list[dict{word,start_ms,duration_ms}])"""
-    return tts_japanese(text, path, speed)
+    return tts_japanese(text, path, speed, rate=rate, pitch=pitch)
 
 def get_audio_duration(path):
     try:

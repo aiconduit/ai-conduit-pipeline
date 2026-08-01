@@ -147,11 +147,24 @@ print(f"   {len(scenes)} シーン生成済み")
 
 # 4. TTS 生成（各セグメントを分割後、個別のシーンとして処理）
 print("\n[1/4] 🎙️ TTS 生成中...")
+# moodごとのTTS rate/pitch設定
+MOOD_TTS_PARAMS = {
+    "hook":           {"rate": "+8%",  "pitch": "+3Hz"},
+    "interrupt":      {"rate": "+5%",  "pitch": "+2Hz"},
+    "value":          {"rate": "-8%",  "pitch": "-4Hz"},
+    "secondary_hook": {"rate": "+5%",  "pitch": "+2Hz"},
+    "cta":            {"rate": "+3%",  "pitch": "+5Hz"},
+    "default":        {"rate": "-5%",  "pitch": "-3Hz"},
+}
+
 for s in scenes:
     p = str(WORK_DIR / f"narr_{s['id']:04d}.wav")
     narration_text = s["narration"]
+    tts_params = MOOD_TTS_PARAMS.get(s.get("mood", "default"), MOOD_TTS_PARAMS["default"])
     try:
-        audio_path, timestamps = generate_word_subtitle_audio(narration_text, p, speed=1.08)
+        audio_path, timestamps = generate_word_subtitle_audio(
+            narration_text, p, speed=1.05,
+            rate=tts_params["rate"], pitch=tts_params["pitch"])
         dur = (timestamps[-1]["start_ms"] + timestamps[-1]["duration_ms"]) / 1000.0 if timestamps else probe_dur(audio_path)
     except Exception as e:
         print(f"   ⚠️ TTS失敗({e}), フォールバック")

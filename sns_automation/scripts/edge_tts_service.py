@@ -15,12 +15,12 @@ MIN_AUDIO_BYTES = 5_000
 EDGE_TTS_KBPS = 48
 
 
-def generate_speech_with_timestamps(text: str, output_path: str):
+def generate_speech_with_timestamps(text: str, output_path: str, rate: str = "-5%", pitch: str = "-3Hz"):
     word_boundaries = []
     sentence_fallback = []
 
     async def _synthesize():
-        communicate = edge_tts.Communicate(text, voice=VOICE, boundary="WordBoundary")
+        communicate = edge_tts.Communicate(text, voice=VOICE, rate=rate, pitch=pitch, boundary="WordBoundary")
         with open(output_path, "wb") as audio_file:
             async for chunk in communicate.stream():
                 if chunk["type"] == "audio":

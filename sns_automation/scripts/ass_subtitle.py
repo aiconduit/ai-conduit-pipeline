@@ -175,9 +175,11 @@ def generate_ass_subtitles(word_timings: list, output_path: str) -> str:
         if not parts:
             continue
         line_text = " ".join(parts)
+        # キネティック効果: 表示時に120%→100%のスケールダウン（ポップイン）
+        kinetic = r"{\fscx120\fscy120\t(0,150,\fscx100\fscy100)}"
         events.append(
             f"Dialogue: 0,{_ass_timestamp(start_ms)},{_ass_timestamp(chunk_end)},"
-            f"Pop,,0,0,0,,{line_text}"
+            f"Pop,,0,0,0,,{kinetic}{line_text}"
         )
 
     with open(output_path, "w", encoding="utf-8") as f:
