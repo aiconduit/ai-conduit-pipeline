@@ -115,6 +115,7 @@ for i, spec in enumerate(scene_specs):
         "topic": topic,
         "repo_name": repo_name,
         "narration": sent,
+        "news_url": news_item.get("url", ""),
     }
     scenes.append(scene)
 

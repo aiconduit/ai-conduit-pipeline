@@ -588,22 +588,23 @@ TOOL_URL_MAP = {
 }
 
 
-def fetch_broll_playwright(tool_name, cache_dir):
+def fetch_broll_playwright(tool_name, cache_dir, direct_url=None):
     """ツールの公式HPをヘッドレスChromiumでスクリーンショット → Ken Burns動画化。
 
-    tool_nameからTOOL_URL_MAPを部分マッチで検索し、公式URLをPlaywrightで撮影、
-    960x540にcropして _make_kenburns() で動画化する。
+    direct_urlが指定された場合はそのURLを直接使用。
+    それ以外はTOOL_URL_MAPからtool_nameで検索。
     失敗時は None を返す。
     """
     try:
-        if not tool_name:
+        if not tool_name and not direct_url:
             return None
-        url = None
-        t = tool_name.lower()
-        for key, u in TOOL_URL_MAP.items():
-            if key in t:
-                url = u
-                break
+        url = direct_url
+        if not url:
+            t = tool_name.lower()
+            for key, u in TOOL_URL_MAP.items():
+                if key in t:
+                    url = u
+                    break
         if not url:
             return None
 
@@ -728,11 +729,12 @@ def _make_black_screen(output_path, dur=8.0, size=960):
     return None
 
 
-def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
+def fetch_broll_from_topic(topic, visual_query, cache_dir=None, direct_url=None):
     """B-roll取得（優先順位でフォールバック）。
 
     優先順位:
       1. Playwrightで公式HPスクリーンショット → Ken Burns動画（最優先）
+         direct_urlが指定された場合はそのURLを直接使用
       2. GitHub READMEの実際のツール画像 → Ken Burns動画
       3. Pexelsでシンプルな英語クエリ検索（フォールバック1）
       4. 黒画面（最終フォールバック）
@@ -744,7 +746,7 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None):
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
     # 1. Playwrightで公式HP撮影 → Ken Burns動画（最優先）
-    playwright_shot = fetch_broll_playwright(topic, cache_dir)
+    playwright_shot = fetch_broll_playwright(topic, cache_dir, direct_url=direct_url)
     if playwright_shot:
         print(f"   ✅ Playwright公式HP → Ken Burns動画: {playwright_shot}")
         return playwright_shot
