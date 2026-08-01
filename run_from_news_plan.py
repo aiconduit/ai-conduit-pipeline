@@ -290,30 +290,12 @@ def _has_audio(path):
                 capture_output=True, text=True)
     return bool(r.stdout.strip())
 
-# 映像のみfade付きで連結
-try:
-    n = len(norm_list)
-    input_args = []
-    for np_ in norm_list:
-        input_args += ["-i", np_]
-    filter_v = ""
-    for j in range(n):
-        filter_v += f"[{j}:v]fade=t=in:st=0:d=0.15,fade=t=out:st=0.65:d=0.15[v{j}];"
-    filter_v += "".join(f"[v{j}]" for j in range(n))
-    filter_v += f"concat=n={n}:v=1:a=0[vout]"
-    video_only = str(WORK_DIR / "video_only.mp4")
-    _run(["ffmpeg", "-y"] + input_args + [
-        "-filter_complex", filter_v,
-        "-map", "[vout]",
-        "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-        "-pix_fmt", "yuv420p", "-an", video_only])
-    print("   ✅ 映像fade連結完了")
-except Exception as _xe:
-    print(f"   ⚠️ fade映像スキップ ({_xe}) → 通常concat映像")
-    video_only = str(WORK_DIR / "video_only.mp4")
-    _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-          "-pix_fmt", "yuv420p", "-an", video_only])
+# 映像をシンプルなconcatで連結（フェードなし→ハードカット）
+video_only = str(WORK_DIR / "video_only.mp4")
+_run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
+      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+      "-pix_fmt", "yuv420p", "-an", video_only])
+print("   ✅ 映像連結完了")
 
 # 音声ありのクリップだけでconcat
 audio_clips = [f for f in norm_list if _has_audio(f)]

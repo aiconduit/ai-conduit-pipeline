@@ -135,13 +135,28 @@ def upload(youtube, video_file, title, description, tags):
     return response["id"]
 
 def main():
-    # content_plan.jsonからメタデータ取得
+    # news_content_plan.json（P2）またはcontent_plan.json（P1）からメタデータ取得
     try:
-        with open("sns_automation/content_plan.json") as f:
-            plan = json.load(f)
-        topic = plan["plans"][0]
-        hook = topic.get("hook", "ルーティン作業、AIに任せよう")
-        topic_text = topic.get("topic", "GitHubトレンドAIツール")
+        # P2: news_content_plan.jsonを優先
+        news_plan_path = "sns_automation/news_content_plan.json"
+        if os.path.exists(news_plan_path):
+            with open(news_plan_path) as f:
+                news_plan = json.load(f)
+            plan_data = news_plan.get("plan", {})
+            if isinstance(plan_data, dict) and "plan" in plan_data:
+                plan_data = plan_data["plan"]
+            selected_title = plan_data.get("selected_title", "") or news_plan.get("news_item", {}).get("title", "")
+            hashtags = plan_data.get("hashtags", ["#AI", "#AIニュース"])
+            tags = [t.replace("#","") for t in hashtags] + ["AI", "AIニュース", "Shorts", "エンジニア"]
+            title = f"{selected_title[:45]} #Shorts" if selected_title else "【AI速報】最新AIニュース #Shorts"
+            hook_text = selected_title[:30] if selected_title else "AI速報"
+            repo_name = plan_data.get("repo_name", "")
+        else:
+            with open("sns_automation/content_plan.json") as f:
+                plan = json.load(f)
+            topic = plan["plans"][0]
+            hook = topic.get("hook", "ルーティン作業、AIに任せよう")
+            topic_text = topic.get("topic", "GitHubトレンドAIツール")
         patterns = [
             f"え、マジ？{hook}",
             f"【衝撃】{topic_text}がヤバすぎた",
