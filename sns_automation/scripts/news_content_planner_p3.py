@@ -219,7 +219,37 @@ def pick_top1(items: list[dict[str, Any]]) -> dict[str, Any] | None:
     logger.info("Source priority: %s", [f"{i.get('source')}: {i.get('title')}" for i in ordered[:5]])
     if not ordered:
         return None
-    top = ordered[0]
+    # 過去24時間に使用したトピックを除外
+    import json as _json, os as _os, datetime as _dt
+    used_path = "sns_automation/used_topics.json"
+    used_titles = []
+    if _os.path.exists(used_path):
+        try:
+            with open(used_path) as _f:
+                used_data = _json.load(_f)
+            cutoff = (_dt.datetime.now() - _dt.timedelta(hours=24)).isoformat()
+            used_titles = [u["title"][:30] for u in used_data if u.get("used_at", "") > cutoff]
+        except: pass
+    
+    for item in ordered:
+        title_short = item.get("title", "")[:30]
+        if not any(title_short in u for u in used_titles):
+            top = item
+            break
+    else:
+        top = ordered[0]
+    
+    try:
+        existing = []
+        if _os.path.exists(used_path):
+            with open(used_path) as _f:
+                existing = _json.load(_f)
+        existing.append({"title": top.get("title", ""), "used_at": _dt.datetime.now().isoformat()})
+        existing = existing[-50:]
+        with open(used_path, "w") as _f:
+            _json.dump(existing, _f, ensure_ascii=False)
+    except: pass
+    
     logger.info("Selected Top1: [%s] %s", top.get("source"), top.get("title"))
     return top
 
