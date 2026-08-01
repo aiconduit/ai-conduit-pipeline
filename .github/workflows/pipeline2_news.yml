@@ -55,6 +55,15 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           GIFT_LINK: ${{ secrets.GIFT_LINK }}
 
+      - name: Step 4.5 - used_topics.json更新をコミット
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          git add sns_automation/used_topics.json || true
+          git diff --staged --quiet || git commit -m "Auto: used_topics.json更新 [skip ci]"
+          git push origin master || true
+        continue-on-error: true
+
       - name: Step 5 - Instagram投稿
         run: |
           pip install instagrapi --quiet
