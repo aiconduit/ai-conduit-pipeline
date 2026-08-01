@@ -97,30 +97,34 @@ jobs:
           )
           youtube = build('youtube', 'v3', credentials=creds)
 
-          resp = youtube.channels().list(part='snippet', mine=True).execute()
+          resp = youtube.channels().list(part='brandingSettings', mine=True).execute()
           channel = resp['items'][0]
+          channel_id = channel['id']
+          branding = channel.get('brandingSettings', {})
+          channel_info = branding.get('channel', {})
 
-          channel['snippet']['description'] = """AIツール・GitHubトレンドを毎日紹介！
+          channel_info['description'] = """AIツール・GitHubトレンドを毎日紹介！
 
-          毎日投稿 | Daily AI news
-          GitHubトレンド解説
-          エンジニア向けAIツール紹介
-          就活・副業・自動化のヒント
+毎日投稿 | Daily AI news
+GitHubトレンド解説
+エンジニア向けAIツール紹介
+就活・副業・自動化のヒント
 
-          ━━━━━━━━━━━━━━━
-          無料プレゼントあり！
-          動画を見てコメントに「AIconduit」と書くと
-          この動画に関連した限定資料を無料でお渡しします！
+━━━━━━━━━━━━━━━
+無料プレゼントあり！
+動画を見てコメントに「AIconduit」と書くと
+この動画に関連した限定資料を無料でお渡しします！
 
-          Instagram（DM受付中）
-          https://www.instagram.com/aiconduit/
-          ━━━━━━━━━━━━━━━
+Instagram（DM受付中）
+https://www.instagram.com/aiconduit/
+━━━━━━━━━━━━━━━
 
-          チャンネル登録で最新AI情報をキャッチ！"""
+チャンネル登録で最新AI情報をキャッチ！"""
 
+          branding['channel'] = channel_info
           youtube.channels().update(
-              part='snippet',
-              body={'id': channel['id'], 'snippet': channel['snippet']}
+              part='brandingSettings',
+              body={'id': channel_id, 'brandingSettings': branding}
           ).execute()
           print('チャンネル説明更新完了')
           PYEOF
