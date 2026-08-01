@@ -634,8 +634,14 @@ def fetch_broll_playwright(tool_name, cache_dir):
         shot = asyncio.run(_capture())
         if not shot:
             return None
-            print(f"   [fetch_broll_playwright] ✅ 公式HP → Ken Burns動画: {result}")
+        safe = re.sub(r"[^\w]", "_", tool_name)[:20]
+        out = str(Path(cache_dir) / f"playwright_kenburns_{safe}.mp4")
+        result = _make_kenburns(shot, out, dur=8.0)
+        if result and os.path.exists(result):
+            print(f"   [fetch_broll_playwright] OK: {result}")
             return result
+        return None
+        return None
         return None
     except Exception as e:
         print(f"   ⚠️ [fetch_broll_playwright] 例外: {e} → None")
