@@ -55,6 +55,16 @@ jobs:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           GIFT_LINK: ${{ secrets.GIFT_LINK }}
 
+      - name: チャンネル説明更新（一時）
+        run: |
+          pip install google-api-python-client google-auth google-auth-oauthlib -q
+          python3 update_channel_desc.py
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        continue-on-error: true
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
