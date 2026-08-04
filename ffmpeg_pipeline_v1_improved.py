@@ -339,7 +339,9 @@ def compose_scene(scene, idx, is_last=False):
     # ★ SFX追加（シーン動画完成後）: hook/interrupt冒頭 + シーン切替カット
     sfx_out = str(WORK_DIR / f"scene_sfx_{idx:02d}.mp4")
     try:
-        add_sfx_to_scene(out, sfx_out, mood=mood, dur=dur, add_cut=(not is_last))
+        result = add_sfx_to_scene(out, mood=mood)
+        if result != out and os.path.exists(result):
+            import shutil; shutil.copy(result, sfx_out)
     except Exception as _e:
         print(f"   ⚠️ SFX追加失敗({_e}) → そのまま出力")
         sfx_out = out
