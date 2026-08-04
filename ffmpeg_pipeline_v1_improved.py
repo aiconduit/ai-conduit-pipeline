@@ -129,6 +129,47 @@ def gen_overlay(scene, out_path, scene_idx=0):
             x_start += nw + 120
     img.save(out_path, 'PNG')
 
+# SFX設定: moodとシーンに応じた効果音マッピング
+SFX_DIR = Path(__file__).parent / "assets" / "sfx"
+MOOD_SFX = {
+    "hook":      ["07_glitch.wav", "02_bass_drop.wav"],   # グリッチ+ベースドロップ
+    "interrupt": ["01_whoosh.wav", "03_pop.wav"],          # ウーシュ+ポップ
+    "value":     ["08_chime_sparkle.wav", "06_bell_ding.wav"],  # チャイム+ベル
+    "why":       ["04_riser.wav"],                         # ライザー
+    "fact_1":    ["06_bell_ding.wav"],                     # ベル
+    "fact_2":    ["06_bell_ding.wav"],                     # ベル
+    "impact":    ["02_bass_drop.wav"],                     # ベースドロップ
+    "twist":     ["07_glitch.wav", "04_riser.wav"],        # グリッチ+ライザー
+    "context":   ["08_chime_sparkle.wav"],                 # チャイム
+    "cta":       ["05_click.wav", "03_pop.wav"],           # クリック+ポップ
+    "default":   ["01_whoosh.wav"],                        # ウーシュ
+}
+
+def add_sfx_to_scene(scene_path, mood, sfx_vol=0.3):
+    """シーン動画にSFX効果音を冒頭に追加してミックス"""
+    sfx_list = MOOD_SFX.get(mood, MOOD_SFX["default"])
+    sfx_path = None
+    for sfx_name in sfx_list:
+        candidate = SFX_DIR / sfx_name
+        if candidate.exists():
+            sfx_path = str(candidate)
+            break
+    if not sfx_path:
+        return scene_path  # SFXなし
+    
+    out_path = scene_path.replace(".mp4", "_sfx.mp4")
+    try:
+        _run(["ffmpeg", "-y", "-i", scene_path, "-i", sfx_path,
+              "-filter_complex",
+              f"[1:a]volume={sfx_vol},adelay=100|100[sfx];[0:a][sfx]amix=inputs=2:duration=first:weights=1 {sfx_vol}[aout]",
+              "-map", "0:v", "-map", "[aout]",
+              "-c:v", "copy", "-c:a", "aac", out_path])
+        if os.path.exists(out_path) and os.path.getsize(out_path) > 10000:
+            return out_path
+    except Exception as e:
+        print(f"   ⚠️ SFX追加失敗 ({e})")
+    return scene_path
+
 def compose_scene(scene, idx, is_last=False):
     dur = scene["duration"]; audio = scene["audio_path"]
     mood = scene.get("mood","default")

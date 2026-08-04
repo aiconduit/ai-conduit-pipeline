@@ -25,6 +25,9 @@ jobs:
           python3 -m playwright install chromium
           python3 -m playwright install-deps chromium
 
+      - name: SFX確認
+        run: ls assets/sfx/ || echo "SFXディレクトリなし"
+
       - name: キャッシュクリア
         run: rm -rf assets/pexels_cache/playwright_kenburns_*.mp4 || true
 
