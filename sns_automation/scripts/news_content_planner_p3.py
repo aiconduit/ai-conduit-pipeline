@@ -76,35 +76,34 @@ FIRESHIP_STYLE = get_fireship_style()
 # 1文の文字数制限を守るための目安(15文字以内)
 WARD_WIDTH = 15
 
-BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のSNSコンテンツプランナーです。
-AI Conduitは、トレンド自動収集→動画生成→SNS投稿を完全自動化するツールです。
+BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテンツプランナーです。
+日本のエンジニア向けAIニュースショート動画(28〜35秒)のスクリプトを生成してください。
 
-以下のソースから収集した本日のAI関連ニュース一覧から、ショート動画(30〜45秒)にする
-にふさわしい「Top1」を選び、Fireship型スクリプトを生成してください。
+## 最重要ルール
+1. narrationは1シーン30〜55文字の完全な日本語文章で書くこと(短すぎるのは絶対NG)
+2. 必ず具体的な数字・%・倍・円・ドルを最低3回以上含めること
+3. 抽象的な表現(「大幅向上」「劇的改善」)は禁止 → 必ず数値で示す
+4. 各シーンのvisual_descはニュース内容と一致する具体的な英語クエリ
 
 ## 選定基準
-1. 速報性が高い(今日・最近発表されたもの)ニュース
-2. 技術的事実が明確で、数字・比較・具体例がある
-3. 日本のエンジニア(学生〜現役〜フリーランス)に刺さる
-4. 「なぜ重要か」「何が変わるか」「自分への影響」が説明できる
-5. クリフハンガーを作れる（驚き・逆説・意外な事実がある）
+1. 速報性が高いニュース
+2. 技術的事実が数字で明確に示せる
+3. 日本のエンジニアに刺さる内容
 
 ## スクリプト仕様
 {style}
 
-## シーン構成(合計30〜45秒)
-8〜10シーン構成。各シーンの narration は以下の文字数制限を厳守すること:
-1. Hook(3秒): 速報フック・最も衝撃的な事実。narration 20文字以内
-2. Why(5秒): なぜこれが重要か。narration 25文字以内
-3. Fact_1(6秒): 技術的事実その1（数字必須）。narration 25文字以内
-4. Fact_2(6秒): 技術的事実その2。narration 25文字以内
-5. Impact(6秒): エンジニア・ユーザーへの具体的影響。narration 25文字以内
-6. Twist(5秒): 驚き・クリフハンガー（「でも実は...」「さらに...」）。narration 20文字以内
-7. Context(5秒): 背景・他社比較・業界への影響。narration 25文字以内
-8. CTA(5秒): AI Conduitへの行動喚起。narration 20文字以内
-※9・10シーン目は情報量が多い場合のみ追加
+## シーン構成(合計35〜45秒、10シーン)
+1. Hook(3秒): 数字を含む衝撃的な一文
+2. Why(3秒): なぜ重要か(金額・規模感)
+3. Fact_1(4秒): 具体的数字付き事実その1
+4. Fact_2(4秒): 具体的数字付き事実その2
+5. Fact_3(4秒): 具体的数字付き事実その3
+6. Impact(4秒): 業界・社会への影響
+7. Twist(5秒): 驚き・逆転・クリフハンガー
+8. CTA(3秒): 「詳細はコメント欄のリンクから」
 
-出力形式(JSONのみ。余計な説明は不要):
+出力形式(JSONのみ):
 ```json
 {{
   "selected_title": "選んだニュースのタイトル",
@@ -114,73 +113,69 @@ AI Conduitは、トレンド自動収集→動画生成→SNS投稿を完全自�
   "tags": ["ai news", ...10〜15個の英日タグ],
   "target_audience": "ターゲット視聴者層",
   "script": {{
-    "total_duration_sec": 45,
+    "total_duration_sec": 40,
     "scenes": [
       {{
         "scene_title": "Hook",
+        "mood": "hook",
         "duration_sec": 3,
-        "narration": "(20文字以内・最も衝撃的な事実)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
+        "narration": "(30〜55文字の完全な文章。必ず数字を含む)",
+        "visual_desc": "(英語、ニュース内容に合ったB-roll検索クエリ)"
       }},
       {{
         "scene_title": "Why",
-        "duration_sec": 5,
-        "narration": "(25文字以内・なぜ重要か)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
+        "mood": "why",
+        "duration_sec": 3,
+        "narration": "(30〜55文字。金額・規模感を含む)",
+        "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Fact_1",
-        "duration_sec": 6,
-        "narration": "(25文字以内・数字必須)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
+        "mood": "value",
+        "duration_sec": 4,
+        "narration": "(30〜55文字。具体的な数字・%・倍を含む)",
+        "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Fact_2",
-        "duration_sec": 6,
-        "narration": "(25文字以内・技術的事実)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
+        "mood": "fact_2",
+        "duration_sec": 4,
+        "narration": "(30〜55文字。具体的な数字・%・倍を含む)",
+        "visual_desc": "(英語)"
+      }},
+      {{
+        "scene_title": "Fact_3",
+        "mood": "fact_3",
+        "duration_sec": 4,
+        "narration": "(30〜55文字。具体的な数字・%・倍を含む)",
+        "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Impact",
-        "duration_sec": 6,
-        "narration": "(25文字以内・影響)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
+        "mood": "impact",
+        "duration_sec": 4,
+        "narration": "(30〜55文字。業界・社会への具体的影響)",
+        "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Twist",
+        "mood": "twist",
         "duration_sec": 5,
-        "narration": "(20文字以内・驚き)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
-      }},
-      {{
-        "scene_title": "Context",
-        "duration_sec": 5,
-        "narration": "(25文字以内・背景)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
+        "narration": "(30〜55文字。驚き・逆転・クリフハンガー)",
+        "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "CTA",
-        "duration_sec": 5,
-        "narration": "(20文字以内・AI Conduit行動喚起)",
-        "visual_1": "(英語)",
-        "visual_2": "(英語)"
+        "mood": "cta",
+        "duration_sec": 3,
+        "narration": "詳細はコメント欄のリンクから。AI Conduitで毎日最新AIニュースをチェック！",
+        "visual_desc": "smartphone social media app notification"
       }}
     ]
   }}
 }}
 ```
-台本は必ず日本語で出力してください。
-narration は各シーンの文字数制限を厳守してください。
-visual_1 / visual_2 は英語で具体的なビジュアルを指定してください。"""
-
-
+narrationは必ず30〜55文字の完全な文章で書いてください。数字のない文は書き直してください。"""
 def build_source_list(items: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """ソースの優先順位で並べた上で重複URLを除去する。上位ほど優先。"""
     seen: set[str] = set()
