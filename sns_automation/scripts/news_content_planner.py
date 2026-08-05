@@ -93,7 +93,7 @@ BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテン�
 ## スクリプト仕様
 {style}
 
-## シーン構成(合計28〜35秒、8シーン)
+## シーン構成(合計22〜28秒、8シーン・必ず28秒以内に収める)
 1. Hook(3秒): 数字を含む衝撃的な一文
 2. Why(3秒): なぜ重要か(金額・規模感)
 3. Fact_1(4秒): 具体的数字付き事実その1
@@ -113,7 +113,7 @@ BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテン�
   "tags": ["ai news", ...10〜15個の英日タグ],
   "target_audience": "ターゲット視聴者層",
   "script": {{
-    "total_duration_sec": 30,
+    "total_duration_sec": 25,
     "scenes": [
       {{
         "scene_title": "Hook",

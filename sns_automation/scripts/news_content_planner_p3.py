@@ -113,7 +113,7 @@ BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテン�
   "tags": ["ai news", ...10〜15個の英日タグ],
   "target_audience": "ターゲット視聴者層",
   "script": {{
-    "total_duration_sec": 40,
+    "total_duration_sec": 30,
     "scenes": [
       {{
         "scene_title": "Hook",
