@@ -74,7 +74,7 @@ def get_fireship_style():
 FIRESHIP_STYLE = get_fireship_style()
 
 # 1文の文字数制限を守るための目安(15文字以内)
-WARD_WIDTH = 15
+WARD_WIDTH = 55
 
 BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテンツプランナーです。
 日本のエンジニア向けAIニュースショート動画(28〜35秒)のスクリプトを生成してください。
