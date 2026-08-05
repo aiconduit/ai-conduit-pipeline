@@ -122,7 +122,7 @@ def upload_thumbnail(youtube, video_id, image_buf):
 
 
 def reply_to_comments(youtube, video_id):
-    gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/gift_content/")
+    gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
     # コメント返信テンプレート
     reply_templates = [
         "ありがとうございます！詳細は概要欄をチェックしてください👇",
@@ -130,7 +130,12 @@ def reply_to_comments(youtube, video_id):
         "嬉しいコメントありがとうございます！プレゼントは概要欄から受け取れます🎁",
         "ありがとうございます！毎日AIニュースを投稿しているのでチャンネル登録お願いします🙏",
     ]
-    gift_reply_text = f"ありがとうございます！🎁無料プレゼントはこちらから受け取れます👉 {gift_link}"
+    gift_reply_text = f"""🎁 AI Conduitプレゼントをどうぞ！
+ChatGPT・Claude最強プロンプト集10選（完全無料）
+SNS運用・コンテンツ作成・SEOに使えるプロンプトを厳選しました✨
+↓無料ダウンロード
+{gift_link}
+毎日AIニュースを配信中📱 @ai.conduit"""
     comments = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=20).execute()
     import random as _rand_reply
     replied_count = 0
@@ -245,7 +250,7 @@ def main():
         tags = ["AI","GitHub","Shorts","エンジニア","自動化"]
         repo_name = ""
 
-    gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/gift_content/")
+    gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
     seo_tags = "#AI #AIニュース #エンジニア #プログラミング #自動化 #Shorts #人工知能 #テクノロジー"
     description = f"""🤖 {title}
 
