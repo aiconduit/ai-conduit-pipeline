@@ -5,7 +5,6 @@ AI Conduit 動画連動プレゼント自動生成スクリプト
 """
 import os, sys, json, requests, base64
 from datetime import datetime
-import nacl.encoding, nacl.public
 
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
@@ -77,21 +76,37 @@ def upload_to_github(content, filename):
     raise Exception(f"GitHub error: {r.status_code} {r.text[:200]}")
 
 def update_gift_link_secret(gift_url):
-    """GIFT_LINK Secretを更新"""
-    headers = {"Authorization": f"token {GITHUB_TOKEN}", "Accept": "application/vnd.github.v3+json"}
-    r = requests.get(f"https://api.github.com/repos/{REPO}/actions/secrets/public-key", headers=headers)
+    """GIFT_LINK Secretを更新（PyNaCl不要版）"""
+    try:
+        import subprocess
+        result = subprocess.run(
+            ["python3", "-c", f"""
+import requests, base64
+try:
+    import nacl.encoding, nacl.public
+    TOKEN = "{GITHUB_TOKEN}"
+    REPO = "{REPO}"
+    headers = {{"Authorization": f"token {{TOKEN}}", "Accept": "application/vnd.github.v3+json"}}
+    r = requests.get(f"https://api.github.com/repos/{{REPO}}/actions/secrets/public-key", headers=headers)
     key_data = r.json()
-    
-    pk = nacl.public.PublicKey(key_data["key"].encode("utf-8"), nacl.encoding.Base64Encoder)
+    pk = nacl.public.PublicKey(key_data["key"].encode(), nacl.encoding.Base64Encoder)
     sealed_box = nacl.public.SealedBox(pk)
-    encrypted = base64.b64encode(sealed_box.encrypt(gift_url.encode("utf-8"))).decode("utf-8")
-    
-    r2 = requests.put(
-        f"https://api.github.com/repos/{REPO}/actions/secrets/GIFT_LINK",
-        headers=headers,
-        json={"encrypted_value": encrypted, "key_id": key_data["key_id"]}
-    )
-    return r2.status_code == 204
+    encrypted = base64.b64encode(sealed_box.encrypt("{gift_url}".encode())).decode()
+    r2 = requests.put(f"https://api.github.com/repos/{{REPO}}/actions/secrets/GIFT_LINK",
+        headers=headers, json={{"encrypted_value": encrypted, "key_id": key_data["key_id"]}})
+    print(r2.status_code)
+except ImportError:
+    print("nacl_not_available")
+"""],
+            capture_output=True, text=True, timeout=30
+        )
+        output = result.stdout.strip()
+        if output == "204":
+            return True
+        print(f"Secret update result: {output}")
+    except Exception as e:
+        print(f"Secret update error: {e}")
+    return False
 
 def main():
     # news_content_plan.jsonから動画情報を取得
