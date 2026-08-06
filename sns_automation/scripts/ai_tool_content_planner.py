@@ -143,6 +143,20 @@ CONTENT_SOURCES = [
      "category": "claude_code", "title_prefix": "AI会社OS構築術"},
     {"repo": "Samarth0211/awesome-claude-skills-2026", "file": "README.md",
      "category": "claude_code", "title_prefix": "2300スキル完全ガイド"},
+    # 並列開発・worktree
+    {"repo": "nekocode/agent-worktree", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Git worktreeで並列Agent開発"},
+    # NetworkChuck AI in Terminal（844★）
+    {"repo": "theNetworkChuck/ai-in-the-terminal", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "ターミナルでAI完全攻略"},
+    # CLAUDE.md系
+    {"repo": "josix/awesome-claude-md", "file": "README.md",
+     "category": "claude_code", "title_prefix": "CLAUDE.md厳選集544★"},
+    {"repo": "abhishekray07/claude-md-templates", "file": "README.md",
+     "category": "claude_code", "title_prefix": "CLAUDE.mdテンプレ完全版"},
+    # teambrilliant
+    {"repo": "teambrilliant/dev-skills", "file": "README.md",
+     "category": "claude_code", "title_prefix": "shape→plan→implement術"},
 ]
 
 # トピックテンプレート（カテゴリ別）
