@@ -285,8 +285,12 @@ def enforce_scene_limit(plan: dict, max_scenes: int = 5) -> dict:
                 new_scenes[-1] = {"scene_title": "CTA", "mood": "cta", "duration_sec": 3,
                                   "narration": "コメントにAIと書いてプレゼントゲット！",
                                   "visual_desc": "smartphone comment notification"}
-            script["scenes"] = new_scenes[:max_scenes]
-            script["total_duration_sec"] = sum(s.get("duration_sec", 4) for s in new_scenes[:max_scenes])
+            # 各シーンの秒数も強制調整（合計20秒以内）
+        dur_map = {"hook": 2, "value": 3, "impact": 3, "twist": 3, "cta": 2, "interrupt": 3, "why": 2, "fact_2": 3, "fact_3": 3}
+        for s in new_scenes[:max_scenes]:
+            s["duration_sec"] = dur_map.get(s.get("mood", "value"), 3)
+        script["scenes"] = new_scenes[:max_scenes]
+        script["total_duration_sec"] = sum(s.get("duration_sec", 3) for s in new_scenes[:max_scenes])
     except Exception as e:
         logger.warning(f"enforce_scene_limit error: {e}")
     return plan
