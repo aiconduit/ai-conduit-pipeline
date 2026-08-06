@@ -217,8 +217,11 @@ def main():
     print(f"📰 トピック: {title}")
     print(f"📝 シーン数: {len(scenes)}")
     
-    # カテゴリ自動判定
-    category = detect_category(title, narrations)
+    # カテゴリ自動判定（plan.jsonにcategoryがある場合はそれを使用）
+    category = plan.get("category") or detect_category(title, narrations)
+    if category not in CATEGORY_REPOS:
+        category = detect_category(title, narrations)
+    print(f"📊 カテゴリ: {category}")
     
     # プレゼントコンテンツ生成
     print("🤖 プレゼントコンテンツ生成中...")
