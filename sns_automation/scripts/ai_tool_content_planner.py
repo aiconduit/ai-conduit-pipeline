@@ -187,6 +187,27 @@ CONTENT_SOURCES = [
      "category": "claude_code", "title_prefix": "Claudeで作る最強Hub"},
     {"repo": "OneRedOak/claude-code-workflows", "file": "README.md",
      "category": "claude_code", "title_prefix": "実践ワークフロー3885★"},
+    # スキルテンプレート大量追加
+    {"repo": "feiskyer/claude-code-settings", "file": "README.md",
+     "category": "claude_code", "title_prefix": "スキル設定テンプレ1623★"},
+    {"repo": "ComposioHQ/awesome-claude-skills", "file": "README.md",
+     "category": "claude_code", "title_prefix": "公式Claudeスキル集"},
+    {"repo": "YYH211/Claude-meta-skill", "file": "README.md",
+     "category": "claude_code", "title_prefix": "再利用可能スキル274★"},
+    {"repo": "TerminalSkills/skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "オープンソーススキル122★"},
+    {"repo": "VoltAgent/awesome-agent-skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "Agentスキル241K文字29K★"},
+    {"repo": "jzOcb/writing-style-skill", "file": "SKILL.md",
+     "category": "claude_code", "title_prefix": "ライティングスキルSKILL.md"},
+    {"repo": "Rtur2003/Claude-Code-Promts-Skills", "file": "README.md",
+     "category": "claude_code", "title_prefix": "高品質プロンプトスキル集"},
+    {"repo": "skillmdcreator/skillmd-examples", "file": "README.md",
+     "category": "claude_code", "title_prefix": "SKILL.md実例集"},
+    {"repo": "fabricioctelles/skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "マルチAgent対応スキル集"},
+    {"repo": "FiveOhhWon/agent-skills", "file": "README.md",
+     "category": "claude_code", "title_prefix": "開発自動化スキル集"},
 ]
 
 # トピックテンプレート（カテゴリ別）
