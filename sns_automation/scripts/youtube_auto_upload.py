@@ -393,7 +393,7 @@ https://www.instagram.com/aiconduit/
         import time as _time
         ab_flag = int(_time.time()) % 2
         if ab_flag == 0:
-            thumb_buf = generate_thumbnail(hook_text, repo_name)
+            thumb_buf = generate_thumbnail(hook_text, repo_name, category=plan_data.get("category", ""))
             print("   サムネイルA（ダーク）使用")
         else:
             thumb_buf = generate_thumbnail_b(hook_text, repo_name)
