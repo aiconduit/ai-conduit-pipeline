@@ -237,11 +237,13 @@ def main():
             import random as _rand
             hook_patterns = [
                 f"【衝撃】{selected_title[:35]}",
-                f"【速報】{selected_title[:35]}",
                 f"知らないと損！{selected_title[:30]}",
                 f"エンジニア必見：{selected_title[:30]}",
-                f"【2026最新】{selected_title[:33]}",
-                f"今話題の{selected_title[:35]}",
+                f"【神機能】{selected_title[:33]}",
+                f"今すぐ試して！{selected_title[:30]}",
+                f"【完全解説】{selected_title[:31]}",
+                f"プロが使う{selected_title[:33]}",
+                f"これ知ってた？{selected_title[:30]}",
             ]
             title = _rand.choice(hook_patterns) + " #Shorts"
             if not selected_title:
@@ -286,14 +288,14 @@ def main():
     seo_tags = " ".join(rotating_tags[:10])
     description = f"""⚡ {title}
 
-このチャンネルでは毎日最新AIニュースを30秒で解説！
-エンジニア・IT学生・AI初学者に役立つ情報を毎日配信中🔥
+Claude Code・Codex・Gemini・Cursorなど最新AIコーディングツールの使い方を毎日配信！
+エンジニア・IT学生・AI初学者に役立つ実用テクニックを30秒で解説🔥
 
-🎁 無料プレゼント: AIプロンプト集・チートシート
-↓コメントに「AI」と書いてくれた方にDMでお届け！
+🎁 無料プレゼント: AIツールチートシート・プロンプト集
+↓コメントに「AI」と書いてくれた方にお届け！
 {gift_link}
 
-📱 フォローして毎日チェック！
+📱 チャンネル登録して毎日チェック！
 ━━━━━━━━━━━━━━━
 
 
