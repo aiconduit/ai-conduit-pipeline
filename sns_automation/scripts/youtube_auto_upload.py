@@ -208,6 +208,9 @@ def upload(youtube, video_file, title, description, tags):
     return response["id"]
 
 def main():
+    selected_title = ""
+    repo_name = ""
+    hashtags = ["#AI", "#AIニュース"]
     # news_content_plan.json（P2）またはcontent_plan.json（P1）からメタデータ取得
     try:
         # P2: news_content_plan.jsonを優先
