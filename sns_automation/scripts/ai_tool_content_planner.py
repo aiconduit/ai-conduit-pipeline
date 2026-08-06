@@ -26,6 +26,14 @@ CONTENT_SOURCES = [
      "category": "system_prompts", "title_prefix": "System Prompt"},
     {"repo": "jnMetaCode/ai-coding-guide", "file": "ecosystem.en.md",
      "category": "ai_ecosystem", "title_prefix": "AIエコシステム"},
+    {"repo": "jnMetaCode/ai-coding-guide", "file": "resources.en.md",
+     "category": "ai_tools", "title_prefix": "AIツールリソース"},
+    {"repo": "dontriskit/awesome-ai-system-prompts", "file": "README.md",
+     "category": "system_prompts", "title_prefix": "Systemプロンプト"},
+    {"repo": "jnMetaCode/ai-coding-guide", "file": "claude-code/README.en.md",
+     "category": "claude_code", "title_prefix": "Claude Code応用"},
+    {"repo": "jnMetaCode/ai-coding-guide", "file": "cheatsheet.en.md",
+     "category": "ai_tools", "title_prefix": "AIツール速攻比較"},
 ]
 
 # トピックテンプレート（カテゴリ別）
