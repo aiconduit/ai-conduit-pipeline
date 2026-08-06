@@ -221,6 +221,20 @@ CONTENT_SOURCES = [
      "category": "ai_tools", "title_prefix": "セキュリティスキルClaude/Codex"},
     {"repo": "feiskyer/codex-settings", "file": "README.md",
      "category": "codex", "title_prefix": "Codex設定テンプレート公式"},
+    # Codex専用（追加）
+    {"repo": "shanraisshan/codex-cli-best-practice", "file": "README.md",
+     "category": "codex", "title_prefix": "Codex CLIベストプラクティス30K"},
+    {"repo": "Yeachan-Heo/oh-my-codex", "file": "README.md",
+     "category": "codex", "title_prefix": "oh-my-codex入門"},
+    {"repo": "feiskyer/codex-settings", "file": "AGENTS.md",
+     "category": "codex", "title_prefix": "Codexエージェント設定"},
+    # Gemini CLI専用（追加）
+    {"repo": "Njengah/gemini-cli-cheat-sheet", "file": "README.md",
+     "category": "gemini", "title_prefix": "Gemini CLIレベル別攻略"},
+    {"repo": "jnMetaCode/ai-coding-guide", "file": "gemini-cli/README.md",
+     "category": "gemini", "title_prefix": "Gemini CLI実践ガイド"},
+    {"repo": "theNetworkChuck/ai-in-the-terminal", "file": "README.md",
+     "category": "gemini", "title_prefix": "Gemini+Claude+Codexターミナル"},
 ]
 
 # トピックテンプレート（カテゴリ別）
