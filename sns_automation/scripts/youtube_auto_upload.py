@@ -213,28 +213,17 @@ def main():
         # P2: news_content_plan.jsonを優先
         news_plan_path = "sns_automation/news_content_plan.json"
         if os.path.exists(news_plan_path):
-            with open(news_plan_path) as f:
-                news_plan = json.load(f)
-            plan_data = news_plan.get("plan", {})
-            if isinstance(plan_data, dict) and "plan" in plan_data:
-                plan_data = plan_data["plan"]
-            # selected_titleを複数のキーから取得
+            # news_content_plan.jsonから確実にselected_titleを取得
             selected_title = (
-                plan_data.get("selected_title") or
                 news_plan.get("selected_title") or
-                news_plan.get("plan", {}).get("selected_title") if isinstance(news_plan.get("plan"), dict) else None or
-                news_plan.get("news_item", {}).get("title") or
+                news_plan.get("plan", {}).get("selected_title") or
+                news_plan.get("plan", {}).get("script", {}).get("title") or
                 ""
             )
-            # さらに空の場合はscriptのtitleから取得
+            plan_data = news_plan.get("plan", news_plan) if isinstance(news_plan.get("plan"), dict) else news_plan
             if not selected_title:
-                script = plan_data.get("script", {})
-                selected_title = script.get("title", "") or script.get("topic", "")
-            hashtags = plan_data.get("hashtags", ["#AI", "#AIニュース"])
-            # 固定ハッシュタグ+トピック連動タグ
-            fixed_tags = ["AI", "AIニュース", "Shorts", "エンジニア", "プログラミング", "自動化", 
-                        "人工知能", "ChatGPT", "Claude", "テクノロジー", "副業", "生産性"]
-            topic_tags = [t.replace("#","") for t in hashtags if t.replace("#","") not in fixed_tags]
+                selected_title = plan_data.get("selected_title", "")
+            hashtags = plan_data.get("hashtags", news_plan.get("hashtags", ["#AI", "#AIニュース"]))
             tags = fixed_tags + topic_tags[:5]
             # フック型タイトル（クリック率最大化）
             import random as _rand
