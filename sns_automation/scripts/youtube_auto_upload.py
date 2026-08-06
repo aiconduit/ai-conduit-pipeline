@@ -216,6 +216,9 @@ def main():
         # P2: news_content_plan.jsonを優先
         news_plan_path = "sns_automation/news_content_plan.json"
         if os.path.exists(news_plan_path):
+            with open(news_plan_path) as f:
+                news_plan = json.load(f)
+            print(f"[DEBUG] keys: {list(news_plan.keys())[:5]}, selected_title: {str(news_plan.get('selected_title',''))[:40]}")
             # news_content_plan.jsonから確実にselected_titleを取得
             selected_title = (
                 news_plan.get("selected_title") or
