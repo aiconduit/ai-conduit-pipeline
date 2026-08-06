@@ -112,7 +112,7 @@ def generate_thumbnail(hook_text, repo_name="", category=""):
     buf.seek(0)
     return buf
 
-def generate_thumbnail_b(hook_text, repo_name=""):
+def generate_thumbnail_b(hook_text, repo_name="", category=""):
     """サムネイルBパターン: 白背景+黒テキスト（ColdFusion型）"""
     W, H = 1280, 720
     img = Image.new("RGB", (W, H), (245, 245, 240))
@@ -396,7 +396,7 @@ https://www.instagram.com/aiconduit/
             thumb_buf = generate_thumbnail(hook_text, repo_name, category=plan_data.get("category", ""))
             print("   サムネイルA（ダーク）使用")
         else:
-            thumb_buf = generate_thumbnail_b(hook_text, repo_name)
+            thumb_buf = generate_thumbnail_b(hook_text, repo_name, category=plan_data.get("category", ""))
             print("   サムネイルB（ライト）使用")
         upload_thumbnail(youtube, vid_id, thumb_buf)
         print("✅ サムネイル設定完了")
