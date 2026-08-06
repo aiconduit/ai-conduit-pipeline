@@ -53,6 +53,25 @@ CONTENT_SOURCES = [
      "category": "ai_tools", "title_prefix": "Agentベストプラクティス"},
     {"repo": "appcypher/awesome-mcp-servers", "file": "README.md",
      "category": "claude_code", "title_prefix": "MCPサーバー厳選"},
+    # Boris追加TIPSシリーズ
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-6-tips-16-apr-26.md",
+     "category": "claude_code", "title_prefix": "Opus4.7完全活用"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-2-tips-25-mar-26.md",
+     "category": "claude_code", "title_prefix": "Boris最新2Tips"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-power-ups.md",
+     "category": "claude_code", "title_prefix": "Claude Codeパワーアップ"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-memory.md",
+     "category": "claude_code", "title_prefix": "Claude Codeメモリ設定"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-skills.md",
+     "category": "claude_code", "title_prefix": "Claude Codeスキル作成"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-cli-startup-flags.md",
+     "category": "claude_code", "title_prefix": "Claude Code起動フラグ"},
+    # agents-best-practices
+    {"repo": "DenisSergeevitch/agents-best-practices", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "Agentベストプラクティス"},
+    # MCP servers awesome list
+    {"repo": "wong2/awesome-mcp-servers", "file": "README.md",
+     "category": "claude_code", "title_prefix": "MCPサーバー活用"},
 ]
 
 # トピックテンプレート（カテゴリ別）
