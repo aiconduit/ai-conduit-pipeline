@@ -208,6 +208,19 @@ CONTENT_SOURCES = [
      "category": "ai_tools", "title_prefix": "マルチAgent対応スキル集"},
     {"repo": "FiveOhhWon/agent-skills", "file": "README.md",
      "category": "claude_code", "title_prefix": "開発自動化スキル集"},
+    # Codex・Gemini・Claude全対応スキル
+    {"repo": "SlavaSexton/ComfyUI-Agent-Kit", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "全AIツール対応スキルKit"},
+    {"repo": "lencx/skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "暗黙知をスキル化110★"},
+    {"repo": "minipuft/claude-prompts-mcp", "file": "README.md",
+     "category": "claude_code", "title_prefix": "MCPプロンプトテンプレ"},
+    {"repo": "EthanYoQ/Skill-hub", "file": "README.en.md",
+     "category": "ai_tools", "title_prefix": "Codex/Claude統合スキルHub"},
+    {"repo": "dweinstein/mobile-security-skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "セキュリティスキルClaude/Codex"},
+    {"repo": "feiskyer/codex-settings", "file": "README.md",
+     "category": "codex", "title_prefix": "Codex設定テンプレート公式"},
 ]
 
 # トピックテンプレート（カテゴリ別）
