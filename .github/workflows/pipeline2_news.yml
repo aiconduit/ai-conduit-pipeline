@@ -31,7 +31,7 @@ jobs:
         run: ls assets/sfx/ || echo "SFXディレクトリなし"
 
       - name: キャッシュクリア
-        run: rm -rf assets/pexels_cache/playwright_kenburns_*.mp4 || true
+        run: rm -rf assets/pexels_cache/playwright_kenburns_*.mp4 sns_automation/news_content_plan*.json || true
 
       - name: Step 1 - ニュース収集
         run: python3 sns_automation/scripts/research_collector.py
