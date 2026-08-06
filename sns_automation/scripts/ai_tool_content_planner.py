@@ -238,6 +238,17 @@ CONTENT_SOURCES = [
     # Gemini CLI専用（追加）
     {"repo": "dtunai/awesome-gemini-cli", "file": "README.md",
      "category": "gemini", "title_prefix": "awesome-gemini-cli完全版27K"},
+    # Cursor・追加
+    {"repo": "thehimel/cursor-rules-and-prompts", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "Cursorルール&プロンプト246★"},
+    {"repo": "faizkhairi/claude-code-blueprint", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claude Codeブループリント62★"},
+    {"repo": "thegoo/ai-agent-cheatsheet", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "AIエージェント設定ファイル早見表"},
+    {"repo": "dtunai/awesome-gemini-cli", "file": "mcp-servers/README.md",
+     "category": "gemini", "title_prefix": "Gemini CLI MCPサーバー集"},
+    {"repo": "shanraisshan/codex-cli-best-practice", "file": "CLAUDE.md",
+     "category": "codex", "title_prefix": "Codex+Claude連携設定術"},
 ]
 
 # トピックテンプレート（カテゴリ別）
