@@ -301,13 +301,17 @@ def generate_script(source, raw_content):
 ## 参考にするGitHubコンテンツ（{source["repo"]}）
 {key_content}
 
-## 制作ルール
+## 制作ルール（トップクリエイターの法則を全適用）
 1. 上記のGitHubコンテンツの中から「視聴者が今すぐ試したい」と思う1つのTIPSを選ぶ
 2. 具体的なコマンド・数字・手順を含める（「例：claude codeで/review」等）
 3. narrationは各シーン15〜20文字。短くテンポよく。
-4. total_duration_secは18以下
+4. total_duration_secは18以下（Jenny Hoyos法則: 短いほどループ再生される）
 5. カテゴリ: {source["category"]}
 6. 動画末尾でGitHubリポジトリ（{source["repo"]}）を紹介してプレゼントとして配布
+7. selected_titleには必ず数字を入れる（「5倍」「10分」「3ステップ」等）
+8. HookシーンはCuriosity Gap（情報の空白）を作る（「え、まじ？」「知らないと損！」等）
+9. 5秒地点（scene2）と12秒地点（scene3）にマイクロクリフハンガーを仕込む
+10. 音なしでもnarrationだけで内容が伝わること
 
 以下のJSON形式のみで返してください（全フィールド必ず日本語で記述。英語タイトル・英語narration禁止）:
 {{

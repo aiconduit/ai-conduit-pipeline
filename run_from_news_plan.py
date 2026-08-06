@@ -387,6 +387,16 @@ else:
     shutil.copy(raw_output, final_output)
 
 total = probe_dur(final_output)
+# Jenny Hoyos法則: 最後0.5秒をトリム（リテンション+5%効果）
+if total > 5:
+    trimmed = final_output.replace(".mp4", "_trimmed.mp4")
+    _run(["ffmpeg", "-y", "-i", final_output,
+          "-t", str(round(total - 0.5, 2)),
+          "-c:v", "libx264", "-c:a", "aac", "-pix_fmt", "yuv420p", trimmed])
+    if os.path.exists(trimmed) and os.path.getsize(trimmed) > 100000:
+        import shutil; shutil.move(trimmed, final_output)
+        total = probe_dur(final_output)
+        print(f"   ✂️ 最後0.5秒トリム完了（Jenny Hoyos法則）")
 print(f"\n✅ 完成: {final_output} ({total:.1f}s)")
 print(f"   特徴: news_content_plan / BGM ミックス / 固定5シーン / ループ構造")
 
