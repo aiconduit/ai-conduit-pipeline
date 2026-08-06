@@ -78,7 +78,16 @@ def upload_video_to_x(video_path):
     import time as _time
     UPLOAD_URL = "https://upload.twitter.com/1.1/media/upload.json"
     file_size = os.path.getsize(video_path)
-    headers_no_ct = {k: v for k, v in get_headers().items() if k != "Content-Type"}
+    _h = {
+        "authorization": f"Bearer {BEARER_TOKEN}",
+        "x-csrf-token": X_CT0,
+        "x-twitter-auth-type": "OAuth2Session",
+        "x-twitter-active-user": "yes",
+        "Cookie": f"auth_token={X_AUTH_TOKEN}; ct0={X_CT0}; twid={X_TWID}",
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+        "Referer": "https://x.com/", "Origin": "https://x.com",
+    }
+    headers_no_ct = _h
 
     r = requests.post(UPLOAD_URL, headers=headers_no_ct, data={
         "command": "INIT", "total_bytes": file_size,
