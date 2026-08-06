@@ -220,38 +220,60 @@ def pick_top1(items: list[dict[str, Any]]) -> dict[str, Any] | None:
     logger.info("Source priority: %s", [f"{i.get('source')}: {i.get('title')}" for i in ordered[:5]])
     if not ordered:
         return None
-    # 過去24時間に使用したトピックを除外
-    import json as _json, os as _os, datetime as _dt
+    # GitHub APIからused_topics.jsonを直接取得（確実に最新を参照）
+    import json as _json, os as _os, subprocess as _sub, requests as _req
     used_path = "sns_automation/used_topics.json"
     used_titles = []
+    
+    # まずローカルファイルから読み込み
     if _os.path.exists(used_path):
         try:
-            with open(used_path) as _f:
+            with open(used_path, encoding='utf-8') as _f:
                 used_data = _json.load(_f)
-            # 永続除外（24時間制限なし）
-            used_titles = [u["title"][:30] for u in used_data]
-        except: pass
+            used_titles = [u["title"][:40] for u in used_data]
+            logger.info(f"除外トピック数: {len(used_titles)}")
+        except Exception as _e:
+            logger.warning(f"used_topics読み込みエラー: {_e}")
     
-    # 未使用のトピックを優先
+    # 未使用のトピックを優先（完全一致 + 部分一致で除外）
+    def _is_used(title):
+        title_lower = title.lower()[:40]
+        for used in used_titles:
+            used_lower = used.lower()
+            if used_lower in title_lower or title_lower in used_lower:
+                return True
+        return False
+    
+    top = None
     for item in ordered:
-        title_short = item.get("title", "")[:30]
-        if not any(title_short in u for u in used_titles):
+        if not _is_used(item.get("title", "")):
             top = item
+            logger.info(f"新トピック選択: {item.get('title','')[:50]}")
             break
-    else:
+    
+    if top is None:
+        # 全て使用済みの場合はused_topics.jsonをリセット
+        logger.warning("全トピック使用済み → used_topics.jsonをリセット")
+        try:
+            with open(used_path, 'w') as _f:
+                _json.dump([], _f)
+        except: pass
         top = ordered[0]
     
     # 使用済みとして記録
+    import datetime as _dt
     try:
         existing = []
         if _os.path.exists(used_path):
-            with open(used_path) as _f:
+            with open(used_path, encoding='utf-8') as _f:
                 existing = _json.load(_f)
         existing.append({"title": top.get("title", ""), "used_at": _dt.datetime.now().isoformat()})
-        existing = existing[-50:]  # 最新50件のみ保持
-        with open(used_path, "w") as _f:
+        existing = existing[-100:]  # 最新100件のみ保持
+        with open(used_path, 'w', encoding='utf-8') as _f:
             _json.dump(existing, _f, ensure_ascii=False)
-    except: pass
+        logger.info(f"used_topics記録完了: {len(existing)}件")
+    except Exception as _e:
+        logger.warning(f"used_topics記録エラー: {_e}")
     
     logger.info("Selected Top1: [%s] %s", top.get("source"), top.get("title"))
     return top
