@@ -81,6 +81,31 @@ CONTENT_SOURCES = [
      "category": "claude_code", "title_prefix": "コードレビュー術"},
     {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-settings.md",
      "category": "claude_code", "title_prefix": "Claude Code設定完全版"},
+    # OneRedOak実践ワークフロー
+    {"repo": "OneRedOak/claude-code-workflows", "file": "README.md",
+     "category": "claude_code", "title_prefix": "AI-nativeスタートアップ術"},
+    # Codex・英語チュートリアル（AI-Code-Tutorials英語版）
+    {"repo": "0xfnzero/AI-Code-Tutorials", "file": "tutorials/en/11-practical-tips.md",
+     "category": "claude_code", "title_prefix": "Claude Code実用テク34選"},
+    {"repo": "0xfnzero/AI-Code-Tutorials", "file": "tutorials/en/16-openai-codex-basics.md",
+     "category": "codex", "title_prefix": "Codex CLI入門"},
+    {"repo": "0xfnzero/AI-Code-Tutorials", "file": "tutorials/en/13-mcp-servers-guide.md",
+     "category": "claude_code", "title_prefix": "MCPサーバー完全ガイド"},
+    {"repo": "0xfnzero/AI-Code-Tutorials", "file": "tutorials/en/12-best-practices.md",
+     "category": "claude_code", "title_prefix": "Claude Codeベストプラクティス"},
+    {"repo": "0xfnzero/AI-Code-Tutorials", "file": "tutorials/en/08-advanced-applications.md",
+     "category": "claude_code", "title_prefix": "Claude Code高度活用"},
+    # チートシート・CTO toolkit
+    {"repo": "jmutai/claude-code-cheat-sheet", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claude Codeチートシート"},
+    {"repo": "camilooscargbaptista/cto-toolkit", "file": "README.md",
+     "category": "claude_code", "title_prefix": "CTO向けClaude Code"},
+    # awesome-claude-code-hooks
+    {"repo": "ithiria894/awesome-claude-code-hooks", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claude Codeフック自動化"},
+    # drona23/claude-token-efficient
+    {"repo": "drona23/claude-token-efficient", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claudeトークン節約術"},
 ]
 
 # トピックテンプレート（カテゴリ別）
