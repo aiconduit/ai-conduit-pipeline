@@ -223,8 +223,8 @@ def pick_top1(items: list[dict[str, Any]]) -> dict[str, Any] | None:
         try:
             with open(used_path) as _f:
                 used_data = _json.load(_f)
-            cutoff = (_dt.datetime.now() - _dt.timedelta(hours=24)).isoformat()
-            used_titles = [u["title"][:30] for u in used_data if u.get("used_at", "") > cutoff]
+            # 永続除外（24時間制限なし）
+            used_titles = [u["title"][:30] for u in used_data]
         except: pass
     
     for item in ordered:
