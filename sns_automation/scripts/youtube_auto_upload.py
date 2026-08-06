@@ -220,16 +220,18 @@ def main():
                 news_plan = json.load(f)
             print(f"[DEBUG] keys: {list(news_plan.keys())[:5]}, selected_title: {str(news_plan.get('selected_title',''))[:40]}")
             # news_content_plan.jsonから確実にselected_titleを取得
+            plan_data = news_plan.get("plan", news_plan) if isinstance(news_plan.get("plan"), dict) else news_plan
             selected_title = (
+                plan_data.get("selected_title") or
                 news_plan.get("selected_title") or
-                news_plan.get("plan", {}).get("selected_title") or
-                news_plan.get("plan", {}).get("script", {}).get("title") or
+                plan_data.get("script", {}).get("title") or
                 ""
             )
-            plan_data = news_plan.get("plan", news_plan) if isinstance(news_plan.get("plan"), dict) else news_plan
-            if not selected_title:
-                selected_title = plan_data.get("selected_title", "")
+            print(f"[DEBUG] plan keys: {list(plan_data.keys())[:5]}, selected_title: {selected_title[:40]}")
             hashtags = plan_data.get("hashtags", news_plan.get("hashtags", ["#AI", "#AIニュース"]))
+            fixed_tags = ["AI", "AIニュース", "Shorts", "エンジニア", "プログラミング", "自動化",
+                         "人工知能", "ChatGPT", "Claude", "テクノロジー", "副業", "生産性"]
+            topic_tags = [t.replace("#","") for t in hashtags if t.replace("#","") not in fixed_tags]
             tags = fixed_tags + topic_tags[:5]
             # フック型タイトル（クリック率最大化）
             import random as _rand
