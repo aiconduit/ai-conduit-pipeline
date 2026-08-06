@@ -132,6 +132,17 @@ CONTENT_SOURCES = [
     # launch-swarm: 4時間で40時間の成果（超バズ候補）
     {"repo": "harshmoney123/launch-swarm", "file": "README.md",
      "category": "claude_code", "title_prefix": "6Agentで40時間分の成果"},
+    # 超大型・高品質追加
+    {"repo": "hesreallyhim/awesome-claude-code", "file": "README.md",
+     "category": "claude_code", "title_prefix": "awesome-claude-code完全版"},
+    {"repo": "AlexandrG539/claude-code-setup-guide", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claude Code設定ガイド2026"},
+    {"repo": "centminmod/my-claude-code-setup", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claude Codeスターター設定"},
+    {"repo": "Workflowsio/company-os-starter-kit", "file": "README.md",
+     "category": "claude_code", "title_prefix": "AI会社OS構築術"},
+    {"repo": "Samarth0211/awesome-claude-skills-2026", "file": "README.md",
+     "category": "claude_code", "title_prefix": "2300スキル完全ガイド"},
 ]
 
 # トピックテンプレート（カテゴリ別）
