@@ -12,6 +12,22 @@ REPO = "aiconduit/ai-conduit-pipeline"
 
 # カテゴリ別GitHubリポジトリ（高スター数・高品質）
 CATEGORY_REPOS = {
+    "claude_code": {
+        "keywords": ["claude code", "claude", "anthropic", "mcp", "hook", "subagent", "claude_code", "ai coding"],
+        "repos": [
+            ("jnMetaCode/ai-coding-guide", "claude-code/README.en.md"),
+            ("jnMetaCode/ai-coding-guide", "cheatsheet.en.md"),
+        ],
+        "prompt_hint": "Claude Code・AIコーディング・MCP・チートシート"
+    },
+    "ai_tools": {
+        "keywords": ["codex", "cursor", "gemini", "copilot", "vibe coding", "ai tool", "coding", "terminal", "cli"],
+        "repos": [
+            ("jnMetaCode/ai-coding-guide", "cheatsheet.en.md"),
+            ("jnMetaCode/ai-coding-guide", "ecosystem.en.md"),
+        ],
+        "prompt_hint": "AIコーディングツール比較・Codex/Cursor/Gemini活用術"
+    },
     "webdesign": {
         "keywords": ["design", "ui", "ux", "css", "frontend", "web", "figma", "tailwind", "aesthetic", "visual"],
         "repos": [

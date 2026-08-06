@@ -1,82 +1,54 @@
 {
-  "generated_at": "2026-07-31T12:43:14.491044+00:00",
-  "source": "news_hn_hf_mit_trends_daily",
-  "news_item": {
-    "title": "Advancing the price-performance frontier with GPT‑5.6",
-    "url": "https://openai.com/index/advancing-the-price-performance-frontier-with-gpt-5-6/",
-    "source": "hackernews",
-    "score": 586
+  "selected_title": "AIコーディング4連携で開発爆速！",
+  "category": "ai_ecosystem",
+  "source_repo": "jnMetaCode/ai-coding-guide",
+  "hashtags": [
+    "#AI",
+    "#ClaudeCode",
+    "#エンジニア",
+    "#プログラミング",
+    "#AIツール"
+  ],
+  "script": {
+    "title": "AIコーディング4連携で開発爆速！",
+    "total_duration_sec": 18,
+    "scenes": [
+      {
+        "scene_title": "Hook",
+        "mood": "hook",
+        "duration_sec": 3,
+        "narration": "AI開発、1つだけじゃ足りない！",
+        "visual_desc": "terminal screen coding"
+      },
+      {
+        "scene_title": "Tip",
+        "mood": "value",
+        "duration_sec": 4,
+        "narration": "superpowersで要件分析を注入",
+        "visual_desc": "code editor screen"
+      },
+      {
+        "scene_title": "Demo",
+        "mood": "impact",
+        "duration_sec": 4,
+        "narration": "エージェント起動で実装が爆速化",
+        "visual_desc": "developer working fast"
+      },
+      {
+        "scene_title": "Twist",
+        "mood": "twist",
+        "duration_sec": 4,
+        "narration": "オーケストレーターが全業務自動化",
+        "visual_desc": "ai assistant coding"
+      },
+      {
+        "scene_title": "CTA",
+        "mood": "cta",
+        "duration_sec": 3,
+        "narration": "コメントにAIと書いてプレゼントゲット！",
+        "visual_desc": "smartphone comment notification"
+      }
+    ]
   },
-  "plan": {
-    "selected_title": "Advancing the price-performance frontier with GPT‑5.6",
-    "source": "hackernews",
-    "reason": "GPT-5.6の発表は速報性が高く、性能向上とコスト削減というエンジニアに直結する事実を短い動画で伝えられるため。",
-    "hashtags": [
-      "#GPT5",
-      "#AI",
-      "#OpenAI",
-      "#自動化",
-      "#効率化",
-      "#AIニュース",
-      "#エンジニア"
-    ],
-    "tags": [
-      "ai news",
-      "gpt-5.6",
-      "openai",
-      "llm",
-      "artificial intelligence",
-      "machine learning",
-      "tech news",
-      "ai automation",
-      "AIツール",
-      "AI動画",
-      "自動化",
-      "効率化",
-      "最新AI",
-      "AIニュース"
-    ],
-    "target_audience": "日本のエンジニア（学生〜現役〜フリーランス）",
-    "script": {
-      "total_duration_sec": 38,
-      "scenes": [
-        {
-          "scene_title": "Hook",
-          "duration_sec": 4,
-          "narration": "GPT-5.6発表!",
-          "visual_1": "breaking news alert",
-          "visual_2": "OpenAI logo animation"
-        },
-        {
-          "scene_title": "Fact_1",
-          "duration_sec": 8,
-          "narration": "性能は大幅向上",
-          "visual_1": "AI model performance graph",
-          "visual_2": "speedometer fast motion"
-        },
-        {
-          "scene_title": "Fact_2",
-          "duration_sec": 8,
-          "narration": "コストは劇的低下",
-          "visual_1": "cost reduction chart",
-          "visual_2": "falling coins animation"
-        },
-        {
-          "scene_title": "Twist",
-          "duration_sec": 8,
-          "narration": "開発が加速する",
-          "visual_1": "developer coding fast",
-          "visual_2": "automation pipeline"
-        },
-        {
-          "scene_title": "CTA",
-          "duration_sec": 6,
-          "narration": "詳細はAI Conduitで",
-          "visual_1": "AI Conduit logo",
-          "visual_2": "subscribe button animation"
-        }
-      ]
-    }
-  },
-  "review_issues": []
+  "gift_content": "AI開発の4プロジェクト連携ガイド（日本語版）。インストールから組み合わせまで完全図解。"
 }
