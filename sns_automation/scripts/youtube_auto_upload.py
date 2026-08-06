@@ -321,7 +321,7 @@ https://www.instagram.com/aiconduit/
     print(f"✅ https://youtube.com/shorts/{vid_id}")
 
     # サムネイル生成・アップロード
-    hook_text = topic.get("hook", title.replace("【AI】","").replace("#Shorts","").strip())
+    hook_text = selected_title[:30] if selected_title else title.replace("【AI】","").replace("#Shorts","").strip()
     try:
         # A/Bテスト: run番号の奇偶でA/Bを切り替え
         import time as _time
