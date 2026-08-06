@@ -218,7 +218,18 @@ def main():
             plan_data = news_plan.get("plan", {})
             if isinstance(plan_data, dict) and "plan" in plan_data:
                 plan_data = plan_data["plan"]
-            selected_title = plan_data.get("selected_title", "") or news_plan.get("news_item", {}).get("title", "")
+            # selected_titleを複数のキーから取得
+            selected_title = (
+                plan_data.get("selected_title") or
+                news_plan.get("selected_title") or
+                news_plan.get("plan", {}).get("selected_title") if isinstance(news_plan.get("plan"), dict) else None or
+                news_plan.get("news_item", {}).get("title") or
+                ""
+            )
+            # さらに空の場合はscriptのtitleから取得
+            if not selected_title:
+                script = plan_data.get("script", {})
+                selected_title = script.get("title", "") or script.get("topic", "")
             hashtags = plan_data.get("hashtags", ["#AI", "#AIニュース"])
             # 固定ハッシュタグ+トピック連動タグ
             fixed_tags = ["AI", "AIニュース", "Shorts", "エンジニア", "プログラミング", "自動化", 

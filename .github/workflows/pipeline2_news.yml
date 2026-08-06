@@ -74,6 +74,18 @@ jobs:
           python3 sns_automation/scripts/gift_generator.py sns_automation/news_content_plan.json || echo "⚠️ プレゼント生成スキップ"
         continue-on-error: true
 
+      - name: Step 4.3 - YouTubeチャンネル最適化（週1回）
+        env:
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          DAY=$(date +%u)
+          if [ "$DAY" = "1" ]; then
+            python3 sns_automation/scripts/youtube_channel_optimize.py || echo "チャンネル最適化スキップ"
+          fi
+        continue-on-error: true
+
       - name: Step 4.5 - used_topics.json更新をコミット
         run: |
           git config user.email "actions@github.com"
