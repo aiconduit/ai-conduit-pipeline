@@ -126,6 +126,12 @@ CONTENT_SOURCES = [
     # wshobson/agentsの詳細ドキュメント
     {"repo": "wshobson/agents", "file": "docs/harnesses.md",
      "category": "ai_tools", "title_prefix": "5ツール統合Agent術"},
+    # Gemini CLIチートシート（115★）
+    {"repo": "Njengah/gemini-cli-cheat-sheet", "file": "README.md",
+     "category": "gemini", "title_prefix": "Gemini CLIチートシート"},
+    # launch-swarm: 4時間で40時間の成果（超バズ候補）
+    {"repo": "harshmoney123/launch-swarm", "file": "README.md",
+     "category": "claude_code", "title_prefix": "6Agentで40時間分の成果"},
 ]
 
 # トピックテンプレート（カテゴリ別）
