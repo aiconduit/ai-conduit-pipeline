@@ -249,6 +249,8 @@ def main():
             hook_text = selected_title[:30] if selected_title else "AI速報"
             repo_name = plan_data.get("repo_name", "")
             topic = {"hook": hook_text, "hashtags": hashtags, "repo_name": repo_name}
+            hook = hook_text
+            topic_text = selected_title[:20] if selected_title else "AIツール"
         else:
             with open("sns_automation/content_plan.json") as f:
                 plan = json.load(f)
