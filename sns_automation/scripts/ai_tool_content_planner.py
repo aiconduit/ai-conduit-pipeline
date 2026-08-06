@@ -117,6 +117,15 @@ CONTENT_SOURCES = [
     # Awesome LLM Skills
     {"repo": "Prat011/awesome-llm-skills", "file": "README.md",
      "category": "ai_tools", "title_prefix": "LLMスキル厳選リスト"},
+    # 日本語版リソース（最高品質）
+    {"repo": "Yeachan-Heo/oh-my-claudecode", "file": "README.ja.md",
+     "category": "claude_code", "title_prefix": "OMC日本語・学習コストゼロ"},
+    # oh-my-codex（Codex版）
+    {"repo": "Yeachan-Heo/oh-my-codex", "file": "README.md",
+     "category": "codex", "title_prefix": "oh-my-codex入門"},
+    # wshobson/agentsの詳細ドキュメント
+    {"repo": "wshobson/agents", "file": "docs/harnesses.md",
+     "category": "ai_tools", "title_prefix": "5ツール統合Agent術"},
 ]
 
 # トピックテンプレート（カテゴリ別）
