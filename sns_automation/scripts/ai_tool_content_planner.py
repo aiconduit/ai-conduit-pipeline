@@ -34,6 +34,25 @@ CONTENT_SOURCES = [
      "category": "claude_code", "title_prefix": "Claude Code応用"},
     {"repo": "jnMetaCode/ai-coding-guide", "file": "cheatsheet.en.md",
      "category": "ai_tools", "title_prefix": "AIツール速攻比較"},
+    # Boris Cherny (Claude Code作者) の公式TIPS集（64K★）
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-15-tips-30-mar-26.md",
+     "category": "claude_code", "title_prefix": "Boris直伝15Tips"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-13-tips-03-jan-26.md",
+     "category": "claude_code", "title_prefix": "Boris直伝13Tips"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-12-tips-12-feb-26.md",
+     "category": "claude_code", "title_prefix": "Boris直伝12Tips"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-10-tips-01-feb-26.md",
+     "category": "claude_code", "title_prefix": "Boris直伝10Tips"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-commands.md",
+     "category": "claude_code", "title_prefix": "Claude Codeコマンド"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-mcp.md",
+     "category": "claude_code", "title_prefix": "Claude MCP活用"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "CLAUDE.md",
+     "category": "claude_code", "title_prefix": "CLAUDE.md設定術"},
+    {"repo": "DenisSergeevitch/agents-best-practices", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "Agentベストプラクティス"},
+    {"repo": "appcypher/awesome-mcp-servers", "file": "README.md",
+     "category": "claude_code", "title_prefix": "MCPサーバー厳選"},
 ]
 
 # トピックテンプレート（カテゴリ別）
