@@ -157,6 +157,15 @@ CONTENT_SOURCES = [
     # teambrilliant
     {"repo": "teambrilliant/dev-skills", "file": "README.md",
      "category": "claude_code", "title_prefix": "shape→plan→implement術"},
+    # 高品質追加
+    {"repo": "DataTalksClub/ai-dev-tools-zoomcamp", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "AIツール無料コース1193★"},
+    {"repo": "punkpeye/awesome-mcp-devtools", "file": "README.md",
+     "category": "claude_code", "title_prefix": "MCP開発ツール厳選"},
+    {"repo": "abbosaliboev/free-ai-bible", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "無料AIツール完全聖書"},
+    {"repo": "Caplet1989/Brokies-AI-Foundry", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "無料AIツールTop選"},
 ]
 
 # トピックテンプレート（カテゴリ別）
