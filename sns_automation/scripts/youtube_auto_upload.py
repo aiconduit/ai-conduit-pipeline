@@ -229,8 +229,9 @@ def main():
             )
             print(f"[DEBUG] plan keys: {list(plan_data.keys())[:5]}, selected_title: {selected_title[:40]}")
             hashtags = plan_data.get("hashtags", news_plan.get("hashtags", ["#AI", "#AIニュース"]))
-            fixed_tags = ["AI", "AIニュース", "Shorts", "エンジニア", "プログラミング", "自動化",
-                         "人工知能", "ChatGPT", "Claude", "テクノロジー", "副業", "生産性"]
+            fixed_tags = ["AI", "ClaudeCode", "Shorts", "エンジニア", "プログラミング", "自動化",
+                         "Claude", "Gemini", "Cursor", "Codex", "AIツール", "生産性",
+                         "バイブコーディング", "MCP", "AIコーディング", "副業"]
             topic_tags = [t.replace("#","") for t in hashtags if t.replace("#","") not in fixed_tags]
             tags = fixed_tags + topic_tags[:5]
             # フック型タイトル（クリック率最大化）
