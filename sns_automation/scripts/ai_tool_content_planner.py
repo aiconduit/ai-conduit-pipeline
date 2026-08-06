@@ -72,6 +72,15 @@ CONTENT_SOURCES = [
     # MCP servers awesome list
     {"repo": "wong2/awesome-mcp-servers", "file": "README.md",
      "category": "claude_code", "title_prefix": "MCPサーバー活用"},
+    # ワークフロー・エージェント系（新規）
+    {"repo": "ithiria894/awesome-claude-code-workflows", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claudeワークフロー"},
+    {"repo": "0xfnzero/AI-Code-Tutorials", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "AIコーディング入門"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-2-tips-10-mar-26.md",
+     "category": "claude_code", "title_prefix": "コードレビュー術"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-settings.md",
+     "category": "claude_code", "title_prefix": "Claude Code設定完全版"},
 ]
 
 # トピックテンプレート（カテゴリ別）
