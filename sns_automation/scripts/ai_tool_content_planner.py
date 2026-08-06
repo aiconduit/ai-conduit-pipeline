@@ -106,6 +106,17 @@ CONTENT_SOURCES = [
     # drona23/claude-token-efficient
     {"repo": "drona23/claude-token-efficient", "file": "README.md",
      "category": "claude_code", "title_prefix": "Claudeトークン節約術"},
+    # 超大型リポジトリ（38K★）
+    {"repo": "wshobson/agents", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "94プラグイン203エージェント"},
+    {"repo": "Yeachan-Heo/oh-my-claudecode", "file": "README.md",
+     "category": "claude_code", "title_prefix": "チーム向けマルチAgent"},
+    # Codex CLI best practice（shanraisshan同作者）
+    {"repo": "shanraisshan/codex-cli-best-practice", "file": "README.md",
+     "category": "codex", "title_prefix": "Codex CLIベストプラクティス"},
+    # Awesome LLM Skills
+    {"repo": "Prat011/awesome-llm-skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "LLMスキル厳選リスト"},
 ]
 
 # トピックテンプレート（カテゴリ別）
