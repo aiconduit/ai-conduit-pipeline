@@ -80,7 +80,7 @@ BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテン�
 日本のエンジニア向けAIニュースショート動画(28〜35秒)のスクリプトを生成してください。
 
 ## 最重要ルール
-1. narrationは1シーン30〜55文字の完全な日本語文章で書くこと(短すぎるのは絶対NG)
+1. narrationは1シーン15〜22文字。短くテンポよく。数字必須
 2. 必ず具体的な数字・%・倍・円・ドルを最低3回以上含めること
 3. 抽象的な表現(「大幅向上」「劇的改善」)は禁止 → 必ず数値で示す
 4. 各シーンのvisual_descはニュース内容と一致する具体的な英語クエリ
@@ -93,7 +93,8 @@ BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテン�
 ## スクリプト仕様
 {style}
 
-## シーン構成(合計35〜45秒、10シーン)
+## シーン構成（合計20〜28秒・7シーン・必ず28秒以内）
+【重要】total_duration_secは必ず25以下。
 1. Hook(3秒): 数字を含む衝撃的な一文
 2. Why(3秒): なぜ重要か(金額・規模感)
 3. Fact_1(4秒): 具体的数字付き事実その1
@@ -113,55 +114,55 @@ BRAND_PROMPT_TEMPLATE = """あなたは「AI Conduit」のプロSNSコンテン�
   "tags": ["ai news", ...10〜15個の英日タグ],
   "target_audience": "ターゲット視聴者層",
   "script": {{
-    "total_duration_sec": 30,
+    "total_duration_sec": 25,
     "scenes": [
       {{
         "scene_title": "Hook",
         "mood": "hook",
         "duration_sec": 3,
-        "narration": "(30〜55文字の完全な文章。必ず数字を含む)",
+        "narration": "(15〜22文字・数字必須)",
         "visual_desc": "(英語、ニュース内容に合ったB-roll検索クエリ)"
       }},
       {{
         "scene_title": "Why",
         "mood": "why",
         "duration_sec": 3,
-        "narration": "(30〜55文字。金額・規模感を含む)",
+        "narration": "(15〜22文字・金額規模)",
         "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Fact_1",
         "mood": "value",
         "duration_sec": 4,
-        "narration": "(30〜55文字。具体的な数字・%・倍を含む)",
+        "narration": "(15〜22文字・数字%倍)",
         "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Fact_2",
         "mood": "fact_2",
         "duration_sec": 4,
-        "narration": "(30〜55文字。具体的な数字・%・倍を含む)",
+        "narration": "(15〜22文字・数字%倍)",
         "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Fact_3",
         "mood": "fact_3",
         "duration_sec": 4,
-        "narration": "(30〜55文字。具体的な数字・%・倍を含む)",
+        "narration": "(15〜22文字・数字%倍)",
         "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Impact",
         "mood": "impact",
         "duration_sec": 4,
-        "narration": "(30〜55文字。業界・社会への具体的影響)",
+        "narration": "(15〜22文字・業界影響)",
         "visual_desc": "(英語)"
       }},
       {{
         "scene_title": "Twist",
         "mood": "twist",
         "duration_sec": 5,
-        "narration": "(30〜55文字。驚き・逆転・クリフハンガー)",
+        "narration": "(15〜22文字・驚き逆転)",
         "visual_desc": "(英語)"
       }},
       {{

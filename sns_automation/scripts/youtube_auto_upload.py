@@ -221,10 +221,23 @@ def main():
             selected_title = plan_data.get("selected_title", "") or news_plan.get("news_item", {}).get("title", "")
             hashtags = plan_data.get("hashtags", ["#AI", "#AIニュース"])
             # 固定ハッシュタグ+トピック連動タグ
-            fixed_tags = ["AI", "AIニュース", "Shorts", "エンジニア", "プログラミング", "自動化"]
+            fixed_tags = ["AI", "AIニュース", "Shorts", "エンジニア", "プログラミング", "自動化", 
+                        "人工知能", "ChatGPT", "Claude", "テクノロジー", "副業", "生産性"]
             topic_tags = [t.replace("#","") for t in hashtags if t.replace("#","") not in fixed_tags]
             tags = fixed_tags + topic_tags[:5]
-            title = f"{selected_title[:45]} #Shorts" if selected_title else "【AI速報】最新AIニュース #Shorts"
+            # フック型タイトル（クリック率最大化）
+            import random as _rand
+            hook_patterns = [
+                f"【衝撃】{selected_title[:35]}",
+                f"【速報】{selected_title[:35]}",
+                f"知らないと損！{selected_title[:30]}",
+                f"エンジニア必見：{selected_title[:30]}",
+                f"【2026最新】{selected_title[:33]}",
+                f"今話題の{selected_title[:35]}",
+            ]
+            title = _rand.choice(hook_patterns) + " #Shorts"
+            if not selected_title:
+                title = "【衝撃】エンジニアが知るべきAI最新情報 #Shorts"
             hook_text = selected_title[:30] if selected_title else "AI速報"
             repo_name = plan_data.get("repo_name", "")
             topic = {"hook": hook_text, "hashtags": hashtags, "repo_name": repo_name}
@@ -246,13 +259,31 @@ def main():
         tags = [t.replace("#","") for t in topic.get("hashtags",[])] + ["AI","GitHub","Shorts","エンジニア"]
         repo_name = topic.get("repo_name","")
     except:
-        title = "【AI Conduit】GitHubトレンドAIツール紹介 #Shorts"
+        title = "【速報】エンジニア必見のAIツール登場 #Shorts"
         tags = ["AI","GitHub","Shorts","エンジニア","自動化"]
         repo_name = ""
 
     gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
-    seo_tags = "#AI #AIニュース #エンジニア #プログラミング #自動化 #Shorts #人工知能 #テクノロジー"
-    description = f"""🤖 {title}
+    from datetime import datetime as _dt
+    import random as _r2
+    # 毎回違うハッシュタグの順番（Visual Uniqueness対策）
+    rotating_tags = ["#AI", "#AIニュース", "#エンジニア", "#プログラミング", "#自動化", 
+                     "#Shorts", "#人工知能", "#テクノロジー", "#ChatGPT", "#副業", "#生産性向上",
+                     "#AI活用", "#ITエンジニア", "#最新技術", "#テック"]
+    _r2.shuffle(rotating_tags)
+    seo_tags = " ".join(rotating_tags[:10])
+    description = f"""⚡ {title}
+
+このチャンネルでは毎日最新AIニュースを30秒で解説！
+エンジニア・IT学生・AI初学者に役立つ情報を毎日配信中🔥
+
+🎁 無料プレゼント: AIプロンプト集・チートシート
+↓コメントに「AI」と書いてくれた方にDMでお届け！
+{gift_link}
+
+📱 フォローして毎日チェック！
+━━━━━━━━━━━━━━━
+
 
 ━━━━━━━━━━━━━━━
 🎁 無料プレゼントあり！
