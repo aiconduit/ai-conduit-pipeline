@@ -171,6 +171,22 @@ CONTENT_SOURCES = [
      "category": "claude_code", "title_prefix": "claude-forge 11Agent36コマンド"},
     {"repo": "athola/claude-night-market", "file": "README.md",
      "category": "claude_code", "title_prefix": "23プラグインTDD/PR/Spec"},
+    # 超大型・マルチAgent系
+    {"repo": "catlog22/Claude-Code-Workflow", "file": "README.md",
+     "category": "claude_code", "title_prefix": "マルチAgent開発フレームワーク2141★"},
+    {"repo": "CronusL-1141/AI-company", "file": "README.md",
+     "category": "claude_code", "title_prefix": "AI会社OS・108MCPツール"},
+    {"repo": "Sakshxm1/hermes-agency-orchestrator", "file": "README.md",
+     "category": "claude_code", "title_prefix": "AgentワークフローガイドSKills vs Teams"},
+    # 超大型スター数
+    {"repo": "VoltAgent/awesome-agent-skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "1000+Agentスキル厳選29K★"},
+    {"repo": "heilcheng/awesome-agent-skills", "file": "README.md",
+     "category": "ai_tools", "title_prefix": "Agentスキル入門ガイド"},
+    {"repo": "davepoon/buildwithclaude", "file": "README.md",
+     "category": "claude_code", "title_prefix": "Claudeで作る最強Hub"},
+    {"repo": "OneRedOak/claude-code-workflows", "file": "README.md",
+     "category": "claude_code", "title_prefix": "実践ワークフロー3885★"},
 ]
 
 # トピックテンプレート（カテゴリ別）
