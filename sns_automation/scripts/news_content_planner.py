@@ -257,6 +257,41 @@ def pick_top1(items: list[dict[str, Any]]) -> dict[str, Any] | None:
     return top
 
 
+def enforce_scene_limit(plan: dict, max_scenes: int = 5) -> dict:
+    """シーン数を強制的に制限・合計尺も調整"""
+    try:
+        script = plan.get("plan", plan).get("script", {})
+        scenes = script.get("scenes", [])
+        if len(scenes) > max_scenes:
+            logger.info(f"シーン数 {len(scenes)} → {max_scenes} に強制削減")
+            # Hook・Fact・Impact・Twist・CTAの5シーンを優先選択
+            priority = ["hook", "value", "impact", "twist", "cta"]
+            new_scenes = []
+            for mood in priority:
+                for s in scenes:
+                    if s.get("mood") == mood and s not in new_scenes:
+                        new_scenes.append(s)
+                        break
+            # 足りない場合は先頭から埋める
+            if len(new_scenes) < max_scenes:
+                for s in scenes:
+                    if s not in new_scenes:
+                        new_scenes.append(s)
+                    if len(new_scenes) >= max_scenes:
+                        break
+            # CTA確保
+            has_cta = any(s.get("mood") == "cta" for s in new_scenes)
+            if not has_cta:
+                new_scenes[-1] = {"scene_title": "CTA", "mood": "cta", "duration_sec": 3,
+                                  "narration": "コメントにAIと書いてプレゼントゲット！",
+                                  "visual_desc": "smartphone comment notification"}
+            script["scenes"] = new_scenes[:max_scenes]
+            script["total_duration_sec"] = sum(s.get("duration_sec", 4) for s in new_scenes[:max_scenes])
+    except Exception as e:
+        logger.warning(f"enforce_scene_limit error: {e}")
+    return plan
+
+
 def fetch_page_text(url: str, max_chars: int = 1500) -> str:
     """URLのページ本文をrequestsで取得（簡易スクレイピング）"""
     if not url:
@@ -400,6 +435,8 @@ def plan_and_save() -> None:
     plan["selected_title"] = plan.get("selected_title") or top.get("title", "")
     plan["source"] = plan.get("source") or top.get("source", "")
 
+    # シーン数を5シーン・18秒以内に強制制限
+    plan = enforce_scene_limit(plan, max_scenes=5)
     issues = validate_script(plan)
     if issues:
         logger.warning("Review issues (%d):", len(issues))
