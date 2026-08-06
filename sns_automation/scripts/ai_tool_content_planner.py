@@ -166,6 +166,11 @@ CONTENT_SOURCES = [
      "category": "ai_tools", "title_prefix": "無料AIツール完全聖書"},
     {"repo": "Caplet1989/Brokies-AI-Foundry", "file": "README.md",
      "category": "ai_tools", "title_prefix": "無料AIツールTop選"},
+    # 高スター・実用系
+    {"repo": "sangrokjung/claude-forge", "file": "README.md",
+     "category": "claude_code", "title_prefix": "claude-forge 11Agent36コマンド"},
+    {"repo": "athola/claude-night-market", "file": "README.md",
+     "category": "claude_code", "title_prefix": "23プラグインTDD/PR/Spec"},
 ]
 
 # トピックテンプレート（カテゴリ別）
