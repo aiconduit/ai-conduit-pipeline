@@ -7,14 +7,61 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload, MediaIoBaseUpload
 from PIL import Image, ImageDraw, ImageFont
 
-def generate_thumbnail(hook_text, repo_name=""):
+# カラーシステム（カテゴリ別・カラーホイール法則）
+COLOR_PATTERNS = {
+    "claude_code": {
+        "bg": (10, 10, 26),        # 深い青黒
+        "text": (255, 255, 255),   # 白
+        "accent": (255, 107, 0),   # オレンジ（補色）
+        "border": (255, 215, 0),   # 金
+        "highlight": (255, 107, 0),
+    },
+    "codex": {
+        "bg": (13, 13, 13),        # 黒
+        "text": (255, 255, 255),   # 白
+        "accent": (255, 45, 45),   # 赤（強コントラスト）
+        "border": (255, 45, 45),
+        "highlight": (255, 45, 45),
+    },
+    "gemini": {
+        "bg": (26, 10, 46),        # 深い紫
+        "text": (255, 255, 255),   # 白
+        "accent": (255, 215, 0),   # 黄金（三角配色）
+        "border": (155, 89, 182),  # 紫
+        "highlight": (255, 215, 0),
+    },
+    "ai_tools": {
+        "bg": (10, 26, 10),        # 深い緑
+        "text": (255, 255, 255),   # 白
+        "accent": (0, 255, 136),   # 明るい緑
+        "border": (255, 0, 255),   # マゼンタ（補色）
+        "highlight": (0, 255, 136),
+    },
+    "default": {
+        "bg": (10, 10, 26),
+        "text": (255, 255, 255),
+        "accent": (255, 107, 0),
+        "border": (255, 215, 0),
+        "highlight": (255, 107, 0),
+    },
+}
+
+def get_color_pattern(category=""):
+    """カテゴリからカラーパターンを取得"""
+    for key in COLOR_PATTERNS:
+        if key in (category or "").lower():
+            return COLOR_PATTERNS[key]
+    return COLOR_PATTERNS["default"]
+
+def generate_thumbnail(hook_text, repo_name="", category=""):
     """Fireship型サムネイル: ダーク背景+高コントラスト+3語以内+数字強調"""
     W, H = 1280, 720
-    img = Image.new("RGB", (W, H), (10, 10, 15))
+    colors = get_color_pattern(category)
+    img = Image.new("RGB", (W, H), colors["bg"])
     draw = ImageDraw.Draw(img)
 
-    draw.rectangle([0, 0, 6, H], fill=(255, 220, 0))
-    draw.rectangle([0, 0, W, 6], fill=(255, 220, 0))
+    draw.rectangle([0, 0, 6, H], fill=colors["border"])
+    draw.rectangle([0, 0, W, 6], fill=colors["border"])
 
     font_paths = [
         '/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc',
@@ -44,7 +91,7 @@ def generate_thumbnail(hook_text, repo_name=""):
                 if dx*dx + dy*dy <= 16:
                     draw.text((x+dx, y_start+dy), line, fill=(0, 0, 0), font=font_main)
         has_number = any(c.isdigit() for c in line)
-        color = (255, 220, 0) if has_number else (255, 255, 255)
+        color = colors['accent'] if has_number else colors['text']
         draw.text((x, y_start), line, fill=color, font=font_main)
         y_start += 140
 
@@ -56,8 +103,9 @@ def generate_thumbnail(hook_text, repo_name=""):
     logo_text = "AI Conduit"
     bbox = draw.textbbox((0, 0), logo_text, font=font_logo)
     lw = bbox[2] - bbox[0]
-    draw.rectangle([W - lw - 50, H - 70, W - 10, H - 10], fill=(255, 220, 0))
-    draw.text((W - lw - 30, H - 60), logo_text, fill=(10, 10, 15), font=font_logo)
+    draw.rectangle([W - lw - 50, H - 70, W - 10, H - 10], fill=colors['border'])
+    colors = get_color_pattern(category)
+    draw.text((W - lw - 30, H - 60), logo_text, fill=colors["bg"], font=font_logo)
 
     buf = io.BytesIO()
     img.save(buf, format="PNG")
@@ -69,8 +117,10 @@ def generate_thumbnail_b(hook_text, repo_name=""):
     W, H = 1280, 720
     img = Image.new("RGB", (W, H), (245, 245, 240))
     draw = ImageDraw.Draw(img)
-    draw.rectangle([0, 0, 8, H], fill=(10, 10, 15))
-    draw.rectangle([0, 0, W, 8], fill=(10, 10, 15))
+    colors = get_color_pattern(category)
+    draw.rectangle([0, 0, 8, H], fill=colors["bg"])
+    colors = get_color_pattern(category)
+    draw.rectangle([0, 0, W, 8], fill=colors["bg"])
 
     font_paths = [
         "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc",
@@ -96,7 +146,7 @@ def generate_thumbnail_b(hook_text, repo_name=""):
         tw = bbox[2] - bbox[0]
         x = (W - tw) // 2
         has_number = any(c.isdigit() for c in line)
-        color = (220, 0, 0) if has_number else (10, 10, 15)
+        color = colors["accent"] if has_number else colors["text"]
         draw.text((x, y_start), line, fill=color, font=font_main)
         y_start += 120
 
@@ -108,7 +158,8 @@ def generate_thumbnail_b(hook_text, repo_name=""):
     logo_text = "AI Conduit"
     bbox3 = draw.textbbox((0, 0), logo_text, font=font_logo)
     lw3 = bbox3[2] - bbox3[0]
-    draw.rectangle([W - lw3 - 50, H - 70, W - 10, H - 10], fill=(10, 10, 15))
+    colors = get_color_pattern(category)
+    draw.rectangle([W - lw3 - 50, H - 70, W - 10, H - 10], fill=colors["bg"])
     draw.text((W - lw3 - 30, H - 60), logo_text, fill=(245, 245, 240), font=font_logo)
 
     buf = io.BytesIO()
