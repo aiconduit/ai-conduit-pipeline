@@ -264,7 +264,9 @@ def main():
         title = f"{raw[:45]}#Shorts" if len(raw) > 45 else f"{raw} #Shorts"
         tags = [t.replace("#","") for t in topic.get("hashtags",[])] + ["AI","GitHub","Shorts","エンジニア"]
         repo_name = topic.get("repo_name","")
-    except:
+    except Exception as _e:
+        print(f"[DEBUG] title generation error: {_e}")
+        import traceback; traceback.print_exc()
         title = "【速報】エンジニア必見のAIツール登場 #Shorts"
         tags = ["AI","GitHub","Shorts","エンジニア","自動化"]
         repo_name = ""
