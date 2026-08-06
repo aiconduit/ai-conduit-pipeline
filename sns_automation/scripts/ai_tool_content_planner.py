@@ -235,6 +235,9 @@ CONTENT_SOURCES = [
      "category": "gemini", "title_prefix": "Gemini CLI実践ガイド"},
     {"repo": "theNetworkChuck/ai-in-the-terminal", "file": "README.md",
      "category": "gemini", "title_prefix": "Gemini+Claude+Codexターミナル"},
+    # Gemini CLI専用（追加）
+    {"repo": "dtunai/awesome-gemini-cli", "file": "README.md",
+     "category": "gemini", "title_prefix": "awesome-gemini-cli完全版27K"},
 ]
 
 # トピックテンプレート（カテゴリ別）
