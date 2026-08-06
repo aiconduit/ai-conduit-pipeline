@@ -114,7 +114,7 @@ def generate_script(source, raw_content):
 5. カテゴリ: {source["category"]}
 6. 動画末尾でGitHubリポジトリ（{source["repo"]}）を紹介してプレゼントとして配布
 
-以下のJSON形式のみで返してください:
+以下のJSON形式のみで返してください（全フィールド必ず日本語で記述。英語タイトル・英語narration禁止）:
 {{
   "selected_title": "（動画タイトル30文字以内・日本語）",
   "category": "{source["category"]}",
