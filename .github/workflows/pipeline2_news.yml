@@ -50,12 +50,19 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Step 3 - 動画生成
-        run: python3 run_from_news_plan.py
+      - name: Step 3 - 動画生成（スクリーン録画スタイル）
+        run: |
+          # news_content_plan.jsonからリポジトリ・カテゴリを取得してv30を実行
+          CATEGORY=$(python3 -c "import json; d=json.load(open('sns_automation/news_content_plan.json')); print(d.get('category','claude_code'))")
+          SOURCE_REPO=$(python3 -c "import json; d=json.load(open('sns_automation/news_content_plan.json')); print(d.get('source_repo','shanraisshan/claude-code-best-practice'))")
+          TITLE=$(python3 -c "import json; d=json.load(open('sns_automation/news_content_plan.json')); print(d.get('selected_title','Claude Code Tips'))")
+          echo "カテゴリ: $CATEGORY / リポジトリ: $SOURCE_REPO"
+          python3 ffmpeg_pipeline_v30_screenrec.py "$SOURCE_REPO" "50000" "$TITLE" || python3 run_from_news_plan.py
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
 
       - name: Step 4 - YouTube投稿
         run: python3 sns_automation/scripts/youtube_auto_upload.py
