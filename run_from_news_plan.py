@@ -29,7 +29,7 @@ with open(plan_path, "r", encoding="utf-8") as f:
     plan = json.load(f)
 
 news_item = plan.get("news_item", {})
-content = plan.get("plan", {})
+content = plan if plan.get("selected_title") else plan.get("plan", plan)
 
 # topic = YouTubeタイトル（selected_title → news_item.title の順でフォールバック）
 plan_data = content.get("plan", content)
@@ -49,7 +49,7 @@ generated_at = plan.get("generated_at", "")
 CTA_TEXT = f"詳細は概要欄をチェック！コメントにAIconduitと書いてプレゼントをゲット！"
 
 # 2. script_60s を構築（plan.script.scenes[].narration を連結）
-plan = content.get("plan", content)
+plan = content  # ai_tool_content_plannerはトップレベルにscriptを保存
 scene_narrations = [s.get("narration", "") for s in plan.get("script", {}).get("scenes", [])]
 script_60s = "".join(scene_narrations).strip()
 if not script_60s:
