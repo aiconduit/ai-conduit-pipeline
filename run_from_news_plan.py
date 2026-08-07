@@ -33,7 +33,7 @@ content = plan.get("plan", {})
 
 # topic = YouTubeタイトル（selected_title → news_item.title の順でフォールバック）
 plan_data = content.get("plan", content)
-topic = plan_data.get("selected_title") or news_item.get("title", "")
+topic = plan.get("selected_title") or plan_data.get("selected_title") or news_item.get("title", "")
 if not topic:
     print("⚠️ news_content_plan.jsonからタイトルが取得できません。デフォルトを使用します。")
     topic = "AI News"
