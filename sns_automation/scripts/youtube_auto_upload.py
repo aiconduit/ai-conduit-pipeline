@@ -340,36 +340,19 @@ def main():
     seo_tags = " ".join(rotating_tags[:10])
     description = f"""⚡ {title}
 
-Claude Code・Codex・Gemini・Cursorなど最新AIコーディングツールの使い方を毎日配信！
-エンジニア・IT学生・AI初学者に役立つ実用テクニックを30秒で解説🔥
-
-🎁 無料プレゼント: AIツールチートシート・プロンプト集
-↓コメントに「AI」と書いてくれた方にお届け！
+🎁【無料プレゼント】今すぐ受け取れます！
+👇クリックして今すぐゲット👇
 {gift_link}
 
-📱 チャンネル登録して毎日チェック！
 ━━━━━━━━━━━━━━━
+💬「AI」とコメントしてくれた方に
+  さらに豪華プレゼントをお届け予定！
 
-
+📱 フォローで毎日AIツールの使い方を配信🔥
+🔔 チャンネル登録もよろしく！
 ━━━━━━━━━━━━━━━
-🎁 無料プレゼントあり！
-コメントに「AIconduit」と書いて概要欄をチェック！
-
-📌 受け取り方法:
-① コメントに「AIconduit」と書く
-② Instagramをフォロー
-③ DMで「プレゼント」と送る
-
-📱 Instagram👇
-https://www.instagram.com/aiconduit/
-━━━━━━━━━━━━━━━
-
-🔔 チャンネル登録で毎日最新AIニュース！
-
-📎 プレゼント詳細: {gift_link}
-
----
-🌐 [EN] Daily AI news in Japanese. Subscribe for the latest AI updates!
+Claude Code・Codex・Gemini・Cursor
+AIコーディングツールの実践テクを毎日解説！
 
 {seo_tags}"""
 
