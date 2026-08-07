@@ -23,6 +23,31 @@ from ffmpeg_pipeline_v1_improved import (
     gen_overlay, _run
 )
 
+# パイプライン選択（カテゴリ・ランダムで最適なスタイルを選択）
+import subprocess as _sp
+def _run_pipeline(pipeline_script, plan_json_path, topic, source_repo=""):
+    """指定パイプラインを実行して動画を生成"""
+    env = os.environ.copy()
+    env["PIPELINE_TOPIC"] = topic
+    env["PIPELINE_REPO"] = source_repo
+    env["PIPELINE_PLAN"] = str(plan_json_path)
+    result = _sp.run(
+        ["python3", str(ROOT_DIR / pipeline_script), str(plan_json_path)],
+        capture_output=True, text=True, env=env
+    )
+    if result.returncode != 0:
+        print(f"⚠️ {pipeline_script} 失敗: {result.stderr[-300:]}")
+        return False
+    return True
+
+PIPELINE_BY_CATEGORY = {
+    "claude_code": ["ffmpeg_pipeline_v30_screenrec.py", "ffmpeg_pipeline_v33_hormozi.py"],
+    "codex": ["ffmpeg_pipeline_v30_screenrec.py", "ffmpeg_pipeline_v34_mrbeast.py"],
+    "gemini": ["ffmpeg_pipeline_v30_screenrec.py", "ffmpeg_pipeline_v33_hormozi.py"],
+    "ai_tools": ["ffmpeg_pipeline_v33_hormozi.py", "ffmpeg_pipeline_v34_mrbeast.py"],
+    "default": ["ffmpeg_pipeline_v1_improved.py"],
+}
+
 # 1. news_content_plan.json を読み込み
 plan_path = ROOT_DIR / "sns_automation" / "news_content_plan.json"
 with open(plan_path, "r", encoding="utf-8") as f:
