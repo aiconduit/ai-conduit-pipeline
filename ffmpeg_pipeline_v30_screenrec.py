@@ -4,7 +4,7 @@ import sys,json,os,subprocess,requests,random,re
 from pathlib import Path
 from PIL import Image,ImageDraw,ImageFont
 sys.path.insert(0,str(Path(__file__).parent))
-GROQ_API_KEY=os.environ.get("GROQ_API_KEY","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")
+DEEPSEEK_API_KEY=os.environ.get("DEEPSEEK_API_KEY","sk-71eab12699f047a5891e62268c66c241")
 GOOGLE_TTS_KEY=os.environ.get("GOOGLE_TTS_KEY","AIzaSyCsrOd3cgi9hcnoOeFXRde9prLAy6Y2vdY")
 ROOT_DIR=Path(__file__).parent
 OUTPUT_DIR=ROOT_DIR/"projects"/"daily"/"renders"
@@ -52,11 +52,11 @@ Output ONLY JSON:
   }},
   ...6 steps...
 ]"""
-    r=requests.post("https://api.groq.com/openai/v1/chat/completions",
-        headers={"Authorization":f"Bearer {GROQ_API_KEY}","Content-Type":"application/json"},
-        json={"model":"llama-3.3-70b-versatile","messages":[{"role":"user","content":prompt}],"max_tokens":700})
+    r=requests.post("https://api.deepseek.com/chat/completions",
+        headers={"Authorization":f"Bearer {DEEPSEEK_API_KEY}","Content-Type":"application/json"},
+        json={"model":"deepseek-chat","messages":[{"role":"user","content":prompt}],"max_tokens":700,"temperature":0.7})
     resp=r.json()
-    if "choices" not in resp: raise Exception(f"Groq:{resp}")
+    if "choices" not in resp: raise Exception(f"DeepSeek:{resp}")
     text=resp["choices"][0]["message"]["content"].strip()
     s=text.find("[");e=text.rfind("]")+1
     if s>=0 and e>s: text=text[s:e]
