@@ -338,23 +338,36 @@ def main():
                      "#AI活用", "#ITエンジニア", "#最新技術", "#テック"]
     _r2.shuffle(rotating_tags)
     seo_tags = " ".join(rotating_tags[:10])
-    description = f"""⚡ {title}
+    import random as _rdp
+    _desc_patterns = [
+        f"""【無料配布】{title}の完全チートシート
 
-🎁【無料プレゼント】今すぐ受け取れます！
-👇クリックして今すぐゲット👇
+GitHubから今すぐダウンロード:
 {gift_link}
 
-━━━━━━━━━━━━━━━
-💬「AI」とコメントしてくれた方に
-  さらに豪華プレゼントをお届け予定！
+コメントに「AI」と書いてくれた方には追加でソースコードも送ります。
 
-📱 フォローで毎日AIツールの使い方を配信🔥
-🔔 チャンネル登録もよろしく！
-━━━━━━━━━━━━━━━
-Claude Code・Codex・Gemini・Cursor
-AIコーディングツールの実践テクを毎日解説！
+Claude Code / Codex / Gemini CLI の実践テクニックを毎日配信。
 
-{seo_tags}"""
+{seo_tags}""",
+        f"""今日から使えます。{title}
+
+初心者でも3分で設定できるステップガイドを無料配布中です:
+{gift_link}
+
+コメントに「AI」と書いてください。個別で使い方を説明します。
+
+{seo_tags}""",
+        f"""AIで作業時間を10分の1にした方法: {title}
+
+この動画で紹介した自動化テンプレートを無料配布しています:
+{gift_link}
+
+コメントに「AI」と書いてくれた方には収益化事例も共有します。
+
+{seo_tags}""",
+    ]
+    description = _rdp.choice(_desc_patterns)
 
     # 最新の動画を探す
     videos = sorted(glob.glob("projects/daily/renders/*.mp4"))
