@@ -17,55 +17,58 @@ jobs:
         with:
           python-version: '3.11'
       
-      - name: Install Verticals v3
+      - name: Install dependencies
         run: |
           pip install git+https://github.com/rushindrasinha/youtube-shorts-pipeline.git --break-system-packages -q
-          pip install edge-tts ffmpeg-python --break-system-packages -q
-          sudo apt-get install -y ffmpeg imagemagick --quiet
+          pip install edge-tts google-cloud-texttospeech --break-system-packages -q
+          sudo apt-get install -y ffmpeg --quiet
       
-      - name: トピック生成（Claude Code / AI Tools）
+      - name: 設定ファイル作成（DeepSeek + Edge TTS）
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
-          python3 << 'PYEOF'
-          import requests, json, os, random
-          
-          DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-71eab12699f047a5891e62268c66c241")
-          
-          # Claude Code/AIツール系のトピック生成
-          topics = [
-              "Claude Code --dangerously-skip-permissions flag just changed how I work",
-              "OpenAI Codex CLI vs Claude Code: one of these wins and it's not close",
-              "This Claude Code feature deleted 3 hours of my daily work",
-              "GitHub just made Claude Code free for students",
-              "Gemini CLI can now read your entire codebase in one shot",
-          ]
-          
-          selected = random.choice(topics)
-          print(f"選択トピック: {selected}")
-          
-          with open('/tmp/p4_topic.txt', 'w') as f:
-              f.write(selected)
-          PYEOF
+          mkdir -p ~/.verticals
+          cat > ~/.verticals/config.json << CONF
+          {
+            "openai_api_key": "${{ secrets.DEEPSEEK_API_KEY }}",
+            "openai_base_url": "https://api.deepseek.com",
+            "openai_model": "deepseek-chat",
+            "pexels_api_key": "${{ secrets.PEXELS_API_KEY }}",
+            "tts_provider": "edge",
+            "voice_id_en": "en-US-GuyNeural"
+          }
+          CONF
+          echo "設定完了"
       
       - name: Verticals v3 動画生成
         env:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-          GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
         run: |
-          TOPIC=$(cat /tmp/p4_topic.txt)
+          TOPICS=(
+            "Claude Code just killed the code review meeting"
+            "OpenAI Codex CLI vs Claude Code one of these wins"
+            "This Claude Code flag deleted 3 hours of my daily work"
+            "Gemini CLI can now read your entire codebase in one shot"
+            "GitHub Copilot just made a move nobody expected"
+          )
+          IDX=$((RANDOM % ${#TOPICS[@]}))
+          TOPIC="${TOPICS[$IDX]}"
           echo "トピック: $TOPIC"
+          
+          OPENAI_API_KEY="${{ secrets.DEEPSEEK_API_KEY }}" \
+          OPENAI_BASE_URL="https://api.deepseek.com" \
+          PEXELS_API_KEY="${{ secrets.PEXELS_API_KEY }}" \
           python3 -m verticals run \
             --topic "$TOPIC" \
             --niche tech \
-            --tts-provider edge \
-            --llm-provider openai \
-            --llm-base-url https://api.deepseek.com \
-            --llm-model deepseek-chat \
-            --no-upload \
-            --output-dir /tmp/p4_output || echo "⚠️ Verticals失敗"
-          ls /tmp/p4_output/ 2>/dev/null || echo "出力なし"
+            --provider openai \
+            --voice edge \
+            --lang en \
+            --no-upload 2>&1 || echo "⚠️ Verticals失敗"
+          
+          ls ~/.verticals/media/ 2>/dev/null && echo "動画生成完了"
       
       - name: YouTube投稿
         env:
@@ -74,11 +77,11 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: |
-          python3 sns_automation/scripts/youtube_auto_upload.py
+          python3 sns_automation/scripts/youtube_auto_upload.py || echo "⚠️ YouTube投稿スキップ"
       
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: p4-video
-          path: /tmp/p4_output/
+          path: ~/.verticals/media/
           retention-days: 3
