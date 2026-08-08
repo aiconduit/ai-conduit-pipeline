@@ -93,7 +93,10 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-        run: python3 sns_automation/scripts/youtube_auto_upload.py || echo "skipped"
+        run: |
+          echo "動画ファイル確認:"
+          ls projects/daily/renders/*.mp4 2>/dev/null || echo "renders: なし"
+          python3 sns_automation/scripts/youtube_auto_upload.py || echo "upload skipped"
 
       - uses: actions/upload-artifact@v4
         if: always()
