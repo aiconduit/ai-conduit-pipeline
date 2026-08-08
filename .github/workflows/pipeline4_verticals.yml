@@ -1,130 +1,83 @@
-name: AI Conduit パイプライン4 Verticals v3 Tech
+name: AI Conduit Pipeline 4 Verticals
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 13 * * *'  # 毎日22:00 JST
+    - cron: '0 13 * * *'
 
 jobs:
-  generate_video:
+  generate:
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
-      - name: Install dependencies
+
+      - name: Install
         run: |
-          pip install git+https://github.com/rushindrasinha/youtube-shorts-pipeline.git --break-system-packages -q
-          pip install edge-tts google-cloud-texttospeech --break-system-packages -q
-          sudo apt-get install -y ffmpeg --quiet
-      
-      - name: 設定ファイル作成（DeepSeek + Edge TTS）
-        env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          pip install git+https://github.com/rushindrasinha/youtube-shorts-pipeline.git -q
+          sudo apt-get install -y ffmpeg -q
+
+      - name: Generate Draft with DeepSeek
         run: |
-          mkdir -p ~/.verticals
-          cat > ~/.verticals/config.json << CONF
-          {
-            "openai_api_key": "sk-71eab12699f047a5891e62268c66c241",
-            "openai_base_url": "https://api.deepseek.com",
-            "openai_model": "deepseek-chat",
-            "pexels_api_key": "${{ secrets.PEXELS_API_KEY }}",
-            "tts_provider": "edge",
-            "voice_id_en": "en-US-GuyNeural"
-          }
-          CONF
-          echo "設定完了"
-      
-      - name: Verticals v3 動画生成（DeepSeek draft + Verticals produce）
-        env:
-          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
-        run: |
-          # Step1: DeepSeekでdraftを生成
-          python3 << 'PYEOF'
+          python3 << 'PYEOF2'
           import requests, json, random, os
           from pathlib import Path
-          
-          DEEPSEEK_KEY = "sk-71eab12699f047a5891e62268c66c241"
-          PEXELS_KEY = os.environ.get("PEXELS_API_KEY", "")
-          
+
+          KEY = "sk-71eab12699f047a5891e62268c66c241"
           topics = [
-              "Claude Code just killed the code review meeting",
-              "OpenAI Codex CLI vs Claude Code: one of these wins and it's not close",
-              "This Claude Code flag deleted 3 hours of my daily work",
-              "Gemini CLI can now read your entire codebase in one shot",
-              "GitHub Copilot just made a move nobody expected",
+            "Claude Code just killed the code review meeting",
+            "OpenAI Codex CLI vs Claude Code: one wins and its not close",
+            "This Claude Code flag deleted 3 hours of daily work",
+            "Gemini CLI can now read your entire codebase in one shot",
           ]
           topic = random.choice(topics)
-          print(f"トピック: {topic}")
-          
-          # tech.yamlのフックパターンを参考にスクリプト生成
-          prompt = f"""You are writing a viral YouTube Short script about: {topic}
+          print(f"Topic: {topic}")
 
-STYLE: Fireship/MKBHD style. Fast, dense with facts, no filler.
-FORMAT:
-- Hook (0-3s): Contrarian or shocking opener. e.g. "Everyone is celebrating X. Here's why that's wrong."
-- Body (3-50s): 3-4 punchy facts/steps. Each sentence max 10 words.
-- CTA (50-60s): "Follow for daily tech breakdowns."
-
-OUTPUT: Plain script text only, 150-170 words, no stage directions."""
+          prompt = f"""Write a 60-second YouTube Short script about: {topic}
+Style: Fireship. Fast, punchy, no filler. 150-170 words.
+Hook first sentence must grab attention.
+End with: Follow for daily tech breakdowns."""
 
           r = requests.post("https://api.deepseek.com/chat/completions",
-              headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
-              json={"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}],
-                    "max_tokens": 300, "temperature": 0.7}, timeout=30)
-          
+            headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"},
+            json={"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}],
+                  "max_tokens": 300}, timeout=30)
+
           script = r.json()["choices"][0]["message"]["content"].strip()
-          print(f"スクリプト生成完了 ({len(script)}文字)")
-          
-          # Verticals draft形式でJSONを作成
-          draft = {
-              "news": topic,
-              "script": script,
-              "youtube_title": topic,
-              "youtube_description": "Follow for daily AI & tech breakdowns.",
-              "broll_prompts": [
-                  "developer coding terminal dark screen",
-                  "AI robot futuristic technology",
-                  "code review screen computer",
-                  "software engineer working laptop",
-              ],
-              "niche": "tech",
-              "platform": "shorts",
-              "job_id": "p4_job",
-              "stage": {"research": True, "draft": True},
-          }
-          
+          print(f"Script: {script[:100]}...")
+
           Path(os.path.expanduser("~/.verticals/drafts")).mkdir(parents=True, exist_ok=True)
-          with open(os.path.expanduser("~/.verticals/drafts/p4_job.json"), "w") as f:
-              json.dump(draft, f, indent=2)
-          print("Draft JSON保存完了")
-          PYEOF
-          
-          # Step2: Verticalsでproduceのみ実行
-          PEXELS_API_KEY="${{ secrets.PEXELS_API_KEY }}" \
-          python3 -m verticals produce \
-            --draft ~/.verticals/drafts/p4_job.json \
-            --voice edge \
-            --lang en \
-            2>&1 || echo "⚠️ produce失敗"
-          
-          ls ~/.verticals/media/ 2>/dev/null && echo "動画生成完了"
-      
-      - name: YouTube投稿
+          draft = {
+            "news": topic, "script": script,
+            "youtube_title": topic,
+            "youtube_description": "Follow for daily AI and tech breakdowns.",
+            "broll_prompts": ["developer coding terminal", "AI technology futuristic", "code review screen"],
+            "niche": "tech", "platform": "shorts", "job_id": "p4",
+            "stage": {"research": True, "draft": True},
+          }
+          with open(os.path.expanduser("~/.verticals/drafts/p4.json"), "w") as f:
+            json.dump(draft, f)
+          print("Draft saved")
+          PYEOF2
+
+      - name: Produce Video
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          python3 -m verticals produce --draft ~/.verticals/drafts/p4.json --voice edge --lang en || echo "produce failed"
+          ls ~/.verticals/media/ 2>/dev/null || echo "no media"
+
+      - name: Upload to YouTube
         env:
           YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-        run: |
-          python3 sns_automation/scripts/youtube_auto_upload.py || echo "⚠️ YouTube投稿スキップ"
-      
+        run: python3 sns_automation/scripts/youtube_auto_upload.py || echo "upload skipped"
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
