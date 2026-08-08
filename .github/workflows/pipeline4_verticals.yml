@@ -41,32 +41,78 @@ jobs:
           CONF
           echo "設定完了"
       
-      - name: Verticals v3 動画生成
+      - name: Verticals v3 動画生成（DeepSeek draft + Verticals produce）
         env:
-          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
-          TOPICS=(
-            "Claude Code just killed the code review meeting"
-            "OpenAI Codex CLI vs Claude Code one of these wins"
-            "This Claude Code flag deleted 3 hours of my daily work"
-            "Gemini CLI can now read your entire codebase in one shot"
-            "GitHub Copilot just made a move nobody expected"
-          )
-          IDX=$((RANDOM % ${#TOPICS[@]}))
-          TOPIC="${TOPICS[$IDX]}"
-          echo "トピック: $TOPIC"
+          # Step1: DeepSeekでdraftを生成
+          python3 << 'PYEOF'
+          import requests, json, random, os
+          from pathlib import Path
           
-          OPENAI_API_KEY="sk-71eab12699f047a5891e62268c66c241" \
-          OPENAI_BASE_URL="https://api.deepseek.com" \
+          DEEPSEEK_KEY = "sk-71eab12699f047a5891e62268c66c241"
+          PEXELS_KEY = os.environ.get("PEXELS_API_KEY", "")
+          
+          topics = [
+              "Claude Code just killed the code review meeting",
+              "OpenAI Codex CLI vs Claude Code: one of these wins and it's not close",
+              "This Claude Code flag deleted 3 hours of my daily work",
+              "Gemini CLI can now read your entire codebase in one shot",
+              "GitHub Copilot just made a move nobody expected",
+          ]
+          topic = random.choice(topics)
+          print(f"トピック: {topic}")
+          
+          # tech.yamlのフックパターンを参考にスクリプト生成
+          prompt = f"""You are writing a viral YouTube Short script about: {topic}
+
+STYLE: Fireship/MKBHD style. Fast, dense with facts, no filler.
+FORMAT:
+- Hook (0-3s): Contrarian or shocking opener. e.g. "Everyone is celebrating X. Here's why that's wrong."
+- Body (3-50s): 3-4 punchy facts/steps. Each sentence max 10 words.
+- CTA (50-60s): "Follow for daily tech breakdowns."
+
+OUTPUT: Plain script text only, 150-170 words, no stage directions."""
+
+          r = requests.post("https://api.deepseek.com/chat/completions",
+              headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
+              json={"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": 300, "temperature": 0.7}, timeout=30)
+          
+          script = r.json()["choices"][0]["message"]["content"].strip()
+          print(f"スクリプト生成完了 ({len(script)}文字)")
+          
+          # Verticals draft形式でJSONを作成
+          draft = {
+              "news": topic,
+              "script": script,
+              "youtube_title": topic,
+              "youtube_description": "Follow for daily AI & tech breakdowns.",
+              "broll_prompts": [
+                  "developer coding terminal dark screen",
+                  "AI robot futuristic technology",
+                  "code review screen computer",
+                  "software engineer working laptop",
+              ],
+              "niche": "tech",
+              "platform": "shorts",
+              "job_id": "p4_job",
+              "stage": {"research": True, "draft": True},
+          }
+          
+          Path(os.path.expanduser("~/.verticals/drafts")).mkdir(parents=True, exist_ok=True)
+          with open(os.path.expanduser("~/.verticals/drafts/p4_job.json"), "w") as f:
+              json.dump(draft, f, indent=2)
+          print("Draft JSON保存完了")
+          PYEOF
+          
+          # Step2: Verticalsでproduceのみ実行
           PEXELS_API_KEY="${{ secrets.PEXELS_API_KEY }}" \
-          python3 -m verticals run \
-            --topic "$TOPIC" \
-            --niche tech \
-            --provider openai \
+          python3 -m verticals produce \
+            --draft ~/.verticals/drafts/p4_job.json \
             --voice edge \
             --lang en \
-            2>&1 || echo "⚠️ Verticals失敗"
+            2>&1 || echo "⚠️ produce失敗"
           
           ls ~/.verticals/media/ 2>/dev/null && echo "動画生成完了"
       
