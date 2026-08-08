@@ -332,16 +332,29 @@ def _has_audio(path):
 # 63パターン10グループからランダム選択してxfadeトランジション適用
 import random as _rand_mot
 _MOTION_GROUPS = {
-    "A": {"hook": "zoomin",     "value": "fade",       "cta": "fadeblack"},
-    "B": {"hook": "fade",       "value": "zoomin",     "cta": "fadewhite"},
-    "C": {"hook": "slideleft",  "value": "slideright", "cta": "fadeblack"},
-    "D": {"hook": "diagtl",     "value": "circleopen", "cta": "fade"},
-    "E": {"hook": "slideup",    "value": "wipeleft",   "cta": "fadewhite"},
-    "F": {"hook": "zoomout",    "value": "diagtr",     "cta": "fadeblack"},
-    "G": {"hook": "circleopen", "value": "zoomin",     "cta": "fadewhite"},
-    "H": {"hook": "wipetl",     "value": "radial",     "cta": "fade"},
-    "I": {"hook": "fadeblack",  "value": "slideup",    "cta": "wipeleft"},
-    "J": {"hook": "radial",     "value": "fadewhite",  "cta": "dissolve"},
+    # カット系・スピード感
+    "A": {"hook": "zoomin",      "interrupt": "slideleft",  "value": "fade",        "secondary_hook": "diagtl",    "cta": "fadeblack"},
+    "B": {"hook": "fade",        "interrupt": "dissolve",   "value": "zoomin",      "secondary_hook": "wipetl",    "cta": "fadewhite"},
+    "C": {"hook": "slideleft",   "interrupt": "zoomin",     "value": "slideright",  "secondary_hook": "zoomout",   "cta": "fadeblack"},
+    "D": {"hook": "diagtl",      "interrupt": "fadeblack",  "value": "circleopen",  "secondary_hook": "radial",    "cta": "fade"},
+    "E": {"hook": "slideup",     "interrupt": "slidedown",  "value": "wipeleft",    "secondary_hook": "fade",      "cta": "fadewhite"},
+    "F": {"hook": "zoomout",     "interrupt": "slideleft",  "value": "diagtr",      "secondary_hook": "slideup",   "cta": "fadeblack"},
+    "G": {"hook": "circleopen",  "interrupt": "fade",       "value": "zoomin",      "secondary_hook": "wiperight", "cta": "fadewhite"},
+    "H": {"hook": "wipetl",      "interrupt": "diagbl",     "value": "radial",      "secondary_hook": "slidedown", "cta": "fade"},
+    "I": {"hook": "fadeblack",   "interrupt": "zoomin",     "value": "slideup",     "secondary_hook": "circleopen","cta": "wipeleft"},
+    "J": {"hook": "radial",      "interrupt": "wiperight",  "value": "fadewhite",   "secondary_hook": "zoomout",   "cta": "dissolve"},
+    # シネマティック系
+    "K": {"hook": "dissolve",    "interrupt": "fade",       "value": "circleopen",  "secondary_hook": "fadewhite", "cta": "fadeblack"},
+    "L": {"hook": "wiperight",   "interrupt": "wipetl",     "value": "slideleft",   "secondary_hook": "diagtr",    "cta": "dissolve"},
+    "M": {"hook": "diagbl",      "interrupt": "circleopen", "value": "fadeblack",   "secondary_hook": "zoomin",    "cta": "fadewhite"},
+    "N": {"hook": "slidedown",   "interrupt": "radial",     "value": "diagtl",      "secondary_hook": "dissolve",  "cta": "fade"},
+    "O": {"hook": "fadewhite",   "interrupt": "slideup",    "value": "wiperight",   "secondary_hook": "wipetl",    "cta": "zoomin"},
+    # エネルギー系
+    "P": {"hook": "zoomin",      "interrupt": "diagbl",     "value": "slideleft",   "secondary_hook": "fadeblack", "cta": "circleopen"},
+    "Q": {"hook": "slideleft",   "interrupt": "zoomout",    "value": "diagtl",      "secondary_hook": "wipeleft",  "cta": "dissolve"},
+    "R": {"hook": "circleopen",  "interrupt": "slidedown",  "value": "zoomout",     "secondary_hook": "diagbl",    "cta": "fade"},
+    "S": {"hook": "diagtr",      "interrupt": "wipeleft",   "value": "slideup",     "secondary_hook": "radial",    "cta": "fadeblack"},
+    "T": {"hook": "wipeleft",    "interrupt": "circleopen", "value": "dissolve",    "secondary_hook": "slidedown", "cta": "zoomin"},
 }
 _gkey = _rand_mot.choice(list(_MOTION_GROUPS.keys()))
 _mxfade = _MOTION_GROUPS[_gkey]
