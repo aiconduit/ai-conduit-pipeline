@@ -50,10 +50,8 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Step 3 - 動画生成（v40ターミナルデモ）
-        run: |
-          pip install edge-tts --break-system-packages -q
-          python3 ffmpeg_pipeline_v40_terminal_demo.py || python3 run_from_news_plan.py
+      - name: Step 3 - 動画生成
+        run: python3 run_from_news_plan.py
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           GOOGLE_TTS_KEY: ${{ secrets.GOOGLE_TTS_KEY }}
