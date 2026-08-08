@@ -1,0 +1,103 @@
+name: AI Conduit Pipeline 5 MoneyPrinter
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 14 * * *'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install
+        run: |
+          pip install edge-tts requests pillow --break-system-packages -q
+          sudo apt-get install -y ffmpeg --quiet
+
+      - name: Generate Video
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          python3 /dev/stdin << 'PY'
+          import requests, json, random, os, subprocess, asyncio
+          from pathlib import Path
+          import edge_tts
+
+          KEY = "sk-71eab12699f047a5891e62268c66c241"
+          PEXELS = os.environ.get("PEXELS_API_KEY", "")
+
+          topics = [
+            "Claude Code just replaced my entire dev team",
+            "I automated my job with Claude Code in one weekend",
+            "Claude Code writes better code than most developers",
+            "The Claude Code trick that saved me 20 hours this week",
+          ]
+          topic = random.choice(topics)
+          print("Topic:", topic)
+
+          r = requests.post("https://api.deepseek.com/chat/completions",
+            headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"},
+            json={"model": "deepseek-chat", "messages": [{"role": "user", "content": f"Write viral YouTube Short script about: {topic}. MrBeast energy. 5 punchy sentences. Hook + 3 facts + CTA. Max 60 words."}],
+                  "max_tokens": 150}, timeout=30)
+          script = r.json()["choices"][0]["message"]["content"].strip()
+          print("Script:", script[:80])
+
+          async def gen():
+              tts = edge_tts.Communicate(script, voice="en-US-GuyNeural", rate="+20%")
+              await tts.save("/tmp/p5_audio.mp3")
+          asyncio.run(gen())
+          print("Audio done")
+
+          broll_url = None
+          try:
+              pex = requests.get("https://api.pexels.com/videos/search",
+                headers={"Authorization": PEXELS},
+                params={"query": "developer coding AI", "per_page": 3, "orientation": "portrait"}, timeout=10)
+              videos = pex.json().get("videos", [])
+              if videos:
+                  files = [f for f in videos[0].get("video_files", []) if f.get("width", 0) >= 720]
+                  if files:
+                      broll_url = files[0]["link"]
+          except Exception as e:
+              print("Pexels error:", e)
+
+          Path("projects/daily/renders").mkdir(parents=True, exist_ok=True)
+          output = f"projects/daily/renders/v2news_{topic[:30]}.mp4"
+
+          if broll_url:
+              r2 = requests.get(broll_url, timeout=30, stream=True)
+              with open("/tmp/p5_broll.mp4", "wb") as f:
+                  for chunk in r2.iter_content(8192): f.write(chunk)
+              subprocess.run(["ffmpeg", "-y", "-i", "/tmp/p5_broll.mp4", "-i", "/tmp/p5_audio.mp3",
+                "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
+                "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+                "-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-shortest", output], capture_output=True)
+          else:
+              subprocess.run(["ffmpeg", "-y", "-f", "lavfi", "-i", "color=black:s=1080x1920:r=30",
+                "-i", "/tmp/p5_audio.mp3", "-c:v", "libx264", "-preset", "fast",
+                "-c:a", "aac", "-shortest", output], capture_output=True)
+
+          size = Path(output).stat().st_size // 1024 if Path(output).exists() else 0
+          print(f"Video: {output} ({size}KB)")
+          PY
+
+      - name: Upload YouTube
+        env:
+          YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: python3 sns_automation/scripts/youtube_auto_upload.py || echo "skipped"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: p5-video
+          path: projects/daily/renders/
+          retention-days: 3
