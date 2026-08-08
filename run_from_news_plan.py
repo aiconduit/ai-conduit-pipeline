@@ -329,12 +329,55 @@ def _has_audio(path):
                 capture_output=True, text=True)
     return bool(r.stdout.strip())
 
-# 映像をシンプルなconcatで連結（フェードなし→ハードカット）
+# 63パターン10グループからランダム選択してxfadeトランジション適用
+import random as _rand_mot
+_MOTION_GROUPS = {
+    "A": {"hook": "zoomin",     "value": "fade",       "cta": "fadeblack"},
+    "B": {"hook": "fade",       "value": "zoomin",     "cta": "fadewhite"},
+    "C": {"hook": "slideleft",  "value": "slideright", "cta": "fadeblack"},
+    "D": {"hook": "diagtl",     "value": "circleopen", "cta": "fade"},
+    "E": {"hook": "slideup",    "value": "wipeleft",   "cta": "fadewhite"},
+    "F": {"hook": "zoomout",    "value": "diagtr",     "cta": "fadeblack"},
+    "G": {"hook": "circleopen", "value": "zoomin",     "cta": "fadewhite"},
+    "H": {"hook": "wipetl",     "value": "radial",     "cta": "fade"},
+    "I": {"hook": "fadeblack",  "value": "slideup",    "cta": "wipeleft"},
+    "J": {"hook": "radial",     "value": "fadewhite",  "cta": "dissolve"},
+}
+_gkey = _rand_mot.choice(list(_MOTION_GROUPS.keys()))
+_mxfade = _MOTION_GROUPS[_gkey]
+print(f"[Motion] グループ{_gkey}を選択: {_mxfade}", flush=True)
+
 video_only = str(WORK_DIR / "video_only.mp4")
-_run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-      "-pix_fmt", "yuv420p", "-an", video_only])
-print("   ✅ 映像連結完了")
+_xfade_dur = 0.2
+if len(norm_list) >= 2:
+    import subprocess as _xsp
+    def _probe_dur(p):
+        res = _xsp.run(["ffprobe","-v","error","-show_entries","format=duration",
+                        "-of","default=noprint_wrappers=1:nokey=1",p],
+                       capture_output=True, text=True)
+        try: return float(res.stdout.strip())
+        except: return 3.0
+    _durations = [_probe_dur(p) for p in norm_list]
+    _inputs = []
+    for p in norm_list: _inputs.extend(["-i", p])
+    _fparts = []
+    _running = _durations[0] - _xfade_dur
+    _moods = [s.get("mood","value") for s in scene_specs] if "scene_specs" in dir() else ["hook"] + ["value"]*(len(norm_list)-2) + ["cta"]
+    _xf1 = _mxfade.get(_moods[1] if len(_moods)>1 else "value", "fade")
+    _fparts.append(f"[0:v][1:v]xfade=transition={_xf1}:duration={_xfade_dur}:offset={_running:.3f}[v0]")
+    for _i in range(2, len(norm_list)):
+        _running += _durations[_i-1] - _xfade_dur
+        _xfi = _mxfade.get(_moods[_i] if _i < len(_moods) else "value", "fade")
+        _fparts.append(f"[v{_i-2}][{_i}:v]xfade=transition={_xfi}:duration={_xfade_dur}:offset={_running:.3f}[v{_i-1}]")
+    _last = f"v{len(norm_list)-2}"
+    _fstr = "".join(_fparts) + f"[{_last}]format=yuv420p[out]"
+    _run(["ffmpeg","-y"] + _inputs + ["-filter_complex",_fstr,"-map","[out]",
+          "-r","30","-c:v","libx264","-preset","fast","-crf","20","-pix_fmt","yuv420p","-an",video_only])
+else:
+    _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+          "-pix_fmt", "yuv420p", "-an", video_only])
+print("   ✅ 映像連結完了（グループ{_gkey}）".format(_gkey=_gkey), flush=True)
 
 # 音声ありのクリップだけでconcat
 audio_clips = [f for f in norm_list if _has_audio(f)]
