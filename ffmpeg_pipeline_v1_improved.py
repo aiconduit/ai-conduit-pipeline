@@ -452,7 +452,7 @@ def main():
     }
     _group_key = _random.choice(list(_MOTION_GROUPS.keys()))
     _mood_xfade = _MOTION_GROUPS[_group_key]
-    print(f"[Motion] グループ{_group_key}を選択: {_mood_xfade}")
+    print(f"[Motion] グループ{_group_key}を選択: {_mood_xfade}", flush=True)
     if len(norm_list) == 1:
         _run(["ffmpeg","-y","-i",norm_list[0],
               "-r","30","-c:v","libx264","-preset","fast","-crf","18","-c:a","aac","-pix_fmt","yuv420p",
