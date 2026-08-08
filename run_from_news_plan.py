@@ -225,7 +225,14 @@ def _load_font(size):
 
 intro_clip = None
 try:
-    intro_img = Image.new("RGB", (1080, 1920), (10, 10, 15))
+    # Pollinations.aiで生成したサムネイル画像を使用（Step2.5で生成済み）
+    _thumb_path = "assets/intro_thumbnail.jpg"
+    if os.path.exists(_thumb_path):
+        intro_img = Image.open(_thumb_path).convert("RGB").resize((1080, 1920), Image.LANCZOS)
+        print("   ✅ Pollinations.aiサムネイルを使用")
+    else:
+        intro_img = Image.new("RGB", (1080, 1920), (10, 10, 15))
+        print("   ⚠️ フォールバック: 黒背景使用")
     d = ImageDraw.Draw(intro_img)
     d.rectangle([0, 0, 1080, 8], fill=(255, 220, 0))
     d.rectangle([0, 1912, 1080, 1920], fill=(255, 220, 0))
