@@ -20,63 +20,35 @@ jobs:
           pip install git+https://github.com/rushindrasinha/youtube-shorts-pipeline.git -q
           sudo apt-get install -y ffmpeg -q
 
-      - name: Generate Draft with DeepSeek
-        run: |
-          python3 << 'PYEOF2'
-          import requests, json, random, os
-          from pathlib import Path
-
-          KEY = "sk-71eab12699f047a5891e62268c66c241"
-          topics = [
-            "Claude Code just killed the code review meeting",
-            "OpenAI Codex CLI vs Claude Code: one wins and its not close",
-            "This Claude Code flag deleted 3 hours of daily work",
-            "Gemini CLI can now read your entire codebase in one shot",
-          ]
-          topic = random.choice(topics)
-          print(f"Topic: {topic}")
-
-          prompt = f"""Write a 60-second YouTube Short script about: {topic}
-Style: Fireship. Fast, punchy, no filler. 150-170 words.
-Hook first sentence must grab attention.
-End with: Follow for daily tech breakdowns."""
-
-          r = requests.post("https://api.deepseek.com/chat/completions",
-            headers={"Authorization": f"Bearer {KEY}", "Content-Type": "application/json"},
-            json={"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}],
-                  "max_tokens": 300}, timeout=30)
-
-          script = r.json()["choices"][0]["message"]["content"].strip()
-          print(f"Script: {script[:100]}...")
-
-          Path(os.path.expanduser("~/.verticals/drafts")).mkdir(parents=True, exist_ok=True)
-          draft = {
-            "news": topic, "script": script,
-            "youtube_title": topic,
-            "youtube_description": "Follow for daily AI and tech breakdowns.",
-            "broll_prompts": ["developer coding terminal", "AI technology futuristic", "code review screen"],
-            "niche": "tech", "platform": "shorts", "job_id": "p4",
-            "stage": {"research": True, "draft": True},
-          }
-          with open(os.path.expanduser("~/.verticals/drafts/p4.json"), "w") as f:
-            json.dump(draft, f)
-          print("Draft saved")
-          PYEOF2
-
-      - name: Produce Video
+      - name: Generate and Produce
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: |
+          python3 -c "
+          import requests, json, random, os
+          from pathlib import Path
+          KEY = 'sk-71eab12699f047a5891e62268c66c241'
+          topics = ['Claude Code just killed the code review meeting', 'OpenAI Codex CLI vs Claude Code one wins', 'This Claude Code flag deleted 3 hours of work']
+          topic = random.choice(topics)
+          print('Topic:', topic)
+          r = requests.post('https://api.deepseek.com/chat/completions', headers={'Authorization': f'Bearer {KEY}', 'Content-Type': 'application/json'}, json={'model': 'deepseek-chat', 'messages': [{'role': 'user', 'content': f'Write a 60-second YouTube Short script about: {topic}. Style: Fireship. 150-170 words. Fast punchy no filler. End: Follow for daily tech breakdowns.'}], 'max_tokens': 300}, timeout=30)
+          script = r.json()['choices'][0]['message']['content'].strip()
+          print('Script:', script[:80])
+          Path(os.path.expanduser('~/.verticals/drafts')).mkdir(parents=True, exist_ok=True)
+          draft = {'news': topic, 'script': script, 'youtube_title': topic, 'youtube_description': 'Follow for daily AI and tech breakdowns.', 'broll_prompts': ['developer coding terminal', 'AI technology futuristic', 'code review screen'], 'niche': 'tech', 'platform': 'shorts', 'job_id': 'p4', 'stage': {'research': True, 'draft': True}}
+          json.dump(draft, open(os.path.expanduser('~/.verticals/drafts/p4.json'), 'w'))
+          print('Draft saved')
+          "
           python3 -m verticals produce --draft ~/.verticals/drafts/p4.json --voice edge --lang en || echo "produce failed"
           ls ~/.verticals/media/ 2>/dev/null || echo "no media"
 
-      - name: Upload to YouTube
+      - name: Upload YouTube
         env:
           YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-        run: python3 sns_automation/scripts/youtube_auto_upload.py || echo "upload skipped"
+        run: python3 sns_automation/scripts/youtube_auto_upload.py || echo "skipped"
 
       - uses: actions/upload-artifact@v4
         if: always()
