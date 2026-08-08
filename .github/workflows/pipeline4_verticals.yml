@@ -48,11 +48,11 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-          DEEPSEEK_API_KEY: sk-71eab12699f047a5891e62268c66c241
         run: |
-          # Verticals動画をprojects/daily/rendersにコピー
+          # Verticals動画をprojects/daily/rendersにコピー（トピック名でリネーム）
           mkdir -p projects/daily/renders
-          cp ~/.verticals/media/*.mp4 projects/daily/renders/ 2>/dev/null || echo "no video"
+          TOPIC=$(python3 -c "import json; d=json.load(open(os.path.expanduser('~/.verticals/drafts/p4.json'))); print(d['news'][:40])" 2>/dev/null || echo "AI Tech News")
+          cp ~/.verticals/media/*.mp4 "projects/daily/renders/v2news_${TOPIC}.mp4" 2>/dev/null || echo "no video"
           ls projects/daily/renders/
           python3 sns_automation/scripts/youtube_auto_upload.py || echo "upload skipped"
 
