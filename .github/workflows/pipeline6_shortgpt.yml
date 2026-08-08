@@ -28,7 +28,7 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-        run: python3 sns_automation/scripts/youtube_auto_upload.py || echo "skipped"
+        run: python3 sns_automation/scripts/yt_upload_simple.py || echo "upload skipped"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
