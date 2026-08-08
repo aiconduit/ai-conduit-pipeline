@@ -50,6 +50,40 @@ jobs:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Step 2.5 - サムネイル生成（Pollinations.ai）
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          pip install Pillow --break-system-packages -q
+          python3 << 'PYEOF'
+          import json, os, sys
+          from pathlib import Path
+          
+          # news_content_plan.jsonからタイトルを取得
+          plan_path = "sns_automation/news_content_plan.json"
+          title = "AIコーディング最前線"
+          hook = "99%が知らない"
+          
+          try:
+              with open(plan_path) as f:
+                  plan = json.load(f)
+              title = plan.get("selected_title") or plan.get("script", {}).get("title", title)
+              scenes = plan.get("script", {}).get("scenes", [])
+              if scenes:
+                  hook = scenes[0].get("narration", hook)[:15]
+          except Exception as e:
+              print(f"plan読み込みエラー: {e}")
+          
+          print(f"タイトル: {title}")
+          print(f"フック: {hook}")
+          
+          sys.path.insert(0, "sns_automation/scripts")
+          from thumbnail_generator import generate_thumbnail
+          generate_thumbnail(title, hook, "assets/intro_thumbnail.jpg", "tech")
+          print("サムネイル生成完了")
+          PYEOF
+
       - name: Step 3 - 動画生成
         run: python3 run_from_news_plan.py
         env:
