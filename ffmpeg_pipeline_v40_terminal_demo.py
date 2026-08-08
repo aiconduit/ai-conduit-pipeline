@@ -67,15 +67,22 @@ def generate_demo_script(topic, category):
     import requests
     
     category_prompts = {
-        "claude_code": f"""Claude Codeを使った「{topic}」のデモ手順を生成してください。
-実際のターミナルコマンドと出力を6ステップで。
-RULES:
-- "command": 実際のclaudeコマンド（$ claude "..."等）
-- "output": コマンドの出力（2-4行）絵文字禁止・ASCII記号のみ使用
-- "comment": 日本語の解説（15文字以内）
-- リアルなClaude Code操作にすること
-Output ONLY JSON array:
-[{{"step":1,"command":"$ claude --version","output":["claude 2.1.206"],"comment":"バージョン確認"}},...]""",
+        "claude_code": f"""You are a Claude Code expert. Create a realistic terminal demo for "{topic}".
+Show 5 steps of actual Claude Code usage that would impress Japanese developers.
+
+STRICT RULES:
+- command: Real claude CLI commands only. Examples:
+  $ claude --dangerously-skip-permissions "Create REST API in app.py"
+  $ claude "review src/main.py and fix bugs"
+  $ cat app.py | claude "optimize this code"
+  DO NOT use fake commands like /config
+- output: 2-3 lines realistic terminal output. NO emoji. ASCII only.
+  Examples: "Writing app.py...", "Tests: 12 passed", "Committed: feat: add auth"
+- comment: Japanese max 10 chars. Show VALUE not action.
+  BAD: "バージョン確認" GOOD: "8秒でAPI完成"
+- Tell a story: problem to solution to result
+Output ONLY valid JSON array:
+[{{"step":1,"command":"$ claude --dangerously-skip-permissions \"Create a REST API\"","output":["Writing app.py...","Created 3 endpoints","[OK] Ready on :3000"],"comment":"8秒でAPI完成"}}]""",
         
         "gemini": f"""Gemini CLIを使った「{topic}」のデモ手順を6ステップで。
 実際のgeminiコマンドと出力。
@@ -230,10 +237,12 @@ def render_terminal_animation(steps, output_path, topic):
     # フレームをFFmpegでMP4に変換
     # TTS音声生成
     print(">> 音声生成中...")
-    narration_text = topic + "の使い方を解説します。" + "。".join(
-        s.get("comment", "") for s in steps if s.get("comment")
-    )[:80] + "。詳細は概要欄のリンクから無料で受け取れます。コメントにAIと書いてください。"
-    audio_path = str(WORK_DIR / "narration.mp3")
+    comments = [s.get("comment", "") for s in steps if s.get("comment")]
+    narration_text = (
+        f"{comments[0] if comments else topic}、その方法を解説します。"
+        + "、".join(comments[1:4]) + f"。{topic}をマスターすれば開発速度が大幅に上がります。"
+        + "詳細は概要欄のリンクから無料で受け取れます。コメントにAIと書いてください。"
+    )
     try:
         generate_tts(narration_text, audio_path)
         print(f"[OK] 音声生成完了")
