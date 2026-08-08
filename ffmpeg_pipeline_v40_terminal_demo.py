@@ -32,6 +32,15 @@ PROMPT = (255, 121, 198)   # プロンプト($)
 
 DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-71eab12699f047a5891e62268c66c241")
 
+def generate_tts(text, output_path, voice="ja-JP-KeitaNeural"):
+    """Edge TTSで音声生成"""
+    import asyncio, edge_tts
+    async def _gen():
+        tts = edge_tts.Communicate(text, voice=voice, rate="+10%")
+        await tts.save(output_path)
+    asyncio.run(_gen())
+    return output_path
+
 def get_font(size, mono=False):
     """日本語対応フォント取得"""
     jp_paths = [
@@ -185,7 +194,7 @@ def render_terminal_animation(steps, output_path, topic):
         lines.append({"text": cmd, "color": CYAN})
         
         # Enter後の間（0.3秒）
-        for _ in range(int(FPS * 0.3)):
+        for _ in range(int(FPS * 0.5)):
             img = make_terminal_frame(lines, title=topic, progress=progress)
             frames.append(img)
         
@@ -202,12 +211,12 @@ def render_terminal_animation(steps, output_path, topic):
                 color = WHITE
             
             lines.append({"text": out_line, "color": color})
-            for _ in range(int(FPS * 0.2)):
+            for _ in range(int(FPS * 0.5)):
                 img = make_terminal_frame(lines, title=topic, progress=progress)
                 frames.append(img)
         
         # ステップ間の間（0.5秒）
-        for _ in range(int(FPS * 0.5)):
+        for _ in range(int(FPS * 1.0)):
             img = make_terminal_frame(lines, title=topic, progress=progress)
             frames.append(img)
     
@@ -219,6 +228,19 @@ def render_terminal_animation(steps, output_path, topic):
         frames.append(img)
     
     # フレームをFFmpegでMP4に変換
+    # TTS音声生成
+    print(">> 音声生成中...")
+    narration_text = topic + "の使い方を解説します。" + "。".join(
+        s.get("comment", "") for s in steps if s.get("comment")
+    )[:80] + "。詳細は概要欄のリンクから無料で受け取れます。コメントにAIと書いてください。"
+    audio_path = str(WORK_DIR / "narration.mp3")
+    try:
+        generate_tts(narration_text, audio_path)
+        print(f"[OK] 音声生成完了")
+    except Exception as e:
+        print(f"[WARN] TTS失敗: {e}")
+        audio_path = None
+
     print(f">> {len(frames)}フレームをMP4に変換中...")
     
     # フレームを一時保存
@@ -229,13 +251,26 @@ def render_terminal_animation(steps, output_path, topic):
         frame_paths.append(p)
     
     # FFmpegでMP4生成
-    subprocess.run([
-        "ffmpeg", "-y", "-framerate", str(FPS),
-        "-i", str(FRAMES_DIR / "frame_%05d.png"),
-        "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-        "-pix_fmt", "yuv420p", "-movflags", "+faststart",
-        str(output_path)
-    ], capture_output=True)
+    import os as _os
+    if _os.path.exists(audio_path):
+        subprocess.run([
+            "ffmpeg", "-y", "-framerate", str(FPS),
+            "-i", str(FRAMES_DIR / "frame_%05d.png"),
+            "-i", audio_path,
+            "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+"-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-ac", "2",
+            "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+            "-shortest",
+            str(output_path)
+        ], capture_output=True)
+    else:
+        subprocess.run([
+            "ffmpeg", "-y", "-framerate", str(FPS),
+            "-i", str(FRAMES_DIR / "frame_%05d.png"),
+            "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+            "-pix_fmt", "yuv420p", "-movflags", "+faststart",
+            str(output_path)
+        ], capture_output=True)
     
     dur = len(frames) / FPS
     print(f"[OK] 完成: {output_path} ({dur:.1f}s)")
