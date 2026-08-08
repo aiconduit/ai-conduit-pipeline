@@ -253,10 +253,17 @@ def upload(youtube, video_file, title, description, tags):
     media = MediaFileUpload(video_file, chunksize=5*1024*1024, resumable=True, mimetype="video/mp4")
     request = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
     response = None
-    while response is None:
-        status, response = request.next_chunk()
-        if status: print(f"  {int(status.progress()*100)}%")
-    return response["id"]
+    try:
+        while response is None:
+            status, response = request.next_chunk()
+            if status: print(f"  {int(status.progress()*100)}%")
+        return response["id"]
+    except Exception as _ue:
+        err_str = str(_ue)
+        if "uploadLimitExceeded" in err_str:
+            print("⚠️ 本日のYouTubeアップロード上限に達しました。明日リセットされます。")
+            return None
+        raise
 
 def main():
     selected_title = ""
