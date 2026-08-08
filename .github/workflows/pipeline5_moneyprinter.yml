@@ -17,7 +17,7 @@ jobs:
 
       - name: Install
         run: |
-          pip install edge-tts requests pillow --break-system-packages -q
+          pip install edge-tts requests google-auth-oauthlib google-api-python-client pillow --break-system-packages -q
           sudo apt-get install -y ffmpeg --quiet
 
       - name: Generate Video
