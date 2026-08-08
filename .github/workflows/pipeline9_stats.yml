@@ -20,18 +20,18 @@ jobs:
           sudo apt-get install -y ffmpeg --quiet
       - name: Generate
         env:
-          PEXELS_API_KEY: ${ secrets.PEXELS_API_KEY }
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
         run: python3 sns_automation/scripts/p9_generate.py
       - name: Upload YouTube
         env:
-          YOUTUBE_TOKEN_JSON: ${ secrets.YOUTUBE_TOKEN_JSON }
-          YOUTUBE_CLIENT_ID: ${ secrets.YOUTUBE_CLIENT_ID }
-          YOUTUBE_CLIENT_SECRET: ${ secrets.YOUTUBE_CLIENT_SECRET }
-          YOUTUBE_REFRESH_TOKEN: ${ secrets.YOUTUBE_REFRESH_TOKEN }
+          YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: python3 sns_automation/scripts/yt_upload_simple.py || echo "upload skipped"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Pipeline_9_Stats_MrBeast-video
+          name: Pipeline-9-Stats-MrBeast-video
           path: projects/daily/renders/
           retention-days: 3
