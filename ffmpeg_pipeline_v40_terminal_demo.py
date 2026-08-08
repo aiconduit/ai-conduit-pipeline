@@ -250,6 +250,7 @@ def render_terminal_animation(steps, output_path, topic):
         frame.save(p)
         frame_paths.append(p)
     
+    CINEMATIC_VF = "unsharp=lx=7:ly=7:la=1.5:cx=3:cy=3:ca=0.3,curves=r='0/0 0.25/0.28 0.75/0.78 1/1'\:g='0/0 0.5/0.49 1/0.96'\:b='0/0.04 0.4/0.44 1/0.92',eq=contrast=1.2:brightness=0.01:saturation=1.3:gamma=0.92,vignette=angle=PI/2.5,noise=alls=7:allf=t+u,gblur=sigma=1.5"
     # FFmpegでMP4生成
     import os as _os
     if _os.path.exists(audio_path):
@@ -257,7 +258,7 @@ def render_terminal_animation(steps, output_path, topic):
             "ffmpeg", "-y", "-framerate", str(FPS),
             "-i", str(FRAMES_DIR / "frame_%05d.png"),
             "-i", audio_path,
-            "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+            "-vf", CINEMATIC_VF, "-preset", "slow", "-crf", "16",
 "-c:a", "aac", "-b:a", "192k", "-ar", "44100", "-ac", "2",
             "-pix_fmt", "yuv420p", "-movflags", "+faststart",
             "-shortest",
@@ -267,7 +268,7 @@ def render_terminal_animation(steps, output_path, topic):
         subprocess.run([
             "ffmpeg", "-y", "-framerate", str(FPS),
             "-i", str(FRAMES_DIR / "frame_%05d.png"),
-            "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+            "-vf", CINEMATIC_VF, "-preset", "slow", "-crf", "16",
             "-pix_fmt", "yuv420p", "-movflags", "+faststart",
             str(output_path)
         ], capture_output=True)
