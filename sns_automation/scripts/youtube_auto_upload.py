@@ -288,14 +288,14 @@ def main():
             # フック型タイトル（クリック率最大化）
             import random as _rand
             hook_patterns = [
-                f"【衝撃】{selected_title[:35]}",
+                f"99%が知らない{selected_title[:28]}",
+                f"コードレビューに3時間？{selected_title[:24]}",
                 f"知らないと損！{selected_title[:30]}",
                 f"エンジニア必見：{selected_title[:30]}",
-                f"【神機能】{selected_title[:33]}",
-                f"今すぐ試して！{selected_title[:30]}",
-                f"【完全解説】{selected_title[:31]}",
-                f"プロが使う{selected_title[:33]}",
-                f"これ知ってた？{selected_title[:30]}",
+                f"AIエンジニアが全員使ってる{selected_title[:22]}",
+                f"{selected_title[:35]}を3分で理解する",
+                f"プロが絶対教えない{selected_title[:27]}",
+                f"残業が消えた理由は{selected_title[:27]}",
             ]
             title = _rand.choice(hook_patterns) + " #Shorts"
             if not selected_title:
