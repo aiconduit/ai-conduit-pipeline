@@ -312,11 +312,13 @@ def main():
             hook = topic.get("hook", "ルーティン作業、AIに任せよう")
             topic_text = topic.get("topic", "GitHubトレンドAIツール")
         patterns = [
-            f"え、マジ？{hook}",
-            f"【衝撃】{topic_text}がヤバすぎた",
+            f"99%が知らない{hook}",
+            f"コードレビューに3時間？{topic_text}で解決",
             f"知らないと損！{hook}",
             f"{topic_text}を3分で理解する",
             f"AIエンジニアが全員使ってる{topic_text}",
+            f"残業が消えた理由は{topic_text}だった",
+            f"プロが絶対教えない{hook}",
         ]
         raw = random.choice(patterns)
         title = f"{raw[:45]}#Shorts" if len(raw) > 45 else f"{raw} #Shorts"
