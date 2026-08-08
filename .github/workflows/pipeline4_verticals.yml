@@ -66,7 +66,7 @@ jobs:
             --provider openai \
             --voice edge \
             --lang en \
-            --no-upload 2>&1 || echo "⚠️ Verticals失敗"
+            2>&1 || echo "⚠️ Verticals失敗"
           
           ls ~/.verticals/media/ 2>/dev/null && echo "動画生成完了"
       
