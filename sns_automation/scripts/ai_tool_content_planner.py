@@ -323,19 +323,59 @@ def generate_script(source, raw_content):
     """DeepSeekでショート動画スクリプトを生成"""
     key_content = extract_key_sections(raw_content, 1500)
     
-    prompt = f"""あなたは「AI Conduit」のSNSコンテンツプランナーです。
-日本のエンジニア・IT学生・AI初学者向けのYouTube Shorts動画（15〜20秒・5シーン）のスクリプトを生成してください。
+    prompt = f"""あなたはJenny Hoyos × Fireshipを超えるショート動画スクリプトライターです。
+日本のエンジニア向けYouTube Shorts（34秒・完了率90%以上狙い）のスクリプトを生成してください。
 
 ## 参考にするGitHubコンテンツ（{source["repo"]}）
 {key_content}
 
-## 制作ルール（トップクリエイターの法則を全適用）
-1. 上記のGitHubコンテンツの中から「視聴者が今すぐ試したい」と思う1つのTIPSを選ぶ
-2. 具体的なコマンド・数字・手順を含める（「例：claude codeで/review」等）
-3. narrationは各シーン15〜20文字。短くテンポよく。
-4. total_duration_secは18以下（Jenny Hoyos法則: 短いほどループ再生される）
-5. カテゴリ: {source["category"]}
-6. 動画末尾でGitHubリポジトリ（{source["repo"]}）を紹介してプレゼントとして配布
+## Jenny Hoyos式フォーミュラ（必ず守る）
+上記コンテンツから「視聴者が今すぐ試したい」1つのTIPSを選び、以下の構造で作成:
+
+Scene 1 - Hook（0-3秒）: Power wordsで始める。「無料」「秘密」「消えた」「3秒」「10倍」等。
+  逆張りか衝撃の数字で「え、なんで？」と思わせる。
+  例:「コードレビューが3秒で終わるコマンドがある」
+  例:「99%のエンジニアが知らないClaude Code設定」
+
+Scene 2 - Foreshadow（3-6秒）: 最後まで見る理由を植え付ける。
+  例:「しかも完全無料で、今日から使える」
+  例:「最後に誰も教えてくれない裏技も紹介する」
+
+Scene 3 - Narrative（6-25秒）: 具体的なTIPS・コマンド・数字を3つ。
+  各文10文字以内。小学5年生でも分かる言葉のみ。
+  具体的なコマンドや数字を必ず入れる。
+
+Scene 4 - Twist（25-31秒）: 予想外の事実で驚かせる。
+  例:「実はこれ、公式ドキュメントに書いてない」
+  例:「日本語で動かせることを誰も知らなかった」
+
+Scene 5 - CTA（31-34秒）: 「概要欄のリンクから今すぐ受け取れます。コメントにAIと書いてください。」
+
+## 品質基準（全シーン）
+- 体言止め禁止・必ず動詞で終わる
+- 「やばい」「え、まじ」「すごい」等の曖昧語禁止
+- 数字は具体的に（「たくさん」→「3つ」「87%」「3秒」）
+- 読み易さ: 小学5年生レベル
+- 各シーンnarration: 10-20文字
+- 合計: 110-130文字（34秒）
+
+## カテゴリ: {source["category"]}
+## リポジトリ: {source["repo"]}
+
+## 出力形式（JSONのみ・前置き不要）
+{{
+  "selected_title": "選んだTIPSのタイトル",
+  "hook_text_overlay": "画面表示テキスト（8文字以内・インパクト重視）",
+  "scenes": [
+    {{"title": "Hook", "narration": "Hook文（15文字以内）", "caption": "Hook（8文字以内）", "mood": "hook", "visual_prompt": "b-roll英語キーワード"}},
+    {{"title": "Foreshadow", "narration": "Foreshadow文", "caption": "伏線", "mood": "hook", "visual_prompt": "b-roll英語キーワード"}},
+    {{"title": "Narrative", "narration": "3つの事実", "caption": "具体的内容", "mood": "value", "visual_prompt": "coding terminal"}},
+    {{"title": "Twist", "narration": "Twist文", "caption": "どんでん返し", "mood": "value", "visual_prompt": "surprise reveal"}},
+    {{"title": "CTA", "narration": "概要欄のリンクから今すぐ受け取れます。コメントにAIと書いてください。", "caption": "無料プレゼント", "mood": "cta", "visual_prompt": "gift reward"}}
+  ],
+  "total_duration_sec": 34,
+  "pexels_keywords": ["b-roll英語1", "b-roll英語2", "b-roll英語3"]
+}}布
 7. selected_titleには必ず数字を入れる（「5倍」「10分」「3ステップ」等）
 8. HookシーンはCuriosity Gap（情報の空白）を作る。以下のパターンから選ぶ:
    - 「○○を知らないエンジニアは10年後に後悔する」
