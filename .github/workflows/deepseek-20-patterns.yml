@@ -1,15 +1,7 @@
 name: DeepSeek 20 Patterns Video Generator
 
 on:
-  push:
-    branches: [ master, deepseek-pipeline ]
   workflow_dispatch:
-  schedule:
-    - cron: '0 */6 * * *'
-
-env:
-  DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-  PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
 
 jobs:
   generate-20-videos:
