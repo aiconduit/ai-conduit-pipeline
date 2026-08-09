@@ -75,7 +75,9 @@ CTA_TEXT = f"概要欄のリンクから無料で受け取れます。コメン�
 
 # 2. script_60s を構築（plan.script.scenes[].narration を連結）
 plan = content  # ai_tool_content_plannerはトップレベルにscriptを保存
-scene_narrations = [s.get("narration", "") for s in plan.get("script", {}).get("scenes", [])]
+# 新旧両フォーマット対応（script.scenes または scenes）
+_scenes_data = plan.get("script", {}).get("scenes", []) or plan.get("scenes", [])
+scene_narrations = [s.get("narration", "") for s in _scenes_data]
 script_60s = "".join(scene_narrations).strip()
 if not script_60s:
     print("⚠️ scriptが空です。デフォルトナレーションを使用します。")
@@ -96,7 +98,7 @@ print(f"   スクリプト: {script_60s}")
 #    Scene 5 (cta)       : 固定CTA
 # scenesのnarrationを直接使用
 CTA_TEXT = f"概要欄のリンクから無料で受け取れます。コメントにAIと書いてください。"
-raw_scenes = plan.get("script", {}).get("scenes", [])
+raw_scenes = plan.get("script", {}).get("scenes", []) or plan.get("scenes", [])
 mood_map = {"Hook": "hook", "Fact_1": "interrupt", "Fact_2": "value", "Twist": "value", "CTA": "cta"}
 scene_specs = []
 for s in raw_scenes:
