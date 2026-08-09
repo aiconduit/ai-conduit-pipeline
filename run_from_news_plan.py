@@ -150,6 +150,17 @@ def mood_visual_query(topic, mood):
 
 interrupts = ["zoom_punch", "color_flash", "text_pop", "speed_ramp", "cut_zoom", "none"]
 
+# シーン別モーション設定（forループ前に定義）
+SCENE_MOTION = {
+    "Hook":     {"zoom": "snap_zoom_in",  "kb": "diagonal",   "vf_extra": ""},
+    "Why":      {"zoom": "slow_zoom_in",  "kb": "up_down",    "vf_extra": ""},
+    "Solution": {"zoom": "hard_cut",      "kb": "left_right", "vf_extra": ""},
+    "Step1":    {"zoom": "punch_in",      "kb": "right_left", "vf_extra": "eq=contrast=1.1"},
+    "Step2":    {"zoom": "punch_in",      "kb": "down_up",    "vf_extra": "eq=contrast=1.1"},
+    "Result":   {"zoom": "snap_zoom_out", "kb": "diagonal",   "vf_extra": ""},
+    "CTA":      {"zoom": "fade_out",      "kb": "left_right", "vf_extra": ""},
+}
+
 scenes = []
 for i, spec in enumerate(scene_specs):
     sent = spec["narration"]
@@ -200,17 +211,6 @@ MOOD_TTS_PARAMS = {
     "Step1":          {"rate": "-5%",  "pitch": "-3Hz"},  # ゆっくり・明確
     "Step2":          {"rate": "-5%",  "pitch": "-3Hz"},  # ゆっくり・明確
     "Result":         {"rate": "+8%",  "pitch": "+4Hz"},  # 達成感
-}
-
-# シーン別FFmpegモーション設定
-SCENE_MOTION = {
-    "Hook":     {"zoom": "snap_zoom_in",   "kb": "diagonal",    "vf_extra": ""},
-    "Why":      {"zoom": "slow_zoom_in",   "kb": "up_down",     "vf_extra": ""},
-    "Solution": {"zoom": "hard_cut",       "kb": "left_right",  "vf_extra": ""},
-    "Step1":    {"zoom": "punch_in",       "kb": "right_left",  "vf_extra": "eq=contrast=1.1"},
-    "Step2":    {"zoom": "punch_in",       "kb": "down_up",     "vf_extra": "eq=contrast=1.1"},
-    "Result":   {"zoom": "snap_zoom_out",  "kb": "diagonal",    "vf_extra": ""},
-    "CTA":      {"zoom": "fade_out",       "kb": "left_right",  "vf_extra": ""},
 }
 
 for s in scenes:
