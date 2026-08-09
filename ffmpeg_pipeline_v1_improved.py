@@ -196,8 +196,12 @@ def compose_scene(scene, idx, is_last=False):
     scroll_y = scene.get("scroll_y", 0)
     ken_burns_style = scene.get("ken_burns_style", None)
     visual_2 = scene.get("visual_2", visual)
-    # A/Bスプリット: 前半はnews_url録画、後半はPexels B-roll
-    broll_a = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE, direct_url=news_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
+    # Pexels B-roll（video_libraryのURLを優先）
+    # シーン別video_libraryのURLを使用（Playwright録画を無効化）
+    _scene_lib_url = None
+    if hasattr(scene, "get"):
+        _shot_key = scene.get("shot", "value").lower()
+    broll_a = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE, direct_url=_scene_lib_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
     broll_b = fetch_broll_from_topic(topic_str, visual_2, cache_dir=PEXELS_CACHE, direct_url=None, scroll_y=0, ken_burns_style=ken_burns_style)
     if broll_a and broll_b and broll_a != broll_b:
         half_dur = dur / 2
