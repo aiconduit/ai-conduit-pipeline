@@ -185,11 +185,35 @@ def compose_scene(scene, idx, is_last=False):
     scroll_y = scene.get("scroll_y", 0)
     ken_burns_style = scene.get("ken_burns_style", None)
     visual_2 = scene.get("visual_2", visual)
+    # Step1/Step2/SolutionシーンはターミナルアニメーションをB-rollとして使用
+    _shot = scene.get("shot", scene.get("title", "")).lower()
+    _broll_override = scene.get("broll_override", None)
+    _terminal_broll = None
+    if _broll_override and Path(_broll_override).exists():
+        _terminal_broll = _broll_override
+        print(f"   ✅ broll_override使用: {_shot}")
+    elif _shot in ["step1", "step2", "solution"] and scene.get("narration", ""):
+        try:
+            import sys as _sys2
+            _sys2.path.insert(0, str(ROOT_DIR / "sns_automation/scripts"))
+            from terminal_animator import generate_typing_animation, extract_commands_from_narration
+            _term_out = str(WORK_DIR / f"terminal_{idx:02d}.mp4")
+            _cmds = extract_commands_from_narration(scene.get("narration", ""))
+            _term = generate_typing_animation(_cmds, _term_out, duration=max(3.0, dur))
+            if _term and Path(_term_out).exists():
+                _terminal_broll = _term_out
+                print(f"   ✅ ターミナルアニメーション生成: {_shot}")
+        except Exception as _te:
+            print(f"   ⚠️ ターミナルアニメーション失敗: {_te}")
+
     # A/Bスプリット: 前半はnews_url録画、後半はPexels B-roll
     broll_a = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE, direct_url=news_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
     broll_b = fetch_broll_from_topic(topic_str, visual_2, cache_dir=PEXELS_CACHE, direct_url=None, scroll_y=0, ken_burns_style=ken_burns_style)
     # A/Bスプリット合成: 前半broll_a、後半broll_b
-    if broll_a and broll_b and broll_a != broll_b:
+    # ターミナルアニメーションが生成されていれば優先使用
+    if _terminal_broll:
+        broll = _terminal_broll
+    elif broll_a and broll_b and broll_a != broll_b:
         half_dur = dur / 2
         broll_a_half = str(WORK_DIR / f"broll_a_{idx:02d}.mp4")
         broll_b_half = str(WORK_DIR / f"broll_b_{idx:02d}.mp4")
