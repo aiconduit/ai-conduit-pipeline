@@ -1,184 +1,121 @@
-# Claude Codeで完全仮想マシンから安全な操作を実現 - 実践テンプレート
+# Claude Codeで毎回の指示が不要になる設定 - 実践テンプレート
 
 ## この動画で学んだこと
-Claude Codeのcomputer-use機能とdisposable macOS VMを組み合わせることで、ホスト環境を汚染せずに安全なAI操作を実現できます。隔離された環境でClaudeに自由に作業させるための完全テンプレートです。
+Claude Codeのプロジェクト直下に`CLAUDE.md`ファイルを作成することで、毎回の指示入力を省略し、コーディング規約や禁止事項を自動的に適用させることができます。
 
 ## すぐに使えるテンプレート
 
-### 1. 開発環境の準備（ターミナルで実行）
+### 1. CLAUDE.mdファイル（プロジェクトルートに配置）
 
-```bash
-# ステップ1: Xcode Command Line Toolsのインストール
-# これがないとHomebrewやビルドツールが動作しません
-xcode-select --install
+```markdown
+# プロジェクト共通設定
 
-# インストール確認（バージョンが表示されればOK）
-xcode-select -p
-# 出力例: /Library/Developer/CommandLineTools
+## プロジェクト概要
+- プロジェクト名: [プロジェクト名を記入]
+- 技術スタック: [使用技術を記入]
+- 開発フェーズ: [開発/テスト/本番など]
 
-# ステップ2: Homebrewのインストール（未導入の場合）
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+## コーディング規約
 
-# ステップ3: UTM（仮想マシン管理ツール）のインストール
-brew install --cask utm
+### 全般
+- インデントはスペース2文字を使用する
+- 行末のセミコロンは省略しない
+- 文字列はシングルクォートを基本とする
+- 変数名はキャメルケースで記述する
+- 定数は大文字のスネークケースで記述する
 
-# インストール確認
-brew list --cask utm
+### ファイル構成
+- コンポーネントは`src/components/`に配置する
+- ユーティリティ関数は`src/utils/`に配置する
+- 定数は`src/constants/`に配置する
+
+### コメント
+- 複雑なロジックには必ず日本語でコメントを付ける
+- TODOコメントには担当者名と期限を明記する
+- 公開APIにはJSDoc形式で説明を記述する
+
+## 禁止事項
+- `any`型の使用は禁止する
+- `console.log`の本番コードへの残置は禁止する
+- ハードコーディングは禁止し、定数ファイルに定義する
+- 未使用のインポート・変数は削除する
+- エラーハンドリングを省略しない
+
+## テスト規約
+- テストファイルは`__tests__/`ディレクトリに配置する
+- テスト名は「should_期待する動作_when_条件」の形式で記述する
+- カバレッジは80%以上を維持する
+
+## コミット規約
+- コミットメッセージは日本語で記述する
+- プレフィックスは以下の形式を使用する
+  - `feat:` 新機能
+  - `fix:` バグ修正
+  - `docs:` ドキュメント変更
+  - `refactor:` リファクタリング
+  - `test:` テスト関連
+
+## 環境設定
+- Node.js: v20以上
+- パッケージマネージャー: npm
+- フォーマッター: Prettier
+- リンター: ESLint
+
+## 補足
+- 不明な点があれば必ず質問する
+- 変更は小さく分けて行う
+- 既存コードのスタイルに従う
 ```
 
-### 2. Claude Codeのセットアップ
+### 2. 設定確認コマンド
 
 ```bash
-# Claude Codeのインストール（Anthropic公式）
-npm install -g @anthropic-ai/claude-code
+# CLAUDE.mdファイルの作成
+touch CLAUDE.md
 
-# バージョン確認
-claude --version
+# ファイルの内容を確認
+cat CLAUDE.md
 
-# 認証（初回のみ）
-claude login
+# プロジェクト構造の確認
+ls -la
 ```
 
-### 3. 仮想マシン作成スクリプト
+## 使い方
 
-```bash
-#!/bin/bash
-# ファイル名: setup_vm.sh
-# 使い方: chmod +x setup_vm.sh && ./setup_vm.sh
+1. **プロジェクトのルートディレクトリに移動します**
+   ```bash
+   cd /path/to/your/project
+   ```
 
-set -e  # エラーで即停止
+2. **`CLAUDE.md`ファイルを作成します**
+   ```bash
+   touch CLAUDE.md
+   ```
 
-echo "=== macOS VMセットアップ開始 ==="
+3. **上記のテンプレートをコピー&ペーストし、プロジェクトに合わせてカスタマイズします**
 
-# UTMがインストールされているか確認
-if ! command -v utmctl &> /dev/null; then
-    echo "UTMがインストールされていません。インストールします..."
-    brew install --cask utm
-fi
+4. **Claude Codeを起動して動作を確認します**
+   ```bash
+   claude
+   ```
 
-# VM名を設定
-VM_NAME="Claude-Sandbox"
+5. **指示なしで規約が適用されることを確認します**
+   - コード生成時に自動的に規約が適用されます
+   - 禁止事項が守られているか自動チェックされます
 
-# 既存のVMをチェック
-if utmctl list | grep -q "$VM_NAME"; then
-    echo "既存のVMが見つかりました: $VM_NAME"
-    echo "起動します..."
-    utmctl start "$VM_NAME"
-else
-    echo "新しいVMを作成します: $VM_NAME"
-    echo "※ UTM GUIを開いて、macOS VMを手動で作成してください"
-    echo "推奨設定:"
-    echo "  - OS: macOS Sonoma"
-    echo "  - RAM: 4GB以上"
-    echo "  - ディスク: 40GB以上"
-    echo "  - CPU: 2コア以上"
-    open -a UTM
-fi
+## よくある質問
 
-echo "=== セットアップ完了 ==="
-```
+**Q: CLAUDE.mdは複数作成できますか？**
+A: はい、サブディレクトリにも配置できます。その場合、そのディレクトリ内の作業時に優先的に適用されます。
 
-### 4. Claude CodeをVM内で実行する設定
+**Q: チームメンバーと設定を共有するには？**
+A: CLAUDE.mdをGitリポジトリにコミットすることで、チーム全体で共有できます。
 
-```bash
-#!/bin/bash
-# ファイル名: run_claude_in_vm.sh
-# VM内でClaude Codeを安全に実行するスクリプト
+**Q: プロジェクトごとに異なる設定が必要な場合は？**
+A: プロジェクトのルートに配置するCLAUDE.mdはプロジェクト固有の設定を、ホームディレクトリに配置するCLAUDE.mdはグローバル設定として使用できます。
 
-set -e
+**Q: 設定を一時的に無効化したい場合は？**
+A: 対話中に「CLAUDE.mdの設定を無視して」と指示することで、一時的に設定を無効化できます。
 
-VM_NAME="Claude-Sandbox"
-
-# VMが起動しているか確認
-if ! utmctl list | grep -q "$VM_NAME"; then
-    echo "VMを起動しています..."
-    utmctl start "$VM_NAME"
-    sleep 10  # 起動待機
-fi
-
-# VMのIPアドレスを取得
-VM_IP=$(utmctl ip "$VM_NAME")
-echo "VM IP: $VM_IP"
-
-# SSHでVMに接続してClaude Codeを実行
-# ※ VM側でSSHサーバーを有効にしておく必要があります
-ssh user@"$VM_IP" << 'EOF'
-    # VM内で実行されるコマンド
-    echo "=== Claude CodeをVM内で起動 ==="
-    
-    # Claude Codeのインストール確認
-    if ! command -v claude &> /dev/null; then
-        echo "Claude Codeをインストール中..."
-        npm install -g @anthropic-ai/claude-code
-    fi
-    
-    # 作業ディレクトリ作成
-    mkdir -p ~/claude-workspace
-    cd ~/claude-workspace
-    
-    # Claude Codeを起動（computer-useモード）
-    claude --computer-use
-    
-    echo "=== Claude Code終了 ==="
-EOF
-
-# セッション終了後、VMをシャットダウン（disposable環境）
-echo "VMをシャットダウンします..."
-utmctl stop "$VM_NAME"
-echo "安全にVMを破棄しました"
-```
-
-### 5. 自動クリーンアップ設定
-
-```bash
-#!/bin/bash
-# ファイル名: cleanup_vm.sh
-# 使い終わったVMを自動で削除するスクリプト
-
-set -e
-
-VM_NAME="Claude-Sandbox"
-
-echo "=== VMクリーンアップ開始 ==="
-
-# VMをシャットダウン
-if utmctl list | grep -q "$VM_NAME"; then
-    echo "VMをシャットダウン中..."
-    utmctl stop "$VM_NAME"
-    sleep 5
-fi
-
-# VMを削除（完全に破棄）
-echo "VMを削除中..."
-utmctl delete "$VM_NAME"
-
-# 関連ファイルの削除
-echo "関連ファイルを削除中..."
-rm -rf ~/Library/Application\ Support/UTM/"$VM_NAME".utm
-
-echo "=== クリーンアップ完了 ==="
-echo "新しいVMを作成するには: ./setup_vm.sh を実行"
-```
-
-### 6. ワンライナー実行（すべてを自動化）
-
-```bash
-# 完全自動化スクリプト
-# ファイル名: auto_sandbox.sh
-
-#!/bin/bash
-set -e
-
-echo "=== Claude Code Sandbox環境 自動セットアップ ==="
-
-# 1. 環境チェック
-echo "1. 環境チェック..."
-if ! command -v brew &> /dev/null; then
-    echo "Homebrewをインストール中..."
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-fi
-
-# 2. 必要なツールのインストール
-echo "2. 必要なツールをインストール..."
-xcode-select --install 2>/dev/null || echo "Xcode CLTは既にインストール済み"
-brew install --cask utm 2>/dev/null || echo "UTMは既にインストール
+---
+AI Conduit: https://www.youtube.com/@AI.Conduit
