@@ -139,86 +139,82 @@ def generate_script(source, raw_content):
 
 ## 台本の絶対ルール
 
-### ルール1: Hookは必ず「ツール名」から始める
-フォーマット：「[ツール名]の[具体的な問題]で困っていませんか？」
-視聴者は0.5秒でスワイプするかを決める。ツール名がないと「自分に関係ない話」と判断される。
+### ルール1: Hookは「結果を最初に見せる」
+視聴者は最初の3秒で「これは自分に関係あるか」を判断する。
+問題起点ではなく「完成した結果・できること」を最初に見せる。
+フォーマット：「Claude Code[機能名]で[具体的な結果]ができます」
 
 良い例：
-- 「Claude Codeのサブエージェントが勝手にファイルを書き換えていませんか？」
-- 「Claude Codeに毎回同じ指示を打ち込んでいませんか？」
-- 「Gemini CLIの使い方がわからず毎回ドキュメントを調べていませんか？」
-- 「GitHub Copilotのレビューが的外れで困っていませんか？」
+- 「Claude Codeのdisallowedツールで、コードレビューが読み取り専用で自動化されます」
+- 「Claude CodeのCLAUDE.mdに書くだけで、毎回の指示が不要になります」
+- 「Claude CodeのMCPで、外部APIを自然言語で直接操作できます」
 
 悪い例：
-- 「サブエージェントが勝手にファイルを書き換えていませんか？」→ 何のツール？
-- 「毎回同じ指示を打ち込んでいませんか？」→ 何のツール？
-- 「Claude Codeで作業を自動化できます」→ 問題起点になっていない
-- 「このツールがやばい」→ ツール名も問題も不明
+- 「サブエージェントで困っていませんか？」→ 結果が見えない
+- 「Claude Codeをもっと活用しましょう」→ 何ができるか不明
 
-必ずHookの1文目にツール名（Claude Code/Gemini CLI/GitHub Copilot等）を入れること。
+### ルール2: 構成は「結果→理由→手順→確認」
+- Hook: 完成した結果・できること（ツール名必須）
+- Why: なぜこれが必要か・使わないと何が起きるか
+- Solution: 何をどこに書くか（実際のパス・コマンド）
+- Step1: 手順1（実際のコード・コマンドそのまま）
+- Step2: 手順2（実際のコード・設定値そのまま）
+- Result: 実際にどう変わるか（具体的・定量的）
+- CTA: この設定ファイルを受け取れる
 
-### ルール2: 解決策は実際のコード・コマンド・ファイルパスをそのまま使う
-ドキュメントに書いてある実際のフィールド名・コマンド・パスをそのまま台本に入れる。
-「設定する」「作るだけ」で終わらず「具体的に何をどこに書くか」まで言う。
+### ルール3: 実際のコード・パスをそのまま使う
+- 「.claude/agents/reviewer.md」「disallowedTools: Write, Edit」等をそのまま入れる
+- 「設定するだけ」「書くだけ」で終わらず「何をどこに書くか」まで言う
+- コマンドは $ から始まる実際のコマンドを使う
 
 良い例：
-- 「.claude/agents/reviewer.mdを作り、1行目にname: reviewer と書きます」
-- 「disallowedTools: Write, Edit と書くと書き換えを禁止できます」
-- 「CLAUDE.mdのトップに# Rules for Claude と書いてルールを追加します」
+- 「.claude/agents/reviewer.mdの1行目にname: reviewer と書きます」
+- 「frontmatterにdisallowedTools: Write, Edit と記述します」
+- 「$ claude --model claude-opus-4 と入力するだけです」
 
 悪い例：
-- 「設定ファイルを作るだけです」→ どこに何を書く？
-- 「フィールドを追加します」→ どのフィールドを？どこに？
+- 「設定ファイルを作るだけです」→ どこに何を？
+- 「コマンドを実行します」→ どのコマンド？
 
-### ルール3: 説明は段階的に・具体的に
-- Step1: 何を準備するか
-- Step2: 実際に何をするか（コマンド・コードそのまま）
-- Step3: 実行するとどうなるか
-各ステップは視聴者がその場で試せるレベルで具体的に説明する。
+### ルール4: Before→Afterは具体的に
+Before: 今まで何をしていたか（具体的・時間や手順数）
+After: これで何がどう変わるか（具体的・測定可能）
+禁止: 「爆速」「大幅」「劇的に」「やばい」
 
-### ルール4: Before→Afterで変化を具体的に示す
-Before: 今まで何が起きていたか（1文・具体的）
-After: これで何がどう変わるか（1文・具体的）
-絶対禁止: 「爆速」「大幅」「劇的に」などの曖昧な言葉
-
-### ルール5: CTAは動画の内容と完全一致
-「この[動画で紹介したもの]を概要欄から受け取れます」
-例: 「このdisallowedToolsの設定テンプレートを概要欄から受け取れます」
+### ルール5: CTAは動画内容と完全一致
+「この[動画で紹介したもの]のテンプレートを概要欄から受け取れます」
 
 ## 台本構成（60秒・7シーン）
-Scene1 Hook（0-5秒）: 視聴者の具体的な問題提起（「〜で困っていませんか？」）
-Scene2 Problem（5-13秒）: その問題がなぜ起きるのか・どれだけ困るか説明
-Scene3 Solution（13-23秒）: ツール名+機能名+何をするか（実際のパス・フィールドを含む）
-Scene4 Step1（23-33秒）: 実際にやること手順1（コマンドそのまま・ファイルパスそのまま）
-Scene5 Step2（33-45秒）: 実際にやること手順2（コードそのまま・設定そのまま）
-Scene6 Result（45-53秒）: Before→After（何がどう変わるか具体的に）
+Scene1 Hook（0-5秒）: Claude Codeの[機能]で[具体的な結果]ができます（結果を最初に見せる）
+Scene2 Why（5-13秒）: これがないと何が起きるか・なぜ必要か
+Scene3 Solution（13-23秒）: 何をどこに書くか（実際のパス・ファイル名）
+Scene4 Step1（23-33秒）: 手順1の実際のコード・コマンドそのまま
+Scene5 Step2（33-45秒）: 手順2の実際のコード・設定値そのまま
+Scene6 Result（45-53秒）: Before→After（具体的な変化）
 Scene7 CTA（53-60秒）: 動画内容と直結したプレゼント
 
-## 禁止
-- 根拠のない数字（「10倍速」「3秒で」「爆速」）
-- 曖昧な言葉（「やばい」「すごい」「大幅」「神」「消えた」「禁断」）
-- 「〜するだけ」で終わる説明（必ず具体的に続ける）
-- 問題が不明なフック
+## 禁止ワード
+爆速・大幅・劇的・やばい・すごい・神・消えた・禁断・根拠のない数字
 
 ## カテゴリ: {source["category"]}
 ## リポジトリ: {source["repo"]}
 
 JSONのみ出力（前置き不要）:
 {{
-  "selected_title": "問題と解決策が伝わる30文字以内のタイトル（ツール名必須）",
-  "problem": "視聴者の具体的な問題（1文）",
-  "hook_text_overlay": "8文字以内・問題のキーワード",
+  "selected_title": "結果が伝わる30文字以内のタイトル（Claude Code/Claude必須）",
+  "result_first": "最初に見せる結果（1文・具体的）",
+  "hook_text_overlay": "8文字以内・できることのキーワード",
   "scenes": [
-    {{"title": "Hook", "narration": "具体的な問題（「〜ていませんか？」で終わる・30文字以内）", "caption": "問題", "mood": "hook", "visual_prompt": "frustrated developer typing"}},
-    {{"title": "Problem", "narration": "問題の背景・なぜ困るか（30文字以内）", "caption": "背景", "mood": "hook", "visual_prompt": "developer frustrated screen"}},
-    {{"title": "Solution", "narration": "ツール名+機能名+解決手順概要（実際のファイルパス・フィールドを含む・35文字以内）", "caption": "解決策", "mood": "value", "visual_prompt": "terminal command coding dark"}},
-    {{"title": "Step1", "narration": "手順1: 実際のコマンドやファイルパス（ドキュメントそのまま・35文字以内）", "caption": "手順1", "mood": "value", "visual_prompt": "code editor file creation"}},
-    {{"title": "Step2", "narration": "手順2: 実際のコードや設定値（ドキュメントそのまま・35文字以内）", "caption": "手順2", "mood": "value", "visual_prompt": "code writing terminal"}},
-    {{"title": "Result", "narration": "Before: [具体的な問題] → After: [具体的な変化]（35文字以内）", "caption": "変化", "mood": "value", "visual_prompt": "developer happy success productive"}},
-    {{"title": "CTA", "narration": "この[動画で紹介したもの]のテンプレートを概要欄から受け取れます。コメントにAIと書いてください。", "caption": "プレゼント", "mood": "cta", "visual_prompt": "gift download link"}}
+    {{"title": "Hook", "narration": "Claude Code[機能]で[具体的な結果]ができます（30文字以内）", "caption": "できること", "mood": "hook", "visual_prompt": "claude code terminal success result screen"}},
+    {{"title": "Why", "narration": "これがないと[具体的な問題]が起きます（30文字以内）", "caption": "必要な理由", "mood": "hook", "visual_prompt": "developer frustrated problem screen"}},
+    {{"title": "Solution", "narration": "Claude Codeの[機能名]・[実際のファイルパス]で解決（35文字以内）", "caption": "解決策", "mood": "value", "visual_prompt": "terminal file creation coding dark"}},
+    {{"title": "Step1", "narration": "手順1: [実際のコマンド・パスそのまま]（35文字以内）", "caption": "手順1", "mood": "value", "visual_prompt": "code editor typing command terminal"}},
+    {{"title": "Step2", "narration": "手順2: [実際のコード・設定値そのまま]（35文字以内）", "caption": "手順2", "mood": "value", "visual_prompt": "code writing configuration file"}},
+    {{"title": "Result", "narration": "Before: [問題] → After: [具体的な変化]（35文字以内）", "caption": "変化", "mood": "value", "visual_prompt": "developer happy productive success screen"}},
+    {{"title": "CTA", "narration": "この[紹介したもの]のテンプレートを概要欄から受け取れます。コメントにAIと書いてください。", "caption": "無料プレゼント", "mood": "cta", "visual_prompt": "gift download template file"}}
   ],
   "total_duration_sec": 60,
-  "pexels_keywords": ["developer coding terminal", "programming screen dark", "code editor"]
+  "pexels_keywords": ["claude code terminal", "developer coding dark screen", "programming workspace"]
 }}"""
 
     r = requests.post(
