@@ -129,6 +129,37 @@ MOOD_VISUAL_QUERIES = {
 
 
 # B-roll B: 内容に関係なくtech系映像に固定（コード画面・PC操作・AI技術）
+
+# シーン別動画素材ライブラリ読み込み
+import random as _rand_lib
+VIDEO_LIBRARY = {}
+try:
+    _lib_path = "assets/video_library.json"
+    if os.path.exists(_lib_path):
+        with open(_lib_path, encoding="utf-8") as _lf:
+            VIDEO_LIBRARY = json.load(_lf)
+        print(f"✅ 動画ライブラリ: {sum(len(v) for v in VIDEO_LIBRARY.values())}本")
+except Exception as _le:
+    print(f"⚠️ 動画ライブラリ読み込み失敗: {_le}")
+
+def get_scene_video_url(shot_title: str) -> str:
+    """シーンタイトルに対応する動画URLをライブラリから取得"""
+    key = shot_title.lower()
+    videos = VIDEO_LIBRARY.get(key, VIDEO_LIBRARY.get("solution", []))
+    if videos:
+        return _rand_lib.choice(videos)["url"]
+    return None
+
+# ターミナルアニメーター読み込み
+try:
+    sys.path.insert(0, "sns_automation/scripts")
+    from terminal_animator import generate_typing_animation, extract_commands_from_narration
+    TERMINAL_ANIMATOR_AVAILABLE = True
+    print("✅ ターミナルアニメーター読み込み完了")
+except Exception as _te:
+    TERMINAL_ANIMATOR_AVAILABLE = False
+    print(f"⚠️ ターミナルアニメーター失敗: {_te}")
+
 import random as _rand_broll
 TECH_BROLL_QUERIES = [
     "person typing laptop coding",
