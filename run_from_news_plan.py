@@ -184,12 +184,30 @@ print(f"   {len(scenes)} シーン生成済み")
 print("\n[1/4] 🎙️ TTS 生成中...")
 # moodごとのTTS rate/pitch設定
 MOOD_TTS_PARAMS = {
+    # 旧型対応
     "hook":           {"rate": "+8%",  "pitch": "+3Hz"},
     "interrupt":      {"rate": "+5%",  "pitch": "+2Hz"},
-    "value":          {"rate": "-8%",  "pitch": "-4Hz"},
+    "value":          {"rate": "-5%",  "pitch": "-2Hz"},
     "secondary_hook": {"rate": "+5%",  "pitch": "+2Hz"},
     "cta":            {"rate": "+3%",  "pitch": "+5Hz"},
     "default":        {"rate": "-5%",  "pitch": "-3Hz"},
+    # 新7シーン型
+    "Why":            {"rate": "-3%",  "pitch": "-2Hz"},  # 落ち着いた説明
+    "Solution":       {"rate": "+5%",  "pitch": "+2Hz"},  # 明快・前向き
+    "Step1":          {"rate": "-5%",  "pitch": "-3Hz"},  # ゆっくり・明確
+    "Step2":          {"rate": "-5%",  "pitch": "-3Hz"},  # ゆっくり・明確
+    "Result":         {"rate": "+8%",  "pitch": "+4Hz"},  # 達成感
+}
+
+# シーン別FFmpegモーション設定
+SCENE_MOTION = {
+    "Hook":     {"zoom": "snap_zoom_in",   "kb": "diagonal",    "vf_extra": ""},
+    "Why":      {"zoom": "slow_zoom_in",   "kb": "up_down",     "vf_extra": ""},
+    "Solution": {"zoom": "hard_cut",       "kb": "left_right",  "vf_extra": ""},
+    "Step1":    {"zoom": "punch_in",       "kb": "right_left",  "vf_extra": "eq=contrast=1.1"},
+    "Step2":    {"zoom": "punch_in",       "kb": "down_up",     "vf_extra": "eq=contrast=1.1"},
+    "Result":   {"zoom": "snap_zoom_out",  "kb": "diagonal",    "vf_extra": ""},
+    "CTA":      {"zoom": "fade_out",       "kb": "left_right",  "vf_extra": ""},
 }
 
 for s in scenes:
