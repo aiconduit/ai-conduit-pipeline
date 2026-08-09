@@ -155,9 +155,12 @@ for i, spec in enumerate(scene_specs):
     sent = spec["narration"]
     mood = spec["mood"]
     visual_query = mood_visual_query(topic, mood)
-    # シーンごとにスクロール位置とKen Burnsスタイルを変える
+    # シーンタイトルに基づいてSCENE_MOTIONからKen Burnsスタイルを選択
     scroll_patterns = [0, 200, 500, 900, 1400]
     kb_styles = ["left_right", "right_left", "up_down", "down_up", "diagonal"]
+    # シーンタイトルを取得（Hook/Why/Solution/Step1/Step2/Result/CTA）
+    _scene_title = spec.get("shot", "").replace("_", "").title() if isinstance(spec, dict) else ""
+    _motion = SCENE_MOTION.get(_scene_title, SCENE_MOTION.get("Solution", {"kb": "left_right", "zoom_factor": 1.05, "vf_extra": ""}))
     scene = {
         "id": i + 1,
         "caption": re.sub(r"[^\w\s]", "", sent)[:8],
@@ -170,7 +173,7 @@ for i, spec in enumerate(scene_specs):
         "narration": sent,
         "news_url": news_item.get("url", ""),
         "scroll_y": scroll_patterns[i % len(scroll_patterns)],
-        "ken_burns_style": kb_styles[i % len(kb_styles)],
+        "ken_burns_style": _motion.get("kb", kb_styles[i % len(kb_styles)]),
         "visual_2": MOOD_VISUAL_QUERIES_2.get(spec["mood"], f"{topic} technology abstract"),
     }
     scenes.append(scene)
