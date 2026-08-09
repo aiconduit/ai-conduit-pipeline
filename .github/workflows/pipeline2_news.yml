@@ -23,8 +23,8 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
-          pip install requests edge-tts pillow google-cloud-texttospeech google-auth google-api-python-client google-auth-httplib2 google-auth-oauthlib google-cloud-texttospeech google-auth playwright moviepy numpy moviepy numpy pynacl
-          # playwright 無効化
+          pip install requests edge-tts pillow google-cloud-texttospeech google-auth google-api-python-client google-auth-httplib2 google-auth-oauthlib google-cloud-texttospeech google-auth moviepy numpy moviepy numpy pynacl
+          # 無効化
 
       - name: SFX確認
         run: ls assets/sfx/ || echo "SFXディレクトリなし"
