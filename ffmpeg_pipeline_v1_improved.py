@@ -31,6 +31,17 @@ WORK_DIR = Path("/tmp/ai_conduit_v1_imp")
 PEXELS_CACHE = ROOT_DIR / "assets" / "pexels_cache"
 for d in [OUTPUT_DIR, WORK_DIR, PEXELS_CACHE]: d.mkdir(parents=True, exist_ok=True)
 
+# シーン別モーション設定
+SCENE_MOTION = {
+    "Hook":     {"kb": "diagonal",   "zoom_factor": 1.08, "vf_extra": "unsharp=5:5:1.5"},
+    "Why":      {"kb": "up_down",    "zoom_factor": 1.04, "vf_extra": ""},
+    "Solution": {"kb": "left_right", "zoom_factor": 1.06, "vf_extra": "eq=contrast=1.05"},
+    "Step1":    {"kb": "right_left", "zoom_factor": 1.10, "vf_extra": "eq=contrast=1.1:brightness=0.02"},
+    "Step2":    {"kb": "down_up",    "zoom_factor": 1.10, "vf_extra": "eq=contrast=1.1:brightness=0.02"},
+    "Result":   {"kb": "diagonal",   "zoom_factor": 1.05, "vf_extra": "eq=saturation=1.2"},
+    "CTA":      {"kb": "left_right", "zoom_factor": 1.03, "vf_extra": ""},
+}
+
 FONT_PATHS = [
     '/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc',
     '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
