@@ -323,105 +323,80 @@ def generate_script(source, raw_content):
     """DeepSeekでショート動画スクリプトを生成"""
     key_content = extract_key_sections(raw_content, 1500)
     
-    prompt = f"""あなたはAIツール紹介の動画台本ライターです。
-以下のGitHubコンテンツから、実際に使えるTIPSを1つ選んで台本を作ってください。
+    prompt = f"""あなたはYouTube Shortsの台本ライターです。
+以下のGitHubコンテンツから1つのTIPSを選んで台本を作ってください。
 
 ## ソースコンテンツ（{source["repo"]}）
 {key_content}
 
-## 絶対ルール（最重要）
+## 台本の鉄則
 
-### ルール1: 最初にツール名を言う
-- 1文目は必ず「[ツール名]で[実際にできること]」から始める
-- 例：「Claude Codeで プルリクのレビューが自動で出ます」
-- 例：「Gemini CLIで 1000行のコードを30秒で読めます」
-- 例：「GitHub Copilotで バグの原因を特定できます」
-- ❌禁止：「このコマンドで〜」「知らないと損」「消えた理由」→ 何のツールか不明
+### 鉄則1: 問題起点で始める
+視聴者が「自分のことだ」と思う問題から始める。
+フォーマット：「[具体的な問題]、ありませんか？」
 
-### ルール2: 嘘・誇張は絶対禁止
-- ソースコンテンツに書いてある事実のみ使う
-- 実際のコマンドをそのまま使う（例：$ claude /review）
-- 数字はソースに書いてある数字のみ（でたらめな%は禁止）
-- 「3秒で終わる」「10倍速」など根拠のない数字は使わない
+良い例：
+- 「毎回同じ指示をClaude Codeに打ち込んでいませんか？」
+- 「コードレビューの依頼をするたびに長い文章を書いていませんか？」
+- 「Gemini CLIの使い方がわからず毎回ドキュメントを調べていませんか？」
 
-### ルール3: 5W1Hで伝える
-- 誰が（エンジニア・開発者）
-- 何を（ツール名）
-- どうやって（具体的なコマンド・手順）
-- どんな効果（実際の効果）
+悪い例：
+- 「Claude Codeで作業を自動化できます」→ 問題が不明
+- 「このツールがやばい」→ 何の解決策か不明
+
+### 鉄則2: 解決策は具体的な手順
+- 実際のコマンド・ファイルパス・設定をそのまま書く
+- 「〜するだけ」で終わらず「具体的に何をするか」を必ず言う
+
+良い例：
+- 「.claude/commands/review.md を作って/reviewで実行できます」
+- 「CLAUDE.mdに指示を書くとプロジェクト全体に適用されます」
+- 「$ gemini --model gemini-2.5-pro と入力するだけです」
+
+悪い例：
+- 「設定するだけです」→ 何を設定？
+- 「ファイルを作るだけです」→ どこに何を作る？
+
+### 鉄則3: Before→Afterで変化を示す
+Before: 今まで何をしていたか（具体的に）
+After: これで何が変わるか（具体的に）
+数字はソースに書いてある事実のみ。なければ定性的に（「毎回→1回」など）
+
+### 鉄則4: プレゼントは動画内容と直結
+CTAのプレゼントは動画で紹介したものと直接関係するもの
+例：「このCommandsテンプレートを概要欄から受け取れます」
 
 ## 台本構成（34秒）
+Scene1 Hook（0-4秒）: 視聴者の具体的な問題提起（「〜していませんか？」）
+Scene2 Solution（4-12秒）: ツール名+具体的な解決手順（実際のコマンド・パスを含む）
+Scene3 HowTo（12-22秒）: 実際にやること（コマンドそのまま・ファイルパスそのまま）
+Scene4 Result（22-30秒）: Before→After（何がどう変わるか具体的に）
+Scene5 CTA（30-34秒）: 動画内容に関連するプレゼント
 
-Scene 1 - Hook（0-3秒）:
-「[ツール名]で [実際にできること] が [具体的な変化] できます」
-例：「Claude Codeで コードのバグを自動で検出できます」
-
-Scene 2 - How（3-15秒）:
-実際のやり方を1-2ステップで説明
-- 実際のコマンドを使う
-- 各文10-15文字以内
-
-Scene 3 - Result（15-25秒）:
-実際の効果・使った人の変化
-- ソースに書いてある事実のみ
-
-Scene 4 - Bonus（25-31秒）:
-知らない人が多い追加の使い方・設定
-- これもソースからの事実のみ
-
-Scene 5 - CTA（31-34秒）:
-「このツールの使い方まとめを概要欄から受け取れます。コメントにAIと書いてください。」
-
-## 禁止ワード
-やばい / すごい / 衝撃 / 消えた / 禁断 / 99% / 全員使ってる / 知らないと損
+## 禁止
+- 根拠のない数字（「10倍速」「3秒で」「爆速」）
+- 曖昧な言葉（「やばい」「すごい」「大幅」「神」「消えた」「禁断」）
+- 「〜するだけ」で終わる説明（必ず具体的に続ける）
+- 問題が不明なフック（ツール名なし・効果不明なフック）
 
 ## カテゴリ: {source["category"]}
 ## リポジトリ: {source["repo"]}
 
 JSONのみ出力（前置き不要）:
 {{
-  "selected_title": "30文字以内・必ずツール名を含む",
-  "hook_text_overlay": "8文字以内・ツール名を含む",
+  "selected_title": "問題+解決策が入った30文字以内のタイトル（ツール名必須）",
+  "problem": "視聴者が抱えている具体的な問題（1文）",
+  "solution": "具体的な解決策（コマンド・手順を含む）",
+  "hook_text_overlay": "8文字以内・問題か解決策のキーワード",
   "scenes": [
-    {{"title": "Hook", "narration": "ツール名から始まる15文字以内", "caption": "ツール名8文字以内", "mood": "hook", "visual_prompt": "tool demo coding screen"}},
-    {{"title": "How", "narration": "実際のコマンドや手順", "caption": "やり方", "mood": "value", "visual_prompt": "terminal command coding"}},
-    {{"title": "Result", "narration": "実際の効果（事実のみ）", "caption": "効果", "mood": "value", "visual_prompt": "developer success result"}},
-    {{"title": "Bonus", "narration": "追加の使い方・設定", "caption": "応用", "mood": "value", "visual_prompt": "settings config coding"}},
-    {{"title": "CTA", "narration": "このツールの使い方まとめを概要欄から受け取れます。コメントにAIと書いてください。", "caption": "無料プレゼント", "mood": "cta", "visual_prompt": "gift download link"}}
+    {{"title": "Hook", "narration": "具体的な問題提起（20文字以内・〜していませんか？）", "caption": "問題", "mood": "hook", "visual_prompt": "frustrated developer typing"}},
+    {{"title": "Solution", "narration": "ツール名+具体的な解決手順（25文字以内・コマンドを含む）", "caption": "解決策", "mood": "value", "visual_prompt": "terminal command coding"}},
+    {{"title": "HowTo", "narration": "実際のコマンドやファイルパス（25文字以内・そのまま記載）", "caption": "手順", "mood": "value", "visual_prompt": "code editor file creation"}},
+    {{"title": "Result", "narration": "Beforeの問題がAfterでどう変わるか（25文字以内・具体的に）", "caption": "変化", "mood": "value", "visual_prompt": "developer happy success"}},
+    {{"title": "CTA", "narration": "動画で紹介した内容に関連するプレゼントを概要欄から受け取れます。コメントにAIと書いてください。", "caption": "プレゼント", "mood": "cta", "visual_prompt": "gift download"}}
   ],
   "total_duration_sec": 34,
-  "pexels_keywords": ["coding terminal", "developer working", "programming screen"]
-}}布
-7. selected_titleには必ず数字を入れる（「5倍」「10分」「3ステップ」等）
-8. HookシーンはCuriosity Gap（情報の空白）を作る。以下のパターンから選ぶ:
-   - 「○○を知らないエンジニアは10年後に後悔する」
-   - 「99%のエンジニアがやっていない○○の使い方」
-   - 「これを使ったら残業が消えた」
-   - 「○○コマンド1つで作業が消えた」
-   - 「コードレビューに3時間かけてる人、見てください」
-9. 5秒地点（scene2）と12秒地点（scene3）にマイクロクリフハンガーを仕込む
-10. 音なしでもnarrationだけで内容が伝わること
-11. CTAシーンのnarrationは必ず「概要欄のリンクから無料で受け取れます。コメントにAIと書いてください。」にする
-12. narrationは口語・体言止め禁止。動詞で終わること（「〜できます」「〜なります」）
-
-以下のJSON形式のみで返してください（全フィールド必ず日本語で記述。英語タイトル・英語narration禁止）:
-{{
-  "selected_title": "（動画タイトル30文字以内・日本語）",
-  "category": "{source["category"]}",
-  "source_repo": "{source["repo"]}",
-  "hashtags": ["#AI", "#ClaudeCode", "#エンジニア", "#プログラミング", "#AIツール"],
-  "script": {{
-    "title": "（日本語タイトル）",
-    "total_duration_sec": 18,
-    "scenes": [
-      {{"scene_title": "Hook", "mood": "hook", "duration_sec": 3, "narration": "（15〜20文字・衝撃フック）", "visual_desc": "terminal screen coding"}},
-      {{"scene_title": "Tip", "mood": "value", "duration_sec": 4, "narration": "（15〜20文字・具体的なコマンドor手順）", "visual_desc": "code editor screen"}},
-      {{"scene_title": "Demo", "mood": "impact", "duration_sec": 4, "narration": "（15〜20文字・実際の効果・時間短縮）", "visual_desc": "developer working fast"}},
-      {{"scene_title": "Twist", "mood": "twist", "duration_sec": 4, "narration": "（15〜20文字・さらに応用・驚き）", "visual_desc": "ai assistant coding"}},
-      {{"scene_title": "CTA", "mood": "cta", "duration_sec": 3, "narration": "コメントにAIと書いてプレゼントゲット！", "visual_desc": "smartphone comment notification"}}
-    ]
-  }},
-  "gift_content": "（プレゼントとして配布するGitHubリポジトリの日本語説明・50文字以内）"
+  "pexels_keywords": ["developer coding terminal", "programming screen", "code editor"]
 }}"""
 
     r = requests.post(
