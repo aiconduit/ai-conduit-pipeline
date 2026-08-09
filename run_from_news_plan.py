@@ -129,6 +129,35 @@ MOOD_VISUAL_QUERIES = {
 
 
 # B-roll B: 内容に関係なくtech系映像に固定（コード画面・PC操作・AI技術）
+import random as _rand_broll
+
+# シーンタイトル別の固有B-rollクエリ
+SCENE_BROLL_QUERIES = {
+    "Hook":     ["developer frustrated slow computer", "programmer stuck problem", "person annoyed laptop"],
+    "Why":      ["developer stressed deadline", "computer error screen", "person worried work"],
+    "Solution": ["developer excited discovery", "programmer breakthrough", "coding solution found"],
+    "Step1":    ["hands typing terminal command", "close up keyboard typing", "terminal dark screen"],
+    "Step2":    ["code editor screen close", "programming configuration", "developer focused screen"],
+    "Result":   ["developer celebrating success", "programmer happy work", "person satisfied laptop"],
+    "CTA":      ["phone notification", "mobile app download", "person sharing phone"],
+    "hook":     ["developer frustrated problem", "programmer stuck error", "coding issue dark"],
+    "value":    ["developer coding terminal", "programming dark screen", "software development"],
+    "interrupt":["fast typing keyboard", "code running terminal", "developer quick action"],
+    "cta":      ["gift box open", "download success", "developer sharing"],
+}
+
+def get_broll_query(shot_title: str) -> str:
+    queries = SCENE_BROLL_QUERIES.get(shot_title, ["developer coding dark terminal"])
+    return _rand_broll.choice(queries)
+
+TECH_BROLL_QUERIES = ["developer coding terminal dark", "programming screen", "software development"]
+MOOD_VISUAL_QUERIES_2 = {
+    "hook": get_broll_query("hook"),
+    "value": get_broll_query("value"),
+    "interrupt": get_broll_query("interrupt"),
+    "cta": get_broll_query("cta"),
+}
+
 
 # シーン別動画素材ライブラリ読み込み
 import random as _rand_lib
