@@ -340,6 +340,14 @@ def main():
     _gift_url_path = "sns_automation/gift_url.txt"
     if os.path.exists(_gift_url_path):
         with open(_gift_url_path, encoding="utf-8") as _gf:
+            _g = _gf.read().strip()
+        gift_link = _g if _g else os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+        print(f"[Gift] 動画専用URL: {gift_link}")
+    else:
+        gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+    _gift_url_path = "sns_automation/gift_url.txt"
+    if os.path.exists(_gift_url_path):
+        with open(_gift_url_path, encoding="utf-8") as _gf:
             _gift_url = _gf.read().strip()
         gift_link = _gift_url if _gift_url else os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
         print(f"[Gift] 動画専用プレゼントURL: {gift_link}")
