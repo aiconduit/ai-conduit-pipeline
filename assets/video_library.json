@@ -1,0 +1,541 @@
+{
+  "hook": [
+    {
+      "url": "https://videos.pexels.com/video-files/30284959/12981873_1080_2048_60fps.mp4",
+      "keyword": "developer coding dark",
+      "id": 30284959
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8266177/8266177-hd_720_1280_25fps.mp4",
+      "keyword": "developer coding dark",
+      "id": 8266177
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "developer coding dark",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "developer coding dark",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/36628017/15529027_1080_1920_25fps.mp4",
+      "keyword": "developer coding dark",
+      "id": 36628017
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8720746/8720746-hd_1080_2048_25fps.mp4",
+      "keyword": "programmer typing keyboard",
+      "id": 8720746
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/32259631/13758060_1080_1920_25fps.mp4",
+      "keyword": "programmer typing keyboard",
+      "id": 32259631
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/36628014/15529023_1080_1920_25fps.mp4",
+      "keyword": "programmer typing keyboard",
+      "id": 36628014
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7989854/7989854-hd_720_1280_25fps.mp4",
+      "keyword": "programmer typing keyboard",
+      "id": 7989854
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12893579/12893579-hd_720_1280_24fps.mp4",
+      "keyword": "programmer typing keyboard",
+      "id": 12893579
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "code on screen dark",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "code on screen dark",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "code on screen dark",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "code on screen dark",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5377697/5377697-hd_720_1280_25fps.mp4",
+      "keyword": "code on screen dark",
+      "id": 5377697
+    }
+  ],
+  "why": [
+    {
+      "url": "https://videos.pexels.com/video-files/27155336/12086316_1080_1920_24fps.mp4",
+      "keyword": "developer frustrated problem",
+      "id": 27155336
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8526496/8526496-hd_720_1366_25fps.mp4",
+      "keyword": "developer frustrated problem",
+      "id": 8526496
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7263093/7263093-hd_1080_1920_25fps.mp4",
+      "keyword": "developer frustrated problem",
+      "id": 7263093
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7924511/7924511-hd_1080_1920_24fps.mp4",
+      "keyword": "developer frustrated problem",
+      "id": 7924511
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/6623022/6623022-hd_720_1280_24fps.mp4",
+      "keyword": "developer frustrated problem",
+      "id": 6623022
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "error screen coding",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "error screen coding",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "error screen coding",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "error screen coding",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5377697/5377697-hd_720_1280_25fps.mp4",
+      "keyword": "error screen coding",
+      "id": 5377697
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "bug fixing code",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12893579/12893579-hd_720_1280_24fps.mp4",
+      "keyword": "bug fixing code",
+      "id": 12893579
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "bug fixing code",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5377697/5377697-hd_720_1280_25fps.mp4",
+      "keyword": "bug fixing code",
+      "id": 5377697
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5473803/5473803-hd_1080_2048_25fps.mp4",
+      "keyword": "bug fixing code",
+      "id": 5473803
+    }
+  ],
+  "solution": [
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "coding solution terminal",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "coding solution terminal",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "coding solution terminal",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/36628017/15529027_1080_1920_25fps.mp4",
+      "keyword": "coding solution terminal",
+      "id": 36628017
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8720756/8720756-hd_720_1366_25fps.mp4",
+      "keyword": "coding solution terminal",
+      "id": 8720756
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7679831/7679831-hd_1080_2048_25fps.mp4",
+      "keyword": "developer success computer",
+      "id": 7679831
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "developer success computer",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12893579/12893579-hd_720_1280_24fps.mp4",
+      "keyword": "developer success computer",
+      "id": 12893579
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "developer success computer",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5473803/5473803-hd_1080_2048_25fps.mp4",
+      "keyword": "developer success computer",
+      "id": 5473803
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5377697/5377697-hd_720_1280_25fps.mp4",
+      "keyword": "programming breakthrough",
+      "id": 5377697
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/36628017/15529027_1080_1920_25fps.mp4",
+      "keyword": "programming breakthrough",
+      "id": 36628017
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5473803/5473803-hd_1080_2048_25fps.mp4",
+      "keyword": "programming breakthrough",
+      "id": 5473803
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/4709299/4709299-hd_720_1366_50fps.mp4",
+      "keyword": "programming breakthrough",
+      "id": 4709299
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5495890/5495890-hd_720_1280_30fps.mp4",
+      "keyword": "programming breakthrough",
+      "id": 5495890
+    }
+  ],
+  "step1": [
+    {
+      "url": "https://videos.pexels.com/video-files/28709421/12457750_1080_1920_30fps.mp4",
+      "keyword": "terminal command line",
+      "id": 28709421
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5925283/5925283-hd_1080_1920_24fps.mp4",
+      "keyword": "terminal command line",
+      "id": 5925283
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "terminal command line",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7199252/7199252-hd_720_1280_50fps.mp4",
+      "keyword": "terminal command line",
+      "id": 7199252
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/6568514/6568514-hd_1080_2048_25fps.mp4",
+      "keyword": "terminal command line",
+      "id": 6568514
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "coding dark screen typing",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "coding dark screen typing",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8720756/8720756-hd_720_1366_25fps.mp4",
+      "keyword": "coding dark screen typing",
+      "id": 8720756
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5473802/5473802-hd_1080_2048_25fps.mp4",
+      "keyword": "coding dark screen typing",
+      "id": 5473802
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5377698/5377698-hd_1080_1920_25fps.mp4",
+      "keyword": "coding dark screen typing",
+      "id": 5377698
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "developer terminal",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "developer terminal",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "developer terminal",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/36628014/15529023_1080_1920_25fps.mp4",
+      "keyword": "developer terminal",
+      "id": 36628014
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/36628017/15529027_1080_1920_25fps.mp4",
+      "keyword": "developer terminal",
+      "id": 36628017
+    }
+  ],
+  "step2": [
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "code editor dark",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5473802/5473802-hd_1080_2048_25fps.mp4",
+      "keyword": "code editor dark",
+      "id": 5473802
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5495899/5495899-hd_720_1280_30fps.mp4",
+      "keyword": "code editor dark",
+      "id": 5495899
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "code editor dark",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "code editor dark",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5377697/5377697-hd_720_1280_25fps.mp4",
+      "keyword": "programming screen code",
+      "id": 5377697
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "programming screen code",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "programming screen code",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "programming screen code",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315143/14188175_1080_1920_25fps.mp4",
+      "keyword": "programming screen code",
+      "id": 33315143
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/6803592/6803592-hd_1080_2048_25fps.mp4",
+      "keyword": "software development",
+      "id": 6803592
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12893579/12893579-hd_720_1280_24fps.mp4",
+      "keyword": "software development",
+      "id": 12893579
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "software development",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/36628014/15529023_1080_1920_25fps.mp4",
+      "keyword": "software development",
+      "id": 36628014
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12896413/12896413-hd_1080_1920_24fps.mp4",
+      "keyword": "software development",
+      "id": 12896413
+    }
+  ],
+  "result": [
+    {
+      "url": "https://videos.pexels.com/video-files/7005918/7005918-hd_1080_1920_24fps.mp4",
+      "keyword": "developer happy success",
+      "id": 7005918
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7005890/7005890-hd_1080_1920_24fps.mp4",
+      "keyword": "developer happy success",
+      "id": 7005890
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7652267/7652267-hd_1080_1920_30fps.mp4",
+      "keyword": "developer happy success",
+      "id": 7652267
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5020448/5020448-hd_1066_1920_25fps.mp4",
+      "keyword": "developer happy success",
+      "id": 5020448
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/9305781/9305781-hd_720_1366_30fps.mp4",
+      "keyword": "developer happy success",
+      "id": 9305781
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/37116402/15723571_1080_1920_25fps.mp4",
+      "keyword": "coding complete success",
+      "id": 37116402
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8523649/8523649-hd_1080_1920_25fps.mp4",
+      "keyword": "coding complete success",
+      "id": 8523649
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "coding complete success",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33314914/14188115_1080_1920_25fps.mp4",
+      "keyword": "coding complete success",
+      "id": 33314914
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "coding complete success",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/30284959/12981873_1080_2048_60fps.mp4",
+      "keyword": "programmer achievement",
+      "id": 30284959
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7989667/7989667-hd_720_1280_25fps.mp4",
+      "keyword": "programmer achievement",
+      "id": 7989667
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8720746/8720746-hd_1080_2048_25fps.mp4",
+      "keyword": "programmer achievement",
+      "id": 8720746
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/6803592/6803592-hd_1080_2048_25fps.mp4",
+      "keyword": "programmer achievement",
+      "id": 6803592
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "programmer achievement",
+      "id": 33315117
+    }
+  ],
+  "cta": [
+    {
+      "url": "https://videos.pexels.com/video-files/12893579/12893579-hd_720_1280_24fps.mp4",
+      "keyword": "gift laptop developer",
+      "id": 12893579
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7989667/7989667-hd_720_1280_25fps.mp4",
+      "keyword": "gift laptop developer",
+      "id": 7989667
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7191510/7191510-hd_720_1280_25fps.mp4",
+      "keyword": "gift laptop developer",
+      "id": 7191510
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/8266177/8266177-hd_720_1280_25fps.mp4",
+      "keyword": "gift laptop developer",
+      "id": 8266177
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34679079/14699227_1080_1920_30fps.mp4",
+      "keyword": "gift laptop developer",
+      "id": 34679079
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/33315117/14188163_1080_1920_25fps.mp4",
+      "keyword": "download code link",
+      "id": 33315117
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12893579/12893579-hd_720_1280_24fps.mp4",
+      "keyword": "download code link",
+      "id": 12893579
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5378000/5378000-hd_720_1280_25fps.mp4",
+      "keyword": "download code link",
+      "id": 5378000
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/34459460/14601224_1080_1920_25fps.mp4",
+      "keyword": "download code link",
+      "id": 34459460
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/5377532/5377532-hd_720_1280_25fps.mp4",
+      "keyword": "download code link",
+      "id": 5377532
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/7252716/7252716-hd_1080_1920_25fps.mp4",
+      "keyword": "developer sharing",
+      "id": 7252716
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/6913274/6913274-hd_1080_1920_25fps.mp4",
+      "keyword": "developer sharing",
+      "id": 6913274
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12894351/12894351-hd_720_1280_24fps.mp4",
+      "keyword": "developer sharing",
+      "id": 12894351
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/12893579/12893579-hd_720_1280_24fps.mp4",
+      "keyword": "developer sharing",
+      "id": 12893579
+    },
+    {
+      "url": "https://videos.pexels.com/video-files/6803592/6803592-hd_1080_2048_25fps.mp4",
+      "keyword": "developer sharing",
+      "id": 6803592
+    }
+  ]
+}
