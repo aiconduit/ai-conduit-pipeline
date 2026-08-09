@@ -324,7 +324,7 @@ def generate_script(source, raw_content):
     key_content = extract_key_sections(raw_content, 1500)
     
     prompt = f"""あなたはYouTube Shortsの台本ライターです。
-以下のGitHubドキュメントから1つの具体的なTIPSを選んで台本を作ってください。
+以下のGitHubドキュメントから1つの具体的なTIPSを選んで60秒の台本を作ってください。
 
 ## ソースドキュメント（{source["repo"]}）
 {key_content}
@@ -336,8 +336,8 @@ def generate_script(source, raw_content):
 視聴者が0.5秒で「自分のことだ」とわかる問題を選ぶ。
 
 良い例：
-- 「サブエージェントが勝手にファイルを書き換えて困っていませんか？」
 - 「毎回同じ指示をClaude Codeに打ち込んでいませんか？」
+- 「サブエージェントが勝手にファイルを書き換えて困っていませんか？」
 - 「コードレビューの依頼をするたびに長い文章を書いていませんか？」
 
 悪い例：
@@ -349,48 +349,62 @@ def generate_script(source, raw_content):
 「設定する」「作るだけ」で終わらず「具体的に何をどこに書くか」まで言う。
 
 良い例：
-- 「.claude/agents/reviewer.mdに disallowedTools: Write, Edit と書きます」
+- 「.claude/agents/reviewer.mdを作り、1行目にname: reviewer と書きます」
+- 「disallowedTools: Write, Edit と書くと書き換えを禁止できます」
 - 「CLAUDE.mdのトップに# Rules for Claude と書いてルールを追加します」
 
 悪い例：
 - 「設定ファイルを作るだけです」→ どこに何を書く？
-- 「フィールドを追加します」→ どのフィールドを？
+- 「フィールドを追加します」→ どのフィールドを？どこに？
 
-### ルール3: Before→Afterで変化を具体的に示す
+### ルール3: 説明は段階的に・具体的に
+- Step1: 何を準備するか
+- Step2: 実際に何をするか（コマンド・コードそのまま）
+- Step3: 実行するとどうなるか
+各ステップは視聴者がその場で試せるレベルで具体的に説明する。
+
+### ルール4: Before→Afterで変化を具体的に示す
 Before: 今まで何が起きていたか（1文・具体的）
 After: これで何がどう変わるか（1文・具体的）
 絶対禁止: 「爆速」「大幅」「劇的に」などの曖昧な言葉
 
-### ルール4: CTAは動画の内容と完全一致
+### ルール5: CTAは動画の内容と完全一致
 「この[動画で紹介したもの]を概要欄から受け取れます」
 例: 「このdisallowedToolsの設定テンプレートを概要欄から受け取れます」
 
-## 台本構成（34秒）
-Hook（0-4秒）: 具体的な問題（「〜で困っていませんか？」）
-Solution（4-14秒）: ツール名+機能名+何をするか（実際のパス・フィールドを含む）
-HowTo（14-24秒）: 実際に書くコード・コマンド（ドキュメントからそのまま引用）
-Result（24-30秒）: Before→After（具体的な変化）
-CTA（30-34秒）: 動画内容と直結したプレゼント
+## 台本構成（60秒・7シーン）
+Scene1 Hook（0-5秒）: 視聴者の具体的な問題提起（「〜で困っていませんか？」）
+Scene2 Problem（5-13秒）: その問題がなぜ起きるのか・どれだけ困るか説明
+Scene3 Solution（13-23秒）: ツール名+機能名+何をするか（実際のパス・フィールドを含む）
+Scene4 Step1（23-33秒）: 実際にやること手順1（コマンドそのまま・ファイルパスそのまま）
+Scene5 Step2（33-45秒）: 実際にやること手順2（コードそのまま・設定そのまま）
+Scene6 Result（45-53秒）: Before→After（何がどう変わるか具体的に）
+Scene7 CTA（53-60秒）: 動画内容と直結したプレゼント
 
-## 禁止ワード
-爆速・大幅・やばい・すごい・神・消えた・禁断・10倍速・根拠のない数字
+## 禁止
+- 根拠のない数字（「10倍速」「3秒で」「爆速」）
+- 曖昧な言葉（「やばい」「すごい」「大幅」「神」「消えた」「禁断」）
+- 「〜するだけ」で終わる説明（必ず具体的に続ける）
+- 問題が不明なフック
 
 ## カテゴリ: {source["category"]}
 ## リポジトリ: {source["repo"]}
 
 JSONのみ出力（前置き不要）:
 {{
-  "selected_title": "問題と解決策が伝わる30文字以内（ツール名必須）",
+  "selected_title": "問題と解決策が伝わる30文字以内のタイトル（ツール名必須）",
   "problem": "視聴者の具体的な問題（1文）",
   "hook_text_overlay": "8文字以内・問題のキーワード",
   "scenes": [
-    {{"title": "Hook", "narration": "具体的な問題（「〜ていませんか？」で終わる・20文字以内）", "caption": "問題", "mood": "hook", "visual_prompt": "frustrated developer typing"}},
-    {{"title": "Solution", "narration": "ツール名+機能名+解決手順（実際のファイルパス・フィールドを含む・25文字以内）", "caption": "解決策", "mood": "value", "visual_prompt": "terminal command coding"}},
-    {{"title": "HowTo", "narration": "実際に書くコード・コマンド（ドキュメントそのまま・25文字以内）", "caption": "手順", "mood": "value", "visual_prompt": "code editor file"}},
-    {{"title": "Result", "narration": "Before: [問題] → After: [具体的な変化]（25文字以内）", "caption": "変化", "mood": "value", "visual_prompt": "developer happy success"}},
-    {{"title": "CTA", "narration": "この[動画で紹介したもの]のテンプレートを概要欄から受け取れます。コメントにAIと書いてください。", "caption": "プレゼント", "mood": "cta", "visual_prompt": "gift download"}}
+    {{"title": "Hook", "narration": "具体的な問題（「〜ていませんか？」で終わる・30文字以内）", "caption": "問題", "mood": "hook", "visual_prompt": "frustrated developer typing"}},
+    {{"title": "Problem", "narration": "問題の背景・なぜ困るか（30文字以内）", "caption": "背景", "mood": "hook", "visual_prompt": "developer frustrated screen"}},
+    {{"title": "Solution", "narration": "ツール名+機能名+解決手順概要（実際のファイルパス・フィールドを含む・35文字以内）", "caption": "解決策", "mood": "value", "visual_prompt": "terminal command coding dark"}},
+    {{"title": "Step1", "narration": "手順1: 実際のコマンドやファイルパス（ドキュメントそのまま・35文字以内）", "caption": "手順1", "mood": "value", "visual_prompt": "code editor file creation"}},
+    {{"title": "Step2", "narration": "手順2: 実際のコードや設定値（ドキュメントそのまま・35文字以内）", "caption": "手順2", "mood": "value", "visual_prompt": "code writing terminal"}},
+    {{"title": "Result", "narration": "Before: [具体的な問題] → After: [具体的な変化]（35文字以内）", "caption": "変化", "mood": "value", "visual_prompt": "developer happy success productive"}},
+    {{"title": "CTA", "narration": "この[動画で紹介したもの]のテンプレートを概要欄から受け取れます。コメントにAIと書いてください。", "caption": "プレゼント", "mood": "cta", "visual_prompt": "gift download link"}}
   ],
-  "total_duration_sec": 34,
+  "total_duration_sec": 60,
   "pexels_keywords": ["developer coding terminal", "programming screen dark", "code editor"]
 }}"""
 
