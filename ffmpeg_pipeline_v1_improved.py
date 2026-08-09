@@ -199,11 +199,7 @@ def compose_scene(scene, idx, is_last=False):
     # A/Bスプリット: 前半はnews_url録画、後半はPexels B-roll
     broll_a = fetch_broll_from_topic(topic_str, visual, cache_dir=PEXELS_CACHE, direct_url=news_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
     broll_b = fetch_broll_from_topic(topic_str, visual_2, cache_dir=PEXELS_CACHE, direct_url=None, scroll_y=0, ken_burns_style=ken_burns_style)
-    # A/Bスプリット合成: 前半broll_a、後半broll_b
-    # ターミナルアニメーションが生成されていれば優先使用
-    if _terminal_broll:
-        broll = _terminal_broll
-    elif broll_a and broll_b and broll_a != broll_b:
+    if broll_a and broll_b and broll_a != broll_b:
         half_dur = dur / 2
         broll_a_half = str(WORK_DIR / f"broll_a_{idx:02d}.mp4")
         broll_b_half = str(WORK_DIR / f"broll_b_{idx:02d}.mp4")
