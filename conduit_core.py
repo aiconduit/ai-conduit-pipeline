@@ -808,8 +808,8 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None, direct_url=None,
         cache_dir = Path("/tmp/broll_topic_cache")
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
-    # 1. Playwrightで公式HP撮影 → Ken Burns動画（最優先）
-    playwright_shot = fetch_broll_playwright(topic, cache_dir, direct_url=direct_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
+    # 1. Playwright無効化（処理速度改善）
+    playwright_shot = None  # 無効化: fetch_broll_playwright(topic, cache_dir, direct_url=direct_url, scroll_y=scroll_y, ken_burns_style=ken_burns_style)
     if playwright_shot:
         print(f"   ✅ Playwright公式HP → Ken Burns動画: {playwright_shot}")
         return playwright_shot
