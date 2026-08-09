@@ -97,7 +97,12 @@ def main():
     gift_content = generate_gift_content(plan)
     print(f"OK 生成完了 ({len(gift_content)}文字)")
     
-    safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in title)[:30]
+    # ファイル名は英数字のみ（日本語はASCIIに変換）
+    import unicodedata
+    ascii_title = unicodedata.normalize('NFKD', title).encode('ascii', 'ignore').decode('ascii')
+    safe = "".join(c if c.isalnum() or c in "-_" else "_" for c in ascii_title)[:25]
+    if not safe or safe.strip("_") == "":
+        safe = f"video_{hash(title) % 99999}"
     date_str = datetime.now().strftime("%Y%m%d_%H%M")
     filename = f"gift_p2_{safe}_{date_str}.md"
     
