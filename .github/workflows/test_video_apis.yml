@@ -1,0 +1,39 @@
+name: AI Video Generation Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test_video:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: テスト - Pollinations動画API
+        run: |
+          echo "=== Pollinations動画API ==="
+          curl -s "https://pollinations.ai/api/video" | head -200
+          
+      - name: テスト - HuggingFace Wan2.1-1.3B（軽量・CPUで動くか確認）
+        run: |
+          echo "=== HuggingFace Inference API ==="
+          curl -s -X POST \
+            "https://api-inference.huggingface.co/models/Wan-AI/Wan2.1-T2V-1.3B-Diffusers" \
+            -H "Content-Type: application/json" \
+            -d '{"inputs": "developer typing code dark terminal screen cinematic"}' \
+            -o /tmp/hf_test.bin -w "HTTP_STATUS:%{http_code} SIZE:%{size_download}" || echo "失敗"
+          file /tmp/hf_test.bin 2>/dev/null || echo "ファイルなし"
+          
+      - name: テスト - Pixabay動画API（無料）
+        run: |
+          echo "=== Pixabay動画API ==="
+          curl -s "https://pixabay.com/api/videos/?key=49003380-2c63d1e3e86c19e1bf15ab4f1&q=coding+terminal&per_page=3" | python3 -c "import json,sys; d=json.load(sys.stdin); [print(h['videos']['medium']['url']) for h in d.get('hits',[])]" || echo "失敗"
+
+      - name: テスト - Coverr API（無料動画）
+        run: |
+          echo "=== Coverr API ==="
+          curl -s "https://api.coverr.co/videos?page=1&category=technology" -H "Accept: application/json" | python3 -c "import json,sys; d=json.load(sys.stdin); print(list(d.keys())[:5])" 2>/dev/null || echo "失敗"
+          
+      - name: テスト - Mixkit動画（無料）
+        run: |
+          echo "=== Mixkit ==="
+          curl -s -I "https://mixkit.co/free-stock-video/coding-on-a-laptop-in-the-dark-8329/" | head -5 || echo "確認のみ"
