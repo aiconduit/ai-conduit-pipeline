@@ -336,7 +336,15 @@ def main():
         tags = ["AI","GitHub","Shorts","エンジニア","自動化"]
         repo_name = ""
 
-    gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+    # gift_url.txt（gift_generator.pyが生成）があれば優先使用
+    _gift_url_path = "sns_automation/gift_url.txt"
+    if os.path.exists(_gift_url_path):
+        with open(_gift_url_path, encoding="utf-8") as _gf:
+            _gift_url = _gf.read().strip()
+        gift_link = _gift_url if _gift_url else os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+        print(f"[Gift] 動画専用プレゼントURL: {gift_link}")
+    else:
+        gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
     from datetime import datetime as _dt
     import random as _r2
     # 毎回違うハッシュタグの順番（Visual Uniqueness対策）
