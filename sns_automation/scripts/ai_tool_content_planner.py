@@ -239,6 +239,14 @@ JSONのみ出力（前置き不要）:
     
     data = json.loads(m.group())
     logger.info(f"スクリプト生成完了: {data.get('selected_title', '')}")
+    
+    # 新旧フォーマット統一: scenesがトップレベルにある場合script.scenesに変換
+    if "scenes" in data and "script" not in data:
+        data["script"] = {
+            "title": data.get("selected_title", ""),
+            "scenes": data["scenes"]
+        }
+    
     return data
 
 def update_used_topics(title):
