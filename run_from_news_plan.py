@@ -99,7 +99,14 @@ print(f"   スクリプト: {script_60s}")
 # scenesのnarrationを直接使用
 CTA_TEXT = f"概要欄のリンクから無料で受け取れます。コメントにAIと書いてください。"
 raw_scenes = plan.get("script", {}).get("scenes", []) or plan.get("scenes", [])
-mood_map = {"Hook": "hook", "Fact_1": "interrupt", "Fact_2": "value", "Twist": "value", "CTA": "cta"}
+mood_map = {
+    # 旧5シーン型
+    "Hook": "hook", "Fact_1": "interrupt", "Fact_2": "value", "Twist": "value", "CTA": "cta",
+    # 新7シーン型
+    "Problem": "hook", "Solution": "value", "Step1": "value", "Step2": "value", "Result": "value",
+    # その他
+    "How": "value", "Bonus": "value", "Tip": "value", "Demo": "value",
+}
 scene_specs = []
 for s in raw_scenes:
     title = s.get("scene_title", "value")
@@ -114,10 +121,10 @@ if not scene_specs:
     scene_specs = [{"shot": "hook", "mood": "hook", "narration": script_60s[:50] or "AIニュース速報"}]
 
 MOOD_VISUAL_QUERIES = {
-    "hook": f"{topic} breaking news alert futuristic",
-    "value": f"{topic} technology innovation concept",
+    "hook": "frustrated developer typing computer problem",
+    "value": "developer coding terminal dark screen solution",
     "interrupt": f"{topic} AI speed performance result",
-    "cta": "AI automation futuristic digital abstract",
+    "cta": "gift download reward success developer",
 }
 
 
