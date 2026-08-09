@@ -294,15 +294,16 @@ def main():
             tags = fixed_tags + topic_tags[:5]
             # フック型タイトル（クリック率最大化）
             import random as _rand
+            # 分析結果: 謎掛け型・20文字以内・数字1つ・誇張なし が最効果
             hook_patterns = [
-                f"99%が知らない{selected_title[:28]}",
-                f"コードレビューに3時間？{selected_title[:24]}",
-                f"知らないと損！{selected_title[:30]}",
-                f"エンジニア必見：{selected_title[:30]}",
-                f"AIエンジニアが全員使ってる{selected_title[:22]}",
-                f"{selected_title[:35]}を3分で理解する",
-                f"プロが絶対教えない{selected_title[:27]}",
-                f"残業が消えた理由は{selected_title[:27]}",
+                f"{selected_title[:20]}が消えた理由",
+                f"{selected_title[:18]}の本当の理由",
+                f"エンジニアが全員使ってる{selected_title[:16]}",
+                f"{selected_title[:22]}の秘密",
+                f"知らないと損！{selected_title[:18]}",
+                f"{selected_title[:20]}で残業が消えた",
+                f"コードレビューを{selected_title[:16]}で3秒に",
+                f"{selected_title[:24]}がやばい理由",
             ]
             title = _rand.choice(hook_patterns) + " #Shorts"
             if not selected_title:
