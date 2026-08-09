@@ -323,64 +323,74 @@ def generate_script(source, raw_content):
     """DeepSeekでショート動画スクリプトを生成"""
     key_content = extract_key_sections(raw_content, 1500)
     
-    prompt = f"""You are a professional short-form content strategist for Japanese engineers.
-Create a 34-second YouTube Shorts script targeting 90%+ completion rate.
+    prompt = f"""あなたはAIツール紹介の動画台本ライターです。
+以下のGitHubコンテンツから、実際に使えるTIPSを1つ選んで台本を作ってください。
 
-## Source Content from {source["repo"]}
+## ソースコンテンツ（{source["repo"]}）
 {key_content}
 
-## Script Rules (Dark2C + Jenny Hoyos method)
-Pick ONE specific tip from the source that viewers can try TODAY.
+## 絶対ルール（最重要）
 
-**CORE PRINCIPLE: Hook early. Keep momentum. Finish with CTA.**
+### ルール1: 最初にツール名を言う
+- 1文目は必ず「[ツール名]で[実際にできること]」から始める
+- 例：「Claude Codeで プルリクのレビューが自動で出ます」
+- 例：「Gemini CLIで 1000行のコードを30秒で読めます」
+- 例：「GitHub Copilotで バグの原因を特定できます」
+- ❌禁止：「このコマンドで〜」「知らないと損」「消えた理由」→ 何のツールか不明
 
-Structure (strictly follow):
-1. Hook (0-3s): Open with a POWER WORD that stops the scroll.
-   - Use: 「無料」「禁断」「消えた」「3秒」「10倍」「99%が知らない」
-   - Pattern: [shocking stat or contrarian claim] + [specific tool/command]
-   - Example: 「コードレビューに3時間かける人、見てください」
-   - Example: 「このコマンド1つで残業が消えた」
-   - NO: 「やばい」「すごい」「え、まじ」— too vague, kills credibility
+### ルール2: 嘘・誇張は絶対禁止
+- ソースコンテンツに書いてある事実のみ使う
+- 実際のコマンドをそのまま使う（例：$ claude /review）
+- 数字はソースに書いてある数字のみ（でたらめな%は禁止）
+- 「3秒で終わる」「10倍速」など根拠のない数字は使わない
 
-2. Foreshadow (3-6s): Plant a reason to watch to the end.
-   - Example: 「しかも完全無料で今日から使えます」
-   - Example: 「最後に誰も教えない設定も紹介します」
+### ルール3: 5W1Hで伝える
+- 誰が（エンジニア・開発者）
+- 何を（ツール名）
+- どうやって（具体的なコマンド・手順）
+- どんな効果（実際の効果）
 
-3. Narrative (6-25s): Deliver 3 concrete facts with numbers.
-   - Each sentence: MAX 12 characters
-   - MUST include: specific commands, percentages, or time savings
-   - Readability: grade 5 level — simple words only
-   - Maintain momentum: no filler words
+## 台本構成（34秒）
 
-4. Twist (25-31s): One unexpected fact that reframes everything.
-   - Example: 「実はこれ公式ドキュメントに書いていません」
-   - Example: 「Microsoftのエンジニアも使っています」
+Scene 1 - Hook（0-3秒）:
+「[ツール名]で [実際にできること] が [具体的な変化] できます」
+例：「Claude Codeで コードのバグを自動で検出できます」
 
-5. CTA (31-34s): EXACT TEXT — 「概要欄のリンクから今すぐ受け取れます。コメントにAIと書いてください。」
+Scene 2 - How（3-15秒）:
+実際のやり方を1-2ステップで説明
+- 実際のコマンドを使う
+- 各文10-15文字以内
 
-## Absolute Rules
-- NO body-noun endings (体言止め禁止) — always end with a verb
-- NO vague words: やばい / すごい / 最高 / 神
-- Numbers must be SPECIFIC: not 「たくさん」but 「3つ」「87%」「30秒」
-- Each narration line: 10-15 characters MAX
-- Total narration: 110-130 characters (= 34 seconds)
+Scene 3 - Result（15-25秒）:
+実際の効果・使った人の変化
+- ソースに書いてある事実のみ
 
-## Category: {source["category"]}
-## Repo: {source["repo"]}
+Scene 4 - Bonus（25-31秒）:
+知らない人が多い追加の使い方・設定
+- これもソースからの事実のみ
 
-Output ONLY valid JSON, no markdown, no preamble:
+Scene 5 - CTA（31-34秒）:
+「このツールの使い方まとめを概要欄から受け取れます。コメントにAIと書いてください。」
+
+## 禁止ワード
+やばい / すごい / 衝撃 / 消えた / 禁断 / 99% / 全員使ってる / 知らないと損
+
+## カテゴリ: {source["category"]}
+## リポジトリ: {source["repo"]}
+
+JSONのみ出力（前置き不要）:
 {{
-  "selected_title": "chosen tip title (under 30 chars, Japanese)",
-  "hook_text_overlay": "screen overlay text (max 8 chars, high impact)",
+  "selected_title": "30文字以内・必ずツール名を含む",
+  "hook_text_overlay": "8文字以内・ツール名を含む",
   "scenes": [
-    {{"title": "Hook", "narration": "hook line (max 15 chars)", "caption": "hook (max 8 chars)", "mood": "hook", "visual_prompt": "b-roll keyword english"}},
-    {{"title": "Foreshadow", "narration": "foreshadow line", "caption": "teaser", "mood": "hook", "visual_prompt": "b-roll keyword english"}},
-    {{"title": "Narrative", "narration": "3 facts with numbers", "caption": "concrete tip", "mood": "value", "visual_prompt": "coding terminal dark"}},
-    {{"title": "Twist", "narration": "unexpected fact", "caption": "twist", "mood": "value", "visual_prompt": "reveal surprise"}},
-    {{"title": "CTA", "narration": "概要欄のリンクから今すぐ受け取れます。コメントにAIと書いてください。", "caption": "無料プレゼント", "mood": "cta", "visual_prompt": "gift reward"}}
+    {{"title": "Hook", "narration": "ツール名から始まる15文字以内", "caption": "ツール名8文字以内", "mood": "hook", "visual_prompt": "tool demo coding screen"}},
+    {{"title": "How", "narration": "実際のコマンドや手順", "caption": "やり方", "mood": "value", "visual_prompt": "terminal command coding"}},
+    {{"title": "Result", "narration": "実際の効果（事実のみ）", "caption": "効果", "mood": "value", "visual_prompt": "developer success result"}},
+    {{"title": "Bonus", "narration": "追加の使い方・設定", "caption": "応用", "mood": "value", "visual_prompt": "settings config coding"}},
+    {{"title": "CTA", "narration": "このツールの使い方まとめを概要欄から受け取れます。コメントにAIと書いてください。", "caption": "無料プレゼント", "mood": "cta", "visual_prompt": "gift download link"}}
   ],
   "total_duration_sec": 34,
-  "pexels_keywords": ["english keyword 1", "english keyword 2", "english keyword 3"]
+  "pexels_keywords": ["coding terminal", "developer working", "programming screen"]
 }}布
 7. selected_titleには必ず数字を入れる（「5倍」「10分」「3ステップ」等）
 8. HookシーンはCuriosity Gap（情報の空白）を作る。以下のパターンから選ぶ:
