@@ -432,14 +432,14 @@ _MOTION_GROUPS = {
     # カット系・スピード感
     "A": {"hook": "zoomin",      "interrupt": "slideleft",  "value": "fade",        "secondary_hook": "diagtl",    "cta": "fadeblack"},
     "B": {"hook": "fade",        "interrupt": "dissolve",   "value": "zoomin",      "secondary_hook": "wipetl",    "cta": "fadewhite"},
-    "C": {"hook": "slideleft",   "interrupt": "zoomin",     "value": "slideright",  "secondary_hook": "zoomout",   "cta": "fadeblack"},
+    "C": {"hook": "slideleft",   "interrupt": "zoomin",     "value": "slideright",  "secondary_hook": "dissolve",  "cta": "fadeblack"},
     "D": {"hook": "diagtl",      "interrupt": "fadeblack",  "value": "circleopen",  "secondary_hook": "radial",    "cta": "fade"},
     "E": {"hook": "slideup",     "interrupt": "slidedown",  "value": "wipeleft",    "secondary_hook": "fade",      "cta": "fadewhite"},
-    "F": {"hook": "zoomout",     "interrupt": "slideleft",  "value": "diagtr",      "secondary_hook": "slideup",   "cta": "fadeblack"},
+    "F": {"hook": "dissolve",    "interrupt": "slideleft",  "value": "diagtr",      "secondary_hook": "slideup",   "cta": "fadeblack"},
     "G": {"hook": "circleopen",  "interrupt": "fade",       "value": "zoomin",      "secondary_hook": "wiperight", "cta": "fadewhite"},
     "H": {"hook": "wipetl",      "interrupt": "diagbl",     "value": "radial",      "secondary_hook": "slidedown", "cta": "fade"},
     "I": {"hook": "fadeblack",   "interrupt": "zoomin",     "value": "slideup",     "secondary_hook": "circleopen","cta": "wipeleft"},
-    "J": {"hook": "radial",      "interrupt": "wiperight",  "value": "fadewhite",   "secondary_hook": "zoomout",   "cta": "dissolve"},
+    "J": {"hook": "radial",      "interrupt": "wiperight",  "value": "fadewhite",   "secondary_hook": "dissolve",  "cta": "dissolve"},
     # シネマティック系
     "K": {"hook": "dissolve",    "interrupt": "fade",       "value": "circleopen",  "secondary_hook": "fadewhite", "cta": "fadeblack"},
     "L": {"hook": "wiperight",   "interrupt": "wipetl",     "value": "slideleft",   "secondary_hook": "diagtr",    "cta": "dissolve"},
@@ -448,8 +448,8 @@ _MOTION_GROUPS = {
     "O": {"hook": "fadewhite",   "interrupt": "slideup",    "value": "wiperight",   "secondary_hook": "wipetl",    "cta": "zoomin"},
     # エネルギー系
     "P": {"hook": "zoomin",      "interrupt": "diagbl",     "value": "slideleft",   "secondary_hook": "fadeblack", "cta": "circleopen"},
-    "Q": {"hook": "slideleft",   "interrupt": "zoomout",    "value": "diagtl",      "secondary_hook": "wipeleft",  "cta": "dissolve"},
-    "R": {"hook": "circleopen",  "interrupt": "slidedown",  "value": "zoomout",     "secondary_hook": "diagbl",    "cta": "fade"},
+    "Q": {"hook": "slideleft",   "interrupt": "dissolve",   "value": "diagtl",      "secondary_hook": "wipeleft",  "cta": "dissolve"},
+    "R": {"hook": "circleopen",  "interrupt": "slidedown",  "value": "fade",        "secondary_hook": "diagbl",    "cta": "fade"},
     "S": {"hook": "diagtr",      "interrupt": "wipeleft",   "value": "slideup",     "secondary_hook": "radial",    "cta": "fadeblack"},
     "T": {"hook": "wipeleft",    "interrupt": "circleopen", "value": "dissolve",    "secondary_hook": "slidedown", "cta": "zoomin"},
 }
