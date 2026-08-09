@@ -84,6 +84,12 @@ jobs:
           print("サムネイル生成完了")
           PYEOF
 
+      - name: Step 2.6 - プレゼント自動生成（台本内容と一致）
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 sns_automation/scripts/gift_generator.py || echo "プレゼント生成スキップ"
+
       - name: Step 3 - 動画生成
         run: python3 run_from_news_plan.py
         env:
