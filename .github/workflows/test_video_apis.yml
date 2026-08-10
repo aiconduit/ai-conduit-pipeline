@@ -1,4 +1,4 @@
-name: CogVideoX API調査
+name: CogVideoX API調査 v2
 
 on:
   workflow_dispatch:
@@ -8,29 +8,49 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: CogVideoX 正しいAPI名を調査
-        run: |
-          pip install gradio_client -q
-          python3 << 'PYEOF'
-          from gradio_client import Client
-          client = Client("THUDM/CogVideoX-5B-Space")
-          print("利用可能なAPI一覧:")
-          for ep in client.view_api(print_info=False).get('named_endpoints', {}).items():
-              print(f"  {ep}")
-          PYEOF
-
-      - name: CogVideoX 動画生成テスト
+      - name: CogVideoX API一覧と動画生成テスト
         run: |
           pip install gradio_client -q
           python3 << 'PYEOF'
           from gradio_client import Client
           import json
+
           client = Client("THUDM/CogVideoX-5B-Space")
-          info = client.view_api(print_info=False)
-          print(json.dumps(info, indent=2, ensure_ascii=False)[:2000])
+          
+          # APIを表示
+          try:
+              client.view_api()
+          except Exception as e:
+              print(f"view_api error: {e}")
+          
+          # predict_fn一覧を確認
+          print("endpoints:", dir(client))
+          
+          # REST APIで直接確認
+          import requests
+          r = requests.get("https://zai-org-cogvideox-5b-space.hf.space/info")
+          print("Space info:", r.text[:500])
+          
+          # Gradio APIを直接確認
+          r2 = requests.get("https://zai-org-cogvideox-5b-space.hf.space/api/predict")
+          print("predict:", r2.status_code, r2.text[:200])
           PYEOF
 
-      - name: Pixabay 新しいAPIキーでテスト
+      - name: fal.ai 無料クレジット確認
         run: |
-          echo "=== Pixabay動画API ==="
-          curl -v "https://pixabay.com/api/videos/?key=49003380-2c63d1e3e86c19e1bf15ab4f1&q=coding+developer&per_page=3" 2>&1 | grep -E "HTTP|total|url" | head -10
+          echo "=== fal.ai API テスト ==="
+          # fal.aiの無料アクセス（APIキーなしで試す）
+          curl -s -X POST "https://fal.run/fal-ai/wan/v2/image-to-video" \
+            -H "Content-Type: application/json" \
+            -d '{"prompt": "developer typing code terminal", "image_url": "https://picsum.photos/1080/1920"}' \
+            -w "HTTP:%{http_code}" | head -100 || echo "失敗"
+
+      - name: Hugging Face 無料モデルAPIテスト
+        run: |
+          echo "=== HF 無料 text-to-video ==="
+          # ali-vilab/i2vgen-xl (軽量・無料)
+          curl -s -X POST \
+            "https://api-inference.huggingface.co/models/ali-vilab/i2vgen-xl" \
+            -H "Content-Type: application/json" \
+            -d '{"inputs": "developer coding dark terminal"}' \
+            -w "\nHTTP:%{http_code}" | tail -3
