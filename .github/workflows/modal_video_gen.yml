@@ -17,4 +17,4 @@ jobs:
           pip install modal -q
           modal token set --token-id $MODAL_TOKEN_ID --token-secret $MODAL_TOKEN_SECRET
           echo "Modal認証OK"
-          python3 modal_gpu_test.py
+          modal run modal_gpu_test.py
