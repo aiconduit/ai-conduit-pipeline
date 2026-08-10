@@ -1,56 +1,82 @@
-name: CogVideoX API調査 v2
+name: CogVideoX 実際の動画生成テスト
 
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
-      - name: CogVideoX API一覧と動画生成テスト
+      - uses: actions/checkout@v4
+      
+      - name: CogVideoX で動画生成（7シーン分）
         run: |
-          pip install gradio_client -q
+          pip install gradio_client requests -q
           python3 << 'PYEOF'
-          from gradio_client import Client
-          import json
-
+          from gradio_client import Client, handle_file
+          import requests, os, shutil, time
+          
           client = Client("THUDM/CogVideoX-5B-Space")
           
-          # APIを表示
-          try:
-              client.view_api()
-          except Exception as e:
-              print(f"view_api error: {e}")
+          # AI Conduitのシーン別プロンプト
+          scenes = [
+              ("hook",     "frustrated developer staring at dark terminal screen, close up face, cinematic"),
+              ("why",      "developer typing frantically at computer with error messages on screen, dark office"),
+              ("solution", "developer suddenly smiling at computer screen showing success, bright terminal"),
+              ("step1",    "close up hands typing commands on dark mechanical keyboard, terminal screen"),
+              ("step2",    "code editor screen showing YAML configuration file, syntax highlighting, dark theme"),
+              ("result",   "developer celebrating at desk, multiple monitors, successful code deployment"),
+              ("cta",      "smartphone screen showing download notification, modern app interface, close up"),
+          ]
           
-          # predict_fn一覧を確認
-          print("endpoints:", dir(client))
+          os.makedirs("assets/cogvideo", exist_ok=True)
           
-          # REST APIで直接確認
-          import requests
-          r = requests.get("https://zai-org-cogvideox-5b-space.hf.space/info")
-          print("Space info:", r.text[:500])
+          for scene_name, prompt in scenes:
+              print(f"\n生成中: {scene_name}")
+              print(f"  プロンプト: {prompt[:60]}")
+              try:
+                  result = client.predict(
+                      prompt=prompt,
+                      image_input=None,
+                      video_input=None,
+                      video_strength=0.8,
+                      seed_value=-1,
+                      scale_status=False,
+                      rife_status=False,
+                      api_name="/generate"
+                  )
+                  print(f"  結果: {result}")
+                  # 動画ファイルをコピー
+                  if result and isinstance(result, (list, tuple)) and result[0]:
+                      video_data = result[0]
+                      if isinstance(video_data, dict):
+                          src = video_data.get('video', '')
+                      else:
+                          src = str(video_data)
+                      if src and os.path.exists(src):
+                          dst = f"assets/cogvideo/{scene_name}.mp4"
+                          shutil.copy(src, dst)
+                          size = os.path.getsize(dst) // 1024
+                          print(f"  ✅ 保存: {dst} ({size}KB)")
+                      else:
+                          print(f"  ⚠️ ファイルパス不明: {src}")
+              except Exception as e:
+                  print(f"  ❌ エラー: {e}")
+              time.sleep(5)
           
-          # Gradio APIを直接確認
-          r2 = requests.get("https://zai-org-cogvideox-5b-space.hf.space/api/predict")
-          print("predict:", r2.status_code, r2.text[:200])
+          # 生成結果確認
+          files = os.listdir("assets/cogvideo") if os.path.exists("assets/cogvideo") else []
+          print(f"\n生成ファイル数: {len(files)}")
+          for f in files:
+              size = os.path.getsize(f"assets/cogvideo/{f}") // 1024
+              print(f"  {f}: {size}KB")
           PYEOF
 
-      - name: fal.ai 無料クレジット確認
+      - name: 生成動画をGitHubにコミット
         run: |
-          echo "=== fal.ai API テスト ==="
-          # fal.aiの無料アクセス（APIキーなしで試す）
-          curl -s -X POST "https://fal.run/fal-ai/wan/v2/image-to-video" \
-            -H "Content-Type: application/json" \
-            -d '{"prompt": "developer typing code terminal", "image_url": "https://picsum.photos/1080/1920"}' \
-            -w "HTTP:%{http_code}" | head -100 || echo "失敗"
-
-      - name: Hugging Face 無料モデルAPIテスト
-        run: |
-          echo "=== HF 無料 text-to-video ==="
-          # ali-vilab/i2vgen-xl (軽量・無料)
-          curl -s -X POST \
-            "https://api-inference.huggingface.co/models/ali-vilab/i2vgen-xl" \
-            -H "Content-Type: application/json" \
-            -d '{"inputs": "developer coding dark terminal"}' \
-            -w "\nHTTP:%{http_code}" | tail -3
+          git config user.email "cogvideo@aiconduit.com"
+          git config user.name "CogVideo Generator"
+          git add assets/cogvideo/ || true
+          git diff --staged --quiet || git commit -m "Auto: CogVideoX シーン別動画生成"
+          git push || true
