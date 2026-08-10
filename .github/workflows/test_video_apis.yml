@@ -1,4 +1,4 @@
-name: 無料動画生成 代替手段テスト
+name: Modal + Lightning AI テスト
 
 on:
   workflow_dispatch:
@@ -6,87 +6,51 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
-      - name: HuggingFace 軽量動画モデルテスト
+      - name: Modal.com API テスト
         run: |
-          pip install gradio_client requests -q
+          pip install modal -q 2>/dev/null || true
           python3 << 'PYEOF'
-          from gradio_client import Client
-          import time
-
-          # 軽量なモデルを複数試す
-          spaces = [
-              ("stabilityai/stable-video-diffusion", "/video"),
-              ("multimodalart/stable-video-diffusion", "/predict"),
-              ("damo-vilab/text-to-video-ms-1.7b", "/predict"),
-              ("fffiloni/text-to-video", "/infer"),
-              ("wangfuyun/AnimateLCM", "/animate"),
-          ]
+          import requests
           
-          for space_id, api_name in spaces:
-              try:
-                  print(f"\n試行: {space_id}")
-                  client = Client(space_id, verbose=False)
-                  print(f"  ✅ 接続成功")
-                  # API一覧確認のみ（実際の生成はしない）
-                  client.view_api()
-              except Exception as e:
-                  print(f"  ❌ {str(e)[:80]}")
-              time.sleep(2)
+          # Modal APIエンドポイント確認
+          r = requests.get("https://api.modal.com/v1/", timeout=5)
+          print(f"Modal API: {r.status_code} {r.text[:100]}")
+          
+          # Modal サインアップURL
+          print("Modal登録: https://modal.com/signup")
+          print("特徴: 月$30分の無料クレジット・GPU A10G・カード不要")
           PYEOF
 
-      - name: Zeroscope V2 テスト（軽量テキスト→動画）
-        run: |
-          pip install gradio_client -q
-          python3 << 'PYEOF'
-          from gradio_client import Client
-          import time, os, shutil
-
-          spaces = [
-              "hysts/zeroscope-v2",
-              "fffiloni/zeroscope-v2-XL",
-              "Manjushri/Zeroscope-v2-XL",
-          ]
-          
-          for space_id in spaces:
-              try:
-                  print(f"\n試行: {space_id}")
-                  client = Client(space_id, verbose=False)
-                  print(f"  ✅ 接続成功")
-                  result = client.predict(
-                      "developer coding dark terminal screen",
-                      api_name="/predict"
-                  )
-                  print(f"  結果: {result}")
-                  break
-              except Exception as e:
-                  print(f"  ❌ {str(e)[:100]}")
-              time.sleep(3)
-          PYEOF
-
-      - name: Pexels 動画 新APIキーでテスト
+      - name: Lightning AI API テスト
         run: |
           python3 << 'PYEOF'
           import requests
           
-          # Pexels Videos API
-          key = "LSsE8rcX23VNaFN0M0F19PCMtoLhEyg1NxZpIqwr7aCuvUYInctIexrW"
-          headers = {"Authorization": key}
+          # Lightning AI APIを確認
+          r = requests.get("https://lightning.ai/api/v1/", timeout=5)
+          print(f"Lightning AI: {r.status_code} {r.text[:100]}")
           
-          queries = ["developer coding dark", "typing keyboard terminal", "programmer computer night"]
+          # Salad Cloud（安価GPU）
+          r2 = requests.get("https://api.salad.com/api/public/", timeout=5)
+          print(f"Salad Cloud: {r2.status_code} {r2.text[:100]}")
           
-          for q in queries:
-              r = requests.get(
-                  "https://api.pexels.com/videos/search",
-                  headers=headers,
-                  params={"query": q, "per_page": 3, "orientation": "portrait", "size": "medium"}
-              )
-              print(f"\n{q}: {r.status_code}")
-              if r.status_code == 200:
-                  for v in r.json().get('videos', [])[:2]:
-                      for f in v.get('video_files', []):
-                          if f.get('quality') == 'hd' and f.get('width', 0) <= 1080:
-                              print(f"  ✅ {f['link'][:80]}")
-                              break
+          # Vast.ai
+          r3 = requests.get("https://console.vast.ai/api/v0/", timeout=5)
+          print(f"Vast.ai: {r3.status_code} {r3.text[:100]}")
+          PYEOF
+
+      - name: Replicate API テスト（Wan2.2）
+        run: |
+          python3 << 'PYEOF'
+          import requests
+          
+          # Replicateの無料モデル確認
+          r = requests.get("https://api.replicate.com/v1/models/wan-video/wan-2.1", timeout=10)
+          print(f"Replicate Wan: {r.status_code} {r.text[:200]}")
+          
+          # 無料で使えるモデル
+          r2 = requests.get("https://api.replicate.com/v1/models?cursor=&per_page=5", timeout=10)
+          print(f"Models: {r2.status_code}")
           PYEOF
