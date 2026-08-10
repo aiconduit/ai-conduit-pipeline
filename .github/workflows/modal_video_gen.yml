@@ -25,6 +25,7 @@ jobs:
         run: |
           git config user.email "modal@aiconduit.com"
           git config user.name "Modal Video Gen"
-          git add assets/wan22_videos/ || true
+          git add -f assets/wan22_videos/*.mp4 || true
+          git add assets/wan22_videos/manifest.json || true
           git diff --staged --quiet || git commit -m "Auto: Wan2.2 7シーン動画生成"
           git push || true
