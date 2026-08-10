@@ -1,6 +1,5 @@
 import modal
-import os
-import io
+import os, io
 
 app = modal.App("wan22-video-gen")
 
@@ -15,43 +14,47 @@ image = (
         "imageio[ffmpeg]",
         "sentencepiece",
         "huggingface_hub",
+        "bitsandbytes",
     )
 )
 
 @app.function(
-    gpu="T4",
+    gpu="A10G",  # T4→A10G(24GB)に変更
     image=image,
     timeout=600,
-    memory=16384,
+    memory=32768,
 )
 def generate_video(prompt: str, scene_name: str) -> bytes:
     import torch
     from diffusers import WanPipeline
-    import imageio
+    from diffusers.utils import export_to_video
+    import imageio, tempfile
     
     print(f"GPU: {torch.cuda.get_device_name(0)}")
+    print(f"VRAM: {torch.cuda.get_device_properties(0).total_memory // 1024**3}GB")
     print(f"PyTorch: {torch.__version__}")
     print(f"生成中: {scene_name}")
     
     pipe = WanPipeline.from_pretrained(
         "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
-        torch_dtype=torch.float16,
+        torch_dtype=torch.bfloat16,
     )
-    pipe.to("cuda")
     pipe.enable_model_cpu_offload()
+    pipe.vae.enable_slicing()
+    pipe.vae.enable_tiling()
     
     output = pipe(
         prompt=prompt,
         num_inference_steps=20,
-        height=832,
-        width=480,
+        height=480,
+        width=832,
         num_frames=49,
         guidance_scale=5.0,
     )
     
     frames = output.frames[0]
     buf = io.BytesIO()
-    imageio.mimsave(buf, frames, format="mp4", fps=8, quality=8)
+    imageio.mimsave(buf, frames, format="mp4", fps=8, quality=7)
     video_bytes = buf.getvalue()
     print(f"✅ 生成完了: {len(video_bytes)//1024}KB")
     return video_bytes
@@ -59,27 +62,17 @@ def generate_video(prompt: str, scene_name: str) -> bytes:
 
 @app.local_entrypoint()
 def main():
-    import json
-    
-    # まず1シーンだけテスト
-    scenes = [
-        ("hook", "frustrated developer staring at dark terminal screen, cinematic 4K"),
-    ]
-    
     os.makedirs("assets/wan22_videos", exist_ok=True)
-    generated = []
     
-    for scene_name, prompt in scenes:
-        print(f"\n=== {scene_name} ===")
-        try:
-            video_bytes = generate_video.remote(prompt, scene_name)
-            path = f"assets/wan22_videos/{scene_name}.mp4"
-            with open(path, "wb") as f:
-                f.write(video_bytes)
-            size = len(video_bytes) // 1024
-            generated.append({"scene": scene_name, "path": path, "size_kb": size})
-            print(f"✅ {path} ({size}KB)")
-        except Exception as e:
-            print(f"❌ {scene_name}: {e}")
+    prompt = "frustrated developer staring at dark terminal screen, cinematic 4K"
+    scene_name = "hook"
     
-    print(f"\n生成完了: {len(generated)}シーン")
+    print(f"=== {scene_name} 生成テスト ===")
+    try:
+        video_bytes = generate_video.remote(prompt, scene_name)
+        path = f"assets/wan22_videos/{scene_name}.mp4"
+        with open(path, "wb") as f:
+            f.write(video_bytes)
+        print(f"✅ 保存: {path} ({len(video_bytes)//1024}KB)")
+    except Exception as e:
+        print(f"❌ エラー: {e}")
