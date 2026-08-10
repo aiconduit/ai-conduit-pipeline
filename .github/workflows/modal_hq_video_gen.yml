@@ -1,0 +1,32 @@
+name: Modal Wan2.2 HQ動画生成
+
+on:
+  workflow_dispatch:
+
+jobs:
+  hq_generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Modal Wan2.2 5B 高品質動画生成
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pip install modal requests -q
+          modal token set --token-id $MODAL_TOKEN_ID --token-secret $MODAL_TOKEN_SECRET
+          echo "Modal認証OK"
+          modal run modal_hq_video_gen.py
+          
+      - name: 生成動画をコミット
+        run: |
+          git config user.email "modal@aiconduit.com"
+          git config user.name "Modal HQ Video Gen"
+          git add -f assets/wan22_hq/ || true
+          git diff --staged --quiet || git commit -m "Auto: Wan2.2 5B HQ 7シーン動画生成"
+          git push || true
