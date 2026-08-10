@@ -1,4 +1,4 @@
-name: CogVideoX + Mixkit Test
+name: CogVideoX API調査
 
 on:
   workflow_dispatch:
@@ -8,61 +8,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: CogVideoX HuggingFace Spaces API テスト
+      - name: CogVideoX 正しいAPI名を調査
         run: |
-          echo "=== CogVideoX Spaces API ==="
-          # Gradio Client経由でSpacesを呼び出す
           pip install gradio_client -q
           python3 << 'PYEOF'
-          try:
-              from gradio_client import Client
-              client = Client("THUDM/CogVideoX-5B-Space")
-              result = client.predict(
-                  prompt="developer typing code on dark terminal screen, cinematic 4K",
-                  image_input=None,
-                  num_inference_steps=10,
-                  guidance_scale=6,
-                  api_name="/generate_video"
-              )
-              print(f"✅ CogVideoX成功: {result}")
-          except Exception as e:
-              print(f"❌ CogVideoX失敗: {e}")
+          from gradio_client import Client
+          client = Client("THUDM/CogVideoX-5B-Space")
+          print("利用可能なAPI一覧:")
+          for ep in client.view_api(print_info=False).get('named_endpoints', {}).items():
+              print(f"  {ep}")
           PYEOF
 
-      - name: Mixkit 動画ダウンロードテスト
+      - name: CogVideoX 動画生成テスト
         run: |
-          echo "=== Mixkit 動画テスト ==="
-          # Mixkitの直接ダウンロードを試みる
-          curl -s -L "https://mixkit.co/free-stock-video/developer-working-on-laptop-at-night-8329/download/preview" \
-            -o /tmp/mixkit_test.mp4 -w "SIZE:%{size_download} HTTP:%{http_code}" || echo "失敗"
-          file /tmp/mixkit_test.mp4 2>/dev/null || echo "ファイルなし"
-          
-          # Mixkit検索ページからリンク取得
-          curl -s "https://mixkit.co/search/coding/" | grep -o 'https://assets.mixkit.co[^"]*\.mp4' | head -5 || echo "リンクなし"
+          pip install gradio_client -q
+          python3 << 'PYEOF'
+          from gradio_client import Client
+          import json
+          client = Client("THUDM/CogVideoX-5B-Space")
+          info = client.view_api(print_info=False)
+          print(json.dumps(info, indent=2, ensure_ascii=False)[:2000])
+          PYEOF
 
-      - name: Coverr 動画テスト
+      - name: Pixabay 新しいAPIキーでテスト
         run: |
-          echo "=== Coverr 動画テスト ==="
-          curl -s "https://api.coverr.co/videos?page=1&category=tech&limit=3" | python3 -c "
-          import json, sys
-          try:
-              d = json.load(sys.stdin)
-              print('Keys:', list(d.keys()))
-              hits = d.get('hits', d.get('videos', d.get('results', [])))
-              for v in hits[:3]:
-                  print('URL:', v.get('url', v.get('urls', {}).get('mp4', 'N/A')))
-          except Exception as e:
-              print('Error:', e)
-          " || echo "失敗"
-
-      - name: Pixabay 動画API テスト  
-        run: |
-          echo "=== Pixabay 動画API ==="
-          curl -s "https://pixabay.com/api/videos/?key=49003380-2c63d1e3e86c19e1bf15ab4f1&q=coding+developer+dark&per_page=3&video_type=film" | python3 -c "
-          import json, sys
-          d = json.load(sys.stdin)
-          print('Total:', d.get('totalHits', 0))
-          for v in d.get('hits', [])[:3]:
-              url = v.get('videos', {}).get('medium', {}).get('url', 'N/A')
-              print('URL:', url)
-          " || echo "失敗"
+          echo "=== Pixabay動画API ==="
+          curl -v "https://pixabay.com/api/videos/?key=49003380-2c63d1e3e86c19e1bf15ab4f1&q=coding+developer&per_page=3" 2>&1 | grep -E "HTTP|total|url" | head -10
