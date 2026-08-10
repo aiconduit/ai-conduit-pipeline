@@ -7,19 +7,21 @@ app = modal.App("wan22-video-gen")
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
-        "torch==2.4.0",
+        "torch>=2.5.0",
+        "torchvision",
         "diffusers>=0.32.0",
         "transformers>=4.49.0",
         "accelerate",
         "imageio[ffmpeg]",
         "sentencepiece",
+        "huggingface_hub",
     )
 )
 
 @app.function(
     gpu="T4",
     image=image,
-    timeout=300,
+    timeout=600,
     memory=16384,
 )
 def generate_video(prompt: str, scene_name: str) -> bytes:
@@ -28,7 +30,8 @@ def generate_video(prompt: str, scene_name: str) -> bytes:
     import imageio
     
     print(f"GPU: {torch.cuda.get_device_name(0)}")
-    print(f"生成中: {scene_name} - {prompt[:50]}")
+    print(f"PyTorch: {torch.__version__}")
+    print(f"生成中: {scene_name}")
     
     pipe = WanPipeline.from_pretrained(
         "Wan-AI/Wan2.1-T2V-1.3B-Diffusers",
@@ -58,14 +61,9 @@ def generate_video(prompt: str, scene_name: str) -> bytes:
 def main():
     import json
     
+    # まず1シーンだけテスト
     scenes = [
-        ("hook",     "frustrated developer staring at dark terminal screen, close up face, cinematic 4K"),
-        ("why",      "developer typing frantically at computer with error messages on screen"),
-        ("solution", "developer smiling at computer screen showing successful code, bright terminal"),
-        ("step1",    "close up hands typing commands on dark mechanical keyboard, terminal screen"),
-        ("step2",    "code editor showing YAML configuration file, syntax highlighting, dark theme"),
-        ("result",   "developer celebrating at desk, multiple monitors, successful deployment"),
-        ("cta",      "smartphone screen showing download notification, modern app interface"),
+        ("hook", "frustrated developer staring at dark terminal screen, cinematic 4K"),
     ]
     
     os.makedirs("assets/wan22_videos", exist_ok=True)
@@ -84,6 +82,4 @@ def main():
         except Exception as e:
             print(f"❌ {scene_name}: {e}")
     
-    print(f"\n生成完了: {len(generated)}/7シーン")
-    with open("assets/wan22_videos/manifest.json", "w") as f:
-        json.dump(generated, f, indent=2)
+    print(f"\n生成完了: {len(generated)}シーン")
