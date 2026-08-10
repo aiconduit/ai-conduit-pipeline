@@ -1,0 +1,37 @@
+[
+  {
+    "scene": "hook",
+    "path": "assets/wan22_videos/hook.mp4",
+    "size_kb": 490
+  },
+  {
+    "scene": "why",
+    "path": "assets/wan22_videos/why.mp4",
+    "size_kb": 740
+  },
+  {
+    "scene": "solution",
+    "path": "assets/wan22_videos/solution.mp4",
+    "size_kb": 868
+  },
+  {
+    "scene": "step1",
+    "path": "assets/wan22_videos/step1.mp4",
+    "size_kb": 649
+  },
+  {
+    "scene": "step2",
+    "path": "assets/wan22_videos/step2.mp4",
+    "size_kb": 762
+  },
+  {
+    "scene": "result",
+    "path": "assets/wan22_videos/result.mp4",
+    "size_kb": 875
+  },
+  {
+    "scene": "cta",
+    "path": "assets/wan22_videos/cta.mp4",
+    "size_kb": 500
+  }
+]
