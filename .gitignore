@@ -3,6 +3,8 @@ node_modules/
 projects/
 assets/pexels_cache/
 assets/*.mp4
+!assets/wan22_videos/*.mp4
+!assets/modal_videos/*.mp4
 assets/*.aiff
 assets/*.mp3
 
