@@ -6,10 +6,10 @@ on:
 jobs:
   gpu_test:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Modal GPU確認
+      - name: Modal Wan2.2 動画生成
         env:
           MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
           MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
@@ -18,3 +18,10 @@ jobs:
           modal token set --token-id $MODAL_TOKEN_ID --token-secret $MODAL_TOKEN_SECRET
           echo "Modal認証OK"
           modal run modal_gpu_test.py
+      - name: 生成動画をコミット
+        run: |
+          git config user.email "modal@aiconduit.com"
+          git config user.name "Modal Video Gen"
+          git add assets/wan22_videos/ || true
+          git diff --staged --quiet || git commit -m "Auto: Wan2.2 シーン別動画生成"
+          git push || true
