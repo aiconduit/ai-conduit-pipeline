@@ -368,30 +368,36 @@ def main():
     _gift_desc = plan.get("gift_content", "")
 
     _desc_patterns = [
-        f"""Claude Codeですぐ使えるテンプレートを無料配布中
+        f"""【保存推奨】後で使えるClaude Codeテンプレートを無料配布中
 
-受け取りはこちら:
+{_gift_file}を今すぐダウンロード:
 {gift_link}
 
 コピペして5分で使えます。
 
-コメントに「AI」と書いてください。
+次回どのClaude Code機能を紹介してほしい？コメントで教えてください。
+
+エンジニアの友達にも送ってあげてください。
 
 {seo_tags}""",
-        f"""【今日のプレゼント】{_gift_file}を無料配布中
+        f"""【Claude Code Tips シリーズ】{_gift_file}を無料配布中
 
-Claude Codeですぐ使えます:
+受け取りはこちら（保存して後でDL）:
 {gift_link}
 
-コメントに「AI」と書いてください。
+このシリーズでClaude Codeを完全マスターできます。
+
+次回リクエストはコメントへ。
 
 {seo_tags}""",
         f"""毎日Claude Code Tipsを配信中
 
-今日のテンプレート({_gift_file})を無料配布:
+今日のテンプレート「{_gift_file}」を無料配布:
 {gift_link}
 
-コピペしてすぐ使えます。
+後で使うから保存しておいてください。
+
+次回何を紹介してほしい？コメントで教えてください。
 
 {seo_tags}""",
     ]
