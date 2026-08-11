@@ -1,0 +1,32 @@
+name: 自動非公開チェック
+
+on:
+  schedule:
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+jobs:
+  auto_private:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 自動非公開チェック実行
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        run: |
+          pip install requests -q
+          python3 sns_automation/scripts/auto_private.py
+
+      - name: ログをコミット
+        run: |
+          git config user.email "agent@aiconduit.com"
+          git config user.name "Auto Private Bot"
+          git add logs/ || true
+          git diff --staged --quiet || git commit -m "Auto: 非公開チェックログ $(date +%Y%m%d)"
+          git push || true
