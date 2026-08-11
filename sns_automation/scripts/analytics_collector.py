@@ -1,205 +1,151 @@
 #!/usr/bin/env python3
 """
-YouTube Analytics自動収集スクリプト
-投稿済み動画の再生数・CTR・視聴維持率を毎日収集してJSONに保存
+analytics_collector.py
+YouTubeアナリティクスを収集して自動改善パラメータを更新
 """
-import os
-import json
-import datetime
+import os, json, requests
+from datetime import datetime, timedelta
 from pathlib import Path
-from google.oauth2.credentials import Credentials
-from googleapiclient.discovery import build
 
-BASE_DIR = Path(__file__).parent.parent.parent
-ANALYTICS_DIR = BASE_DIR / "analytics"
-ANALYTICS_DIR.mkdir(exist_ok=True)
-ANALYTICS_JSON = ANALYTICS_DIR / "analytics_history.json"
-VIDEO_LOG_JSON = BASE_DIR / "output" / "auto_log.json"
-
-def get_youtube_client():
-    token_data = json.loads(os.environ["YOUTUBE_TOKEN_JSON"])
-    creds = Credentials(
-        token=token_data.get("token"),
-        refresh_token=token_data.get("refresh_token"),
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=os.environ["YOUTUBE_CLIENT_ID"],
-        client_secret=os.environ["YOUTUBE_CLIENT_SECRET"],
-    )
-    return build("youtube", "v3", credentials=creds)
-
-def get_analytics_client():
-    token_data = json.loads(os.environ["YOUTUBE_TOKEN_JSON"])
-    creds = Credentials(
-        token=token_data.get("token"),
-        refresh_token=token_data.get("refresh_token"),
-        token_uri="https://oauth2.googleapis.com/token",
-        client_id=os.environ["YOUTUBE_CLIENT_ID"],
-        client_secret=os.environ["YOUTUBE_CLIENT_SECRET"],
-    )
-    return build("youtubeAnalytics", "v2", credentials=creds)
-
-def get_video_stats(youtube, video_ids):
-    """動画の基本統計を取得"""
-    if not video_ids:
-        return {}
-    response = youtube.videos().list(
-        part="statistics,snippet",
-        id=",".join(video_ids)
-    ).execute()
-    stats = {}
-    for item in response.get("items", []):
-        vid = item["id"]
-        s = item["statistics"]
-        stats[vid] = {
-            "title": item["snippet"]["title"],
-            "views": int(s.get("viewCount", 0)),
-            "likes": int(s.get("likeCount", 0)),
-            "comments": int(s.get("commentCount", 0)),
-            "published_at": item["snippet"]["publishedAt"],
-        }
-    return stats
-
-def get_analytics_stats(analytics, video_id, start_date, end_date):
-    """CTR・視聴維持率・インプレッションを取得"""
-    try:
-        response = analytics.reports().query(
-            ids="channel==MINE",
-            startDate=start_date,
-            endDate=end_date,
-            metrics="views,estimatedMinutesWatched,averageViewDuration,averageViewPercentage,impressions,impressionClickThroughRate",
-            dimensions="video",
-            filters=f"video=={video_id}",
-        ).execute()
-        rows = response.get("rows", [])
+def get_youtube_analytics(video_id: str, access_token: str) -> dict:
+    """YouTubeアナリティクスAPI呼び出し"""
+    headers = {"Authorization": f"Bearer {access_token}"}
+    end_date = datetime.utcnow().strftime("%Y-%m-%d")
+    start_date = (datetime.utcnow() - timedelta(days=7)).strftime("%Y-%m-%d")
+    
+    r = requests.get(
+        "https://youtubeanalytics.googleapis.com/v2/reports",
+        headers=headers,
+        params={
+            "ids": "channel==MINE",
+            "startDate": start_date,
+            "endDate": end_date,
+            "metrics": "views,estimatedMinutesWatched,averageViewPercentage,likes,comments,shares,subscribersGained",
+            "filters": f"video=={video_id}",
+            "dimensions": "video",
+        }, timeout=15)
+    
+    if r.status_code == 200:
+        data = r.json()
+        rows = data.get("rows", [])
         if rows:
-            row = rows[0]
-            return {
-                "views": int(row[1]),
-                "watch_minutes": float(row[2]),
-                "avg_view_duration_sec": float(row[3]),
-                "avg_view_percentage": float(row[4]),
-                "impressions": int(row[5]),
-                "ctr": float(row[6]),
-            }
-    except Exception as e:
-        print(f"   ⚠️ Analytics取得失敗 ({video_id}): {e}")
+            cols = [c["name"] for c in data.get("columnHeaders", [])]
+            return dict(zip(cols, rows[0]))
     return {}
 
-def load_history():
-    if ANALYTICS_JSON.exists():
-        with open(ANALYTICS_JSON) as f:
-            return json.load(f)
-    return {}
+def refresh_access_token(refresh_token: str, client_id: str, client_secret: str) -> str:
+    """アクセストークン更新"""
+    r = requests.post("https://oauth2.googleapis.com/token", data={
+        "grant_type": "refresh_token",
+        "refresh_token": refresh_token,
+        "client_id": client_id,
+        "client_secret": client_secret,
+    }, timeout=10)
+    if r.status_code == 200:
+        return r.json().get("access_token", "")
+    return ""
 
-def save_history(data):
-    with open(ANALYTICS_JSON, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-def load_video_log():
-    """投稿済み動画IDリストを取得"""
-    video_ids = []
-    if VIDEO_LOG_JSON.exists():
-        with open(VIDEO_LOG_JSON) as f:
-            log = json.load(f)
-        if isinstance(log, list):
-            for entry in log:
-                vid = entry.get("video_id")
-                if vid:
-                    video_ids.append(vid)
-        elif isinstance(log, dict):
-            vid = log.get("video_id")
-            if vid:
-                video_ids.append(vid)
-    return video_ids
-
-def generate_improvement_report(history):
-    """改善提案レポートを生成"""
-    report = []
-    report.append("# AI Conduit アナリティクスレポート")
-    report.append(f"生成日時: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}")
-    report.append("")
-
-    if not history:
-        report.append("データなし")
-        return "\n".join(report)
-
-    # 平均CTRと視聴維持率
-    ctrs = [v.get("ctr", 0) for v in history.values() if "ctr" in v]
-    retentions = [v.get("avg_view_percentage", 0) for v in history.values() if "avg_view_percentage" in v]
-    views_list = [v.get("views", 0) for v in history.values()]
-
-    if ctrs:
-        avg_ctr = sum(ctrs) / len(ctrs)
-        report.append(f"## 平均CTR: {avg_ctr:.1f}%")
-        if avg_ctr < 3:
-            report.append("⚠️ CTRが低い → サムネイル改善が必要")
-        elif avg_ctr < 6:
-            report.append("△ CTRは普通 → サムネイルの数字・テキストを強化")
-        else:
-            report.append("✅ CTRは良好")
-
-    if retentions:
-        avg_retention = sum(retentions) / len(retentions)
-        report.append(f"## 平均視聴維持率: {avg_retention:.1f}%")
-        if avg_retention < 30:
-            report.append("⚠️ 視聴維持率が低い → フックを強化・動画を短くする")
-        elif avg_retention < 50:
-            report.append("△ 視聴維持率は普通 → 中盤のクリフハンガーを追加")
-        else:
-            report.append("✅ 視聴維持率は良好")
-
-    # トップ動画
-    if views_list:
-        sorted_videos = sorted(history.items(), key=lambda x: x[1].get("views", 0), reverse=True)
-        report.append("\n## トップ動画（再生数順）")
-        for vid, data in sorted_videos[:5]:
-            title = data.get("title", vid)[:30]
-            views = data.get("views", 0)
-            ctr = data.get("ctr", 0)
-            retention = data.get("avg_view_percentage", 0)
-            report.append(f"- {title}: {views}再生 / CTR {ctr:.1f}% / 維持率 {retention:.1f}%")
-
-    return "\n".join(report)
+def auto_improve(metrics: dict, params_file: str = "auto_improvement_params.json") -> dict:
+    """メトリクスに基づいて次回パラメータを自動改善"""
+    
+    # 現在のパラメータ読み込み
+    params = {}
+    if Path(params_file).exists():
+        params = json.loads(Path(params_file).read_text())
+    
+    improvements = []
+    views = metrics.get("views", 0)
+    retention = metrics.get("averageViewPercentage", 0)
+    ctr = metrics.get("clickThroughRate", 0)
+    likes = metrics.get("likes", 0)
+    
+    print(f"\n📊 パフォーマンス:")
+    print(f"  再生数: {views}")
+    print(f"  視聴維持率: {retention:.1f}%")
+    print(f"  いいね: {likes}")
+    
+    # 自動改善ロジック
+    if retention < 75:
+        params["target_duration_sec"] = max(30, params.get("target_duration_sec", 50) - 5)
+        improvements.append(f"視聴維持率低({retention:.1f}%)→尺{params['target_duration_sec']}秒に短縮")
+    elif retention >= 85:
+        params["target_duration_sec"] = min(55, params.get("target_duration_sec", 50) + 3)
+        improvements.append(f"視聴維持率高({retention:.1f}%)→尺を少し延長")
+    
+    if views < 200:
+        params["hook_style"] = "number_shock"
+        improvements.append("再生数低→数字フックに変更")
+    elif views >= 1000:
+        params["hook_style"] = "keep_current"
+        improvements.append(f"再生数優秀({views})→現状維持")
+    
+    if likes > 0 and views > 0:
+        like_rate = likes / views * 100
+        if like_rate > 5:
+            params["content_type"] = "tutorial"
+            improvements.append(f"いいね率高({like_rate:.1f}%)→チュートリアル系を増やす")
+    
+    if improvements:
+        Path(params_file).write_text(json.dumps(params, ensure_ascii=False, indent=2))
+        print(f"\n🔧 自動改善 ({len(improvements)}件):")
+        for imp in improvements:
+            print(f"  ✓ {imp}")
+    else:
+        print("\n✅ 改善不要（パフォーマンス良好）")
+    
+    return params
 
 def main():
-    print("📊 YouTube Analytics収集開始...")
-    today = datetime.date.today().strftime("%Y-%m-%d")
-    week_ago = (datetime.date.today() - datetime.timedelta(days=7)).strftime("%Y-%m-%d")
-
-    youtube = get_youtube_client()
-    analytics = get_analytics_client()
-    history = load_history()
-    video_ids = load_video_log()
-
-    if not video_ids:
-        print("   ⚠️ 投稿済み動画IDが見つかりません")
+    # 環境変数から認証情報取得
+    refresh_token = os.environ.get("YOUTUBE_REFRESH_TOKEN", "")
+    client_id = os.environ.get("YOUTUBE_CLIENT_ID", "")
+    client_secret = os.environ.get("YOUTUBE_CLIENT_SECRET", "")
+    
+    # 最新動画IDを取得
+    video_log = Path("/tmp/latest_video.json")
+    if not video_log.exists():
+        video_log = Path("logs/latest_video.json")
+    
+    if not video_log.exists():
+        print("⚠️ 動画IDログなし")
         return
-
-    print(f"   対象動画: {len(video_ids)}件")
-
-    # 基本統計取得
-    stats = get_video_stats(youtube, video_ids)
-    for vid, data in stats.items():
-        if vid not in history:
-            history[vid] = {}
-        history[vid].update(data)
-        history[vid]["last_updated"] = today
-
-        # Analytics取得
-        analytics_data = get_analytics_stats(analytics, vid, week_ago, today)
-        if analytics_data:
-            history[vid].update(analytics_data)
-        print(f"   ✅ {data['title'][:30]}: {data['views']}再生")
-
-    save_history(history)
-
-    # 改善レポート生成
-    report = generate_improvement_report(history)
-    report_path = ANALYTICS_DIR / f"report_{today}.md"
-    with open(report_path, "w", encoding="utf-8") as f:
-        f.write(report)
-    print(f"\n📝 レポート: {report_path}")
-    print(report)
+    
+    video_data = json.loads(video_log.read_text())
+    video_id = video_data.get("video_id", "")
+    
+    if not video_id:
+        print("⚠️ 動画IDなし")
+        return
+    
+    print(f"分析対象: {video_id}")
+    
+    # アクセストークン更新
+    access_token = refresh_access_token(refresh_token, client_id, client_secret)
+    if not access_token:
+        print("⚠️ トークン更新失敗")
+        return
+    
+    # メトリクス取得
+    metrics = get_youtube_analytics(video_id, access_token)
+    if not metrics:
+        print("⚠️ メトリクス取得失敗（まだ集計中の可能性）")
+        return
+    
+    # 自動改善
+    improved_params = auto_improve(metrics)
+    
+    # レポート保存
+    Path("logs").mkdir(exist_ok=True)
+    report = {
+        "timestamp": datetime.utcnow().isoformat(),
+        "video_id": video_id,
+        "metrics": metrics,
+        "improvements": improved_params,
+    }
+    date_str = datetime.utcnow().strftime("%Y%m%d")
+    Path(f"logs/analytics_{date_str}.json").write_text(
+        json.dumps(report, ensure_ascii=False, indent=2))
+    print(f"\n✅ レポート保存: logs/analytics_{date_str}.json")
 
 if __name__ == "__main__":
     main()
