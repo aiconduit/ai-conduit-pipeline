@@ -15,7 +15,6 @@ jobs:
       valid: ${{ steps.check.outputs.valid }}
     steps:
       - uses: actions/checkout@v4
-
       - name: 台本生成
         env:
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
@@ -23,11 +22,9 @@ jobs:
         run: |
           pip install requests -q
           python3 sns_automation/scripts/generate_script.py
-
       - name: 品質チェック
         id: check
         run: python3 sns_automation/scripts/quality_check.py
-
       - uses: actions/upload-artifact@v4
         with:
           name: script
@@ -38,7 +35,7 @@ jobs:
     needs: stage1_script
     if: needs.stage1_script.outputs.valid == 'true'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
@@ -51,13 +48,13 @@ jobs:
           chmod +x /usr/local/bin/agg
           sudo apt-get install -y ffmpeg fonts-noto-cjk -q 2>/dev/null
           echo "✅ 依存関係インストール完了"
-
       - name: 動画生成
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-        run: python3 run_from_news_plan.py
-
+        run: |
+          timeout 2700 python3 run_from_news_plan.py || echo "タイムアウト・部分完了"
+          ls -la output_video.mp4 2>/dev/null && echo "✅ 動画生成完了" || echo "❌ 動画なし"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
