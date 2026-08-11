@@ -1,192 +1,42 @@
-name: 🤖 AI Conduit 自律型エージェント
+name: AI Conduit 自律型エージェント
 
 on:
-  schedule:
-    # P2: 毎日20:00 JST（UTC 11:00）
-    - cron: "0 11 * * *"
   workflow_dispatch:
-    inputs:
-      topic:
-        description: 'トピック（空欄=自動選択）'
-        required: false
-        default: ''
-      pipeline:
-        description: 'パイプライン番号'
-        required: false
-        default: 'P2'
+  schedule:
+    - cron: "0 11 * * *"
 
 jobs:
-  # ===================================
-  # STAGE 1: 台本生成 + 品質チェック
-  # ===================================
-  generate_script:
-    name: 📝 台本生成
+  stage1_script:
+    name: 台本生成
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
-      script_valid: ${{ steps.quality.outputs.valid }}
-      script_score: ${{ steps.quality.outputs.score }}
+      score: ${{ steps.check.outputs.score }}
+      valid: ${{ steps.check.outputs.valid }}
     steps:
       - uses: actions/checkout@v4
+
       - name: 台本生成
         env:
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           pip install requests -q
-          python3 << 'PYEOF'
-          import os, json, requests, re
-          from pathlib import Path
-
-          CEREBRAS_KEY = os.environ.get("CEREBRAS_API_KEY", "")
-          DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
-
-          # CREATOR_SECRETS.mdのフックパターン組み込み
-          SCRIPT_PROMPT = """
-あなたはClaude Code専門のYouTube Shortsスクリプトライターです。
-厳格なルールで台本を生成してください。
-
-【フックパターン（必ずいずれか使用）】
-- 「{数字}%のエンジニアが知らない{機能}術」
-- 「コードレビューに{時間}？{機能}で解決」
-- 「残業が消えた理由は{機能}だった」
-- 「プロが絶対教えない{機能}の裏技」
-- 「{機能}で{具体的な結果}ができます」→結果を最初に見せる
-
-【必須ルール】
-- Hook: 25文字以内・結果を最初に見せる
-- Step1/Step2: 実際のコマンドをそのまま記載（$ claude /loop等）
-- CTA: 具体的ファイル名を言う（reviewer.mdを受け取れます等）
-- 禁止: 爆速・大幅・劇的・やばい・神・消えた
-
-【JSONのみ出力（他のテキスト不要）】
-{
-  "title": "99%が知らないClaude Code術",
-  "topic": "トピック名",
-  "hook":     {"narration": "...", "duration": 4},
-  "why":      {"narration": "...", "duration": 6},
-  "solution": {"narration": "...", "duration": 8},
-  "step1":    {"narration": "...", "duration": 7, "command": "$ ..."},
-  "step2":    {"narration": "...", "duration": 7, "command": "..."},
-  "result":   {"narration": "...", "duration": 6},
-  "cta":      {"narration": "...", "duration": 5, "gift_file": "reviewer.md"}
-}
-"""
-
-          # GitHubトレンドからトピック取得
-          r = requests.get(
-              "https://api.github.com/repos/aiconduit/ai-conduit-pipeline/contents/sns_automation/news_content_plan.json",
-              headers={"Authorization": f"token {os.environ.get('GITHUB_TOKEN','')}"},
-              timeout=10)
-          topic = "Claude Codeのサブエージェント機能"
-          if r.status_code == 200:
-              import base64
-              plan = json.loads(base64.b64decode(r.json()["content"]).decode())
-              topic = plan.get("selected_title", topic)
-          
-          print(f"トピック: {topic}")
-          prompt = SCRIPT_PROMPT + f"\n\nトピック: {topic}"
-
-          script = None
-
-          # Cerebras試行
-          if CEREBRAS_KEY:
-              try:
-                  r = requests.post("https://api.cerebras.ai/v1/chat/completions",
-                      headers={"Authorization": f"Bearer {CEREBRAS_KEY}", "Content-Type": "application/json"},
-                      json={"model": "gpt-oss-120b", "messages": [{"role": "user", "content": prompt}], "max_tokens": 800},
-                      timeout=30)
-                  if r.status_code == 200:
-                      content = r.json()["choices"][0]["message"]["content"]
-                      json_match = re.search(r"\{[\s\S]*\}", content)
-                      if json_match:
-                          script = json.loads(json_match.group())
-                          print("✅ Cerebras台本生成成功")
-              except Exception as e:
-                  print(f"Cerebras失敗: {e}")
-
-          # DeepSeekフォールバック
-          if not script and DEEPSEEK_KEY:
-              try:
-                  r = requests.post("https://api.deepseek.com/chat/completions",
-                      headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
-                      json={"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}], "max_tokens": 800},
-                      timeout=30)
-                  if r.status_code == 200:
-                      content = r.json()["choices"][0]["message"]["content"]
-                      json_match = re.search(r"\{[\s\S]*\}", content)
-                      if json_match:
-                          script = json.loads(json_match.group())
-                          print("✅ DeepSeek台本生成成功")
-              except Exception as e:
-                  print(f"DeepSeek失敗: {e}")
-
-          if not script:
-              raise Exception("全LLM失敗")
-
-          Path("news_content_plan.json").write_text(
-              json.dumps(script, ensure_ascii=False, indent=2))
-          print(f"✅ 台本保存")
-          print(json.dumps(script, ensure_ascii=False)[:300])
-          PYEOF
+          python3 sns_automation/scripts/generate_script.py
 
       - name: 品質チェック
-        id: quality
-        run: |
-          python3 << 'PYEOF'
-          import json, os, re
-          from pathlib import Path
-
-          script = json.loads(Path("news_content_plan.json").read_text())
-          
-          score = 0
-          issues = []
-          
-          FORBIDDEN = ["爆速","大幅","劇的","やばい","神","消えた","禁断"]
-          
-          hook = script.get("hook", {}).get("narration", "")
-          if len(hook) <= 25: score += 20
-          else: issues.append(f"Hook長すぎ:{len(hook)}文字")
-          
-          if not any(w in hook for w in FORBIDDEN): score += 20
-          else: issues.append(f"禁止ワード検出")
-          
-          for s in ["step1","step2"]:
-              n = script.get(s, {}).get("narration", "")
-              if any(c in n for c in ["$","/"," .claude",".md","yaml","--"]): score += 15
-              else: issues.append(f"{s}にコマンドなし")
-          
-          cta = script.get("cta", {}).get("narration", "")
-          if any(ext in cta for ext in [".md",".json",".yaml",".py"]): score += 20
-          else: issues.append("CTAに具体的ファイル名なし")
-          
-          durations = sum(script.get(s,{}).get("duration",0)
-                         for s in ["hook","why","solution","step1","step2","result","cta"])
-          if 35 <= durations <= 60: score += 10
-          else: issues.append(f"尺不適切:{durations}秒")
-          
-          passed = score >= 60
-          print(f"品質スコア: {score}/100 {'✅合格' if passed else '❌不合格'}")
-          if issues: print(f"問題: {issues}")
-          
-          with open(os.environ.get("GITHUB_OUTPUT",""), "a") as f:
-              f.write(f"valid={'true' if passed else 'false'}\n")
-              f.write(f"score={score}\n")
-          PYEOF
+        id: check
+        run: python3 sns_automation/scripts/quality_check.py
 
       - uses: actions/upload-artifact@v4
         with:
           name: script
           path: news_content_plan.json
 
-  # ===================================
-  # STAGE 2: 動画生成
-  # ===================================
-  generate_video:
-    name: 🎬 動画生成
-    needs: generate_script
-    if: needs.generate_script.outputs.script_valid == 'true'
+  stage2_video:
+    name: 動画生成
+    needs: stage1_script
+    if: needs.stage1_script.outputs.valid == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -204,18 +54,15 @@ jobs:
           chmod +x /usr/local/bin/agg
           sudo apt-get install -y ffmpeg fonts-noto-cjk -q 2>/dev/null
           python3 run_from_news_plan.py
-
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: video
           path: output_video.mp4
 
-  # ===================================
-  # STAGE 3: YouTube投稿
-  # ===================================
-  upload_youtube:
-    name: 📤 YouTube投稿
-    needs: generate_video
+  stage3_upload:
+    name: YouTube投稿
+    needs: stage2_video
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -238,63 +85,24 @@ jobs:
         run: |
           pip install google-auth google-auth-oauthlib google-api-python-client requests -q
           python3 sns_automation/scripts/youtube_auto_upload.py
-          echo "video_id=$(cat /tmp/uploaded_video_id.txt 2>/dev/null || echo '')" >> $GITHUB_OUTPUT
+          VID=$(cat /tmp/uploaded_video_id.txt 2>/dev/null || echo "")
+          echo "video_id=$VID" >> $GITHUB_OUTPUT
 
-  # ===================================
-  # STAGE 4: 24時間後分析 + 自動改善
-  # ===================================
-  analyze_performance:
-    name: 📊 パフォーマンス分析
-    needs: upload_youtube
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v4
-      - name: 24時間待機してから分析
-        env:
-          VIDEO_ID: ${{ needs.upload_youtube.outputs.video_id }}
-          YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
-        run: |
-          echo "動画ID: $VIDEO_ID を記録"
-          echo "{"video_id": "$VIDEO_ID", "posted_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"}" > /tmp/latest_video.json
-          pip install requests -q
-          python3 sns_automation/scripts/analytics_collector.py || echo "分析スキップ（24時間後に再実行）"
-
-  # ===================================
-  # STAGE 5: 品質レポート生成
-  # ===================================
-  quality_report:
-    name: 📈 品質レポート
-    needs: [generate_script, upload_youtube]
+  stage4_log:
+    name: 記録
+    needs: [stage1_script, stage3_upload]
     if: always()
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: レポート生成・コミット
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: 結果記録
         run: |
-          python3 << 'PYEOF'
-          import json
-          from datetime import datetime
-          from pathlib import Path
-
-          report = {
-              "timestamp": datetime.utcnow().isoformat(),
-              "script_score": "${{ needs.generate_script.outputs.script_score }}",
-              "video_id": "${{ needs.upload_youtube.outputs.video_id }}",
-              "status": "completed",
-          }
-
-          Path("logs").mkdir(exist_ok=True)
-          date_str = datetime.utcnow().strftime("%Y%m%d_%H%M")
-          Path(f"logs/report_{date_str}.json").write_text(
-              json.dumps(report, ensure_ascii=False, indent=2))
-          print(f"✅ レポート: logs/report_{date_str}.json")
-          PYEOF
-
+          mkdir -p logs
+          echo '{"video_id":"${{ needs.stage3_upload.outputs.video_id }}","score":"${{ needs.stage1_script.outputs.score }}","posted_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > logs/latest_video.json
           git config user.email "agent@aiconduit.com"
           git config user.name "AI Conduit Agent"
           git add logs/ || true
-          git diff --staged --quiet || git commit -m "Auto: パフォーマンスレポート $(date +%Y%m%d)"
+          git diff --staged --quiet || git commit -m "Auto: 記録 $(date +%Y%m%d_%H%M)"
           git push || true
