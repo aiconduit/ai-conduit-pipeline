@@ -1,4 +1,4 @@
-name: ターミナル録画テスト
+name: Claude画面録画テスト
 
 on:
   workflow_dispatch:
@@ -6,45 +6,57 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
 
-      - name: asciinema + agg + asciinema-automation インストール
+      - name: 環境セットアップ
         run: |
-          pip install asciinema asciinema-automation -q
-          curl -sL https://github.com/asciinema/agg/releases/latest/download/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg
-          chmod +x /usr/local/bin/agg
-          sudo apt-get install -y ffmpeg -q 2>/dev/null
-          echo "✅ インストール完了"
+          sudo apt-get install -y ffmpeg xvfb x11-utils -q 2>/dev/null
+          pip install playwright requests -q
+          python3 -m playwright install chromium
+          python3 -m playwright install-deps chromium
+          echo "✅ セットアップ完了"
 
-      - name: ターミナル録画テスト
+      - name: Xvfb起動
+        run: |
+          Xvfb :99 -screen 0 1280x720x24 &
+          export DISPLAY=:99
+          echo "DISPLAY=:99" >> $GITHUB_ENV
+          sleep 2
+          echo "✅ Xvfb起動完了"
+
+      - name: Claude画面録画テスト
+        env:
+          CLAUDE_SESSION_COOKIE: ${{ secrets.CLAUDE_SESSION_COOKIE }}
+          DISPLAY: :99
         run: |
           pip install requests -q
+          mkdir -p assets/claude_recordings
           python3 << 'PYEOF'
-          import sys
+          import sys, os
           sys.path.insert(0, "sns_automation/scripts")
-          from terminal_recorder import generate_scene_video
-          import os
-          os.makedirs("assets/terminal_test", exist_ok=True)
+          from claude_screen_recorder import generate_claude_recording
+
+          cookie = os.environ.get("CLAUDE_SESSION_COOKIE", "")
           
           tests = [
-              ("step1", "手順1: .claude/agents/reviewer.mdの1行目にname: reviewer と書きます", 5.0),
-              ("step2", "手順2: frontmatterにdisallowedTools: Write, Edit と記述します", 5.0),
-              ("solution", "Claude Codeのサブエージェント設定・.claude/agents/reviewer.mdで解決", 4.0),
+              ("step1", "手順1: .claude/agents/reviewer.mdの1行目にname: reviewer と書きます", 8.0),
+              ("step2", "手順2: frontmatterにdisallowedTools: Write, Edit と記述します", 8.0),
           ]
+          
           for scene, narration, dur in tests:
-              out = f"assets/terminal_test/{scene}.mp4"
-              result = generate_scene_video(scene, narration, dur, out)
+              out = f"assets/claude_recordings/{scene}.mp4"
+              result = generate_claude_recording(scene, narration, dur, out, cookie)
               print(f"{scene}: {'✅' if result else '❌'}")
           PYEOF
 
       - name: コミット
         run: |
-          git config user.email "terminal@aiconduit.com"
-          git config user.name "Terminal Recorder"
-          git add -f assets/terminal_test/*.mp4 || true
-          git diff --staged --quiet || git commit -m "Test: ターミナル録画MP4"
+          git config user.email "claude@aiconduit.com"
+          git config user.name "Claude Recorder"
+          git add -f assets/claude_recordings/*.mp4 || true
+          git diff --staged --quiet || git commit -m "Test: Claude画面録画"
           git push || true
