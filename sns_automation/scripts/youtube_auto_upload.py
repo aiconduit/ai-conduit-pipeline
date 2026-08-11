@@ -368,14 +368,14 @@ def main():
     _gift_desc = plan.get("gift_content", "")
 
     _desc_patterns = [
-        f"""【無料配布】{title}の完全チートシート
+        f"""【今日のプレゼント】{_gift_file}を無料配布中
 
-GitHubから今すぐダウンロード:
+Claude Codeですぐ使えるテンプレートはこちら:
 {gift_link}
 
-コメントに「AI」と書いてくれた方には追加でソースコードも送ります。
+コピペして5分で使えます。
 
-Claude Code / Codex / Gemini CLI の実践テクニックを毎日配信。
+コメントに「AI」と書いてください。個別でサポートします。
 
 {seo_tags}""",
         f"""今日から使えます。{title}
