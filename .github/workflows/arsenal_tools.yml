@@ -1,0 +1,25 @@
+name: Arsenal Tools Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  arsenal:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Arsenal セットアップ
+        run: bash arsenal_setup.sh
+        
+      - name: OmniRoute テスト
+        run: |
+          pip install openai -q
+          python3 /tmp/omni_client.py || echo "OmniRoute: APIキー設定が必要"
+          
+      - name: 使用可能ツール確認
+        run: |
+          echo "=== Arsenal 利用可能ツール ==="
+          ls /tmp/kimi-k3/ 2>/dev/null && echo "✅ kimi-k3-in-c" || echo "❌ kimi-k3"
+          cat /tmp/skiper_components.txt
+          cat /tmp/competitor_notes.md
