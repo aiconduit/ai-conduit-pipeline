@@ -1,44 +1,61 @@
-name: Wan2.2 A14B Space調査
+name: HuggingFace ZeroGPU Wan2.2 A14B テスト
 
 on:
   workflow_dispatch:
 
 jobs:
-  research:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 30
     steps:
-      - name: A14B Space動作確認
+      - uses: actions/checkout@v4
+      - name: HF ZeroGPU Wan2.2 A14B 動画生成
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          pip install gradio_client requests -q
+          pip install gradio_client huggingface_hub requests -q
           python3 << 'PYEOF'
-          import requests
+          import os, requests, time
           from gradio_client import Client
 
-          spaces = [
-              "aryansrk/Wan-AI-Wan2.2-T2V-A14B",
-              "rahul7star/Wan2.2-T2V-A14B",
-              "wana14/Wan2.2-T2V-A14B",
-              "tsh7676/Wan-AI-Wan2.2-T2V-A14B",
-              "gageyoy/Wan-AI-Wan2.2-T2V-A14B",
-          ]
+          HF_TOKEN = os.environ["HF_TOKEN"]
+          headers = {"Authorization": f"Bearer {HF_TOKEN}"}
+
+          print("=== HuggingFace ZeroGPU A14B Spaces 検索 ===")
           
-          for space_id in spaces:
-              print(f"\n=== {space_id} ===")
-              # HF API確認
-              r = requests.get(f"https://huggingface.co/api/spaces/{space_id}", timeout=10)
-              if r.status_code == 200:
-                  d = r.json()
-                  runtime = d.get("runtime", {})
-                  print(f"  Hardware: {runtime.get('hardware','?')}")
-                  print(f"  Stage: {runtime.get('stage','?')}")
-                  print(f"  SDK: {d.get('sdk','?')}")
-              
-              # Gradio API接続テスト
+          # ZeroGPUで動いているA14B Spacesを探す
+          r = requests.get("https://huggingface.co/api/spaces",
+                          params={"search": "Wan2.2 T2V A14B", "limit": 20},
+                          headers=headers, timeout=10)
+          
+          zerogpu_spaces = []
+          if r.status_code == 200:
+              for s in r.json():
+                  hw = s.get("runtime", {}).get("hardware", {})
+                  stage = s.get("runtime", {}).get("stage", "")
+                  if isinstance(hw, dict):
+                      current = hw.get("current", "")
+                  else:
+                      current = str(hw)
+                  print(f"  {s.get('id')} [{current}] stage={stage}")
+                  if "zero" in str(current).lower() or "a10g" in str(current).lower():
+                      zerogpu_spaces.append(s.get("id"))
+          
+          print(f"\nZeroGPU対応Space: {zerogpu_spaces}")
+          
+          # ZeroGPU Spaceに接続テスト
+          test_spaces = [
+              "Wan-AI/Wan2.2-T2V-A14B",
+              "alexnasa/Wan2.2-Animate-ZEROGPU",
+          ] + zerogpu_spaces[:3]
+          
+          for space_id in test_spaces:
               try:
-                  client = Client(space_id, verbose=False)
+                  print(f"\n接続テスト: {space_id}")
+                  client = Client(space_id, hf_token=HF_TOKEN, verbose=False)
                   client.view_api()
-                  print(f"  ✅ Gradio API接続成功")
+                  print(f"✅ 接続成功！")
+                  break
               except Exception as e:
-                  print(f"  ❌ {str(e)[:80]}")
+                  print(f"❌ {str(e)[:100]}")
           PYEOF
