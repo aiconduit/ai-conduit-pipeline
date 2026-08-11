@@ -98,11 +98,18 @@ def main():
     # 1時間動画投稿
     if Path("longform_output.mp4").exists():
         title = longform_script.get("title", "Claude Code完全マスター 今日のTips10選")
+
+        # チャプター情報を取得
+        chapters_text = ""
+        if Path("longform_chapters.txt").exists():
+            chapters_text = "\n\n" + Path("longform_chapters.txt").read_text()
+
         desc = (
-            f"Claude Codeの使い方を今日のTips10個まとめて解説します。\n\n"
-            f"無料テンプレートはこちら:\n{gift_link}\n\n"
-            f"各トピックのショート動画もチャンネルで配信中です。\n\n"
-            f"#ClaudeCode #Claude #AI開発 #エンジニア #プログラミング"
+            f"Claude Codeの使い方を今日のTips10個まとめて解説します。\n"
+            f"各テンプレートファイルを概要欄から無料で受け取れます。\n"
+            f"\n無料テンプレートはこちら:\n{gift_link}"
+            f"{chapters_text}\n\n"
+            f"#ClaudeCode #Claude #AI開発 #エンジニア #プログラミング #生成AI"
         )
         print(f"1時間動画: {title[:40]}")
         vid_id = upload_video(youtube, "longform_output.mp4", title, desc, base_tags, is_short=False)
