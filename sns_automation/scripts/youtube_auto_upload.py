@@ -392,12 +392,20 @@ Claude Code / Codex / Gemini CLI の実践テクニックを毎日配信。
     ]
     description = _rdp.choice(_desc_patterns)
 
-    # 最新の動画を探す
-    videos = sorted(glob.glob("projects/daily/renders/*.mp4"))
-    if not videos:
+    # 最新の動画を探す（複数パスに対応）
+    import os
+    video_file = None
+    search_paths = [
+        "output_video.mp4",  # autonomous_agentからのアーティファクト
+        *sorted(glob.glob("projects/daily/renders/*.mp4")),
+        *sorted(glob.glob("*.mp4")),
+    ]
+    for vp in search_paths:
+        if os.path.exists(vp) and os.path.getsize(vp) > 10000:
+            video_file = vp
+            break
+    if not video_file:
         print("動画ファイルが見つかりません"); sys.exit(1)
-    
-    video_file = videos[-1]
     print(f"アップロード: {video_file}")
     print(f"タイトル: {title}")
     
