@@ -47,14 +47,29 @@ jobs:
           curl -sL https://github.com/asciinema/agg/releases/latest/download/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg
           chmod +x /usr/local/bin/agg
           sudo apt-get install -y ffmpeg fonts-noto-cjk -q 2>/dev/null
-          echo "✅ 依存関係インストール完了"
+          echo "✅ 依存関係完了"
       - name: 動画生成
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          timeout 2700 python3 run_from_news_plan.py || echo "タイムアウト・部分完了"
-          ls -la output_video.mp4 2>/dev/null && echo "✅ 動画生成完了" || echo "❌ 動画なし"
+          timeout 2700 python3 run_from_news_plan.py || true
+          
+          # 出力動画を output_video.mp4 にコピー
+          VIDEO=$(find projects/daily/renders/ -name "*.mp4" 2>/dev/null | sort -t_ | tail -1)
+          if [ -z "$VIDEO" ]; then
+            VIDEO=$(find . -name "*.mp4" -newer news_content_plan.json 2>/dev/null | grep -v pexels | grep -v assets | head -1)
+          fi
+          
+          if [ -n "$VIDEO" ]; then
+            cp "$VIDEO" output_video.mp4
+            echo "✅ 動画コピー完了: $VIDEO"
+            ls -la output_video.mp4
+          else
+            echo "❌ 動画が見つかりません"
+            find . -name "*.mp4" 2>/dev/null | head -10
+          fi
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:
