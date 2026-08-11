@@ -54,22 +54,17 @@ jobs:
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           timeout 2700 python3 run_from_news_plan.py || true
-          
-          # 出力動画を output_video.mp4 にコピー
-          VIDEO=$(find projects/daily/renders/ -name "*.mp4" 2>/dev/null | sort -t_ | tail -1)
+          VIDEO=$(find projects/daily/renders/ -name "*.mp4" 2>/dev/null | tail -1)
           if [ -z "$VIDEO" ]; then
             VIDEO=$(find . -name "*.mp4" -newer news_content_plan.json 2>/dev/null | grep -v pexels | grep -v assets | head -1)
           fi
-          
           if [ -n "$VIDEO" ]; then
             cp "$VIDEO" output_video.mp4
-            echo "✅ 動画コピー完了: $VIDEO"
+            echo "✅ 動画コピー: $VIDEO"
             ls -la output_video.mp4
           else
-            echo "❌ 動画が見つかりません"
-            find . -name "*.mp4" 2>/dev/null | head -10
+            echo "❌ 動画なし"
           fi
-
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -91,6 +86,10 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: script
+      - name: 依存関係インストール
+        run: |
+          pip install google-auth google-auth-oauthlib google-api-python-client requests Pillow numpy -q
+          echo "✅ YouTube投稿依存関係完了"
       - name: YouTube投稿
         id: upload
         env:
@@ -99,10 +98,10 @@ jobs:
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
         run: |
-          pip install google-auth google-auth-oauthlib google-api-python-client requests -q
           python3 sns_automation/scripts/youtube_auto_upload.py
           VID=$(cat /tmp/uploaded_video_id.txt 2>/dev/null || echo "")
           echo "video_id=$VID" >> $GITHUB_OUTPUT
+          echo "投稿動画ID: $VID"
 
   stage4_log:
     name: 記録
