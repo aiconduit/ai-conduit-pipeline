@@ -1,4 +1,4 @@
-name: HuggingFace ZeroGPU Wan2.2 A14B テスト
+name: ZeroGPU A14B 直接テスト
 
 on:
   workflow_dispatch:
@@ -8,54 +8,44 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - name: HF ZeroGPU Wan2.2 A14B 動画生成
+      - name: ZeroGPU Space直接テスト
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          pip install gradio_client huggingface_hub requests -q
+          pip install gradio_client requests -q
           python3 << 'PYEOF'
-          import os, requests, time
+          import os, requests
           from gradio_client import Client
 
           HF_TOKEN = os.environ["HF_TOKEN"]
           headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
-          print("=== HuggingFace ZeroGPU A14B Spaces 検索 ===")
-          
-          # ZeroGPUで動いているA14B Spacesを探す
-          r = requests.get("https://huggingface.co/api/spaces",
-                          params={"search": "Wan2.2 T2V A14B", "limit": 20},
-                          headers=headers, timeout=10)
-          
-          zerogpu_spaces = []
-          if r.status_code == 200:
-              for s in r.json():
-                  hw = s.get("runtime", {}).get("hardware", {})
-                  stage = s.get("runtime", {}).get("stage", "")
-                  if isinstance(hw, dict):
-                      current = hw.get("current", "")
-                  else:
-                      current = str(hw)
-                  print(f"  {s.get('id')} [{current}] stage={stage}")
-                  if "zero" in str(current).lower() or "a10g" in str(current).lower():
-                      zerogpu_spaces.append(s.get("id"))
-          
-          print(f"\nZeroGPU対応Space: {zerogpu_spaces}")
-          
-          # ZeroGPU Spaceに接続テスト
-          test_spaces = [
-              "Wan-AI/Wan2.2-T2V-A14B",
+          # ZeroGPU関連Spaceを優先的にテスト
+          priority_spaces = [
+              "powolnik/Wan-AI-Wan2.2-T2V-A14B-ZERO",
+              "mokodana/Wan-AI-Wan2.2-T2V-A14B-Unlimited",
               "alexnasa/Wan2.2-Animate-ZEROGPU",
-          ] + zerogpu_spaces[:3]
-          
-          for space_id in test_spaces:
+              "wavespeed/wan2.2",
+          ]
+
+          for space_id in priority_spaces:
+              print(f"\n=== {space_id} ===")
+              # ランタイム確認
+              r = requests.get(f"https://huggingface.co/api/spaces/{space_id}",
+                             headers=headers, timeout=10)
+              if r.status_code == 200:
+                  d = r.json()
+                  hw = d.get("runtime", {}).get("hardware", {})
+                  stage = d.get("runtime", {}).get("stage", "")
+                  print(f"  Hardware: {hw}")
+                  print(f"  Stage: {stage}")
+                  print(f"  SDK: {d.get('sdk','')}")
+              
+              # Gradio API接続
               try:
-                  print(f"\n接続テスト: {space_id}")
                   client = Client(space_id, hf_token=HF_TOKEN, verbose=False)
                   client.view_api()
-                  print(f"✅ 接続成功！")
-                  break
+                  print(f"  ✅ API接続成功！動画生成可能")
               except Exception as e:
-                  print(f"❌ {str(e)[:100]}")
+                  print(f"  ❌ {str(e)[:120]}")
           PYEOF
