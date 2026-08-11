@@ -17,3 +17,5 @@ remotion-composer/public/career_*.mp4
 .env
 __pycache__/
 *.pyc
+
+!assets/terminal_test/*.mp4
