@@ -23,7 +23,6 @@ jobs:
           HF_TOKEN = os.environ["HF_TOKEN"]
           space_id = "jimmie11/wan22-a14b-video"
 
-          print(f"接続: {space_id}")
           client = Client(space_id, token=HF_TOKEN, verbose=False)
           client.view_api()
           print("✅ API接続成功")
@@ -42,14 +41,13 @@ jobs:
 
           for scene_name, prompt in scenes:
               print(f"\n=== {scene_name} ===")
-              print(f"プロンプト: {prompt[:60]}")
               try:
                   result = client.predict(
                       prompt=prompt,
-                      negative_prompt="blurry, low quality, watermark, text overlay, bad anatomy, ugly, distorted",
+                      negative_prompt="blurry, low quality, watermark, text overlay, bad anatomy",
                       steps=40,
                       guidance=7.0,
-                      api_name="/predict"
+                      api_name="/generate_video"
                   )
                   if result and os.path.exists(str(result)):
                       dst = f"assets/zerogpu_hq/{scene_name}.mp4"
