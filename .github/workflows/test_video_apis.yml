@@ -1,73 +1,72 @@
-name: ZeroGPU A14B 動画生成
+name: ターミナル録画テスト
 
 on:
   workflow_dispatch:
 
 jobs:
-  generate:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
-    permissions:
-      contents: write
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: Wan2.2 A14B ZeroGPU 7シーン生成
-        env:
-          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+      - name: asciinema + agg + asciinema-automation インストール
         run: |
-          pip install gradio_client -q
+          # asciinema
+          pip install asciinema asciinema-automation -q
+          
+          # agg（Rust製）
+          curl -L https://github.com/asciinema/agg/releases/latest/download/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg
+          chmod +x /usr/local/bin/agg
+          agg --version
+          
+          # ffmpeg
+          sudo apt-get install -y ffmpeg fonts-noto-cjk -q
+          
+          echo "✅ インストール完了"
+
+      - name: ターミナル録画テスト（Step1シーン）
+        run: |
+          pip install requests -q
           python3 << 'PYEOF'
-          import os, shutil, time
-          from gradio_client import Client
+          import sys
+          sys.path.insert(0, "sns_automation/scripts")
+          from terminal_recorder import extract_commands, make_asciinema_script, record_to_mp4, generate_scene_video
+          import os
 
-          HF_TOKEN = os.environ["HF_TOKEN"]
-          space_id = "jimmie11/wan22-a14b-video"
+          os.makedirs("assets/terminal_test", exist_ok=True)
 
-          client = Client(space_id, token=HF_TOKEN, verbose=False)
-          client.view_api()
-          print("✅ API接続成功")
+          # テスト1: コマンド抽出
+          narration = "手順1: .claude/agents/reviewer.mdの1行目にname: reviewer と書きます"
+          commands = extract_commands(narration)
+          print(f"抽出コマンド: {commands}")
 
-          scenes = [
-              ("hook",     "frustrated developer staring at dark terminal screen, cinematic 4K, professional, sharp focus, no text"),
-              ("why",      "developer with stressed expression looking at computer error messages, dark office at night, cinematic"),
-              ("solution", "developer smiling at terminal screen showing successful code output, bright green text, cinematic 4K"),
-              ("step1",    "extreme close up of hands typing on mechanical keyboard, green terminal glow, dark background, 4K"),
-              ("step2",    "code editor screen showing YAML configuration file with syntax highlighting, dark theme, cinematic"),
-              ("result",   "developer celebrating success at desk with multiple monitors showing green output, achievement, 4K"),
-              ("cta",      "smartphone held in hand showing app notification close up, modern UI, dark background, cinematic"),
-          ]
+          # テスト2: スクリプト生成
+          script = make_asciinema_script(commands, duration=5.0)
+          print(f"\nスクリプト:\n{script}")
 
-          os.makedirs("assets/zerogpu_hq", exist_ok=True)
+          # テスト3: MP4生成（fallbackモード）
+          out = "assets/terminal_test/step1_test.mp4"
+          result = generate_scene_video("step1", narration, 5.0, out)
+          print(f"\n結果: {'✅ 成功' if result else '❌ 失敗'}")
 
-          for scene_name, prompt in scenes:
-              print(f"\n=== {scene_name} ===")
-              try:
-                  result = client.predict(
-                      prompt=prompt,
-                      negative_prompt="blurry, low quality, watermark, text overlay, bad anatomy",
-                      steps=40,
-                      guidance=7.0,
-                      api_name="/generate_video"
-                  )
-                  if result and os.path.exists(str(result)):
-                      dst = f"assets/zerogpu_hq/{scene_name}.mp4"
-                      shutil.copy(str(result), dst)
-                      size = os.path.getsize(dst) // 1024
-                      print(f"✅ {dst} ({size}KB)")
-                  else:
-                      print(f"❌ 結果なし: {result}")
-              except Exception as e:
-                  print(f"❌ {scene_name}: {e}")
-              time.sleep(3)
-
-          files = os.listdir("assets/zerogpu_hq")
-          print(f"\n生成完了: {len([f for f in files if f.endswith('.mp4')])}/7シーン")
+          # テスト4: /loopコマンドの例
+          narration2 = "手順1: $ claude と入力し、/loop 5m /babysit と入力します"
+          commands2 = extract_commands(narration2)
+          print(f"\nコマンド2: {commands2}")
+          out2 = "assets/terminal_test/step1_loop.mp4"
+          result2 = generate_scene_video("step1", narration2, 6.0, out2)
+          print(f"結果2: {'✅ 成功' if result2 else '❌ 失敗'}")
           PYEOF
 
-      - name: 生成動画をコミット
+      - name: 生成ファイル確認
         run: |
-          git config user.email "zerogpu@aiconduit.com"
-          git config user.name "ZeroGPU A14B"
-          git add -f assets/zerogpu_hq/ || true
-          git diff --staged --quiet || git commit -m "Auto: Wan2.2 A14B ZeroGPU 7シーン動画生成"
+          ls -la assets/terminal_test/ 2>/dev/null || echo "フォルダなし"
+          
+      - name: コミット
+        run: |
+          git config user.email "terminal@aiconduit.com"
+          git config user.name "Terminal Recorder"
+          git add -f assets/terminal_test/ || true
+          git diff --staged --quiet || git commit -m "Test: ターミナル録画テスト動画"
           git push || true
