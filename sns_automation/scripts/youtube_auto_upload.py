@@ -173,7 +173,7 @@ def upload_thumbnail(youtube, video_id, image_buf):
 
 
 def reply_to_comments(youtube, video_id):
-    gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+    gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/")
     # コメント返信テンプレート
     reply_templates = [
         "ありがとうございます！詳細は概要欄をチェックしてください👇",
@@ -341,18 +341,18 @@ def main():
     if os.path.exists(_gift_url_path):
         with open(_gift_url_path, encoding="utf-8") as _gf:
             _g = _gf.read().strip()
-        gift_link = _g if _g else os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+        gift_link = _g if _g else os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/")
         print(f"[Gift] 動画専用URL: {gift_link}")
     else:
-        gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+        gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/")
     _gift_url_path = "sns_automation/gift_url.txt"
     if os.path.exists(_gift_url_path):
         with open(_gift_url_path, encoding="utf-8") as _gf:
             _gift_url = _gf.read().strip()
-        gift_link = _gift_url if _gift_url else os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+        gift_link = _gift_url if _gift_url else os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/")
         print(f"[Gift] 動画専用プレゼントURL: {gift_link}")
     else:
-        gift_link = os.environ.get("GIFT_LINK", "https://github.com/aiconduit/ai-conduit-pipeline/blob/master/gift/prompt_pack_vol1.md")
+        gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/")
     from datetime import datetime as _dt
     import random as _r2
     # 毎回違うハッシュタグの順番（Visual Uniqueness対策）
@@ -362,6 +362,11 @@ def main():
     _r2.shuffle(rotating_tags)
     seo_tags = " ".join(rotating_tags[:10])
     import random as _rdp
+    # gift_fileを台本から取得
+    _gift_file = plan.get("gift_file", "テンプレート")
+    _gift_path = plan.get("gift_path", "")
+    _gift_desc = plan.get("gift_content", "")
+
     _desc_patterns = [
         f"""【無料配布】{title}の完全チートシート
 
