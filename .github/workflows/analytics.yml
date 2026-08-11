@@ -1,0 +1,34 @@
+name: 📊 自動アナリティクス分析
+
+on:
+  schedule:
+    # 毎日22:00 JST（UTC 13:00）に実行
+    - cron: "0 13 * * *"
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: アナリティクス収集 + 自動改善
+        env:
+          YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+        run: |
+          pip install requests -q
+          python3 sns_automation/scripts/analytics_collector.py
+      
+      - name: 改善パラメータをコミット
+        run: |
+          git config user.email "analytics@aiconduit.com"
+          git config user.name "Analytics Bot"
+          git add logs/ auto_improvement_params.json || true
+          git diff --staged --quiet || git commit -m "Auto: アナリティクスレポート $(date +%Y%m%d)"
+          git push || true
