@@ -1,44 +1,44 @@
-name: OmniRoute テスト
+name: Wan2.2 A14B Space調査
 
 on:
   workflow_dispatch:
 
 jobs:
-  test:
+  research:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: OmniRoute 無料モデルテスト
+      - name: A14B Space動作確認
         run: |
-          pip install requests -q
+          pip install gradio_client requests -q
           python3 << 'PYEOF'
-          import requests, json
-          
-          # OmniRoute GitHubを確認
-          r = requests.get("https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/README.md", timeout=10)
-          print(r.text[:2000])
-          PYEOF
+          import requests
+          from gradio_client import Client
 
-      - name: OpenRouter 無料モデルで台本生成テスト
-        run: |
-          pip install requests -q
-          python3 << 'PYEOF'
-          import requests, json
+          spaces = [
+              "aryansrk/Wan-AI-Wan2.2-T2V-A14B",
+              "rahul7star/Wan2.2-T2V-A14B",
+              "wana14/Wan2.2-T2V-A14B",
+              "tsh7676/Wan-AI-Wan2.2-T2V-A14B",
+              "gageyoy/Wan-AI-Wan2.2-T2V-A14B",
+          ]
           
-          # OpenRouter APIキーなしで試す
-          headers = {
-              "Content-Type": "application/json",
-              "HTTP-Referer": "https://aiconduit.com",
-              "X-Title": "AI Conduit",
-          }
-          
-          # 無料モデル一覧取得
-          r = requests.get("https://openrouter.ai/api/v1/models", headers=headers, timeout=10)
-          print(f"Models API: {r.status_code}")
-          if r.status_code == 200:
-              models = r.json().get("data", [])
-              free = [m for m in models if ":free" in m.get("id","")]
-              print(f"無料モデル数: {len(free)}")
-              for m in free[:15]:
-                  ctx = m.get("context_length", 0)
-                  print(f"  {m['id']} (ctx:{ctx:,})")
+          for space_id in spaces:
+              print(f"\n=== {space_id} ===")
+              # HF API確認
+              r = requests.get(f"https://huggingface.co/api/spaces/{space_id}", timeout=10)
+              if r.status_code == 200:
+                  d = r.json()
+                  runtime = d.get("runtime", {})
+                  print(f"  Hardware: {runtime.get('hardware','?')}")
+                  print(f"  Stage: {runtime.get('stage','?')}")
+                  print(f"  SDK: {d.get('sdk','?')}")
+              
+              # Gradio API接続テスト
+              try:
+                  client = Client(space_id, verbose=False)
+                  client.view_api()
+                  print(f"  ✅ Gradio API接続成功")
+              except Exception as e:
+                  print(f"  ❌ {str(e)[:80]}")
           PYEOF
