@@ -55,9 +55,15 @@ def get_font(size):
             except: pass
     return ImageFont.load_default()
 
-def _run(args, check=True):
-    r = subprocess.run([str(a) for a in args], capture_output=True, text=True, encoding="utf-8", errors="replace")
-    if check and r.returncode: raise RuntimeError(f"ffmpeg:\n{r.stderr[-500:]}")
+def _run(args, check=True, timeout=180):
+    import shlex
+    cmd = [str(a) for a in args]
+    print(f"  [CMD] {cmd[0]} {' '.join(cmd[1:4])}... ({len(cmd)}args)")
+    try:
+        r = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=timeout)
+    except subprocess.TimeoutExpired:
+        raise RuntimeError(f"ffmpegタイムアウト({timeout}s): {cmd[:3]}")
+    if check and r.returncode: raise RuntimeError(f"ffmpeg error:\n{r.stderr[-500:]}")
     return r
 
 MOOD_COLORS = {
