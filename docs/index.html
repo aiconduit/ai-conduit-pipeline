@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Conduit - Claude Code 無料テンプレート集</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:#0a0a14;color:#fff;min-height:100vh;}
+.hero{background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:60px 20px;text-align:center;}
+.hero h1{font-size:2em;color:#FFD700;margin-bottom:10px;}
+.hero p{color:#aaa;font-size:1.1em;}
+.container{max-width:800px;margin:0 auto;padding:40px 20px;}
+.gift-card{background:#1a1a2e;border:1px solid #333;border-radius:12px;padding:24px;margin:16px 0;transition:transform 0.2s;}
+.gift-card:hover{transform:translateY(-2px);border-color:#FFD700;}
+.gift-card h3{color:#FFD700;font-size:1.2em;margin-bottom:8px;}
+.gift-card p{color:#aaa;font-size:0.9em;margin-bottom:16px;}
+.gift-card pre{background:#0a0a14;border:1px solid #333;border-radius:8px;padding:16px;font-size:0.85em;color:#64FF64;overflow-x:auto;white-space:pre-wrap;}
+.copy-btn{background:#FFD700;color:#000;border:none;border-radius:6px;padding:8px 20px;font-weight:bold;cursor:pointer;margin-top:12px;}
+.copy-btn:hover{background:#FFC107;}
+.tag{display:inline-block;background:#0f3460;color:#64C8FF;padding:2px 8px;border-radius:4px;font-size:0.8em;margin-bottom:8px;}
+</style>
+</head>
+<body>
+<div class="hero">
+  <h1>AI Conduit 無料テンプレート集</h1>
+  <p>Claude Codeですぐ使えるファイルを無料配布中</p>
+</div>
+<div class="container">
+
+<div class="gift-card">
+  <span class="tag">reviewer.md</span>
+  <h3>自動コードレビューエージェント</h3>
+  <p>.claude/agents/reviewer.md に保存してください</p>
+  <pre>---
+name: reviewer
+description: コードレビューを自動実行するエージェント
+disallowedTools:
+  - Write
+  - Edit
+---
+以下のコードをレビューしてください。
+- バグ・セキュリティ問題を指摘
+- 改善提案を具体的に
+- 日本語で回答</pre>
+  <button class="copy-btn" onclick="copy(this)">コピーする</button>
+</div>
+
+<div class="gift-card">
+  <span class="tag">CLAUDE.md</span>
+  <h3>プロジェクト設定テンプレート</h3>
+  <p>プロジェクトルートの CLAUDE.md に保存してください</p>
+  <pre># プロジェクト設定
+
+## コーディングルール
+- TypeScriptを使用
+- テストを必ず書く
+- コメントは日本語で
+
+## よく使うコマンド
+- npm run dev: 開発サーバー起動
+- npm test: テスト実行
+
+## Claude Codeへの指示
+- コードを変更する前に必ず確認する
+- テストが通ることを確認してからコミット</pre>
+  <button class="copy-btn" onclick="copy(this)">コピーする</button>
+</div>
+
+<div class="gift-card">
+  <span class="tag">shortcuts.md</span>
+  <h3>Claude Codeショートカット集</h3>
+  <p>.claude/shortcuts.md に保存してください</p>
+  <pre># Claude Code よく使うコマンド
+
+/loop 5m /babysit    # 5分ごとに自動監視
+/review              # コードレビュー実行
+/test                # テスト自動生成
+/doc                 # ドキュメント生成
+/fix                 # バグ自動修正
+/init                # プロジェクト初期化</pre>
+  <button class="copy-btn" onclick="copy(this)">コピーする</button>
+</div>
+
+<div class="gift-card">
+  <span class="tag">settings.json</span>
+  <h3>Claude Code最適設定</h3>
+  <p>.claude/settings.json に保存してください</p>
+  <pre>{
+  "permissions": {
+    "allow": ["Bash", "Read", "Write", "Edit"],
+    "deny": []
+  },
+  "model": "claude-opus-4-6",
+  "autoApprove": false
+}</pre>
+  <button class="copy-btn" onclick="copy(this)">コピーする</button>
+</div>
+
+</div>
+<script>
+function copy(btn) {
+  const pre = btn.previousElementSibling;
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'コピーしました!';
+    setTimeout(() => btn.textContent = 'コピーする', 2000);
+  });
+}
+</script>
+</body>
+</html>
