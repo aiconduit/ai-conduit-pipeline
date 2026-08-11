@@ -1,57 +1,62 @@
-name: ZeroGPU A14B 動画生成テスト
+name: ZeroGPU T2V A14B 検索
 
 on:
   workflow_dispatch:
 
 jobs:
-  generate:
+  search:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - name: ZeroGPU Wan2.2 動画生成
+      - name: ZeroGPU T2V Space検索・API確認
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          pip install gradio_client huggingface_hub -q
+          pip install gradio_client requests -q
           python3 << 'PYEOF'
-          import os, shutil
+          import os, requests
           from gradio_client import Client
 
           HF_TOKEN = os.environ["HF_TOKEN"]
+          headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
-          # alexnasa/Wan2.2-Animate-ZEROGPU - zero-a10g RUNNING
-          space_id = "alexnasa/Wan2.2-Animate-ZEROGPU"
-          print(f"接続: {space_id}")
+          # より広い範囲でZeroGPU対応Spacesを検索
+          searches = [
+              "Wan2.2 text to video zero",
+              "Wan2.2 T2V ZeroGPU",
+              "wan video generation zerogpu",
+          ]
           
-          try:
-              client = Client(space_id, token=HF_TOKEN, verbose=False)
-              client.view_api()
-              print("✅ API接続成功")
-              
-              # 動画生成テスト（hook シーン）
-              print("\n動画生成中: hook シーン")
-              result = client.predict(
-                  prompt="frustrated developer staring at dark terminal screen, cinematic 4K, professional",
-                  api_name="/generate"
-              )
-              print(f"結果: {result}")
-              
-              # ファイル保存
-              if result:
-                  import shutil
-                  os.makedirs("assets/zerogpu_videos", exist_ok=True)
-                  if isinstance(result, str) and os.path.exists(result):
-                      shutil.copy(result, "assets/zerogpu_videos/hook.mp4")
-                      size = os.path.getsize("assets/zerogpu_videos/hook.mp4") // 1024
-                      print(f"✅ 保存: assets/zerogpu_videos/hook.mp4 ({size}KB)")
-          except Exception as e:
-              print(f"❌ エラー: {e}")
+          running_spaces = []
+          for query in searches:
+              r = requests.get("https://huggingface.co/api/spaces",
+                              params={"search": query, "limit": 10},
+                              headers=headers, timeout=10)
+              if r.status_code == 200:
+                  for s in r.json():
+                      hw = s.get("runtime", {}).get("hardware", {})
+                      stage = s.get("runtime", {}).get("stage", "")
+                      current = hw.get("current", "") if isinstance(hw, dict) else ""
+                      if stage == "RUNNING" and s.get("id") not in [x["id"] for x in running_spaces]:
+                          running_spaces.append({"id": s.get("id"), "hw": current, "stage": stage})
+                          print(f"✅ RUNNING: {s.get('id')} [{current}]")
+          
+          print(f"\n稼働中Space: {len(running_spaces)}件")
+          
+          # 各Spaceのテキスト→動画APIを確認
+          for space in running_spaces[:5]:
+              space_id = space["id"]
+              print(f"\n=== {space_id} ===")
+              try:
+                  client = Client(space_id, token=HF_TOKEN, verbose=False)
+                  info = client.view_api(print_info=False)
+                  # promptパラメータがあるか確認
+                  endpoints = str(info)
+                  if "prompt" in endpoints.lower():
+                      print(f"  ✅ テキスト入力あり！動画生成可能")
+                      client.view_api()
+                  else:
+                      print(f"  ⚠️ promptなし: {endpoints[:100]}")
+              except Exception as e:
+                  print(f"  ❌ {str(e)[:100]}")
           PYEOF
-      - name: 生成動画コミット
-        run: |
-          git config user.email "zerogpu@aiconduit.com"
-          git config user.name "ZeroGPU Generator"
-          git add -f assets/zerogpu_videos/ || true
-          git diff --staged --quiet || git commit -m "Auto: ZeroGPU A14B 動画生成"
-          git push || true
