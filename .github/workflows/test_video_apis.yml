@@ -7,66 +7,44 @@ jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
       - name: asciinema + agg + asciinema-automation インストール
         run: |
-          # asciinema
           pip install asciinema asciinema-automation -q
-          
-          # agg（Rust製）
-          curl -L https://github.com/asciinema/agg/releases/latest/download/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg
+          curl -sL https://github.com/asciinema/agg/releases/latest/download/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg
           chmod +x /usr/local/bin/agg
-          agg --version
-          
-          # ffmpeg
-          sudo apt-get install -y ffmpeg fonts-noto-cjk -q
-          
+          sudo apt-get install -y ffmpeg -q 2>/dev/null
           echo "✅ インストール完了"
 
-      - name: ターミナル録画テスト（Step1シーン）
+      - name: ターミナル録画テスト
         run: |
           pip install requests -q
           python3 << 'PYEOF'
           import sys
           sys.path.insert(0, "sns_automation/scripts")
-          from terminal_recorder import extract_commands, make_asciinema_script, record_to_mp4, generate_scene_video
+          from terminal_recorder import generate_scene_video
           import os
-
           os.makedirs("assets/terminal_test", exist_ok=True)
-
-          # テスト1: コマンド抽出
-          narration = "手順1: .claude/agents/reviewer.mdの1行目にname: reviewer と書きます"
-          commands = extract_commands(narration)
-          print(f"抽出コマンド: {commands}")
-
-          # テスト2: スクリプト生成
-          script = make_asciinema_script(commands, duration=5.0)
-          print(f"\nスクリプト:\n{script}")
-
-          # テスト3: MP4生成（fallbackモード）
-          out = "assets/terminal_test/step1_test.mp4"
-          result = generate_scene_video("step1", narration, 5.0, out)
-          print(f"\n結果: {'✅ 成功' if result else '❌ 失敗'}")
-
-          # テスト4: /loopコマンドの例
-          narration2 = "手順1: $ claude と入力し、/loop 5m /babysit と入力します"
-          commands2 = extract_commands(narration2)
-          print(f"\nコマンド2: {commands2}")
-          out2 = "assets/terminal_test/step1_loop.mp4"
-          result2 = generate_scene_video("step1", narration2, 6.0, out2)
-          print(f"結果2: {'✅ 成功' if result2 else '❌ 失敗'}")
+          
+          tests = [
+              ("step1", "手順1: .claude/agents/reviewer.mdの1行目にname: reviewer と書きます", 5.0),
+              ("step2", "手順2: frontmatterにdisallowedTools: Write, Edit と記述します", 5.0),
+              ("solution", "Claude Codeのサブエージェント設定・.claude/agents/reviewer.mdで解決", 4.0),
+          ]
+          for scene, narration, dur in tests:
+              out = f"assets/terminal_test/{scene}.mp4"
+              result = generate_scene_video(scene, narration, dur, out)
+              print(f"{scene}: {'✅' if result else '❌'}")
           PYEOF
 
-      - name: 生成ファイル確認
-        run: |
-          ls -la assets/terminal_test/ 2>/dev/null || echo "フォルダなし"
-          
       - name: コミット
         run: |
           git config user.email "terminal@aiconduit.com"
           git config user.name "Terminal Recorder"
-          git add -f assets/terminal_test/ || true
-          git diff --staged --quiet || git commit -m "Test: ターミナル録画テスト動画"
+          git add -f assets/terminal_test/*.mp4 || true
+          git diff --staged --quiet || git commit -m "Test: ターミナル録画MP4"
           git push || true
