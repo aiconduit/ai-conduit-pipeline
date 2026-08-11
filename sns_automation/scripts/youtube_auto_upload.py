@@ -393,7 +393,6 @@ Claude Code / Codex / Gemini CLI の実践テクニックを毎日配信。
     description = _rdp.choice(_desc_patterns)
 
     # 最新の動画を探す（複数パスに対応）
-    import os
     video_file = None
     search_paths = [
         "output_video.mp4",  # autonomous_agentからのアーティファクト
