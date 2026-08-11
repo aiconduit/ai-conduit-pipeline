@@ -1,0 +1,168 @@
+name: AI Conduit 完全自律システム
+
+on:
+  # コメント返信: 毎日投稿後1時間後
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+    inputs:
+      task:
+        description: 'タスク選択'
+        required: false
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - comment_reply
+          - optimize_time
+          - longform
+
+jobs:
+  # =============================
+  # 1. 自動コメント返信
+  # =============================
+  comment_reply:
+    name: AIコメント自動返信
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event.inputs.task == 'comment_reply' || github.event.inputs.task == 'all' || github.event_name == 'schedule'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: コメント自動返信
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          pip install requests -q
+          python3 sns_automation/scripts/auto_comment_reply.py
+      - name: ログ保存
+        run: |
+          git config user.email "agent@aiconduit.com"
+          git config user.name "AI Conduit Agent"
+          git add logs/ || true
+          git diff --staged --quiet || git commit -m "Auto: コメント返信ログ $(date +%Y%m%d)"
+          git push || true
+
+  # =============================
+  # 2. 投稿時間最適化（週1回）
+  # =============================
+  optimize_time:
+    name: 投稿時間自動最適化
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event.inputs.task == 'optimize_time' || github.event.inputs.task == 'all'
+    steps:
+      - uses: actions/checkout@v4
+      - name: 最適投稿時間算出・ワークフロー更新
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pip install requests -q
+          python3 sns_automation/scripts/optimize_post_time.py
+
+  # =============================
+  # 3. 長尺動画自動生成（週1回）
+  # =============================
+  longform_video:
+    name: 長尺動画自動生成
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: github.event.inputs.task == 'longform' || github.event.inputs.task == 'all'
+    steps:
+      - uses: actions/checkout@v4
+      - name: 長尺動画生成
+        env:
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+        run: |
+          pip install edge-tts requests -q
+          sudo apt-get install -y ffmpeg -q 2>/dev/null
+          python3 sns_automation/scripts/generate_longform.py
+      - name: YouTube投稿
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          GIFT_LINK: ${{ secrets.GIFT_LINK }}
+        run: |
+          pip install google-auth google-auth-oauthlib google-api-python-client Pillow -q
+          python3 << 'PYEOF'
+          import os, json, requests
+          from pathlib import Path
+
+          if not Path("output_longform.mp4").exists():
+              print("長尺動画なし")
+              exit(0)
+
+          plan = json.loads(Path("longform_plan.json").read_text()) if Path("longform_plan.json").exists() else {}
+          title = plan.get("title", "Claude Code完全解説") + " #Shorts解説"
+
+          def refresh_token(refresh, client_id, client_secret):
+              r = requests.post("https://oauth2.googleapis.com/token", data={
+                  "grant_type": "refresh_token",
+                  "refresh_token": refresh,
+                  "client_id": client_id,
+                  "client_secret": client_secret,
+              }, timeout=10)
+              return r.json().get("access_token", "") if r.status_code == 200 else ""
+
+          access_token = refresh_token(
+              os.environ["YOUTUBE_REFRESH_TOKEN"],
+              os.environ["YOUTUBE_CLIENT_ID"],
+              os.environ["YOUTUBE_CLIENT_SECRET"])
+
+          if not access_token:
+              print("認証失敗")
+              exit(1)
+
+          from googleapiclient.discovery import build
+          from googleapiclient.http import MediaFileUpload
+          from google.oauth2.credentials import Credentials
+
+          creds = Credentials(token=access_token)
+          youtube = build("youtube", "v3", credentials=creds)
+
+          gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/")
+          description = (
+              f"Claude Code完全解説動画です。
+
+"
+              f"無料テンプレートはこちら:
+{gift_link}
+
+"
+              f"#ClaudeCode #Claude #AI開発 #エンジニア #プログラミング"
+          )
+
+          body = {
+              "snippet": {
+                  "title": title[:100],
+                  "description": description,
+                  "tags": ["ClaudeCode", "Claude", "AI開発", "エンジニア", "プログラミング"],
+                  "categoryId": "28",
+                  "defaultLanguage": "ja",
+              },
+              "status": {"privacyStatus": "public", "selfDeclaredMadeForKids": False}
+          }
+
+          media = MediaFileUpload("output_longform.mp4", mimetype="video/mp4", resumable=True, chunksize=1024*1024)
+          req = youtube.videos().insert(part="snippet,status", body=body, media_body=media)
+
+          response = None
+          while response is None:
+              status, response = req.next_chunk()
+              if status:
+                  print(f"アップロード: {int(status.progress()*100)}%")
+
+          vid_id = response.get("id", "")
+          print(f"✅ 長尺動画投稿完了: https://youtube.com/watch?v={vid_id}")
+          PYEOF
