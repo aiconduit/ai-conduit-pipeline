@@ -1,4 +1,4 @@
-name: Modal + Lightning AI テスト
+name: OmniRoute テスト
 
 on:
   workflow_dispatch:
@@ -6,51 +6,39 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - name: Modal.com API テスト
+      - name: OmniRoute 無料モデルテスト
         run: |
-          pip install modal -q 2>/dev/null || true
+          pip install requests -q
           python3 << 'PYEOF'
-          import requests
+          import requests, json
           
-          # Modal APIエンドポイント確認
-          r = requests.get("https://api.modal.com/v1/", timeout=5)
-          print(f"Modal API: {r.status_code} {r.text[:100]}")
-          
-          # Modal サインアップURL
-          print("Modal登録: https://modal.com/signup")
-          print("特徴: 月$30分の無料クレジット・GPU A10G・カード不要")
+          # OmniRoute GitHubを確認
+          r = requests.get("https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/README.md", timeout=10)
+          print(r.text[:2000])
           PYEOF
 
-      - name: Lightning AI API テスト
+      - name: OpenRouter 無料モデルで台本生成テスト
         run: |
+          pip install requests -q
           python3 << 'PYEOF'
-          import requests
+          import requests, json
           
-          # Lightning AI APIを確認
-          r = requests.get("https://lightning.ai/api/v1/", timeout=5)
-          print(f"Lightning AI: {r.status_code} {r.text[:100]}")
+          # OpenRouter APIキーなしで試す
+          headers = {
+              "Content-Type": "application/json",
+              "HTTP-Referer": "https://aiconduit.com",
+              "X-Title": "AI Conduit",
+          }
           
-          # Salad Cloud（安価GPU）
-          r2 = requests.get("https://api.salad.com/api/public/", timeout=5)
-          print(f"Salad Cloud: {r2.status_code} {r2.text[:100]}")
-          
-          # Vast.ai
-          r3 = requests.get("https://console.vast.ai/api/v0/", timeout=5)
-          print(f"Vast.ai: {r3.status_code} {r3.text[:100]}")
-          PYEOF
-
-      - name: Replicate API テスト（Wan2.2）
-        run: |
-          python3 << 'PYEOF'
-          import requests
-          
-          # Replicateの無料モデル確認
-          r = requests.get("https://api.replicate.com/v1/models/wan-video/wan-2.1", timeout=10)
-          print(f"Replicate Wan: {r.status_code} {r.text[:200]}")
-          
-          # 無料で使えるモデル
-          r2 = requests.get("https://api.replicate.com/v1/models?cursor=&per_page=5", timeout=10)
-          print(f"Models: {r2.status_code}")
+          # 無料モデル一覧取得
+          r = requests.get("https://openrouter.ai/api/v1/models", headers=headers, timeout=10)
+          print(f"Models API: {r.status_code}")
+          if r.status_code == 200:
+              models = r.json().get("data", [])
+              free = [m for m in models if ":free" in m.get("id","")]
+              print(f"無料モデル数: {len(free)}")
+              for m in free[:15]:
+                  ctx = m.get("context_length", 0)
+                  print(f"  {m['id']} (ctx:{ctx:,})")
           PYEOF
