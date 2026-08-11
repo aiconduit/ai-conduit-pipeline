@@ -1,123 +1,159 @@
-name: AI Conduit 自律型エージェント
+name: AI Conduit 完全量産システム
 
 on:
-  workflow_dispatch:
   schedule:
+    # 毎日20:00 JST = UTC 11:00
     - cron: "0 11 * * *"
+  workflow_dispatch:
 
 jobs:
-  stage1_script:
-    name: 台本生成
+  # ===========================
+  # STEP1: 台本10本一括生成
+  # ===========================
+  generate_all_scripts:
+    name: 台本10本生成
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      score: ${{ steps.check.outputs.score }}
-      valid: ${{ steps.check.outputs.valid }}
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - name: 台本生成
+      - name: 10本分の台本を一括生成
         env:
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           pip install requests -q
-          python3 sns_automation/scripts/generate_script.py
-      - name: 品質チェック
-        id: check
-        run: python3 sns_automation/scripts/quality_check.py
+          python3 sns_automation/scripts/generate_all_scripts.py
       - uses: actions/upload-artifact@v4
         with:
-          name: script
-          path: news_content_plan.json
+          name: all_scripts
+          path: all_scripts.json
 
-  stage2_video:
-    name: 動画生成
-    needs: stage1_script
-    if: needs.stage1_script.outputs.valid == 'true'
+  # ===========================
+  # STEP2: Shorts 10本生成
+  # ===========================
+  generate_shorts:
+    name: Shorts 10本生成
+    needs: generate_all_scripts
     runs-on: ubuntu-latest
     timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: script
-      - name: 依存関係インストール
+          name: all_scripts
+      - name: 依存関係
         run: |
           pip install edge-tts requests aiofiles asciinema asciinema-automation Pillow numpy -q
           curl -sL https://github.com/asciinema/agg/releases/latest/download/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg
           chmod +x /usr/local/bin/agg
           sudo apt-get install -y ffmpeg fonts-noto-cjk -q 2>/dev/null
-          echo "✅ 依存関係完了"
-      - name: 動画生成
+      - name: Shorts 10本生成
         env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          timeout 2700 python3 run_from_news_plan.py || true
-          VIDEO=$(find projects/daily/renders/ -name "*.mp4" 2>/dev/null | tail -1)
-          if [ -z "$VIDEO" ]; then
-            VIDEO=$(find . -name "*.mp4" -newer news_content_plan.json 2>/dev/null | grep -v pexels | grep -v assets | head -1)
-          fi
-          if [ -n "$VIDEO" ]; then
-            cp "$VIDEO" output_video.mp4
-            echo "✅ 動画コピー: $VIDEO"
-            ls -la output_video.mp4
-          else
-            echo "❌ 動画なし"
-          fi
+          python3 sns_automation/scripts/generate_all_shorts.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: video
-          path: output_video.mp4
+          name: shorts_videos
+          path: shorts_output/
 
-  stage3_upload:
-    name: YouTube投稿
-    needs: stage2_video
+  # ===========================
+  # STEP3: 1時間動画生成
+  # ===========================
+  generate_longform:
+    name: 1時間動画生成
+    needs: generate_all_scripts
     runs-on: ubuntu-latest
-    timeout-minutes: 10
-    outputs:
-      video_id: ${{ steps.upload.outputs.video_id }}
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: video
+          name: all_scripts
+      - name: 依存関係
+        run: |
+          pip install edge-tts requests aiofiles Pillow numpy -q
+          sudo apt-get install -y ffmpeg fonts-noto-cjk -q 2>/dev/null
+      - name: 1時間動画生成
+        env:
+          PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          python3 sns_automation/scripts/generate_1hour_video.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: longform_video
+          path: longform_output.mp4
+
+  # ===========================
+  # STEP4: YouTube全投稿
+  # ===========================
+  upload_all:
+    name: YouTube全投稿
+    needs: [generate_shorts, generate_longform]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      uploaded: ${{ steps.upload.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
-          name: script
-      - name: 依存関係インストール
-        run: |
-          pip install google-auth google-auth-oauthlib google-api-python-client requests Pillow numpy -q
-          echo "✅ YouTube投稿依存関係完了"
-      - name: YouTube投稿
+          name: shorts_videos
+          path: shorts_output/
+      - uses: actions/download-artifact@v4
+        with:
+          name: longform_video
+      - uses: actions/download-artifact@v4
+        with:
+          name: all_scripts
+      - name: 全動画投稿
         id: upload
         env:
           YOUTUBE_TOKEN_JSON: ${{ secrets.YOUTUBE_TOKEN_JSON }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          GIFT_LINK: ${{ secrets.GIFT_LINK }}
         run: |
-          python3 sns_automation/scripts/youtube_auto_upload.py
-          VID=$(cat /tmp/uploaded_video_id.txt 2>/dev/null || echo "")
-          echo "video_id=$VID" >> $GITHUB_OUTPUT
-          echo "投稿動画ID: $VID"
+          pip install google-auth google-auth-oauthlib google-api-python-client requests Pillow -q
+          python3 sns_automation/scripts/upload_all_videos.py
+          COUNT=$(cat /tmp/upload_count.txt 2>/dev/null || echo "0")
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
 
-  stage4_log:
-    name: 記録
-    needs: [stage1_script, stage3_upload]
+  # ===========================
+  # STEP5: コメント返信 + 記録
+  # ===========================
+  post_tasks:
+    name: コメント返信・記録
+    needs: upload_all
     if: always()
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@v4
-      - name: 結果記録
+      - name: コメント返信
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          pip install requests -q
+          python3 sns_automation/scripts/auto_comment_reply.py || true
+      - name: 記録
         run: |
           mkdir -p logs
-          echo '{"video_id":"${{ needs.stage3_upload.outputs.video_id }}","score":"${{ needs.stage1_script.outputs.score }}","posted_at":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > logs/latest_video.json
+          echo '{"date":"'$(date -u +%Y-%m-%d)'","uploaded":"${{ needs.upload_all.outputs.uploaded }}","timestamp":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}' > logs/daily_$(date +%Y%m%d).json
           git config user.email "agent@aiconduit.com"
           git config user.name "AI Conduit Agent"
           git add logs/ || true
-          git diff --staged --quiet || git commit -m "Auto: 記録 $(date +%Y%m%d_%H%M)"
+          git diff --staged --quiet || git commit -m "Auto: 日次記録 $(date +%Y%m%d)"
           git push || true
