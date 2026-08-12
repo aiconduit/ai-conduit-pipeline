@@ -61,9 +61,11 @@ def main():
     longform_script = data.get("longform", {})
 
     gift_link = os.environ.get("GIFT_LINK", "https://aiconduit.github.io/ai-conduit-pipeline/")
-    base_tags = ["ClaudeCode", "Claude", "AI開発", "エンジニア", "プログラミング", "生成AI", "AIツール", "自動化"]
+    base_tags = ["ClaudeCode", "Claude", "Anthropic", "AI開発", "エンジニア", "プログラミング", "生成AI", "AIツール", "自動化", "コーディング", "ClaudeCodeTips", "AI活用", "開発効率化", "ソフトウェア開発", "AIエージェント"]
 
     uploaded = 0
+    uploaded_ids = []
+    longform_vid_id = ""
 
     # Shorts 10本投稿（1本ずつ60秒間隔でレート制限対策）
     shorts_dir = Path("shorts_output")
@@ -116,9 +118,29 @@ def main():
         if vid_id:
             print(f"✅ https://youtube.com/watch?v={vid_id}")
             uploaded += 1
+            longform_vid_id = vid_id
 
     Path("/tmp/upload_count.txt").write_text(str(uploaded))
     print(f"\n✅ 投稿完了: {uploaded}本")
+
+    # 再生リスト自動追加
+    try:
+        import sys
+        sys.path.insert(0, "sns_automation/scripts")
+        from manage_playlists import main as pl_main
+        pl_main(short_video_ids=uploaded_ids, longform_video_id=longform_vid_id)
+    except Exception as e:
+        print(f"再生リスト: {e}")
+
+    # エンドスクリーン情報をログ
+    try:
+        from set_endscreen import set_endscreen
+        for vid in uploaded_ids[:3]:
+            set_endscreen(vid)
+        if longform_vid_id:
+            set_endscreen(longform_vid_id)
+    except Exception as e:
+        print(f"エンドスクリーン: {e}")
 
 if __name__ == "__main__":
     main()
