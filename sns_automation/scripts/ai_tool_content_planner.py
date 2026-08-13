@@ -10,6 +10,8 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(na
 logger = logging.getLogger("ai_tool_planner")
 
 DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
+CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "csk-t9j3w5ne42jphxcj54x532hn8hhcv8cvk4r96563xrvvfvnp")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 SAVE_PATH = "sns_automation/news_content_plan.json"
 USED_PATH = "sns_automation/used_topics.json"
@@ -217,22 +219,36 @@ JSONのみ出力（前置き不要）:
   "pexels_keywords": ["claude code terminal", "developer coding dark screen", "programming workspace"]
 }}"""
 
-    r = requests.post(
-        "https://api.deepseek.com/chat/completions",
-        headers={"Authorization": f"Bearer {DEEPSEEK_API_KEY}", "Content-Type": "application/json"},
-        json={
-            "model": "deepseek-chat",
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.85,
-            "max_tokens": 1500,
-        },
-        timeout=60
-    )
-    
-    if r.status_code != 200:
-        raise Exception(f"DeepSeek error: {r.status_code}")
-    
-    text = r.json()["choices"][0]["message"]["content"]
+    # Cerebras → Groq フォールバック
+    text = None
+    for api_name, api_url, api_key, model in [
+        ("Cerebras", "https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "llama-3.3-70b"),
+        ("Groq",     "https://api.groq.com/openai/v1/chat/completions", GROQ_API_KEY, "llama-3.3-70b-versatile"),
+    ]:
+        if not api_key:
+            continue
+        try:
+            r = requests.post(
+                api_url,
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={
+                    "model": model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "temperature": 0.85,
+                    "max_tokens": 1500,
+                },
+                timeout=60
+            )
+            if r.status_code == 200:
+                text = r.json()["choices"][0]["message"]["content"]
+                logger.info(f"{api_name} でスクリプト生成成功")
+                break
+            else:
+                logger.warning(f"{api_name} error: {r.status_code}")
+        except Exception as e:
+            logger.warning(f"{api_name} 例外: {e}")
+    if text is None:
+        raise Exception("全APIでスクリプト生成失敗")
     m = re.search(r'\{.*\}', text, re.DOTALL)
     if not m:
         raise Exception("JSON not found")
