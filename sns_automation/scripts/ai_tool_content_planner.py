@@ -135,7 +135,7 @@ def generate_script(source, raw_content):
     """DeepSeekでショート動画スクリプトを生成"""
     key_content = extract_key_sections(raw_content, 1500)
     
-    prompt = f"""あなたはYouTube Shortsの台本ライターです。
+    prompt = f"""あなたはYouTube Shortsの台本ライターです。必ずJSONのみ出力してください。前置き・説明・マークダウン不要。
 以下のGitHubドキュメントから1つの具体的なTIPSを選んで60秒の台本を作ってください。
 
 ## ソースドキュメント（{source["repo"]}）
