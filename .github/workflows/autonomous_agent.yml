@@ -20,34 +20,87 @@ jobs:
           pip install edge-tts gtts requests aiofiles asciinema asciinema-automation Pillow numpy faster-whisper google-auth google-auth-oauthlib google-api-python-client -q
           curl -sL https://github.com/asciinema/agg/releases/latest/download/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg
           chmod +x /usr/local/bin/agg
-          sudo apt-get install -y ffmpeg fonts-noto-cjk -q 2>/dev/null
+          sudo apt-get install -y ffmpeg fonts-noto-cjk espeak-ng -q 2>/dev/null
           echo "✅ 依存関係完了"
 
-      - name: 完全パイプライン実行
+      - name: Step1-3 台本生成
         env:
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        run: |
+          cd sns_automation/scripts
+          python3 step1_theme_selector.py
+          python3 step2_structure_planner.py
+          python3 step3_script_generator.py
+          cp news_content_plan.json ../../news_content_plan.json 2>/dev/null || true
+
+      - name: Step4-5 動画生成＋品質チェック（最大3回）
+        env:
           PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+        run: |
+          MAX_ATTEMPTS=3
+          ATTEMPT=0
+          PASSED=false
+
+          while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            ATTEMPT=$((ATTEMPT + 1))
+            echo "=============================="
+            echo "動画生成 試行 $ATTEMPT/$MAX_ATTEMPTS"
+            echo "=============================="
+
+            cd sns_automation/scripts
+            python3 step4_video_generator.py
+            python3 step5_subtitle_editor.py
+            cd ../..
+
+            echo "--- 品質チェック $ATTEMPT 回目 ---"
+            if python3 sns_automation/scripts/video_quality_checker.py output_video.mp4; then
+              echo "✅ 品質チェック合格（$ATTEMPT 回目）"
+              PASSED=true
+              break
+            else
+              echo "❌ 品質チェック不合格（$ATTEMPT 回目）→ 再生成"
+              cat quality_check_result.json 2>/dev/null || true
+            fi
+          done
+
+          if [ "$PASSED" = "false" ]; then
+            echo "❌ $MAX_ATTEMPTS 回試行しても合格せず → 投稿中止"
+            exit 1
+          fi
+
+          echo "✅ 品質チェック$ATTEMPT回目で合格！投稿へ進む"
+
+      - name: Step6-7 投稿文作成＋投稿
+        env:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
           GIFT_LINK: ${{ secrets.GIFT_LINK }}
+          CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
           cd sns_automation/scripts
-          python3 master_pipeline.py
+          python3 step6_post_writer.py
+          python3 step7_uploader.py
+          VID=$(cat /tmp/uploaded_video_id.txt 2>/dev/null || echo "")
+          echo "投稿動画ID: $VID"
+          if [ -n "$VID" ]; then
+            echo "✅ https://youtube.com/shorts/$VID"
+          fi
 
-      - name: 結果確認
+      - name: ログ保存
+        if: always()
         run: |
-          echo "=== 投稿結果 ==="
-          cat /tmp/uploaded_video_id.txt 2>/dev/null || echo "動画IDなし"
-          echo "=== ログ ==="
-          ls logs/ 2>/dev/null | tail -5
-
-      - name: ログをコミット
-        run: |
+          mkdir -p logs
           git config user.email "agent@aiconduit.com"
           git config user.name "AI Conduit Agent"
-          git add logs/ || true
+          git add logs/ quality_check_result.json || true
           git diff --staged --quiet || git commit -m "Auto: パイプライン実行ログ $(date +%Y%m%d_%H%M)"
           git push || true
 
@@ -59,7 +112,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - name: 非公開チェック
+      - name: 非公開チェック＋コメント返信
         env:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
