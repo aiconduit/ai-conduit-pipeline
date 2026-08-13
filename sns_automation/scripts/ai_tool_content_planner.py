@@ -272,7 +272,12 @@ JSONのみ出力（前置き不要）:
     if not m:
         logger.warning(f"JSON not found in text (len={len(text)}): {text[:200]}")
         raise Exception("JSON not found")
-    data = json.loads(m.group())
+    try:
+        data = json.loads(m.group())
+    except json.JSONDecodeError:
+        import re as _re2
+        clean = _re2.sub(r'[\x00-\x1f\x7f]', ' ', m.group())
+        data = json.loads(clean)
     logger.info(f"スクリプト生成完了: {data.get('selected_title', '')}")
     
     # 新旧フォーマット統一: scenesがトップレベルにある場合script.scenesに変換
