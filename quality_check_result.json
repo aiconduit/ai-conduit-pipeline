@@ -2,7 +2,18 @@
   "passed": false,
   "results": [
     {
-      "error": "ファイルなし"
+      "file_size_mb": 2.97,
+      "duration_sec": 30.1,
+      "has_audio": false,
+      "has_video": true,
+      "resolution": "1080x1920",
+      "brightness": 0.0,
+      "bitrate_kbps": 828.5,
+      "passed": false,
+      "issues": [
+        "音声ストリームなし",
+        "映像が暗すぎ（輝度0.0）"
+      ]
     }
   ]
 }
