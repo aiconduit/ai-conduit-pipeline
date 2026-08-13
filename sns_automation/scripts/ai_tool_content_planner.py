@@ -245,9 +245,20 @@ JSONのみ出力（前置き不要）:
             )
             if r.status_code == 200:
                 msg = r.json()["choices"][0]["message"]
-                text = msg.get("content") or msg.get("reasoning") or ""
-                if text:
+                # contentとreasoningの両方からJSONを探す
+                content_text = msg.get("content") or ""
+                reasoning_text = msg.get("reasoning") or ""
+                combined = content_text + "
+" + reasoning_text
+                import re as _re
+                _m = _re.search(r'\{[\s\S]*\}', combined)
+                if _m:
+                    text = _m.group()
                     logger.info(f"{api_name} でスクリプト生成成功")
+                    break
+                elif combined.strip():
+                    text = combined
+                    logger.info(f"{api_name} でスクリプト生成成功（テキスト）")
                     break
                 else:
                     logger.warning(f"{api_name}: 空レスポンス")
