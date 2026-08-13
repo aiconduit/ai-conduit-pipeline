@@ -248,8 +248,7 @@ JSONのみ出力（前置き不要）:
                 # contentとreasoningの両方からJSONを探す
                 content_text = msg.get("content") or ""
                 reasoning_text = msg.get("reasoning") or ""
-                combined = content_text + "
-" + reasoning_text
+                combined = content_text + "\n" + reasoning_text
                 import re as _re
                 _m = _re.search(r'\{[\s\S]*\}', combined)
                 if _m:
