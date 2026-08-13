@@ -31,11 +31,9 @@ jobs:
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         run: |
-          cd sns_automation/scripts
-          python3 step1_theme_selector.py
-          python3 step2_structure_planner.py
-          python3 step3_script_generator.py
-          cp news_content_plan.json ../../news_content_plan.json 2>/dev/null || true
+          python3 sns_automation/scripts/step1_theme_selector.py
+          python3 sns_automation/scripts/step2_structure_planner.py
+          python3 sns_automation/scripts/step3_script_generator.py
 
       - name: Step4-5 動画生成＋品質チェック（最大3回）
         env:
@@ -53,12 +51,12 @@ jobs:
             echo "動画生成 試行 $ATTEMPT/$MAX_ATTEMPTS"
             echo "=============================="
 
-            cd sns_automation/scripts
-            python3 step4_video_generator.py
-            python3 step5_subtitle_editor.py
-            cd ../..
+            python3 sns_automation/scripts/step4_video_generator.py
+            python3 sns_automation/scripts/step5_subtitle_editor.py
 
             echo "--- 品質チェック $ATTEMPT 回目 ---"
+            ls -la output_video.mp4 2>/dev/null || echo "output_video.mp4 なし"
+
             if python3 sns_automation/scripts/video_quality_checker.py output_video.mp4; then
               echo "✅ 品質チェック合格（$ATTEMPT 回目）"
               PASSED=true
@@ -66,6 +64,7 @@ jobs:
             else
               echo "❌ 品質チェック不合格（$ATTEMPT 回目）→ 再生成"
               cat quality_check_result.json 2>/dev/null || true
+              rm -f output_video.mp4 draft_video.mp4
             fi
           done
 
@@ -85,9 +84,8 @@ jobs:
           CEREBRAS_API_KEY: ${{ secrets.CEREBRAS_API_KEY }}
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
         run: |
-          cd sns_automation/scripts
-          python3 step6_post_writer.py
-          python3 step7_uploader.py
+          python3 sns_automation/scripts/step6_post_writer.py
+          python3 sns_automation/scripts/step7_uploader.py
           VID=$(cat /tmp/uploaded_video_id.txt 2>/dev/null || echo "")
           echo "投稿動画ID: $VID"
           if [ -n "$VID" ]; then
