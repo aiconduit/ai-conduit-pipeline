@@ -28,15 +28,29 @@ def get_font(size):
     return ImageFont.load_default()
 
 def generate_bg_prompt(title: str, category: str = "tech") -> str:
-    """DeepSeekでサムネイル背景プロンプトを生成"""
-    r = requests.post("https://api.deepseek.com/chat/completions",
-        headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
-        json={"model": "deepseek-chat", "messages": [{"role": "user", "content": 
-            f"Generate a short English image prompt (max 20 words) for a YouTube Short thumbnail background about: {title}. "
-            f"Style: cinematic, dark, professional, tech, 4K. "
-            f"NO text, NO faces. Only background visual. Output prompt only."}],
-            "max_tokens": 60, "temperature": 0.7}, timeout=15)
-    return r.json()["choices"][0]["message"]["content"].strip()
+    """Cerebras/OpenRouterでサムネイル背景プロンプトを生成"""
+    prompt_text = (
+        f"Generate a short English image prompt (max 20 words) for a YouTube Short thumbnail background about: {title}. "
+        f"Style: cinematic, dark, professional, tech, 4K. "
+        f"NO text, NO faces. Only background visual. Output prompt only."
+    )
+    for api_url, api_key, model in [
+        ("https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gpt-oss-120b"),
+        ("https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
+    ]:
+        try:
+            r = requests.post(api_url,
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"model": model, "messages": [{"role": "user", "content": prompt_text}],
+                      "max_tokens": 60, "temperature": 0.7}, timeout=15)
+            if r.status_code == 200:
+                msg = r.json()["choices"][0]["message"]
+                text = msg.get("content") or msg.get("reasoning") or ""
+                if text:
+                    return text.strip()
+        except Exception:
+            continue
+    return f"cinematic dark tech background {title}"
 
 def generate_bg_image(prompt: str, width=1080, height=1920) -> Image.Image:
     """Pollinations.aiで背景画像生成"""
