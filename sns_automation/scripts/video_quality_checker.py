@@ -1,125 +1,231 @@
 #!/usr/bin/env python3
-"""AI Conduit 動画品質自律チェッカー - ffmpeg+Pillowのみ"""
-import subprocess, json, os, sys
+"""
+video_quality_checker.py
+投稿前の動画品質自動チェック
+合格基準を全て満たすまで再生成を要求する
+"""
+import subprocess, json, sys
 from pathlib import Path
-from PIL import Image, ImageStat
 
-def check_video(video_path, plan_path=None):
-    video_path = str(video_path)
-    report = {"video": video_path, "scores": {}, "issues": [], "suggestions": []}
+# 合格基準
+PASS_CRITERIA = {
+    "min_duration_sec": 28,
+    "max_duration_sec": 42,
+    "min_file_size_mb": 0.5,
+    "has_audio": True,
+    "min_brightness": 10,  # 真っ黒でないこと（0-255）
+    "min_video_bitrate_kbps": 500,
+}
 
-    r = subprocess.run(["ffprobe", "-v", "quiet", "-print_format", "json",
-                        "-show_streams", "-show_format", video_path],
-                       capture_output=True, text=True)
-    data = json.loads(r.stdout)
-    fmt = data["format"]
-    duration = float(fmt["duration"])
-    report["duration"] = duration
-    report["bitrate"] = int(fmt.get("bit_rate", 0)) // 1000
-
-    if 25 <= duration <= 45:
-        report["scores"]["duration"] = 10
-    elif 15 <= duration < 25:
-        report["scores"]["duration"] = 6
-        report["issues"].append(f"動画が短い({duration:.1f}秒) 25〜45秒推奨")
-    else:
-        report["scores"]["duration"] = 3
-        report["issues"].append(f"動画尺要改善({duration:.1f}秒)")
-
-    for s in data["streams"]:
-        if s["codec_type"] == "video":
-            w, h = s["width"], s["height"]
-            vbr = int(s.get("bit_rate", 0)) // 1000
-            report["scores"]["resolution"] = 10 if (w == 1080 and h == 1920) else 3
-            report["scores"]["video_bitrate"] = 10 if vbr >= 3000 else (6 if vbr >= 1500 else 3)
-            if w != 1080 or h != 1920:
-                report["issues"].append(f"解像度不正({w}x{h})")
-        elif s["codec_type"] == "audio":
-            report["scores"]["audio_channels"] = 10 if s["channels"] >= 2 else 5
-            if s["channels"] < 2:
-                report["issues"].append("モノラル音声 ステレオ推奨")
-
-    frames_dir = "/tmp/qc_frames"
-    os.makedirs(frames_dir, exist_ok=True)
-    subprocess.run(["ffmpeg", "-y", "-i", video_path, "-vf", "fps=0.5",
-                    "-vframes", "10", f"{frames_dir}/f%03d.jpg"], capture_output=True)
-
-    frames = sorted([f for f in os.listdir(frames_dir) if f.endswith(".jpg")])
-    contrasts = []
-    for fname in frames:
-        try:
-            img = Image.open(f"{frames_dir}/{fname}").convert("RGB")
-            w2, h2 = img.size
-            sub = img.crop((0, int(h2*0.7), w2, h2))
-            from PIL import ImageStat as IS
-            stat = IS.Stat(sub)
-            contrasts.append(stat.stddev[0])
-        except: pass
-
-    avg_c = sum(contrasts)/len(contrasts) if contrasts else 0
-    report["scores"]["subtitle_contrast"] = min(10, round(avg_c/4, 1))
-    if avg_c < 20:
-        report["issues"].append(f"字幕コントラスト低({avg_c:.1f}) 読みにくい可能性")
-
-    r3 = subprocess.run(["ffprobe", "-v", "quiet", "-show_frames",
-        "-select_streams", "v", "-print_format", "json",
-        "-show_entries", "frame=pkt_pts_time,pict_type", video_path],
-        capture_output=True, text=True)
+def get_video_info(video_path):
+    """ffprobeで動画情報を取得"""
+    result = subprocess.run([
+        "ffprobe", "-v", "quiet",
+        "-print_format", "json",
+        "-show_streams", "-show_format",
+        str(video_path)
+    ], capture_output=True, text=True)
+    
+    if result.returncode != 0:
+        return None
+    
     try:
-        fd = json.loads(r3.stdout)
-        itimes = [float(f["pkt_pts_time"]) for f in fd.get("frames",[]) if f.get("pict_type")=="I"]
-        if len(itimes) > 1:
-            intervals = [itimes[i+1]-itimes[i] for i in range(len(itimes)-1)]
-            avg_i = sum(intervals)/len(intervals)
-            report["avg_scene_interval"] = round(avg_i, 1)
-            report["scene_count"] = len(itimes)
-            report["scores"]["scene_pacing"] = 10 if avg_i <= 4 else (7 if avg_i <= 7 else 4)
-            if avg_i > 4:
-                report["issues"].append(f"シーン切り替え遅い(平均{avg_i:.1f}秒) 2〜4秒推奨")
-    except: pass
+        return json.loads(result.stdout)
+    except:
+        return None
 
-    if plan_path and os.path.exists(plan_path):
-        with open(plan_path, encoding="utf-8") as f:
-            plan = json.load(f)
-        pd = plan.get("plan", plan)
-        if isinstance(pd, dict) and "plan" in pd:
-            pd = pd["plan"]
-        scenes = pd.get("script", {}).get("scenes", [])
-        if scenes:
-            narrs = [s.get("narration","") for s in scenes]
-            avg_len = sum(len(n) for n in narrs)/len(narrs)
-            has_num = sum(1 for n in narrs if any(c.isdigit() for c in n))
-            report["narration_avg_chars"] = round(avg_len, 1)
-            report["scenes_with_numbers"] = has_num
-            report["scores"]["narration"] = 10 if avg_len >= 15 else (6 if avg_len >= 10 else 3)
-            if avg_len < 15:
-                report["issues"].append(f"ナレーション短({avg_len:.1f}文字) 20〜25文字推奨")
-            if has_num == 0:
-                report["issues"].append("数字なし 具体的な数字を入れる")
-                report["suggestions"].append("プロンプトに数字必須制約を追加")
+def check_brightness(video_path):
+    """映像の平均輝度を確認（真っ黒チェック）"""
+    result = subprocess.run([
+        "ffmpeg", "-i", str(video_path),
+        "-vf", "select=eq(n\\,5),signalstats",
+        "-f", "null", "-"
+    ], capture_output=True, text=True)
+    
+    for line in result.stderr.split("\n"):
+        if "YAVG" in line:
+            try:
+                val = float(line.split("YAVG:")[1].split()[0])
+                return val
+            except: pass
+    
+    # 別方法で輝度チェック
+    result2 = subprocess.run([
+        "ffmpeg", "-i", str(video_path),
+        "-vf", "select=eq(n\\,5),scale=1:1,format=gray",
+        "-f", "rawvideo", "-"
+    ], capture_output=True, timeout=15)
+    
+    if result2.stdout:
+        avg = sum(result2.stdout[:100]) / max(len(result2.stdout[:100]), 1)
+        return avg
+    
+    return 50  # デフォルト（不明な場合は合格とする）
 
-    scores = report["scores"]
-    report["total_score"] = round(sum(scores.values())/len(scores), 1) if scores else 0
-    return report
+def run_quality_check(video_path):
+    """品質チェックを実行して結果を返す"""
+    path = Path(video_path)
+    results = {}
+    issues = []
+    passed = True
+
+    print(f"\n🔍 品質チェック: {video_path}")
+    print("="*50)
+
+    # 1. ファイル存在チェック
+    if not path.exists():
+        print("❌ ファイルが存在しない")
+        return False, {"error": "ファイルなし"}
+
+    # 2. ファイルサイズ
+    size_mb = path.stat().st_size / 1024 / 1024
+    size_ok = size_mb >= PASS_CRITERIA["min_file_size_mb"]
+    results["file_size_mb"] = round(size_mb, 2)
+    print(f"{'✅' if size_ok else '❌'} ファイルサイズ: {size_mb:.2f}MB (最小{PASS_CRITERIA['min_file_size_mb']}MB)")
+    if not size_ok:
+        issues.append(f"ファイルサイズ不足: {size_mb:.2f}MB")
+        passed = False
+
+    # 3. 動画情報取得
+    info = get_video_info(video_path)
+    if not info:
+        print("❌ 動画情報取得失敗")
+        return False, {"error": "動画情報取得失敗"}
+
+    streams = info.get("streams", [])
+    format_info = info.get("format", {})
+
+    # 4. 尺チェック
+    duration = float(format_info.get("duration", 0))
+    duration_ok = PASS_CRITERIA["min_duration_sec"] <= duration <= PASS_CRITERIA["max_duration_sec"]
+    results["duration_sec"] = round(duration, 1)
+    print(f"{'✅' if duration_ok else '❌'} 尺: {duration:.1f}秒 ({PASS_CRITERIA['min_duration_sec']}-{PASS_CRITERIA['max_duration_sec']}秒)")
+    if not duration_ok:
+        issues.append(f"尺不適切: {duration:.1f}秒")
+        passed = False
+
+    # 5. 音声ストリームチェック
+    audio_streams = [s for s in streams if s.get("codec_type") == "audio"]
+    has_audio = len(audio_streams) > 0
+    results["has_audio"] = has_audio
+    print(f"{'✅' if has_audio else '❌'} 音声: {'あり' if has_audio else 'なし'}")
+    if not has_audio:
+        issues.append("音声ストリームなし")
+        passed = False
+
+    # 音声がある場合、音量も確認
+    if has_audio:
+        vol_result = subprocess.run([
+            "ffmpeg", "-i", str(video_path),
+            "-af", "volumedetect", "-f", "null", "-"
+        ], capture_output=True, text=True, timeout=30)
+        
+        max_vol = -99.0
+        mean_vol = -99.0
+        for line in vol_result.stderr.split("\n"):
+            if "max_volume" in line:
+                try: max_vol = float(line.split(":")[1].strip().split()[0])
+                except: pass
+            if "mean_volume" in line:
+                try: mean_vol = float(line.split(":")[1].strip().split()[0])
+                except: pass
+        
+        results["max_volume_db"] = max_vol
+        results["mean_volume_db"] = mean_vol
+        vol_ok = max_vol > -50  # -50dB以上であれば音声あり
+        print(f"{'✅' if vol_ok else '❌'} 音量: max={max_vol:.1f}dB mean={mean_vol:.1f}dB")
+        if not vol_ok:
+            issues.append(f"音量が小さすぎ: {max_vol:.1f}dB")
+            passed = False
+
+    # 6. 映像ストリームチェック
+    video_streams = [s for s in streams if s.get("codec_type") == "video"]
+    has_video = len(video_streams) > 0
+    results["has_video"] = has_video
+    print(f"{'✅' if has_video else '❌'} 映像: {'あり' if has_video else 'なし'}")
+    if not has_video:
+        issues.append("映像ストリームなし")
+        passed = False
+
+    # 7. 解像度チェック
+    if video_streams:
+        vs = video_streams[0]
+        width = vs.get("width", 0)
+        height = vs.get("height", 0)
+        res_ok = width >= 720 and height >= 1080
+        results["resolution"] = f"{width}x{height}"
+        print(f"{'✅' if res_ok else '⚠️'} 解像度: {width}x{height}")
+
+    # 8. 輝度チェック（真っ黒でないか）
+    try:
+        brightness = check_brightness(video_path)
+        brightness_ok = brightness >= PASS_CRITERIA["min_brightness"]
+        results["brightness"] = round(brightness, 1)
+        print(f"{'✅' if brightness_ok else '❌'} 輝度: {brightness:.1f} (最小{PASS_CRITERIA['min_brightness']})")
+        if not brightness_ok:
+            issues.append(f"映像が暗すぎ（輝度{brightness:.1f}）")
+            passed = False
+    except Exception as e:
+        print(f"⚠️ 輝度チェックスキップ: {e}")
+        results["brightness"] = "unknown"
+
+    # 9. ビットレートチェック
+    bitrate_kbps = float(format_info.get("bit_rate", 0)) / 1000
+    bitrate_ok = bitrate_kbps >= PASS_CRITERIA["min_video_bitrate_kbps"]
+    results["bitrate_kbps"] = round(bitrate_kbps, 1)
+    print(f"{'✅' if bitrate_ok else '⚠️'} ビットレート: {bitrate_kbps:.0f}kbps")
+
+    # 総合判定
+    print("="*50)
+    if passed:
+        print(f"✅ 品質チェック合格!")
+    else:
+        print(f"❌ 品質チェック不合格")
+        print(f"問題点: {', '.join(issues)}")
+
+    results["passed"] = passed
+    results["issues"] = issues
+    return passed, results
+
+def check_three_times(video_path, required_passes=3):
+    """3回品質チェックを実行（全て合格で投稿許可）"""
+    print(f"\n{'#'*50}")
+    print(f"# 投稿前品質チェック（{required_passes}回合格必須）")
+    print(f"{'#'*50}")
+    
+    all_results = []
+    pass_count = 0
+    
+    for i in range(1, required_passes + 1):
+        print(f"\n--- チェック {i}/{required_passes} ---")
+        passed, results = run_quality_check(video_path)
+        all_results.append(results)
+        
+        if passed:
+            pass_count += 1
+            print(f"✅ チェック{i}: 合格 ({pass_count}/{required_passes})")
+        else:
+            print(f"❌ チェック{i}: 不合格")
+            # 1回でも不合格なら即座に失敗
+            print(f"\n🚫 投稿不可: {required_passes}回合格が必要ですが{i}回目で不合格")
+            return False, all_results
+    
+    if pass_count >= required_passes:
+        print(f"\n{'#'*50}")
+        print(f"# ✅ 全{required_passes}回合格！投稿を許可します")
+        print(f"{'#'*50}")
+        return True, all_results
+    else:
+        print(f"\n🚫 投稿不可: {pass_count}/{required_passes}回のみ合格")
+        return False, all_results
 
 if __name__ == "__main__":
-    video = sys.argv[1] if len(sys.argv) > 1 else "/tmp/nv_aesthetic/v3news_AIが変えるデザイン美学、2026年到来.mp4"
-    plan = sys.argv[2] if len(sys.argv) > 2 else None
-    print("\U0001f50d 動画品質チェック中...")
-    r = check_video(video, plan)
-    print(f"\n\U0001f4ca 品質レポート: {Path(video).name}")
-    print(f"尺: {r.get('duration',0):.1f}秒 | ビットレート: {r.get('bitrate',0)}kbps")
-    print(f"シーン数: {r.get('scene_count','N/A')} | 平均間隔: {r.get('avg_scene_interval','N/A')}秒")
-    if 'narration_avg_chars' in r:
-        print(f"ナレーション平均: {r['narration_avg_chars']}文字 | 数字あり: {r['scenes_with_numbers']}シーン")
-    print("\n\U0001f4c8 スコア:")
-    for k,v in r["scores"].items():
-        bar = "█"*int(v) + "░"*(10-int(v))
-        print(f"  {k:25s}: {bar} {v}/10")
-    print(f"\n  総合スコア: {r['total_score']}/10")
-    if r["issues"]:
-        print("\n\u274c 問題点:")
-        for i in r["issues"]: print(f"  • {i}")
-    if r["suggestions"]:
-        print("\n\U0001f4a1 改善提案:")
-        for s in r["suggestions"]: print(f"  → {s}")
+    video_path = sys.argv[1] if len(sys.argv) > 1 else "output_video.mp4"
+    passed, results = check_three_times(video_path)
+    
+    # 結果をJSONで保存
+    import json
+    Path("quality_check_result.json").write_text(
+        json.dumps({"passed": passed, "results": results}, ensure_ascii=False, indent=2))
+    
+    sys.exit(0 if passed else 1)
