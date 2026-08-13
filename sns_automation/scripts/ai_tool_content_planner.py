@@ -258,9 +258,10 @@ JSONのみ出力（前置き不要）:
     if text is None:
         raise Exception("全APIでスクリプト生成失敗")
     m = re.search(r'\{.*\}', text, re.DOTALL)
+    m = re.search(r'\{[\s\S]*\}', text)
     if not m:
+        logger.warning(f"JSON not found in text (len={len(text)}): {text[:200]}")
         raise Exception("JSON not found")
-    
     data = json.loads(m.group())
     logger.info(f"スクリプト生成完了: {data.get('selected_title', '')}")
     
