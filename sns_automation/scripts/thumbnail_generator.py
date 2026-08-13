@@ -9,6 +9,8 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from io import BytesIO
 
 DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-71eab12699f047a5891e62268c66c241")
+CEREBRAS_API_KEY = "csk-t9j3w5ne42jphxcj54x532hn8hhcv8cvk4r96563xrvvfvnp"
+OPENROUTER_API_KEY = "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"
 FONT_PATHS = [
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc",
     "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
