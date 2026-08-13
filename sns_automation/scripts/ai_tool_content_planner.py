@@ -232,15 +232,18 @@ JSONのみ出力（前置き不要）:
         if not api_key:
             continue
         try:
+            req_body = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": 0.85,
+                "max_tokens": 1500,
+            }
+            if api_name == "OpenRouter":
+                req_body["response_format"] = {"type": "json_object"}
             r = requests.post(
                 api_url,
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
-                json={
-                    "model": model,
-                    "messages": [{"role": "user", "content": prompt}],
-                    "temperature": 0.85,
-                    "max_tokens": 1500,
-                },
+                json=req_body,
                 timeout=60
             )
             if r.status_code == 200:
