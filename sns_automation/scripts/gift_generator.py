@@ -3,6 +3,33 @@
 AI Conduit プレゼント自動生成システム
 台本の内容と完全に一致した実用的なテンプレートを生成
 """
+
+CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "csk-t9j3w5ne42jphxcj54x532hn8hhcv8cvk4r96563xrvvfvnp")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
+
+def _call_llm(prompt, max_tokens=800, temperature=0.85):
+    """Cerebras→OpenRouterフォールバックでLLM呼び出し"""
+    import requests as _req
+    for api_url, api_key, model in [
+        ("https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gpt-oss-120b"),
+        ("https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
+    ]:
+        if not api_key:
+            continue
+        try:
+            r = _req.post(api_url,
+                headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
+                json={"model": model, "messages": [{"role": "user", "content": prompt}],
+                      "max_tokens": max_tokens, "temperature": temperature},
+                timeout=60)
+            if r.status_code == 200:
+                msg = r.json()["choices"][0]["message"]
+                text = msg.get("content") or msg.get("reasoning") or ""
+                if text:
+                    return text.strip()
+        except Exception:
+            continue
+    return ""
 import os, json, requests, base64 as b64
 from datetime import datetime
 
@@ -63,11 +90,8 @@ A: 〜
 AI Conduit: https://www.youtube.com/@AI.Conduit
 """
     
-    r = requests.post("https://api.deepseek.com/chat/completions",
-        headers={"Authorization": f"Bearer {DEEPSEEK_KEY}", "Content-Type": "application/json"},
-        json={"model": "deepseek-chat", "messages": [{"role": "user", "content": prompt}],
-              "max_tokens": 1500, "temperature": 0.2}, timeout=60)
-    return r.json()["choices"][0]["message"]["content"]
+    result = _call_llm(prompt, max_tokens=1500, temperature=0.2)
+    return result if result else "# AIツール実践ガイド\n\n動画で紹介したツールの使い方まとめ"
 
 def save_gift_to_github(content: str, filename: str) -> str:
     headers = {"Authorization": f"token {GITHUB_TOKEN}", "Content-Type": "application/json"}
