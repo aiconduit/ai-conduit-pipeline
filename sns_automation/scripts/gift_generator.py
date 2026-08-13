@@ -3,6 +3,8 @@
 AI Conduit プレゼント自動生成システム
 台本の内容と完全に一致した実用的なテンプレートを生成
 """
+import os
+import requests
 
 CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "csk-t9j3w5ne42jphxcj54x532hn8hhcv8cvk4r96563xrvvfvnp")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
