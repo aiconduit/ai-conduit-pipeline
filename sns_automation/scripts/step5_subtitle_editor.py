@@ -421,7 +421,24 @@ def main():
     print("=== ステップ5: 字幕・編集 開始 ===\n")
 
     # 入力ファイル確認
+    # draft_videoがなければシーンファイルから直接生成
     draft_path = Path("draft_video.mp4")
+    if not draft_path.exists():
+        scene_dir = Path("/tmp/video_scenes")
+        if scene_dir.exists():
+            scene_files = sorted(scene_dir.glob("scene_*.mp4"))
+            if scene_files:
+                concat_txt = Path("/tmp/step5_concat.txt")
+                with open(concat_txt, "w") as f:
+                    for sf in scene_files:
+                        f.write(f"file '{sf}'\n")
+                subprocess.run([
+                    "ffmpeg", "-y", "-f", "concat", "-safe", "0",
+                    "-i", str(concat_txt),
+                    "-c:v", "libx264", "-preset", "fast", "-crf", "22",
+                    "-an", str(draft_path)
+                ], capture_output=True)
+                print(f"  ✅ シーンから仮動画生成: {draft_path}")
     audio_path = Path("/tmp/narration.mp3")
     script_file = Path("final_script.json")
 
