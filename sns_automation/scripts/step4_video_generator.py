@@ -280,17 +280,32 @@ def build_text_scene(scene_name, narration, duration, out_path):
     r = subprocess.run(cmd, capture_output=True)
     return r.returncode == 0
 
-async def generate_audio(narration, out_path, rate="+5%", pitch="+2Hz"):
-    """ステップ23: ナレーション音声生成"""
-    import edge_tts
+def generate_audio_sync(narration, out_path, rate="+5%", pitch="+2Hz"):
+    """ステップ23: ナレーション音声生成（同期版）"""
+    import subprocess as _sp, sys
     try:
-        communicate = edge_tts.Communicate(narration, "ja-JP-KeitaNeural",
-                                            rate=rate, pitch=pitch)
-        await communicate.save(str(out_path))
-        return True
-    except Exception as e:
-        print(f"  音声生成失敗: {e}")
+        result = _sp.run([
+            sys.executable, "-c",
+            f"""
+import asyncio
+import edge_tts
+async def gen():
+    c = edge_tts.Communicate({repr(narration)}, "ja-JP-KeitaNeural", rate="{rate}", pitch="{pitch}")
+    await c.save({repr(str(out_path))})
+asyncio.run(gen())
+"""
+        ], capture_output=True, text=True, timeout=60)
+        if result.returncode == 0 and Path(out_path).exists() and Path(out_path).stat().st_size > 100:
+            return True
+        print(f"  音声生成失敗: {result.stderr[:100]}")
         return False
+    except Exception as e:
+        print(f"  音声生成例外: {e}")
+        return False
+
+async def generate_audio(narration, out_path, rate="+5%", pitch="+2Hz"):
+    """後方互換用"""
+    return generate_audio_sync(narration, out_path, rate, pitch)
 
 def get_duration(path):
     """動画・音声の長さを取得"""
@@ -447,7 +462,7 @@ def main():
         if not narration: continue
         rate, pitch = SCENE_TTS.get(scene_name, ("+5%", "+2Hz"))
         scene_audio = Path(f"/tmp/audio_{scene_name}.mp3")
-        success = asyncio.run(generate_audio(narration, scene_audio, rate, pitch))
+        success = generate_audio_sync(narration, scene_audio, rate, pitch)
         if success:
             audio_files[scene_name] = str(scene_audio)
             print(f"  ✅ {scene_name}: rate={rate} pitch={pitch}")
