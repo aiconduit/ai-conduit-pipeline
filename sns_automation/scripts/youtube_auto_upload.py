@@ -363,10 +363,10 @@ def main():
     seo_tags = " ".join(rotating_tags[:10])
     import random as _rdp
     # gift_fileを台本から取得
-    _gift_file = plan.get("gift_file", "テンプレート")
-    _gift_path = plan.get("gift_path", "")
-    _gift_desc = plan.get("gift_content", "")
-
+    _plan_ref = plan if "plan" in dir() else {}
+    _gift_file = _plan_ref.get("gift_file", "テンプレート")
+    _gift_path = _plan_ref.get("gift_path", "")
+    _gift_desc = _plan_ref.get("gift_content", "")
     _desc_patterns = [
         f"""【保存推奨】後で使えるClaude Codeテンプレートを無料配布中
 
