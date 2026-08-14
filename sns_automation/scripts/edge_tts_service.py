@@ -7,7 +7,7 @@ import edge_tts
 log = logging.getLogger("edge_tts_service")
 
 TICKS_PER_MS = 10_000
-SYNC_OFFSET = -0.1
+SYNC_OFFSET = 0.05
 
 VOICE = "ja-JP-KeitaNeural"
 TTS_ATTEMPTS = 3
