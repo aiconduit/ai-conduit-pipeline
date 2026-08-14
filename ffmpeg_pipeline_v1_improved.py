@@ -238,80 +238,46 @@ def compose_scene(scene, idx, is_last=False):
     _force_terminal = (idx % 2 == 1) and (_broll_size >= 500000)  # Bロールがある偶数シーンは使う
     if not broll or not os.path.exists(str(broll)) or _broll_size < 500000 or _force_terminal:
         _broll_fallback = True
-        # ターミナルアニメーション生成（黒画面の代わり）
-        _narration = scene.get("narration", "Claude Code MCP設定")[:40]
-        _commands = [
+        # ターミナルアニメーション生成（ffmpeg drawtext方式・高速）
+        _narration = scene.get("narration", "Claude Code MCP設定")[:35]
+        _lines = [
             "$ claude code --mcp-config ~/.claude/mcp.json",
             "> Connecting to MCP servers...",
-            f"> Topic: {_narration[:35]}",
+            f"> Topic: {_narration}",
             "> [OK] GitHub MCP connected",
             "> [OK] Slack MCP connected",
             "> Running autonomous task...",
-            "> [DONE] Task completed successfully",
+            "> [DONE] Task completed",
         ]
-        _term_frames = str(WORK_DIR / f"term_frames_{idx:02d}")
-        import os as _os; _os.makedirs(_term_frames, exist_ok=True)
-        from PIL import Image as _PILImg, ImageDraw as _PILDraw, ImageFont as _PILFont2
-        _fps = 30
-        _total_frames = int(dur * _fps)
-        _chars_per_frame = max(1, sum(len(c) for c in _commands) // max(_total_frames, 1))
-        _all_text = ""
-        _frame_idx = 0
-        _cmd_idx = 0
-        _char_idx = 0
-        for _f in range(_total_frames):
-            _img = _PILImg.new("RGB", (1080, 960), (10, 14, 20))
-            _d = _PILDraw.Draw(_img)
-            # フォント設定（大きめ）
-            _font_paths = [
-                '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
-                '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf',
-                '/System/Library/Fonts/Helvetica.ttc',
-            ]
-            _term_font = _PILFont2.load_default()
-            _term_font_sm = _PILFont2.load_default()
-            for _fp in _font_paths:
-                import os as _os2
-                if _os2.path.exists(_fp):
-                    try:
-                        _term_font = _PILFont2.truetype(_fp, 36)
-                        _term_font_sm = _PILFont2.truetype(_fp, 28)
-                        break
-                    except: pass
-            # グリッドライン
-            for _y in range(0, 960, 40):
-                _d.line([(0, _y), (1080, _y)], fill=(20, 28, 40), width=1)
-            # ヘッダー
-            _d.rectangle([0, 0, 1080, 50], fill=(30, 34, 50))
-            _d.text((20, 10), "● ● ●  Claude Code Terminal", fill=(150, 150, 180), font=_term_font_sm)
-            # テキスト描画
-            _visible_cmds = int(_f / _fps * 1.5)
-            _y_pos = 65
-            for _ci, _cmd in enumerate(_commands[:min(_visible_cmds + 1, len(_commands))]):
-                # 長いコマンドを折り返し（最大28文字）
-                _max_chars = 28
-                _wrapped = [_cmd[i:i+_max_chars] for i in range(0, len(_cmd), _max_chars)]
-                if _ci < _visible_cmds:
-                    _color = (0, 255, 100) if _cmd.startswith(">") else (100, 200, 255)
-                    for _wline in _wrapped:
-                        if _y_pos < 900:  # 960px上限チェック
-                            _d.text((20, _y_pos), _wline, fill=_color, font=_term_font)
-                        _y_pos += 44
-                elif _ci == _visible_cmds:
-                    _chars_shown = min(len(_cmd), int((_f % max(int(_fps / 1.5), 1)) * 3))
-                    _shown_text = _cmd[:_chars_shown] + "█"
-                    _wrapped_s = [_shown_text[i:i+_max_chars] for i in range(0, len(_shown_text), _max_chars)]
-                    for _wline in _wrapped_s:
-                        _d.text((20, _y_pos), _wline, fill=(255, 255, 100), font=_term_font)
-                        _y_pos += 44
-                    continue
-                # _y_posは上でwrapped分加算済みなのでスキップ
-            _img_path = f"{_term_frames}/frame_{_f:05d}.png"
-            _img.save(_img_path)
-        _run(["ffmpeg", "-y", "-r", str(_fps), "-i", f"{_term_frames}/frame_%05d.png",
-              "-vf", "scale=1080:960", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+        # 各行のdrawtext filterを構築
+        _font_file = ""
+        for _fp in ["/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+                    "/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf"]:
+            if os.path.exists(_fp):
+                _font_file = _fp
+                break
+        _drawtext_parts = ["drawtext=fontfile='" + _font_file + "':fontsize=32:fontcolor=0x1E1E2E:x=0:y=0:text='':box=1:boxcolor=0x0A0E14:boxborderw=540"]
+        _drawtext_parts = []
+        # ヘッダー背景
+        _drawtext_parts.append(f"drawtext=fontfile='{_font_file}':text='● ● ●  Claude Code Terminal':fontsize=26:fontcolor=0x9696B4:x=20:y=12:enable=1")
+        # 各行を時間差で表示
+        for _li, _line in enumerate(_lines):
+            _appear_sec = _li * (dur / (len(_lines) + 1))
+            _color = "0x00FF64" if _line.startswith(">") else "0x64C8FF"
+            if _line.startswith("$"):
+                _color = "0xFFFF00"
+            # 特殊文字をエスケープ
+            _escaped = _line.replace("'", "\'").replace(":", "\:").replace("[", "\[").replace("]", "\]")
+            _y = 65 + _li * 120
+            _drawtext_parts.append(
+                f"drawtext=fontfile='{_font_file}':text='{_escaped}':fontsize=30:fontcolor={_color}:x=20:y={_y}:enable='gte(t,{_appear_sec:.1f})'"
+            )
+        _vf_filter = f"color=c=0x0A0E14:s=1080x960:r=30:d={dur}[bg];[bg]" + ",".join(_drawtext_parts) if _drawtext_parts else f"color=c=0x0A0E14:s=1080x960:r=30:d={dur}"
+        _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=c=0x0A0E14:s=1080x960:r=30:d={dur}",
+              "-vf", ",".join(_drawtext_parts) if _drawtext_parts else "null",
+              "-c:v", "libx264", "-preset", "fast", "-crf", "20",
               "-pix_fmt", "yuv420p", "-an", broll_top])
-        print(f"   ✅ ターミナルアニメーション生成完了")
+        print(f"   ✅ ターミナルアニメーション生成完了（ffmpeg drawtext）")
         broll_lut = broll_top
         bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")
         import shutil; shutil.copy(broll_top, bg)
