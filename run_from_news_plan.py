@@ -460,7 +460,7 @@ _mxfade = _MOTION_GROUPS[_gkey]
 print(f"[Motion] グループ{_gkey}を選択: {_mxfade}", flush=True)
 
 video_only = str(WORK_DIR / "video_only.mp4")
-_xfade_dur = 0.05  # 字幕ずれ防止のため最小化
+_xfade_dur = 0.01  # 最小化（ほぼハードカット）
 if len(norm_list) >= 2:
     import subprocess as _xsp
     def _probe_dur(p):
