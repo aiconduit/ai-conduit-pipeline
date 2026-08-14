@@ -313,38 +313,8 @@ def _load_font(size):
             except: pass
     return _PILFont.load_default()
 
-intro_clip = None
-try:
-    # Pollinations.aiで生成したサムネイル画像を使用（Step2.5で生成済み）
-    _thumb_path = "assets/intro_thumbnail.jpg"
-    if os.path.exists(_thumb_path):
-        intro_img = Image.open(_thumb_path).convert("RGB").resize((1080, 1920), Image.LANCZOS)
-        print("   ✅ Pollinations.aiサムネイルを使用")
-    else:
-        intro_img = Image.new("RGB", (1080, 1920), (10, 10, 15))
-        print("   ⚠️ フォールバック: 黒背景使用")
-    d = ImageDraw.Draw(intro_img)
-    d.rectangle([0, 0, 1080, 8], fill=(255, 220, 0))
-    d.rectangle([0, 1912, 1080, 1920], fill=(255, 220, 0))
-    for txt, col, y, sz in [
-        ("AI Conduit", (255,220,0), 800, 120),
-        ("AIニュース速報", (200,200,200), 960, 56),
-    ]:
-        f = _load_font(sz)
-        bb = d.textbbox((0,0), txt, font=f)
-        d.text(((1080-(bb[2]-bb[0]))//2, y), txt, fill=col, font=f)
-    intro_png = str(WORK_DIR / "intro.png")
-    intro_img.save(intro_png)
-    intro_clip = str(WORK_DIR / "intro.mp4")
-    _run(["ffmpeg", "-y", "-loop", "1", "-i", intro_png, "-t", "2.0",
-          "-vf", "fade=t=in:st=0:d=0.3,fade=t=out:st=1.5:d=0.5,scale=1080:1920",
-          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-          "-pix_fmt", "yuv420p", "-an", intro_clip])
-    print("   ✅ イントロ生成完了")
-except Exception as _e:
-    print(f"   ⚠️ イントロスキップ: {_e}")
-    intro_clip = None
-
+intro_clip = None  # サムネはthumbnail_main.jpgを使用
+intro_clip = None  # サムネはthumbnail_main.jpgを使用
 # シーン合成
 files = []
 
