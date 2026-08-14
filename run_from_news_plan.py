@@ -507,7 +507,9 @@ if audio_clips:
           "-vn", "-c:a", "aac", audio_only_raw])
 
     # イントロ・アウトロの長さ分の無音を追加してタイミングを合わせる
-    intro_dur = probe_dur(intro_clip) if intro_clip and os.path.exists(str(intro_clip or "")) else 0.0
+    # サムネクリップの長さを使ってタイミングを合わせる
+    _thumb_clip_path = str(WORK_DIR / "thumbnail_intro.mp4")
+    intro_dur = probe_dur(_thumb_clip_path) if os.path.exists(_thumb_clip_path) else (probe_dur(intro_clip) if intro_clip and os.path.exists(str(intro_clip or "")) else 0.0)
     outro_dur = probe_dur(outro_clip) if outro_clip and os.path.exists(str(outro_clip or "")) else 0.0
     audio_only = str(WORK_DIR / "audio_only.aac")
     if intro_dur > 0 or outro_dur > 0:
