@@ -240,6 +240,9 @@ JSONのみ出力（前置き不要）:
             }
             if api_name == "OpenRouter":
                 req_body["response_format"] = {"type": "json_object"}
+            if api_name == "Cerebras":
+                # reasoningモードを無効化してcontentに直接JSONを返させる
+                req_body["reasoning_effort"] = "none"
             r = requests.post(
                 api_url,
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
