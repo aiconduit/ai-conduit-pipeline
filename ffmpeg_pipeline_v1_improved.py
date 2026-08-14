@@ -234,7 +234,9 @@ def compose_scene(scene, idx, is_last=False):
     # B-roll取得失敗時は黒画面で代替
     _broll_fallback = False
     _broll_size = os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0
-    if not broll or not os.path.exists(str(broll)) or _broll_size < 500000:
+    # 奇数シーンは強制的にターミナルアニメーション、偶数シーンはBロール
+    _force_terminal = (idx % 2 == 1)
+    if not broll or not os.path.exists(str(broll)) or _broll_size < 500000 or _force_terminal:
         _broll_fallback = True
         # ターミナルアニメーション生成（黒画面の代わり）
         _narration = scene.get("narration", "Claude Code MCP設定")[:40]
@@ -260,23 +262,39 @@ def compose_scene(scene, idx, is_last=False):
         for _f in range(_total_frames):
             _img = _PILImg.new("RGB", (1080, 960), (10, 14, 20))
             _d = _PILDraw.Draw(_img)
+            # フォント設定（大きめ）
+            _font_paths = [
+                '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf',
+                '/System/Library/Fonts/Helvetica.ttc',
+            ]
+            _term_font = _PILFont2.load_default()
+            _term_font_sm = _PILFont2.load_default()
+            for _fp in _font_paths:
+                import os as _os2
+                if _os2.path.exists(_fp):
+                    try:
+                        _term_font = _PILFont2.truetype(_fp, 36)
+                        _term_font_sm = _PILFont2.truetype(_fp, 28)
+                        break
+                    except: pass
             # グリッドライン
-            for _y in range(0, 960, 30):
+            for _y in range(0, 960, 40):
                 _d.line([(0, _y), (1080, _y)], fill=(20, 28, 40), width=1)
             # ヘッダー
-            _d.rectangle([0, 0, 1080, 36], fill=(30, 34, 50))
-            _d.text((20, 8), "● ● ●  Claude Code Terminal", fill=(150, 150, 180), font=_PILFont2.load_default())
+            _d.rectangle([0, 0, 1080, 50], fill=(30, 34, 50))
+            _d.text((20, 10), "● ● ●  Claude Code Terminal", fill=(150, 150, 180), font=_term_font_sm)
             # テキスト描画
             _visible_cmds = int(_f / _fps * 1.5)
-            _y_pos = 50
+            _y_pos = 65
             for _ci, _cmd in enumerate(_commands[:min(_visible_cmds + 1, len(_commands))]):
                 if _ci < _visible_cmds:
                     _color = (0, 255, 100) if _cmd.startswith(">") else (100, 200, 255)
-                    _d.text((20, _y_pos), _cmd, fill=_color, font=_PILFont2.load_default())
+                    _d.text((20, _y_pos), _cmd, fill=_color, font=_term_font)
                 elif _ci == _visible_cmds:
                     _chars_shown = min(len(_cmd), int((_f % max(int(_fps / 1.5), 1)) * 3))
-                    _d.text((20, _y_pos), _cmd[:_chars_shown] + "█", fill=(255, 255, 100), font=_PILFont2.load_default())
-                _y_pos += 28
+                    _d.text((20, _y_pos), _cmd[:_chars_shown] + "█", fill=(255, 255, 100), font=_term_font)
+                _y_pos += 48
             _img_path = f"{_term_frames}/frame_{_f:05d}.png"
             _img.save(_img_path)
         _run(["ffmpeg", "-y", "-r", str(_fps), "-i", f"{_term_frames}/frame_%05d.png",
