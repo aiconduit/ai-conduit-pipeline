@@ -92,18 +92,7 @@ jobs:
         run: python3 sns_automation/scripts/gift_generator.py || echo "プレゼント生成スキップ"
 
       - name: Step 2.7 - ターミナルデモ動画生成
-        run: |
-          python3 -c "
-import json, sys
-sys.path.insert(0, '.')
-from sns_automation.scripts.generate_terminal_demo import generate_terminal_demo
-try:
-    with open('sns_automation/news_content_plan.json') as f:
-        plan = json.load(f)
-    generate_terminal_demo(plan, 'assets/claude_code_demo.mp4')
-except Exception as e:
-    print(f'デモ生成スキップ: {e}')
-"
+        run: python3 sns_automation/scripts/run_terminal_demo.py
         continue-on-error: true
       - name: Step 3 - 動画生成
         run: python3 run_from_news_plan.py
