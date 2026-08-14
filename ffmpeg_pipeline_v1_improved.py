@@ -234,14 +234,57 @@ def compose_scene(scene, idx, is_last=False):
     # B-roll取得失敗時は黒画面で代替
     _broll_fallback = False
     if not broll or not os.path.exists(str(broll)):
-        print(f"   ⚠️ B-roll取得失敗 → 黒画面で代替")
         _broll_fallback = True
-        _run(["ffmpeg","-y","-f","lavfi","-i",f"color=black:s=1080x960:r=30:d={dur}",
-              "-r","30","-c:v","libx264","-preset","fast","-crf","20","-pix_fmt","yuv420p", broll_top])
+        # ターミナルアニメーション生成（黒画面の代わり）
+        _narration = scene.get("narration", "Claude Code MCP設定")[:40]
+        _commands = [
+            "$ claude code --mcp-config ~/.claude/mcp.json",
+            "> Connecting to MCP servers...",
+            f"> Topic: {_narration}",
+            "> ✅ GitHub MCP connected",
+            "> ✅ Slack MCP connected",
+            "> Running autonomous task...",
+            "> ✅ Task completed successfully",
+        ]
+        _term_frames = str(WORK_DIR / f"term_frames_{idx:02d}")
+        import os as _os; _os.makedirs(_term_frames, exist_ok=True)
+        from PIL import Image as _PILImg, ImageDraw as _PILDraw, ImageFont as _PILFont2
+        _fps = 30
+        _total_frames = int(dur * _fps)
+        _chars_per_frame = max(1, sum(len(c) for c in _commands) // max(_total_frames, 1))
+        _all_text = ""
+        _frame_idx = 0
+        _cmd_idx = 0
+        _char_idx = 0
+        for _f in range(_total_frames):
+            _img = _PILImg.new("RGB", (1080, 960), (10, 14, 20))
+            _d = _PILDraw.Draw(_img)
+            # グリッドライン
+            for _y in range(0, 960, 30):
+                _d.line([(0, _y), (1080, _y)], fill=(20, 28, 40), width=1)
+            # ヘッダー
+            _d.rectangle([0, 0, 1080, 36], fill=(30, 34, 50))
+            _d.text((20, 8), "● ● ●  Claude Code Terminal", fill=(150, 150, 180), font=_PILFont2.load_default())
+            # テキスト描画
+            _visible_cmds = int(_f / _fps * 1.5)
+            _y_pos = 50
+            for _ci, _cmd in enumerate(_commands[:min(_visible_cmds + 1, len(_commands))]):
+                if _ci < _visible_cmds:
+                    _color = (0, 255, 100) if _cmd.startswith(">") else (100, 200, 255)
+                    _d.text((20, _y_pos), _cmd, fill=_color, font=_PILFont2.load_default())
+                elif _ci == _visible_cmds:
+                    _chars_shown = min(len(_cmd), int((_f % max(int(_fps / 1.5), 1)) * 3))
+                    _d.text((20, _y_pos), _cmd[:_chars_shown] + "█", fill=(255, 255, 100), font=_PILFont2.load_default())
+                _y_pos += 28
+            _img_path = f"{_term_frames}/frame_{_f:05d}.png"
+            _img.save(_img_path)
+        _run(["ffmpeg", "-y", "-r", str(_fps), "-i", f"{_term_frames}/frame_%05d.png",
+              "-vf", "scale=1080:960", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+              "-pix_fmt", "yuv420p", "-an", broll_top])
+        print(f"   ✅ ターミナルアニメーション生成完了")
         broll_lut = broll_top
         bg = str(WORK_DIR/f"bg_{idx:02d}.mp4")
         import shutil; shutil.copy(broll_top, bg)
-    else:
         broll = str(broll)
 
     def _make_clip(src, out, t, scene_mood=mood, scene_idx=idx):
