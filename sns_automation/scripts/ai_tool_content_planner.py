@@ -206,6 +206,10 @@ Scene7 CTA（53-60秒）: 動画内容と直結したプレゼント
 - コマンドやコードはcaptionフィールドに書く（narrationには書かない）
 - 良い例: "エージェントのymlファイルにdisallowedToolsを追加します"
 - 悪い例: "$ claude --disallowedTools Write を実行します"
+- ファイルパス（.claude/agents/reviewer.md等）をnarrationに入れてはいけない
+- Before:、After:、→などの記号・英語をnarrationに入れてはいけない
+- Result（Scene6）の良い例: "手動で5分かかっていた作業が自動で完了するようになります"
+- Result（Scene6）の悪い例: "Before: 手動 → After: 自動になります"
 ## 必須条件（これを守らないと失格）
 1. narrationは必ず動詞で終わる（「〜します」「〜できます」「〜なります」）
 2. 各シーンのnarrationは20文字以上40文字以内
