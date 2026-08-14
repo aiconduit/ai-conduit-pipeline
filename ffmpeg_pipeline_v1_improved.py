@@ -236,13 +236,16 @@ def compose_scene(scene, idx, is_last=False):
     _broll_size = os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0
     # claude_code_demo.mp4があればHookシーン(idx==0)で優先使用
     _demo_path = ROOT_DIR / "assets" / "claude_code_demo.mp4"
+    _use_demo = False
     if idx == 0 and _demo_path.exists() and _demo_path.stat().st_size > 50000:
         broll = str(_demo_path)
         _broll_size = _demo_path.stat().st_size
+        _broll_size = _demo_path.stat().st_size
+        _use_demo = True
         print(f"   ✅ HookシーンにClaude Codeデモ動画を使用")
     # 奇数シーンは強制的にターミナルアニメーション、偶数シーンはBロール
     _force_terminal = (idx % 2 == 1) and (_broll_size >= 500000)  # Bロールがある偶数シーンは使う
-    if not broll or not os.path.exists(str(broll)) or _broll_size < 500000 or _force_terminal:
+    if (not broll or not os.path.exists(str(broll)) or _broll_size < 500000 or _force_terminal) and not _use_demo:
         _broll_fallback = True
         # Claude Code操作シミュレーター（タイプライター風・高速）
         _narration = scene.get("narration", "Claude Code設定")[:30]
