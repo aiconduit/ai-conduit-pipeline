@@ -494,7 +494,9 @@ else:
 print("   ✅ 映像連結完了（グループ{_gkey}）".format(_gkey=_gkey), flush=True)
 
 # 音声ありのクリップだけでconcat
-audio_clips = [f for f in norm_list if _has_audio(f)]
+# サムネクリップ(norm_00)を音声から除外してシーン音声のみ使用
+_thumb_norm = str(WORK_DIR / "norm" / "norm_00.mp4")
+audio_clips = [f for f in norm_list if _has_audio(f) and f != _thumb_norm]
 if audio_clips:
     audio_concat = str(WORK_DIR / "audio_concat.txt")
     with open(audio_concat, "w") as _af:
