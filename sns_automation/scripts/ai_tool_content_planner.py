@@ -225,7 +225,7 @@ JSONのみ出力（前置き不要）:
     text = None
     for api_name, api_url, api_key, model in [
         ("OpenRouter", "https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
-        ("Cerebras", "https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gpt-oss-120b"),
+        ("Cerebras", "https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gemma-4-31b"),
         ("Groq",     "https://api.groq.com/openai/v1/chat/completions", GROQ_API_KEY, "llama-3.3-70b-versatile"),
         ("OpenRouter", "https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
     ]:
@@ -240,9 +240,6 @@ JSONのみ出力（前置き不要）:
             }
             if api_name == "OpenRouter":
                 req_body["response_format"] = {"type": "json_object"}
-            if api_name == "Cerebras":
-                # reasoningモードを無効化してcontentに直接JSONを返させる
-                req_body["reasoning_effort"] = "none"
             r = requests.post(
                 api_url,
                 headers={"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"},
