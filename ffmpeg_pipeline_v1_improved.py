@@ -243,11 +243,11 @@ def compose_scene(scene, idx, is_last=False):
         _commands = [
             "$ claude code --mcp-config ~/.claude/mcp.json",
             "> Connecting to MCP servers...",
-            f"> Topic: {_narration}",
-            "> ✅ GitHub MCP connected",
-            "> ✅ Slack MCP connected",
+            f"> Topic: {_narration[:35]}",
+            "> [OK] GitHub MCP connected",
+            "> [OK] Slack MCP connected",
             "> Running autonomous task...",
-            "> ✅ Task completed successfully",
+            "> [DONE] Task completed successfully",
         ]
         _term_frames = str(WORK_DIR / f"term_frames_{idx:02d}")
         import os as _os; _os.makedirs(_term_frames, exist_ok=True)

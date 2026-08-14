@@ -826,10 +826,10 @@ def fetch_broll_from_topic(topic, visual_query, cache_dir=None, direct_url=None,
                 result = _make_kenburns(img, out, dur=8.0)
             else:
                 result = str(out)
-            if result and os.path.exists(result):
+            if result and os.path.exists(result) and os.path.getsize(result) > 100000:
                 print(f"   ✅ GitHub README → Ken Burns動画: {result}")
                 return result
-            print(f"   ⚠️ GitHub README画像のKen Burns変換に失敗 → フォールバック")
+            print(f"   ⚠️ GitHub README Ken Burns動画が小さすぎ or 失敗 → Pexelsへフォールバック")
 
     # 3. Pexelsでシンプルな英語クエリ（フォールバック1）
     en_query = _extract_english_query(visual_query)
