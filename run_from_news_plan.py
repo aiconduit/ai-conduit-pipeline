@@ -317,18 +317,36 @@ intro_clip = None  # サムネはthumbnail_main.jpgを使用
 intro_clip = None  # サムネはthumbnail_main.jpgを使用
 # シーン合成
 files = []
-
-# サムネイル画像を冒頭2秒表示
+# サムネイル画像を冒頭に表示（タイトル音声付き）
 _thumb_path = ROOT_DIR / "assets" / "thumbnail_main.jpg"
 _thumb_clip = str(WORK_DIR / "thumbnail_intro.mp4")
+_thumb_audio = str(WORK_DIR / "thumbnail_audio.mp3")
 if _thumb_path.exists():
+    # タイトルをTTSで読み上げ
+    _thumb_title = plan.get("selected_title") or plan.get("script", {}).get("title") or "Claude CodeがMCPで神になった"
+    try:
+        tts_japanese(_thumb_title, _thumb_audio, speed=1.0)
+        _thumb_dur = max(probe_dur(_thumb_audio) + 0.3, 2.0)
+    except Exception as _te:
+        print(f"⚠️ サムネTTSスキップ: {_te}")
+        _thumb_audio = None
+        _thumb_dur = 2.5
+    # 映像生成
+    _thumb_video = str(WORK_DIR / "thumbnail_video.mp4")
     _run(["ffmpeg", "-y", "-loop", "1", "-i", str(_thumb_path),
-          "-t", "2", "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
+          "-t", str(_thumb_dur), "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
           "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
-          "-an", "-pix_fmt", "yuv420p", _thumb_clip])
+          "-an", "-pix_fmt", "yuv420p", _thumb_video])
+    # 音声と映像を合成
+    if _thumb_audio and os.path.exists(_thumb_audio):
+        _run(["ffmpeg", "-y", "-i", _thumb_video, "-i", _thumb_audio,
+              "-c:v", "copy", "-c:a", "aac", "-shortest", _thumb_clip])
+    else:
+        import shutil; shutil.copy(_thumb_video, _thumb_clip)
     files.insert(0, _thumb_clip)
-    print("✅ サムネイントロ追加 (2秒)")
+    print(f"✅ サムネイントロ追加 ({_thumb_dur:.1f}秒・音声付き)")
 else:
+    print("⚠️ thumbnail_main.jpg が見つかりません")
     print("⚠️ thumbnail_main.jpg が見つかりません")
 for i, s in enumerate(scenes):
     s["visual_1"] = mood_visual_query(s["topic"], s["mood"])
