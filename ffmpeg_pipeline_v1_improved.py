@@ -288,13 +288,23 @@ def compose_scene(scene, idx, is_last=False):
             _visible_cmds = int(_f / _fps * 1.5)
             _y_pos = 65
             for _ci, _cmd in enumerate(_commands[:min(_visible_cmds + 1, len(_commands))]):
+                # 長いコマンドを折り返し（最大28文字）
+                _max_chars = 28
+                _wrapped = [_cmd[i:i+_max_chars] for i in range(0, len(_cmd), _max_chars)]
                 if _ci < _visible_cmds:
                     _color = (0, 255, 100) if _cmd.startswith(">") else (100, 200, 255)
-                    _d.text((20, _y_pos), _cmd, fill=_color, font=_term_font)
+                    for _wline in _wrapped:
+                        _d.text((20, _y_pos), _wline, fill=_color, font=_term_font)
+                        _y_pos += 44
                 elif _ci == _visible_cmds:
                     _chars_shown = min(len(_cmd), int((_f % max(int(_fps / 1.5), 1)) * 3))
-                    _d.text((20, _y_pos), _cmd[:_chars_shown] + "█", fill=(255, 255, 100), font=_term_font)
-                _y_pos += 48
+                    _shown_text = _cmd[:_chars_shown] + "█"
+                    _wrapped_s = [_shown_text[i:i+_max_chars] for i in range(0, len(_shown_text), _max_chars)]
+                    for _wline in _wrapped_s:
+                        _d.text((20, _y_pos), _wline, fill=(255, 255, 100), font=_term_font)
+                        _y_pos += 44
+                    continue
+                # _y_posは上でwrapped分加算済みなのでスキップ
             _img_path = f"{_term_frames}/frame_{_f:05d}.png"
             _img.save(_img_path)
         _run(["ffmpeg", "-y", "-r", str(_fps), "-i", f"{_term_frames}/frame_%05d.png",
