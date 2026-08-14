@@ -235,7 +235,7 @@ def compose_scene(scene, idx, is_last=False):
     _broll_fallback = False
     _broll_size = os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0
     # 奇数シーンは強制的にターミナルアニメーション、偶数シーンはBロール
-    _force_terminal = (idx % 2 == 1)
+    _force_terminal = (idx % 2 == 1) and (_broll_size >= 500000)  # Bロールがある偶数シーンは使う
     if not broll or not os.path.exists(str(broll)) or _broll_size < 500000 or _force_terminal:
         _broll_fallback = True
         # ターミナルアニメーション生成（黒画面の代わり）
@@ -294,7 +294,8 @@ def compose_scene(scene, idx, is_last=False):
                 if _ci < _visible_cmds:
                     _color = (0, 255, 100) if _cmd.startswith(">") else (100, 200, 255)
                     for _wline in _wrapped:
-                        _d.text((20, _y_pos), _wline, fill=_color, font=_term_font)
+                        if _y_pos < 900:  # 960px上限チェック
+                            _d.text((20, _y_pos), _wline, fill=_color, font=_term_font)
                         _y_pos += 44
                 elif _ci == _visible_cmds:
                     _chars_shown = min(len(_cmd), int((_f % max(int(_fps / 1.5), 1)) * 3))
