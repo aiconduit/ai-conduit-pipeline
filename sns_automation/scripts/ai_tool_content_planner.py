@@ -21,47 +21,17 @@ USED_PATH = "sns_automation/used_topics.json"
 
 # コンテンツソース（GitHubリポジトリ）
 CONTENT_SOURCES = [
-    # ===== Claude Code Best Practice（最優先・具体的なコマンド豊富）=====
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-subagents.md",
-     "category": "claude_code", "title_prefix": "Claude Codeサブエージェント"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-commands.md",
-     "category": "claude_code", "title_prefix": "Claude Codeカスタムコマンド"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-memory.md",
-     "category": "claude_code", "title_prefix": "Claude CodeメモリCLAUDE.md"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-settings.md",
-     "category": "claude_code", "title_prefix": "Claude Code設定"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-mcp.md",
-     "category": "claude_code", "title_prefix": "Claude Code MCP連携"},
+    # ===== Claude Code スキル（メイン）=====
     {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-skills.md",
      "category": "claude_code", "title_prefix": "Claude Codeスキル"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-commands.md",
+     "category": "claude_code", "title_prefix": "Claude Codeコマンド"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-memory.md",
+     "category": "claude_code", "title_prefix": "Claude Codeメモリ"},
+    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-settings.md",
+     "category": "claude_code", "title_prefix": "Claude Code設定"},
     {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-power-ups.md",
      "category": "claude_code", "title_prefix": "Claude Codeパワーアップ"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-cli-startup-flags.md",
-     "category": "claude_code", "title_prefix": "Claude Code起動フラグ"},
-    # ===== Claude Code公式CHANGELOG（最新機能）=====
-    {"repo": "anthropics/claude-code", "file": "CHANGELOG.md",
-     "category": "claude_news", "title_prefix": "Claude Code最新機能"},
-    # ===== Anthropic Cookbook（実践レシピ）=====
-    {"repo": "anthropics/anthropic-cookbook", "file": "README.md",
-     "category": "claude_api", "title_prefix": "Claude API活用"},
-    # ===== Anthropic Quickstarts（実用ユースケース）=====
-    {"repo": "anthropics/anthropic-quickstarts", "file": "README.md",
-     "category": "claude_usecase", "title_prefix": "Claude実用ユースケース"},
-    {"repo": "anthropics/anthropic-quickstarts", "file": "computer-use-best-practices/README.md",
-     "category": "claude_code", "title_prefix": "Claude Computer Use"},
-    {"repo": "anthropics/anthropic-quickstarts", "file": "agents/README.md",
-     "category": "claude_code", "title_prefix": "Claudeエージェント構築"},
-    {"repo": "anthropics/anthropic-quickstarts", "file": "autonomous-coding/README.md",
-     "category": "claude_code", "title_prefix": "Claude自律コーディング"},
-    # ===== Boris直伝Tips（人気コンテンツ）=====
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-15-tips-30-mar-26.md",
-     "category": "claude_code", "title_prefix": "Boris直伝15Tips"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-13-tips-03-jan-26.md",
-     "category": "claude_code", "title_prefix": "Boris直伝13Tips"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-12-tips-12-feb-26.md",
-     "category": "claude_code", "title_prefix": "Boris直伝12Tips"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "tips/claude-boris-10-tips-01-feb-26.md",
-     "category": "claude_code", "title_prefix": "Boris直伝10Tips"},
 ]
 
 # トピックテンプレート（カテゴリ別）
