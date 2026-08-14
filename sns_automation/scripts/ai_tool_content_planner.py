@@ -288,16 +288,21 @@ JSONのみ出力（前置き不要）:
         try:
             data = json.loads(clean)
         except json.JSONDecodeError:
-            # 末尾の不完全なJSONを修復
-            _txt = clean.strip()
-            # 開いたブラケットを数えて閉じる
-            _open = _txt.count('{') - _txt.count('}')
-            _txt += '}' * max(0, _open)
+            # 無効なエスケープ文字も除去
+            import re as _re3
+            clean2 = _re3.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', clean)
             try:
-                data = json.loads(_txt)
-            except json.JSONDecodeError as _je:
-                logger.warning(f"JSON修復失敗: {_je} / text: {clean[:200]}")
-                raise Exception(f"JSONDecodeError: {_je}")
+                data = json.loads(clean2)
+            except json.JSONDecodeError:
+                # 末尾の不完全なJSONを修復
+                _txt = clean2.strip()
+                _open = _txt.count('{') - _txt.count('}')
+                _txt += '}' * max(0, _open)
+                try:
+                    data = json.loads(_txt)
+                except json.JSONDecodeError as _je:
+                    logger.warning(f"JSON修復失敗: {_je} / text: {clean[:200]}")
+                    raise Exception(f"JSONDecodeError: {_je}")
     logger.info(f"スクリプト生成完了: {data.get('selected_title', '')}")
     
     # 新旧フォーマット統一: scenesがトップレベルにある場合script.scenesに変換
