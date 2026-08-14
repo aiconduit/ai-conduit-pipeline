@@ -240,7 +240,6 @@ def compose_scene(scene, idx, is_last=False):
     if idx == 0 and _demo_path.exists() and _demo_path.stat().st_size > 50000:
         broll = str(_demo_path)
         _broll_size = _demo_path.stat().st_size
-        _broll_size = _demo_path.stat().st_size
         _use_demo = True
         print(f"   ✅ HookシーンにClaude Codeデモ動画を使用")
     # 奇数シーンは強制的にターミナルアニメーション、偶数シーンはBロール
