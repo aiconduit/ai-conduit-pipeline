@@ -237,6 +237,7 @@ def compose_scene(scene, idx, is_last=False):
     # claude_code_demo.mp4があればHookシーン(idx==0)で優先使用
     _demo_path = ROOT_DIR / "assets" / "claude_code_demo.mp4"
     _use_demo = False
+    print(f"   [DEBUG] demo_path={_demo_path} exists={_demo_path.exists()} size={_demo_path.stat().st_size if _demo_path.exists() else 0}")
     if idx == 0 and _demo_path.exists() and _demo_path.stat().st_size > 50000:
         broll = str(_demo_path)
         _broll_size = _demo_path.stat().st_size
