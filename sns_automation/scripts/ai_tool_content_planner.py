@@ -273,7 +273,10 @@ JSONのみ出力（前置き不要）:
     # JSON抽出（textが既にJSONの場合も対応）
     _text_stripped = text.strip()
     if _text_stripped.startswith("{"):
-        m = type("M", (), {"group": lambda self: _text_stripped})() 
+        # 最初の完全なJSONオブジェクトのみ抽出
+        import re as _re4
+        _m2 = _re4.search(r'\{[\s\S]*\}', _text_stripped)
+        m = _m2 if _m2 else type("M", (), {"group": lambda self: _text_stripped})()
     else:
         m = re.search(r'\{[\s\S]*\}', text)
     if not m:
