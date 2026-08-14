@@ -270,8 +270,12 @@ JSONのみ出力（前置き不要）:
             logger.warning(f"{api_name} 例外: {e}")
     if text is None:
         raise Exception("全APIでスクリプト生成失敗")
-    m = re.search(r'\{.*\}', text, re.DOTALL)
-    m = re.search(r'\{[\s\S]*\}', text)
+    # JSON抽出（textが既にJSONの場合も対応）
+    _text_stripped = text.strip()
+    if _text_stripped.startswith("{"):
+        m = type("M", (), {"group": lambda self: _text_stripped})() 
+    else:
+        m = re.search(r'\{[\s\S]*\}', text)
     if not m:
         logger.warning(f"JSON not found in text (len={len(text)}): {text[:200]}")
         raise Exception("JSON not found")
