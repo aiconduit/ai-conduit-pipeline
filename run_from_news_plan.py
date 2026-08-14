@@ -347,6 +347,19 @@ except Exception as _e:
 
 # シーン合成
 files = []
+
+# サムネイル画像を冒頭2秒表示
+_thumb_path = ROOT_DIR / "assets" / "thumbnail_main.jpg"
+_thumb_clip = str(WORK_DIR / "thumbnail_intro.mp4")
+if _thumb_path.exists():
+    _run(["ffmpeg", "-y", "-loop", "1", "-i", str(_thumb_path),
+          "-t", "2", "-vf", "scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920",
+          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+          "-an", "-pix_fmt", "yuv420p", _thumb_clip])
+    files.insert(0, _thumb_clip)
+    print("✅ サムネイントロ追加 (2秒)")
+else:
+    print("⚠️ thumbnail_main.jpg が見つかりません")
 for i, s in enumerate(scenes):
     s["visual_1"] = mood_visual_query(s["topic"], s["mood"])
     f = _original_compose_scene(s, i)
