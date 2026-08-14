@@ -13,6 +13,7 @@ DEEPSEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "csk-t9j3w5ne42jphxcj54x532hn8hhcv8cvk4r96563xrvvfvnp")
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 SAVE_PATH = "sns_automation/news_content_plan.json"
@@ -224,6 +225,7 @@ JSONのみ出力（前置き不要）:
     # Cerebras → Groq フォールバック
     text = None
     for api_name, api_url, api_key, model in [
+        ("Gemini", "GEMINI_SPECIAL", GEMINI_API_KEY, "gemini-2.5-flash"),
         ("OpenRouter", "https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
         ("Cerebras", "https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gemma-4-31b"),
         ("Groq",     "https://api.groq.com/openai/v1/chat/completions", GROQ_API_KEY, "llama-3.3-70b-versatile"),
@@ -232,6 +234,27 @@ JSONのみ出力（前置き不要）:
         if not api_key:
             continue
         try:
+            # Gemini専用処理
+            if api_name == "Gemini" and api_key:
+                import re as _re5
+                _gr = requests.post(
+                    f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}",
+                    headers={"Content-Type": "application/json"},
+                    json={"contents": [{"parts": [{"text": prompt}]}]},
+                    timeout=60)
+                if _gr.status_code == 200:
+                    _gt = _gr.json()["candidates"][0]["content"]["parts"][0]["text"]
+                    _gt = _re5.sub(r"```[a-z]*\s*|```\s*", "", _gt).strip()
+                    _gm = _re5.search(r"\{[\s\S]*\}", _gt)
+                    if _gm:
+                        text = _gm.group()
+                        logger.info("Gemini でスクリプト生成成功")
+                        break
+                    else:
+                        logger.warning(f"Gemini: JSONなし")
+                else:
+                    logger.warning(f"Gemini error: {_gr.status_code}")
+                continue
             req_body = {
                 "model": model,
                 "messages": [{"role": "user", "content": prompt}],
