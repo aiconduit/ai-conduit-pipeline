@@ -23,7 +23,8 @@ jobs:
         run: |
           sudo apt-get update -q
           sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
-          pip install requests edge-tts pillow google-cloud-texttospeech google-auth google-api-python-client google-auth-httplib2 google-auth-oauthlib google-cloud-texttospeech google-auth moviepy numpy moviepy numpy pynacl
+          pip install requests edge-tts pillow google-cloud-texttospeech google-auth google-api-python-client google-auth-httplib2 google-auth-oauthlib google-cloud-texttospeech google-auth moviepy numpy moviepy numpy pynacl asciinema
+          curl -sL https://github.com/asciinema/agg/releases/download/v1.9.0/agg-x86_64-unknown-linux-gnu -o /usr/local/bin/agg && chmod +x /usr/local/bin/agg
           # 無効化
 
       - name: SFX確認
@@ -90,6 +91,20 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: python3 sns_automation/scripts/gift_generator.py || echo "プレゼント生成スキップ"
 
+      - name: Step 2.7 - ターミナルデモ動画生成
+        run: |
+          python3 -c "
+import json, sys
+sys.path.insert(0, '.')
+from sns_automation.scripts.generate_terminal_demo import generate_terminal_demo
+try:
+    with open('sns_automation/news_content_plan.json') as f:
+        plan = json.load(f)
+    generate_terminal_demo(plan, 'assets/claude_code_demo.mp4')
+except Exception as e:
+    print(f'デモ生成スキップ: {e}')
+"
+        continue-on-error: true
       - name: Step 3 - 動画生成
         run: python3 run_from_news_plan.py
         env:
