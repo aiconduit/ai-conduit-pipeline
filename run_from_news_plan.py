@@ -326,7 +326,7 @@ if _thumb_path.exists():
     _thumb_title = plan.get("selected_title") or plan.get("script", {}).get("title") or "Claude CodeがMCPで神になった"
     try:
         tts_japanese(_thumb_title, _thumb_audio, speed=1.0)
-        _thumb_dur = max(probe_dur(_thumb_audio) + 0.3, 2.0)
+        _thumb_dur = min(max(probe_dur(_thumb_audio) + 0.3, 2.0), 3.0)  # 最大3秒
     except Exception as _te:
         print(f"⚠️ サムネTTSスキップ: {_te}")
         _thumb_audio = None
@@ -460,7 +460,7 @@ _mxfade = _MOTION_GROUPS[_gkey]
 print(f"[Motion] グループ{_gkey}を選択: {_mxfade}", flush=True)
 
 video_only = str(WORK_DIR / "video_only.mp4")
-_xfade_dur = 0.2
+_xfade_dur = 0.05  # 字幕ずれ防止のため最小化
 if len(norm_list) >= 2:
     import subprocess as _xsp
     def _probe_dur(p):
