@@ -304,8 +304,17 @@ JSONのみ出力（前置き不要）:
                 try:
                     data = json.loads(_txt)
                 except json.JSONDecodeError as _je:
-                    logger.warning(f"JSON修復失敗: {_je} / text: {clean[:200]}")
-                    raise Exception(f"JSONDecodeError: {_je}")
+                    # "Extra data"の場合は最初のJSONオブジェクトのみ取得
+                    if "Extra data" in str(_je):
+                        try:
+                            import json as _json2
+                            data = _json2.loads(_txt[:int(str(_je).split("(char ")[1].split(")")[0])])
+                        except Exception:
+                            logger.warning(f"JSON修復失敗: {_je} / text: {clean[:200]}")
+                            raise Exception(f"JSONDecodeError: {_je}")
+                    else:
+                        logger.warning(f"JSON修復失敗: {_je} / text: {clean[:200]}")
+                        raise Exception(f"JSONDecodeError: {_je}")
     logger.info(f"スクリプト生成完了: {data.get('selected_title', '')}")
     
     # 新旧フォーマット統一: scenesがトップレベルにある場合script.scenesに変換
