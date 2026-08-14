@@ -345,6 +345,7 @@ if _thumb_path.exists():
         import shutil; shutil.copy(_thumb_video, _thumb_clip)
     files.insert(0, _thumb_clip)
     print(f"✅ サムネイントロ追加 ({_thumb_dur:.1f}秒・音声付き)")
+    _THUMB_DUR_ACTUAL = _thumb_dur  # 正確な値を保持
 else:
     print("⚠️ thumbnail_main.jpg が見つかりません")
     print("⚠️ thumbnail_main.jpg が見つかりません")
@@ -509,7 +510,7 @@ if audio_clips:
     # イントロ・アウトロの長さ分の無音を追加してタイミングを合わせる
     # サムネクリップの長さを使ってタイミングを合わせる
     _thumb_clip_path = str(WORK_DIR / "thumbnail_intro.mp4")
-    intro_dur = probe_dur(_thumb_clip_path) if os.path.exists(_thumb_clip_path) else (probe_dur(intro_clip) if intro_clip and os.path.exists(str(intro_clip or "")) else 0.0)
+    intro_dur = _THUMB_DUR_ACTUAL if "_THUMB_DUR_ACTUAL" in dir() else (probe_dur(_thumb_clip_path) if os.path.exists(_thumb_clip_path) else 0.0)
     outro_dur = probe_dur(outro_clip) if outro_clip and os.path.exists(str(outro_clip or "")) else 0.0
     audio_only = str(WORK_DIR / "audio_only.aac")
     if intro_dur > 0 or outro_dur > 0:
