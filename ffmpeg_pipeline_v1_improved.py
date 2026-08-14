@@ -234,7 +234,7 @@ def compose_scene(scene, idx, is_last=False):
     # B-roll取得失敗時は黒画面で代替
     _broll_fallback = False
     _broll_size = os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0
-    if not broll or not os.path.exists(str(broll)) or _broll_size < 100000:
+    if not broll or not os.path.exists(str(broll)) or _broll_size < 500000:
         _broll_fallback = True
         # ターミナルアニメーション生成（黒画面の代わり）
         _narration = scene.get("narration", "Claude Code MCP設定")[:40]
