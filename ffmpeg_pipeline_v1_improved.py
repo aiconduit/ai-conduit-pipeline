@@ -238,17 +238,36 @@ def compose_scene(scene, idx, is_last=False):
     _force_terminal = (idx % 2 == 1) and (_broll_size >= 500000)  # Bロールがある偶数シーンは使う
     if not broll or not os.path.exists(str(broll)) or _broll_size < 500000 or _force_terminal:
         _broll_fallback = True
-        # ターミナルアニメーション生成（ffmpeg drawtext方式・高速）
-        _narration = scene.get("narration", "Claude Code MCP設定")[:35]
-        _lines = [
-            "$ claude code --mcp-config ~/.claude/mcp.json",
-            "> Connecting to MCP servers...",
-            f"> Topic: {_narration}",
-            "> [OK] GitHub MCP connected",
-            "> [OK] Slack MCP connected",
-            "> Running autonomous task...",
-            "> [DONE] Task completed",
-        ]
+        # Claude Code操作シミュレーター（タイプライター風・高速）
+        _narration = scene.get("narration", "Claude Code設定")[:30]
+        _caption = scene.get("caption", scene.get("title", "設定"))
+        _mood = scene.get("mood", "value")
+        # シーンのmoodに合わせたコマンドシーケンス
+        if _mood == "hook":
+            _lines = [
+                ("cmd", "$ claude"),
+                ("out", "  Claude Code v1.5.0 起動中..."),
+                ("out", f"  > {_narration}"),
+                ("out", "  ✓ 設定を読み込みました"),
+                ("out", "  ✓ 準備完了"),
+            ]
+        elif _mood == "cta":
+            _lines = [
+                ("cmd", "$ cat 概要欄リンク"),
+                ("out", "  → プレゼント受け取り方"),
+                ("out", "  1. コメントに「AI」と入力"),
+                ("out", "  2. 概要欄URLをタップ"),
+                ("out", "  3. テンプレートをダウンロード"),
+            ]
+        else:
+            _lines = [
+                ("cmd", f"$ claude code"),
+                ("out", "  Claude Code 起動中..."),
+                ("cmd", f"  > {_caption}を設定して"),
+                ("out", "  処理中..."),
+                ("out", f"  ✓ {_caption} 完了"),
+                ("out", "  ✓ 設定ファイル更新済み"),
+            ]
         # 各行のdrawtext filterを構築
         _font_file = ""
         for _fp in ["/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
@@ -256,21 +275,24 @@ def compose_scene(scene, idx, is_last=False):
             if os.path.exists(_fp):
                 _font_file = _fp
                 break
-        _drawtext_parts = ["drawtext=fontfile='" + _font_file + "':fontsize=32:fontcolor=0x1E1E2E:x=0:y=0:text='':box=1:boxcolor=0x0A0E14:boxborderw=540"]
         _drawtext_parts = []
         # ヘッダー背景
-        _drawtext_parts.append(f"drawtext=fontfile='{_font_file}':text='● ● ●  Claude Code Terminal':fontsize=26:fontcolor=0x9696B4:x=20:y=12:enable=1")
-        # 各行を時間差で表示
-        for _li, _line in enumerate(_lines):
+        _drawtext_parts.append(f"drawtext=fontfile='{_font_file}':text='● ● ●  Claude Code':fontsize=26:fontcolor=0x9696B4:x=20:y=12:enable=1")
+        # 各行を時間差でタイプライター風に表示
+        for _li, (_ltype, _ltext) in enumerate(_lines):
             _appear_sec = _li * (dur / (len(_lines) + 1))
-            _color = "0x00FF64" if _line.startswith(">") else "0x64C8FF"
-            if _line.startswith("$"):
-                _color = "0xFFFF00"
+            # タイプ別カラー
+            if _ltype == "cmd":
+                _color = "0xFFFF64"  # 黄色：コマンド
+            else:
+                _color = "0x00FF96"  # 緑：出力
             # 特殊文字をエスケープ
-            _escaped = _line.replace("'", "\'").replace(":", "\:").replace("[", "\[").replace("]", "\]")
-            _y = 65 + _li * 120
+            _escaped = _ltext.replace("'", "").replace(":", "\:").replace("[", "").replace("]", "").replace("{", "").replace("}", "")
+            _y = 65 + _li * 110
+            # タイプライター効果: 文字が1文字ずつ出現
+            _char_speed = max(len(_ltext) / max(dur / len(_lines), 0.5), 1)
             _drawtext_parts.append(
-                f"drawtext=fontfile='{_font_file}':text='{_escaped}':fontsize=30:fontcolor={_color}:x=20:y={_y}:enable='gte(t,{_appear_sec:.1f})'"
+                f"drawtext=fontfile='{_font_file}':text='{_escaped}':fontsize=32:fontcolor={_color}:x=20:y={_y}:enable='gte(t,{_appear_sec:.1f})'"
             )
         _vf_filter = f"color=c=0x0A0E14:s=1080x960:r=30:d={dur}[bg];[bg]" + ",".join(_drawtext_parts) if _drawtext_parts else f"color=c=0x0A0E14:s=1080x960:r=30:d={dur}"
         _run(["ffmpeg", "-y", "-f", "lavfi", "-i", f"color=c=0x0A0E14:s=1080x960:r=30:d={dur}",
