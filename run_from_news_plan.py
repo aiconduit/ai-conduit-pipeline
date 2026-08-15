@@ -104,13 +104,13 @@ mood_map = {
     # 旧5シーン型
     "Hook": "hook", "Fact_1": "interrupt", "Fact_2": "value", "Twist": "value", "CTA": "cta",
     # 新7シーン型
-    "Problem": "hook", "Solution": "value", "Step1": "value", "Step2": "value", "Result": "value",
+    "Problem": "hook", "Why": "value", "Solution": "value", "Step1": "value", "Step2": "value", "Result": "value",
     # その他
     "How": "value", "Bonus": "value", "Tip": "value", "Demo": "value",
 }
 scene_specs = []
 for s in raw_scenes:
-    title = s.get("scene_title", "value")
+    title = s.get("title", s.get("scene_title", "value"))
     narration = s.get("narration", "").strip()
     if not narration or len(narration) < 3:
         continue
