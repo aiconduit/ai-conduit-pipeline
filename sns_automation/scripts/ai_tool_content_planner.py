@@ -186,6 +186,8 @@ Scene7 CTA（53-60秒）: 動画内容と直結したプレゼント
 - Before:、After:、→などの記号・英語をnarrationに入れてはいけない
 - Result（Scene6）の良い例: "手動で5分かかっていた作業が自動で完了するようになります"
 - Result（Scene6）の悪い例: "Before: 手動 → After: 自動になります"
+- 専門用語は必ず日常語に言い換える（docstring→コードの説明文、agents→設定ファイル、SKILL.md→テンプレート）
+- 「〜できます」「〜なります」「〜します」で終わる自然な日本語のみ
 ## 必須条件（これを守らないと失格）
 1. narrationは必ず動詞で終わる（「〜します」「〜できます」「〜なります」）
 2. 各シーンのnarrationは20文字以上40文字以内
@@ -223,7 +225,6 @@ JSONのみ出力（前置き不要）:
         ("OpenRouter", "https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
         ("Cerebras", "https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gemma-4-31b"),
         ("Groq",     "https://api.groq.com/openai/v1/chat/completions", GROQ_API_KEY, "llama-3.3-70b-versatile"),
-        ("OpenRouter", "https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
     ]:
         if not api_key:
             continue

@@ -15,7 +15,7 @@ MIN_AUDIO_BYTES = 5_000
 EDGE_TTS_KBPS = 48
 
 
-def generate_speech_with_timestamps(text: str, output_path: str, rate: str = "-5%", pitch: str = "-3Hz"):
+def generate_speech_with_timestamps(text: str, output_path: str, rate: str = "+5%", pitch: str = "-3Hz"):
     word_boundaries = []
     sentence_fallback = []
 

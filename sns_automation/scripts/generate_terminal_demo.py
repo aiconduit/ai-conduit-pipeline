@@ -15,7 +15,8 @@ def generate_commands_with_gemini(title: str, step1: str, step2: str) -> list:
         return None
     
     prompt = f"""以下のClaude Code動画のタイトルと手順に合わせて、
-ターミナルデモ用のコマンドシーケンスを生成してください。
+リアルなターミナルデモ用のコマンドシーケンスを生成してください。
+WEB/UI系のスキル紹介動画です。視聴者が「おお！」と思えるような具体的なコマンドを使ってください。
 
 タイトル: {title}
 手順1: {step1}

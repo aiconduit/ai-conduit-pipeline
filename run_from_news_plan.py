@@ -1,4 +1,5 @@
 import re
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 #!/usr/bin/env python3
 """
 news_content_plan.json を読み、ffmpeg_pipeline_v1_improved.py の
@@ -457,10 +458,13 @@ _MOTION_GROUPS = {
 }
 _gkey = _rand_mot.choice(list(_MOTION_GROUPS.keys()))
 _mxfade = _MOTION_GROUPS[_gkey]
-print(f"[Motion] グループ{_gkey}を選択: {_mxfade}", flush=True)
+# Motion グループ選択（ログ省略）
 
 video_only = str(WORK_DIR / "video_only.mp4")
 # シンプルなconcat（xfadeなし・ずれなし）
+if not norm_list:
+    print("❌ norm_listが空 → 動画生成をスキップ")
+    exit(1)
 _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
       "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
       "-pix_fmt", "yuv420p", "-an", video_only])

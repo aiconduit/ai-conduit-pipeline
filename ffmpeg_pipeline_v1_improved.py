@@ -236,7 +236,7 @@ def compose_scene(scene, idx, is_last=False):
     _broll_size = os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0
     # Before/After動画をResultシーン(idx==5)で優先使用
     _ba_path = ROOT_DIR / "assets" / "before_after.mp4"
-    if idx == 5 and _ba_path.exists() and _ba_path.stat().st_size > 10000:
+    if idx == 5 and _ba_path.exists() and _ba_path.stat().st_size > 50000:
         broll = str(_ba_path)
         _broll_size = _ba_path.stat().st_size
         _use_demo = True
@@ -244,7 +244,6 @@ def compose_scene(scene, idx, is_last=False):
     # claude_code_demo.mp4があればHookシーン(idx==0)で優先使用
     _demo_path = ROOT_DIR / "assets" / "claude_code_demo.mp4"
     _use_demo = False
-    print(f"   [DEBUG] demo_path={_demo_path} exists={_demo_path.exists()} size={_demo_path.stat().st_size if _demo_path.exists() else 0}")
     if idx == 0 and _demo_path.exists() and _demo_path.stat().st_size > 50000:
         broll = str(_demo_path)
         _broll_size = _demo_path.stat().st_size
@@ -347,8 +346,6 @@ def compose_scene(scene, idx, is_last=False):
 
     if not _broll_fallback:
         _make_clip(broll, broll_top, dur)
-    print(f"   [DEBUG] broll={broll} size={os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0}")
-    print(f"   [DEBUG] broll_top exists={os.path.exists(broll_top)} size={os.path.getsize(broll_top) if os.path.exists(broll_top) else 0}")
 
     # apply_zoom_pulse DISABLED: zoompan d=1で黒画面バグあり
 

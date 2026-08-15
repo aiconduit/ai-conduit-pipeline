@@ -44,13 +44,15 @@ def generate_before_after_video(plan: dict, output_path: str) -> bool:
 - HTMLのみ出力（説明不要）"""
     
     before_html = gemini_generate(before_prompt)
-    if not before_html or "<!DOCTYPE" not in before_html and "<html" not in before_html and "<form" not in before_html:
-        before_html = """<!DOCTYPE html><html><body>
-<h2>お問い合わせ</h2>
-<form><label>名前: <input type="text"></label><br>
-<label>メール: <input type="email"></label><br>
-<label>メッセージ: <textarea></textarea></label><br>
-<button type="submit">送信</button></form></body></html>"""
+    if not before_html or ("<!DOCTYPE" not in before_html and "<html" not in before_html and "<form" not in before_html and "<div" not in before_html):
+        before_html = """<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px">
+<h2>お問い合わせフォーム</h2>
+<form>
+<div><label>お名前: <input type="text" style="border:1px solid #ccc;padding:4px"></label></div><br>
+<div><label>メール: <input type="email" style="border:1px solid #ccc;padding:4px"></label></div><br>
+<div><label>メッセージ:<br><textarea style="border:1px solid #ccc;padding:4px" rows="4" cols="30"></textarea></label></div><br>
+<button type="submit" style="background:#333;color:white;padding:8px 16px">送信する</button>
+</form></body></html>"""
     
     # After HTML生成（Tailwind適用）
     after_prompt = f"""以下のHTMLをTailwind CSSを使って美しくモダンなデザインにしてください。
@@ -93,8 +95,14 @@ asyncio.run(main())
 """
         r = subprocess.run(["python3", "-c", ss_script], capture_output=True, text=True, timeout=30)
         if r.returncode != 0:
-            print(f"   ⚠️ Playwright失敗: {r.stderr[:100]}")
-            return False
+            # Playwrightがない場合は自動インストール
+            print(f"   Playwright未インストール → 自動インストール中...")
+            subprocess.run(["python3", "-m", "playwright", "install", "chromium"], capture_output=True, timeout=60)
+            subprocess.run(["python3", "-m", "playwright", "install-deps", "chromium"], capture_output=True, timeout=60)
+            r = subprocess.run(["python3", "-c", ss_script], capture_output=True, text=True, timeout=30)
+            if r.returncode != 0:
+                print(f"   ⚠️ Playwright失敗: {r.stderr[:100]}")
+                return False
         
         # Before/After動画生成
         vf = "scale=1080:960:force_original_aspect_ratio=decrease,pad=1080:960:(ow-iw)/2:(oh-ih)/2:color=white"

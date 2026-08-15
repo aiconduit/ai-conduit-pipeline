@@ -761,16 +761,16 @@ def _extract_english_query(visual_query):
     Returns: 簡潔な英語検索クエリ（str）
     """
     if not visual_query:
-        return "technology abstract"
+        return "web design modern UI"
     en = " ".join(re.findall(r"[A-Za-z][A-Za-z0-9 .\-_/]*", visual_query)).strip()
     en = re.sub(r"\s+", " ", en).strip()
     if len(en) < 3:
-        en = "technology abstract"
+        en = "web design coding modern"
     tokens = [t for t in re.split(r"[\s,._\-/]+", en) if t]
     stopwords = {"a", "an", "the", "and", "or", "of", "for", "to", "with", "on", "in", "it", "that", "this", "is", "are"}
     clean = [t for t in tokens if t.lower() not in stopwords][:4]
     if not clean:
-        clean = ["technology", "abstract"]
+        clean = ["web", "design", "modern", "UI"]
     return " ".join(clean)
 
 

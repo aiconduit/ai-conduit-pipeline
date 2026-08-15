@@ -6,8 +6,8 @@ AI Conduit プレゼント自動生成システム
 import os
 import requests
 
-CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "csk-t9j3w5ne42jphxcj54x532hn8hhcv8cvk4r96563xrvvfvnp")
-OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "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")
+CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "")
+OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 
 def _call_llm(prompt, max_tokens=800, temperature=0.85):
     """Cerebras→OpenRouterフォールバックでLLM呼び出し"""
