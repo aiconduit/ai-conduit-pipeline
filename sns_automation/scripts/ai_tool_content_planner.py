@@ -21,33 +21,23 @@ USED_PATH = "sns_automation/used_topics.json"
 
 # コンテンツソース（GitHubリポジトリ）
 CONTENT_SOURCES = [
-    # ===== Andrej Karpathy Skills（20万★・最注目）=====
-    {"repo": "multica-ai/andrej-karpathy-skills", "file": "CLAUDE.md",
-     "category": "claude_code", "title_prefix": "Claude Codeミス防止ガイド"},
-    {"repo": "multica-ai/andrej-karpathy-skills", "file": "EXAMPLES.md",
-     "category": "claude_code", "title_prefix": "Claude Code実例集"},
-    # ===== zebbern Claude Code スキル集（実用・すぐ使える）=====
-    {"repo": "zebbern/claude-code-guide", "file": "skills/code-documenter/SKILL.md",
-     "category": "claude_code", "title_prefix": "コード自動ドキュメント化"},
+    # ===== WEB系デザイン・UI スキル（可視化しやすい）=====
+    {"repo": "zebbern/claude-code-guide", "file": "skills/design-system-builder/SKILL.md",
+     "category": "claude_code", "title_prefix": "UIデザインシステム自動生成"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/react-best-practices/SKILL.md",
+     "category": "claude_code", "title_prefix": "React UI最適化"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/data-viz-renderer/SKILL.md",
+     "category": "claude_code", "title_prefix": "データ可視化自動生成"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/chart-image/SKILL.md",
+     "category": "claude_code", "title_prefix": "チャート自動生成"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/r3f-animation/SKILL.md",
+     "category": "claude_code", "title_prefix": "3Dアニメーション自動生成"},
     {"repo": "zebbern/claude-code-guide", "file": "skills/code-to-diagram/SKILL.md",
      "category": "claude_code", "title_prefix": "コードを図に変換"},
-    {"repo": "zebbern/claude-code-guide", "file": "skills/database-optimizer/SKILL.md",
-     "category": "claude_code", "title_prefix": "DB最適化自動化"},
-    {"repo": "zebbern/claude-code-guide", "file": "skills/deep-module-refactor/SKILL.md",
-     "category": "claude_code", "title_prefix": "リファクタリング自動化"},
-    {"repo": "zebbern/claude-code-guide", "file": "skills/test-driven-dev/SKILL.md",
-     "category": "claude_code", "title_prefix": "TDD自動化"},
-    {"repo": "zebbern/claude-code-guide", "file": "skills/react-best-practices/SKILL.md",
-     "category": "claude_code", "title_prefix": "React開発自動化"},
-    {"repo": "zebbern/claude-code-guide", "file": "skills/log-error-digest/SKILL.md",
-     "category": "claude_code", "title_prefix": "ログエラー自動分析"},
-    {"repo": "zebbern/claude-code-guide", "file": "skills/typescript-pro/SKILL.md",
-     "category": "claude_code", "title_prefix": "TypeScript自動化"},
-    # ===== Claude Code Best Practice（基本）=====
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-skills.md",
-     "category": "claude_code", "title_prefix": "Claude Codeスキル"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-commands.md",
-     "category": "claude_code", "title_prefix": "Claude Codeコマンド"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/nextjs-developer/SKILL.md",
+     "category": "claude_code", "title_prefix": "Next.js開発自動化"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/timeline-builder/SKILL.md",
+     "category": "claude_code", "title_prefix": "タイムライン自動生成"},
 ]
 
 # トピックテンプレート（カテゴリ別）
