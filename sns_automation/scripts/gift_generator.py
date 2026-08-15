@@ -12,7 +12,22 @@ GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 def _call_llm(prompt, max_tokens=800, temperature=0.85):
     """Gemini→Cerebras→OpenRouterフォールバックでLLM呼び出し"""
-    import requests as _req
+    import requests as _req, re as _re
+    # Gemini優先
+    if GEMINI_API_KEY:
+        try:
+            _gr = _req.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={GEMINI_API_KEY}",
+                headers={"Content-Type": "application/json"},
+                json={"contents": [{"parts": [{"text": prompt}]}]},
+                timeout=30)
+            if _gr.status_code == 200:
+                _gt = _gr.json()["candidates"][0]["content"]["parts"][0]["text"]
+                _gt = _re.sub(r"```[a-z]*\s*|```\s*", "", _gt).strip()
+                if len(_gt) > 100:
+                    return _gt
+        except Exception as _ge:
+            print(f"Gemini失敗: {_ge}")
     for api_url, api_key, model in [
         ("https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gpt-oss-120b"),
         ("https://openrouter.ai/api/v1/chat/completions", OPENROUTER_API_KEY, "meta-llama/llama-3.3-70b-instruct"),
@@ -36,7 +51,7 @@ def _call_llm(prompt, max_tokens=800, temperature=0.85):
 import os, json, requests, base64 as b64
 from datetime import datetime
 
-DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "sk-71eab12699f047a5891e62268c66c241")
+DEEPSEEK_KEY = os.environ.get("DEEPSEEK_API_KEY", "")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
 REPO = "aiconduit/ai-conduit-pipeline"
 
