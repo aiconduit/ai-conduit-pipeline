@@ -19,3 +19,5 @@ __pycache__/
 *.pyc
 
 !assets/terminal_test/*.mp4
+!assets/claude_code_demo.mp4
+!assets/before_after.mp4
