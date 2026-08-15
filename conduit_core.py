@@ -280,7 +280,9 @@ def _pexels_download(query, cache_dir, orientation="portrait"):
     if not videos:
         print(f"   [Pexels] query='{query}' → 0 videos returned (or all <4s)")
         return None
-    v = random.choice(videos[:5])
+    # HD優先ソート（幅が広い動画を優先）
+    videos = sorted(videos, key=lambda x: x.get("width", 0), reverse=True)
+    v = random.choice(videos[:3])
     files = sorted([f for f in v["video_files"] if 360 <= f.get("width", 0) <= 1080], key=lambda x: x["width"])
     url = files[-1]["link"] if files else v["video_files"][0]["link"]
     safe = re.sub(r"[^\w]", "_", query)[:25]
