@@ -94,6 +94,13 @@ jobs:
       - name: Step 2.7 - ターミナルデモ動画生成
         run: python3 sns_automation/scripts/run_terminal_demo.py
         continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Step 2.8 - WEB UI Before/After動画生成
+        run: python3 sns_automation/scripts/run_before_after.py
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Step 3 - 動画生成
         run: python3 run_from_news_plan.py
         env:

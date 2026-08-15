@@ -234,6 +234,13 @@ def compose_scene(scene, idx, is_last=False):
     # B-roll取得失敗時は黒画面で代替
     _broll_fallback = False
     _broll_size = os.path.getsize(str(broll)) if broll and os.path.exists(str(broll)) else 0
+    # Before/After動画をResultシーン(idx==5)で優先使用
+    _ba_path = ROOT_DIR / "assets" / "before_after.mp4"
+    if idx == 5 and _ba_path.exists() and _ba_path.stat().st_size > 10000:
+        broll = str(_ba_path)
+        _broll_size = _ba_path.stat().st_size
+        _use_demo = True
+        print(f"   ✅ ResultシーンにBefore/After動画を使用")
     # claude_code_demo.mp4があればHookシーン(idx==0)で優先使用
     _demo_path = ROOT_DIR / "assets" / "claude_code_demo.mp4"
     _use_demo = False
