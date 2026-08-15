@@ -8,9 +8,10 @@ import requests
 
 CEREBRAS_API_KEY = os.environ.get("CEREBRAS_API_KEY", "")
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 
 def _call_llm(prompt, max_tokens=800, temperature=0.85):
-    """Cerebras→OpenRouterフォールバックでLLM呼び出し"""
+    """Gemini→Cerebras→OpenRouterフォールバックでLLM呼び出し"""
     import requests as _req
     for api_url, api_key, model in [
         ("https://api.cerebras.ai/v1/chat/completions", CEREBRAS_API_KEY, "gpt-oss-120b"),

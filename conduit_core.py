@@ -268,7 +268,7 @@ def get_audio_duration(path):
 def _pexels_download(query, cache_dir, orientation="portrait"):
     headers = {"Authorization": PEXELS_KEY}
     r = requests.get("https://api.pexels.com/videos/search", headers=headers,
-        params={"query": f"{query} cinematic", "per_page": 10, "orientation": orientation}, timeout=15)
+        params={"query": f"{query} cinematic", "per_page": 10, "orientation": orientation, "min_width": 720}, timeout=15)
     if r.status_code != 200:
         print(f"   [Pexels] query='{query} cinematic' → HTTP {r.status_code}, try bare query")
         r = requests.get("https://api.pexels.com/videos/search", headers=headers,
