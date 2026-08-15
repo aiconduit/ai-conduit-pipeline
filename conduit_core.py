@@ -272,7 +272,7 @@ def _pexels_download(query, cache_dir, orientation="portrait"):
     if r.status_code != 200:
         print(f"   [Pexels] query='{query} cinematic' → HTTP {r.status_code}, try bare query")
         r = requests.get("https://api.pexels.com/videos/search", headers=headers,
-            params={"query": query, "per_page": 10, "orientation": orientation}, timeout=15)
+            params={"query": query, "per_page": 10, "orientation": orientation, "min_width": 720}, timeout=15)
     if r.status_code != 200:
         print(f"   [Pexels] bare query='{query}' → HTTP {r.status_code}, giving up")
         return None
@@ -302,11 +302,11 @@ def fetch_broll_cinematic(query, orientation="portrait", cache_dir=None):
     Path(cache_dir).mkdir(parents=True, exist_ok=True)
 
     fallback_queries = [
-        "technology abstract",
-        "computer code",
-        "artificial intelligence",
-        "futuristic technology dark",
-        "tech workspace modern",
+        "web design modern",
+        "coding computer dark",
+        "UI design application",
+        "developer workspace",
+        "technology modern clean",
     ]
 
     print(f"   [fetch_broll] クエリ '{query}' でPexels検索...")
