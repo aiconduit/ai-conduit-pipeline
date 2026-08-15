@@ -460,38 +460,10 @@ _mxfade = _MOTION_GROUPS[_gkey]
 print(f"[Motion] グループ{_gkey}を選択: {_mxfade}", flush=True)
 
 video_only = str(WORK_DIR / "video_only.mp4")
-_xfade_dur = 0.01  # 最小化（ほぼハードカット）
-if len(norm_list) >= 2:
-    import subprocess as _xsp
-    def _probe_dur(p):
-        res = _xsp.run(["ffprobe","-v","error","-show_entries","format=duration",
-                        "-of","default=noprint_wrappers=1:nokey=1",p],
-                       capture_output=True, text=True)
-        try: return float(res.stdout.strip())
-        except: return 3.0
-    _durations = [_probe_dur(p) for p in norm_list]
-    _inputs = []
-    for p in norm_list: _inputs.extend(["-i", p])
-    _fparts = []
-    _running = _durations[0] - _xfade_dur
-    _moods = [s.get("mood","value") for s in scene_specs] if "scene_specs" in dir() else ["hook"] + ["value"]*(len(norm_list)-2) + ["cta"]
-    # 最初のxfade: [0:v][1:v] -> [v0]
-    _xf1 = _mxfade.get(_moods[1] if len(_moods)>1 else "value", "fade")
-    _fparts.append(f"[0:v][1:v]xfade=transition={_xf1}:duration={_xfade_dur}:offset={_running:.3f}[v0]")
-    for _i in range(2, len(norm_list)):
-        _running += _durations[_i-1] - _xfade_dur
-        _xfi = _mxfade.get(_moods[_i] if _i < len(_moods) else "value", "fade")
-        # 前のタグ[v{_i-2}]と新しい入力[{_i}:v]を結合して[v{_i-1}]を出力
-        _fparts.append(f"[v{_i-2}][{_i}:v]xfade=transition={_xfi}:duration={_xfade_dur}:offset={_running:.3f}[v{_i-1}]")
-    # 最後のタグにformat追加（セミコロンで区切る）
-    _last_idx = len(norm_list) - 2
-    _fstr = ";".join(_fparts) + f";[v{_last_idx}]format=yuv420p[out]"
-    _run(["ffmpeg","-y"] + _inputs + ["-filter_complex",_fstr,"-map","[out]",
-          "-r","30","-c:v","libx264","-preset","fast","-crf","20","-pix_fmt","yuv420p","-an",video_only])
-else:
-    _run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
-          "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "22",
-          "-pix_fmt", "yuv420p", "-an", video_only])
+# シンプルなconcat（xfadeなし・ずれなし）
+_run(["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat,
+      "-r", "30", "-c:v", "libx264", "-preset", "fast", "-crf", "20",
+      "-pix_fmt", "yuv420p", "-an", video_only])
 print("   ✅ 映像連結完了（グループ{_gkey}）".format(_gkey=_gkey), flush=True)
 
 # 音声ありのクリップだけでconcat
