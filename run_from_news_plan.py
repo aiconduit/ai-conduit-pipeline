@@ -1,5 +1,4 @@
 import re
-GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 #!/usr/bin/env python3
 """
 news_content_plan.json を読み、ffmpeg_pipeline_v1_improved.py の
@@ -9,6 +8,7 @@ run_from_content_plan.py と同じ動画生成フローを使用するが、
 入力ソースが news_content_plan.json になり、固定の5シーン構成を持つ。
 """
 import sys, json, os, re, random
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent
