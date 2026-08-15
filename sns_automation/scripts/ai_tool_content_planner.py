@@ -21,17 +21,33 @@ USED_PATH = "sns_automation/used_topics.json"
 
 # コンテンツソース（GitHubリポジトリ）
 CONTENT_SOURCES = [
-    # ===== Claude Code スキル（メイン）=====
+    # ===== Andrej Karpathy Skills（20万★・最注目）=====
+    {"repo": "multica-ai/andrej-karpathy-skills", "file": "CLAUDE.md",
+     "category": "claude_code", "title_prefix": "Claude Codeミス防止ガイド"},
+    {"repo": "multica-ai/andrej-karpathy-skills", "file": "EXAMPLES.md",
+     "category": "claude_code", "title_prefix": "Claude Code実例集"},
+    # ===== zebbern Claude Code スキル集（実用・すぐ使える）=====
+    {"repo": "zebbern/claude-code-guide", "file": "skills/code-documenter",
+     "category": "claude_code", "title_prefix": "コード自動ドキュメント化"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/code-to-diagram",
+     "category": "claude_code", "title_prefix": "コードを図に変換"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/database-optimizer",
+     "category": "claude_code", "title_prefix": "DB最適化自動化"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/deep-module-refactor",
+     "category": "claude_code", "title_prefix": "リファクタリング自動化"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/test-driven-dev",
+     "category": "claude_code", "title_prefix": "TDD自動化"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/react-best-practices",
+     "category": "claude_code", "title_prefix": "React開発自動化"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/log-error-digest",
+     "category": "claude_code", "title_prefix": "ログエラー自動分析"},
+    {"repo": "zebbern/claude-code-guide", "file": "skills/typescript-pro",
+     "category": "claude_code", "title_prefix": "TypeScript自動化"},
+    # ===== Claude Code Best Practice（基本）=====
     {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-skills.md",
      "category": "claude_code", "title_prefix": "Claude Codeスキル"},
     {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-commands.md",
      "category": "claude_code", "title_prefix": "Claude Codeコマンド"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-memory.md",
-     "category": "claude_code", "title_prefix": "Claude Codeメモリ"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-settings.md",
-     "category": "claude_code", "title_prefix": "Claude Code設定"},
-    {"repo": "shanraisshan/claude-code-best-practice", "file": "best-practice/claude-power-ups.md",
-     "category": "claude_code", "title_prefix": "Claude Codeパワーアップ"},
 ]
 
 # トピックテンプレート（カテゴリ別）
