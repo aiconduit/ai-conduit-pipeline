@@ -62,7 +62,7 @@ def main():
             continue
         audio_path = str(WORK_DIR / f"audio_{i:02d}.mp3")
         try:
-            timestamps, _ = generate_speech_with_timestamps(narration, audio_path, speed=1.05)
+            timestamps, _ = generate_speech_with_timestamps(narration, audio_path, rate="+8%")
             audio_files.append(audio_path)
             print(f"  Scene {i}: ✅ {narration[:30]}")
         except Exception as e:
