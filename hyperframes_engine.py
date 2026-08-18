@@ -212,6 +212,16 @@ tl.to('.why-badge', {{opacity:1, y:0, duration:0.5, ease:'back.out(1.5)'}}, 0.2)
   .to('.why-emphasis', {{opacity:1, x:0, duration:0.5, ease:'power2.out'}}, 1.1)
 """
 
+    # パーティクル生成（浮遊するドット）
+    float_particles = ""
+    for i in range(12):
+        x = (i * 83 + 50) % 980 + 50
+        dur = 5 + (i % 5)
+        delay = i * 0.7
+        size = 2 + (i % 4)
+        color = s['accent'] if i % 3 != 0 else s['accent2']
+        float_particles += f'<div class="fp" style="left:{x}px;width:{size}px;height:{size}px;animation-duration:{dur}s;animation-delay:{delay}s;background:{color}"></div>'
+
     html = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -222,18 +232,60 @@ tl.to('.why-badge', {{opacity:1, y:0, duration:0.5, ease:'back.out(1.5)'}}, 0.2)
 body {{ width:{W}px; height:{H}px; background:{s['bg']}; overflow:hidden;
   font-family:'Noto Sans JP','Hiragino Sans','Yu Gothic',sans-serif; }}
 
-/* グリッド背景 */
-.grid {{ position:absolute; inset:0; opacity:0.04;
-  background-image:linear-gradient({s['accent']} 1px,transparent 1px),
-                   linear-gradient(90deg,{s['accent']} 1px,transparent 1px);
-  background-size:80px 80px; }}
+/* 動くグラデーション背景 */
+.bg-gradient {{
+  position:absolute; inset:0; z-index:0;
+  background: radial-gradient(ellipse at 20% 40%, {s['accent']}22 0%, transparent 55%),
+              radial-gradient(ellipse at 80% 70%, {s['accent2']}18 0%, transparent 55%),
+              {s['bg']};
+  animation: bgPulse 6s ease-in-out infinite alternate;
+}}
+@keyframes bgPulse {{
+  0% {{ opacity:0.8; }}
+  100% {{ opacity:1; filter:brightness(1.15); }}
+}}
 
-/* パーティクル */
-.particle {{ position:absolute; background:{s['accent']}; border-radius:50%; opacity:0;
-  animation:float 4s ease-in-out infinite; }}
-@keyframes float {{
-  0%,100%{{transform:translateY(0);opacity:0.3}}
-  50%{{transform:translateY(-30px);opacity:0.8}}
+/* スキャンライン */
+.scanline {{
+  position:absolute; left:0; right:0; height:2px;
+  background:linear-gradient(90deg, transparent, {s['accent']}88, transparent);
+  animation: scan 4s linear infinite; opacity:0.3; z-index:1;
+}}
+@keyframes scan {{
+  0% {{ top:-5px; }}
+  100% {{ top:1925px; }}
+}}
+.scanline:nth-child(2) {{ animation-delay:2s; opacity:0.15; }}
+
+/* グリッド */
+.grid {{ position:absolute; inset:0; z-index:1;
+  background-image:linear-gradient({s['accent']}15 1px,transparent 1px),
+                   linear-gradient(90deg,{s['accent']}15 1px,transparent 1px);
+  background-size:80px 80px;
+  animation: gridPulse 4s ease-in-out infinite alternate;
+}}
+@keyframes gridPulse {{
+  0% {{ opacity:0.5; }}
+  100% {{ opacity:1; }}
+}}
+
+/* 浮遊パーティクル */
+.fp {{ position:absolute; border-radius:50%;
+  animation:floatUp linear infinite; z-index:2; }}
+@keyframes floatUp {{
+  0% {{ transform:translateY(1950px) scale(0); opacity:0; }}
+  5% {{ opacity:0.9; }}
+  95% {{ opacity:0.3; }}
+  100% {{ transform:translateY(-50px) scale(1.2); opacity:0; }}
+}}
+
+/* オーバーレイ */
+.overlay {{
+  position:absolute; inset:0; z-index:3;
+  background:linear-gradient(to bottom,
+    {s['bg']}cc 0%, {s['bg']}55 25%,
+    {s['bg']}44 50%, {s['bg']}55 75%,
+    {s['bg']}cc 100%);
 }}
 
 /* トップバー */
@@ -264,8 +316,12 @@ body {{ width:{W}px; height:{H}px; background:{s['bg']}; overflow:hidden;
 <body>
 <div data-composition-id="scene_{idx:02d}" data-width="{W}" data-height="{H}" data-duration="{dur:.1f}">
 
+<div class="bg-gradient"></div>
+<div class="scanline"></div>
+<div class="scanline"></div>
 <div class="grid"></div>
-{particles}
+<div class="overlay"></div>
+{float_particles}
 <div class="topbar"></div>
 <div class="bottombar"></div>
 
