@@ -104,11 +104,74 @@ jobs:
           if exists:
               print(f"size: {os.path.getsize('silent.mp4')//1024}KB")
 
-      - name: Merge audio + video
+      - name: Generate subtitles
         run: |
-          ffmpeg -y -i silent.mp4 -i narration.mp3 \
-            -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p \
-            output.mp4
+          pip install openai-whisper --quiet 2>/dev/null || true
+          python3 << 'SUBEOF'
+          import asyncio, edge_tts, os, subprocess, json, re
+
+          # 音声からタイムスタンプ付き字幕を生成
+          name = os.environ.get("SAMPLE_NAME", "variables-launch")
+          
+          # whisperで字幕生成
+          result = subprocess.run(
+              ["python3", "-m", "whisper", "narration.mp3", 
+               "--language", "ja", "--output_format", "ass",
+               "--output_dir", ".", "--model", "tiny"],
+              capture_output=True, text=True, timeout=120
+          )
+          
+          if os.path.exists("narration.ass"):
+              print("whisper字幕生成完了")
+          else:
+              # フォールバック：シンプルなASS字幕を手動生成
+              narrations = {
+                "variables-launch": [
+                  (0.0, 3.5, "HyperFramesのVariables機能を紹介します"),
+                  (3.5, 7.5, "1つのHTMLで複数バージョンの動画を生成できます"),
+                  (7.5, 12.0, "Claude Codeと組み合わせれば全自動で作れます"),
+                  (12.0, 16.0, "これがAI時代の動画制作です"),
+                ],
+              }
+              
+              subs = narrations.get(name, [(0, 5, "HyperFramesサンプル動画")])
+              
+              ass = """[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,Noto Sans CJK JP,52,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,0,2,80,80,120,1
+
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+              def fmt_time(s):
+                  h=int(s//3600); m=int((s%3600)//60); sec=s%60
+                  return f"{h}:{m:02d}:{sec:05.2f}"
+              
+              for start, end, text in subs:
+                  ass += f"Dialogue: 0,{fmt_time(start)},{fmt_time(end)},Default,,0,0,0,,{text}
+"
+              
+              with open("narration.ass", "w", encoding="utf-8") as f:
+                  f.write(ass)
+              print("フォールバック字幕生成完了")
+          SUBEOF
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+
+      - name: Merge audio + video + subtitles
+        run: |
+          # 字幕ありで合成
+          if [ -f narration.ass ]; then
+            ffmpeg -y -i silent.mp4 -i narration.mp3               -vf "ass=narration.ass"               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p               output.mp4
+            echo "字幕付き動画完成"
+          else
+            ffmpeg -y -i silent.mp4 -i narration.mp3               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p               output.mp4
+          fi
           ls -lh output.mp4
 
       - name: Upload artifact
