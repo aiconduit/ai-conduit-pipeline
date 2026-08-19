@@ -11,7 +11,7 @@ on:
 jobs:
   generate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
 
@@ -23,64 +23,68 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Install dependencies
+      - name: Install system deps
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-noto-cjk git-lfs
-          pip install edge-tts requests
-          npm install -g hyperframes --ignore-scripts
+          pip install edge-tts --quiet
 
-      - name: Clone HyperFrames samples with LFS
+      - name: Install HyperFrames
+        run: npm install -g hyperframes --ignore-scripts
+
+      - name: Clone sample with LFS
         run: |
           git lfs install
-          git clone https://github.com/heygen-com/hyperframes-launches.git
-          cd hyperframes-launches
-          git lfs pull
+          git clone --depth=1 --filter=blob:none \
+            https://github.com/heygen-com/hyperframes-launches.git hf_launches
+          cd hf_launches
+          git lfs pull --include="${{ github.event.inputs.sample_name }}/**"
+          echo "✅ Clone完了"
           ls ${{ github.event.inputs.sample_name }}/
 
-      - name: Generate TTS audio
+      - name: Generate TTS
         run: |
           python3 << 'PYEOF'
           import asyncio, edge_tts, os
 
           narrations = {
             "variables-launch": "HyperFramesのVariables機能を紹介します。1つのHTMLファイルで、テキストや色を変えるだけで複数バージョンの動画を自動生成できます。Claude Codeと組み合わせれば、AIが内容を考えてコードを書いて、動画まで全自動で作ってくれます。これがAI時代の動画制作です。",
-            "spacex-launch": "Claude CodeとHyperFramesを使って、SpaceXスタイルの動画を作りました。コードを書くだけで、このようなシネマティックな動画が自動生成できます。ソースコードはコメントにHFと書いてくれた方にプレゼントします。",
+            "spacex-launch": "Claude CodeとHyperFramesを使って、SpaceXスタイルの動画を作りました。コードを書くだけで、このようなシネマティックな動画が自動生成できます。ソースコードはコメントにAI Conduitと書いてくれた方にプレゼントします。",
             "hyperframes-launch": "HyperFramesとは何か、徹底解説します。HTMLを書くだけでMP4動画が生成できる、完全無料のオープンソースフレームワークです。Claude Code、Cursor、Gemini CLIなど、主要なAIエージェントに対応しています。日本語での解説はこのチャンネルが最速です。",
-            "claude-paper-launch": "AnthropicのClaude Paperは、AIの思考プロセスを可視化します。複雑な問題を段階的に分解して、人間が理解しやすい形で回答を生成します。HyperFramesでこの機能を動画で解説しています。",
+            "claude-paper-launch": "AnthropicのClaude Paperは、AIの思考プロセスを可視化します。複雑な問題を段階的に分解して、人間が理解しやすい形で回答を生成します。ソースコードはコメントにAI Conduitと書いてください。",
             "cloud-render-launch": "GitHub ActionsとHyperFramesを組み合わせた完全自動動画生成パイプラインです。毎日決まった時間に自動で動画を生成してYouTubeに投稿します。Macは一切使わなくてよくなります。",
-            "figma-launch": "FigmaのデザインデータをHyperFramesで動画化する方法を紹介します。デザイナーが作ったUIをそのまま動画のアニメーションとして使えます。AIが全部やってくれます。",
+            "figma-launch": "FigmaのデザインデータをHyperFramesで動画化する方法を紹介します。デザイナーが作ったUIをそのまま動画のアニメーションとして使えます。ソースコードはコメントにAI Conduitと書いてください。",
             "timeline-launch": "HyperFramesのTimeline機能で、複雑なアニメーションを簡単に作れます。GSAPタイムラインをHTMLに書くだけで、映画のような動画が完成します。",
             "liquid-brand-refraction": "HyperFramesのShader機能を使ったリキッドエフェクトの作り方です。WebGLシェーダーをHTMLに埋め込むだけで、プロ品質のビジュアルエフェクトが使えます。完全無料です。",
             "pr-to-video-launch": "GitHubのPull RequestをHyperFramesで自動的に動画化します。コードの変更内容を視覚的に説明する動画が、マージするたびに自動生成されます。",
-            "HF-heygen-stripe": "StripeとHyperFramesを組み合わせた決済動画の自動生成システムです。商品ページを動画広告に自動変換できます。ECサイトの売上アップに直結します。",
+            "HF-heygen-stripe": "StripeとHyperFramesを組み合わせた決済動画の自動生成システムです。商品ページを動画広告に自動変換できます。",
             "sfx-music-launch": "HyperFramesで音楽と効果音付きの動画を作る方法です。HTMLにaudioタグを書くだけで、BGMとSFXが完璧なタイミングで再生されます。",
             "texture-launch-video": "HyperFramesのテクスチャエフェクトで、映像に深みを出す方法です。WebGLシェーダーを使ったドメインワープ効果が、HTMLだけで実現できます。",
             "vfx-heygen-combined": "Three.jsとHyperFramesを組み合わせたVFXの作り方です。3DグラフィックスとGSAPアニメーションを組み合わせて、映画レベルの映像効果が作れます。",
-            "frame-md-launch-storyboard": "MarkdownファイルからHyperFramesで動画を自動生成します。企画書やメモを書くだけで、そのままプレゼン動画になります。Claude Codeが全部やってくれます。",
+            "frame-md-launch-storyboard": "MarkdownファイルからHyperFramesで動画を自動生成します。企画書やメモを書くだけで、そのままプレゼン動画になります。",
             "website-to-hyperframes": "ウェブサイトをHyperFramesで動画に変換する方法です。URLを入れるだけで、そのサイトのデザインを使った動画が自動生成されます。",
-            "claude-design-send-hyperframes-launch": "Claude DesignとHyperFramesを連携させると、デザインをそのまま動画に変換できます。UIのモックアップを作ったら、ボタン一つでアニメーション動画が完成します。",
+            "claude-design-send-hyperframes-launch": "Claude DesignとHyperFramesを連携させると、デザインをそのまま動画に変換できます。ソースコードはコメントにAI Conduitと書いてください。",
           }
 
           name = os.environ.get("SAMPLE_NAME", "variables-launch")
-          text = narrations.get(name, "HyperFramesのサンプル動画です。コメントにHFと書いてソースコードをもらってください。")
+          text = narrations.get(name, "HyperFramesのサンプル動画です。コメントにAI Conduitと書いてソースコードをもらってください。")
 
           async def gen():
               c = edge_tts.Communicate(text, voice="ja-JP-KeitaNeural", rate="+8%")
               await c.save("narration.mp3")
           asyncio.run(gen())
-          print(f"TTS生成完了: {os.path.getsize('narration.mp3')//1024}KB")
+          print(f"TTS: {os.path.getsize('narration.mp3')//1024}KB")
           PYEOF
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
 
       - name: Remove audio & render
+        shell: python3 {0}
         run: |
           import re, os, subprocess
           name = "${{ github.event.inputs.sample_name }}"
-          path = f"hyperframes-launches/{name}"
+          path = f"hf_launches/{name}"
 
-          # 音声タグ除去
           for root, dirs, files in os.walk(path):
               for f in files:
                   if f.endswith('.html'):
@@ -90,12 +94,15 @@ jobs:
                       h = re.sub(r'<hf-audio[^>]*/>', '', h)
                       open(p, 'w').write(h)
 
-          # HyperFramesレンダリング
           env = {**os.environ, "HF_VIDEO_COVERAGE_THRESHOLD": "0"}
-          r = subprocess.run(["hyperframes", "render", path, "-o", "silent.mp4"], env=env, timeout=600)
-          print(f"render exit: {r.returncode}")
-          print(f"silent.mp4: {os.path.getsize('silent.mp4')//1024}KB" if os.path.exists('silent.mp4') else "失敗")
-        shell: python3 {0}
+          r = subprocess.run(
+              ["hyperframes", "render", path, "-o", "silent.mp4"],
+              env=env, timeout=600
+          )
+          exists = os.path.exists("silent.mp4")
+          print(f"render: {r.returncode}, file: {exists}")
+          if exists:
+              print(f"size: {os.path.getsize('silent.mp4')//1024}KB")
 
       - name: Merge audio + video
         run: |
