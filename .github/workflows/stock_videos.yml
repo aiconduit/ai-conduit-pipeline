@@ -198,15 +198,7 @@ jobs:
 
           title = titles.get(sample_name, f"HyperFrames {sample_name} #Shorts")
 
-          description = f"""コメントに「AI Conduit」と書くとソースコードを受け取れます。
-
-今回のテンプレート配布ページ:
-{gift_url}
-
-役に立ったらいいねと保存をお願いします。
-
-GitHub: https://github.com/aiconduit
-#HyperFrames #ClaudeCode #AI自動化 #Shorts"""
+          description = "コメントに「AI Conduit」と書くとソースコードを受け取れます。\n\n今回のテンプレート配布ページ:\n" + gift_url + "\n\n役に立ったらいいねと保存をお願いします。\n\nGitHub: https://github.com/aiconduit\n#HyperFrames #ClaudeCode #AI自動化 #Shorts"
 
           # アクセストークン取得
           r = requests.post("https://oauth2.googleapis.com/token", data={
