@@ -32,25 +32,25 @@
     white-space: nowrap;
   }
 </style>
-
 <style>
-body {
+html, body {
   width: 1080px !important;
   height: 1920px !important;
-  background: #F0EFE9 !important;
+  margin: 0 !important;
+  background: #000 !important;
+  overflow: hidden !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  overflow: hidden !important;
 }
-body > * {
+body > div[data-composition-id],
+body > div:first-of-type {
+  width: 1920px !important;
+  height: 1080px !important;
   transform: scale(0.5625) !important;
   transform-origin: center center !important;
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  margin-top: -540px !important;
-  margin-left: -960px !important;
+  flex-shrink: 0 !important;
+  position: relative !important;
 }
 </style>
 </head>

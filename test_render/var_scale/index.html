@@ -6,32 +6,33 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=block');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { width: 1080px; height: 1920px; overflow: hidden; background: #fff; font-family: 'Inter', sans-serif; }
+  body { width: 1920px; height: 1080px; overflow: hidden; background: #fff; font-family: 'Inter', sans-serif; }
 </style>
-
 <style>
-/* 縦型変換: 1920x1080コンテンツを1080x1920に収める */
-body {
+html, body {
   width: 1080px !important;
   height: 1920px !important;
+  margin: 0 !important;
+  padding: 0 !important;
   background: #000 !important;
+  overflow: hidden !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  overflow: hidden !important;
 }
-/* 元のコンテナを縮小してセンタリング */
-body > div[data-composition-id],
-body > div:first-child {
+/* 元の1920x1080コンテンツを縮小してレターボックス表示 */
+body > div[data-composition-id] {
+  width: 1920px !important;
+  height: 1080px !important;
   transform: scale(0.5625) !important;
   transform-origin: center center !important;
-  position: absolute !important;
+  flex-shrink: 0 !important;
 }
 </style>
 </head>
-<body style="margin:0;padding:0;overflow:hidden;width:1080px;height:1920px;background:#fff">
+<body style="margin:0;padding:0;overflow:hidden;width:1920px;height:1080px;background:#fff">
 
-<div data-composition-id="variables-launch" data-start="0" data-width="1080" data-height="1920" data-duration="43.6" style="position:relative;width:1080px;height:1920px;overflow:hidden">
+<div data-composition-id="variables-launch" data-start="0" data-width="1080" data-height="1920" data-duration="43.6" style="position:relative;width:1920px;height:1080px;overflow:hidden">
 
 <!-- Scene 1: The Dial (0-5.5s) -->
 <div data-composition-id="scene-01" data-composition-src="compositions/scene-01.html"
