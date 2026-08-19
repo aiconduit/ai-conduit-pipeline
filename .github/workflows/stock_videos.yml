@@ -82,8 +82,11 @@ jobs:
               return words
 
           words = asyncio.run(gen())
-          dur = os.path.getsize('narration.mp3') / (128*1024/8)
-          print(f'TTS完了: {os.path.getsize("narration.mp3")//1024}KB, {len(words)}単語, 推定{dur:.1f}秒')
+          import subprocess as sp
+          r = sp.run(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0','narration.mp3'],
+                     capture_output=True, text=True)
+          dur = float(r.stdout.strip()) if r.stdout.strip() else 10.0
+          print(f'TTS完了: {os.path.getsize("narration.mp3")//1024}KB, {len(words)}単語, {dur:.2f}秒')
 
           if words:
               # WordBoundaryでグループ化
@@ -138,16 +141,24 @@ jobs:
           env = {**os.environ, 'HF_VIDEO_COVERAGE_THRESHOLD': '0'}
           r = subprocess.run(['hyperframes', 'render', path, '-o', 'silent.mp4'], env=env, timeout=600)
           print('render:', r.returncode, os.path.exists('silent.mp4'))
-      - name: Merge with subtitles
+      - name: Merge with subtitles and BGM
         run: |
-          if [ -f narration.ass ]; then
-            ffmpeg -y -i silent.mp4 -i narration.mp3 \
-              -vf "ass=narration.ass" \
-              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+          # BGM生成（アンビエント系）
+          ffmpeg -y             -f lavfi -i "sine=frequency=60:duration=120"             -f lavfi -i "sine=frequency=120:duration=120"             -f lavfi -i "sine=frequency=90:duration=120"             -filter_complex "[0][1][2]amix=inputs=3,volume=0.08,aecho=0.8:0.88:80:0.3,lowpass=f=300"             -ar 44100 bgm.mp3 2>/dev/null
+          
+          # 音声の実際の長さを取得して字幕タイミング修正
+          AUDIO_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 narration.mp3)
+          echo "音声長: ${AUDIO_DUR}秒"
+          
+          # 字幕付きで合成（BGMをミックス）
+          if [ -f narration.ass ] && [ -f bgm.mp3 ]; then
+            ffmpeg -y               -i silent.mp4               -i narration.mp3               -i bgm.mp3               -filter_complex "[1:a][2:a]amix=inputs=2:weights=1 0.15:duration=shortest[aout]"               -vf "ass=narration.ass"               -map 0:v -map "[aout]"               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            echo "字幕+BGM付き完成"
+          elif [ -f narration.ass ]; then
+            ffmpeg -y -i silent.mp4 -i narration.mp3               -vf "ass=narration.ass"               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
             echo "字幕付き完成"
           else
-            ffmpeg -y -i silent.mp4 -i narration.mp3 \
-              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            ffmpeg -y -i silent.mp4 -i narration.mp3               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
           fi
           ls -lh output.mp4
       - name: Upload artifact
