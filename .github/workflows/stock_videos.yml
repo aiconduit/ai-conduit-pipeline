@@ -50,14 +50,14 @@ jobs:
             'claude-paper-launch': 'Claude Paperを紹介します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いて役に立ったらいいねと保存もお願いします。',
             'figma-launch': 'FigmaのデザインデータをHyperFramesで動画化する方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
             'timeline-launch': 'HyperFramesのTimeline機能で複雑なアニメーションを作れます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
-            'liquid-brand-refraction': 'HyperFramesのShader機能でリキッドエフェクトを作る方法です。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'liquid-brand-refraction': 'HyperFramesのShader機能でリキッドエフェクトを作る方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
             'pr-to-video-launch': 'Pull RequestをHyperFramesで自動動画化します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
             'sfx-music-launch': 'HyperFramesで音楽と効果音付きの動画を作る方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
             'texture-launch-video': 'HyperFramesのテクスチャエフェクトで映像に深みを出す方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
-            'vfx-heygen-combined': 'Three.jsとHyperFramesを組み合わせたVFXの作り方です。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'vfx-heygen-combined': 'Three.jsとHyperFramesを組み合わせたVFXの作り方です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
             'HF-heygen-stripe': 'StripeとHyperFramesを組み合わせた動画自動生成システムです。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
             'frame-md-launch-storyboard': 'MarkdownからHyperFramesで動画を自動生成します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
-            'website-to-hyperframes': 'ウェブサイトをHyperFramesで動画に変換する方法です。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'website-to-hyperframes': 'ウェブサイトをHyperFramesで動画に変換する方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
             'claude-design-send-hyperframes-launch': 'Claude DesignとHyperFramesでデザインをそのまま動画に変換します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
           }
 
