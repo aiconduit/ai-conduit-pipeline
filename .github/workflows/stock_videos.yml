@@ -24,6 +24,12 @@ jobs:
           path: ~/.npm
           key: ${{ runner.os }}-hyperframes-v1
 
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt/archives
+          key: ${{ runner.os }}-apt-ffmpeg-noto-v1
+
       - name: Install deps
         run: |
           sudo apt-get update -qq
