@@ -65,19 +65,20 @@ jobs:
           text = narrations.get(name, 'HyperFramesサンプル動画です。コメントにAI Conduitと書いてください。')
 
           async def gen():
-              # TTSタイムスタンプを取得
               words = []
+              audio_chunks = []
               c = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
               async for ev in c.stream():
                   if ev['type'] == 'audio':
-                      pass
+                      audio_chunks.append(ev['data'])
                   elif ev['type'] == 'WordBoundary':
                       start = ev['offset'] / 10_000_000
                       end = start + ev['duration'] / 10_000_000
                       words.append((start, end, ev['text']))
-              # MP3保存
-              c2 = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
-              await c2.save('narration.mp3')
+              # 音声データを保存
+              with open('narration.mp3', 'wb') as f:
+                  for chunk in audio_chunks:
+                      f.write(chunk)
               return words
 
           words = asyncio.run(gen())
