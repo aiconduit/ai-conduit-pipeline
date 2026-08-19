@@ -11,7 +11,9 @@ jobs:
         with:
           node-version: '22'
       - name: Install
-        run: npm install -g hyperframes --ignore-scripts
+        run: |
+          sudo apt-get install -y ffmpeg --no-install-recommends -qq
+          npm install -g hyperframes --ignore-scripts
       - name: Render
         run: |
           HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render test_render/var_scale -o output.mp4
