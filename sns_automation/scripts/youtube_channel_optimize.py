@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
 """YouTubeチャンネル設定最適化スクリプト"""
-import os, json
+import os
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
@@ -16,39 +15,36 @@ def get_youtube():
 
 def update_channel():
     yt = get_youtube()
-    
-    # チャンネル情報取得
     ch = yt.channels().list(part="snippet,brandingSettings", mine=True).execute()
     channel_id = ch["items"][0]["id"]
-    print(f"チャンネルID: {channel_id}")
-    print(f"現在の説明: {ch['items'][0]['snippet'].get('description','')[:100]}")
-    
-    # 説明文・キーワード更新
-    new_desc = """🤖 毎日15秒でAI最新情報をお届け！
+    print(f"channel_id: {channel_id}")
 
-エンジニア・IT学生・AI初学者必見のチャンネルです。
+    new_desc = """HyperFrames x Claude Code で作る自動動画チャンネルです。
 
-✅ 毎日自動投稿（20時・21時）
-✅ 最新AIツール・ニュース・テクニック
-✅ コメントに「AI」→無料プレゼント🎁
+毎日ソースコードをプレゼントしています。
+コメントに「AI Conduit」と書いてください。
 
-【チャンネル登録して毎日チェック！】
+- HyperFramesサンプルのソースを毎日配布
+- Claude Code x AI自動化の最新情報
+- 毎日20時自動投稿
 
-#AI #AIニュース #エンジニア #ChatGPT #プログラミング"""
+HTML を書けば動画になる時代が来ました。
 
-    keywords = "AI,人工知能,ChatGPT,Claude,エンジニア,プログラミング,自動化,AIニュース,テクノロジー,副業,生産性,Shorts,AIツール"
-    
+GitHub: https://github.com/aiconduit
+"""
+
     yt.channels().update(
-        part="snippet,brandingSettings",
+        part="snippet",
         body={
             "id": channel_id,
-            "snippet": {"description": new_desc, "defaultLanguage": "ja"},
-            "brandingSettings": {
-                "channel": {"keywords": keywords}
+            "snippet": {
+                "description": new_desc,
+                "defaultLanguage": "ja"
             }
         }
     ).execute()
-    print("✅ チャンネル説明・キーワード更新完了")
+    print("channel description updated")
+    print(new_desc)
 
 if __name__ == "__main__":
     update_channel()

@@ -361,7 +361,17 @@ def main():
             "gift_file": script_data.get("gift_file","reviewer.md"),
         }
 
-    youtube_desc = post_data.get("posts",{}).get("youtube","")
+    youtube_desc_from_plan = post_data.get("posts",{}).get("youtube","")
+    gift_url = post_data.get("gift_url", "https://aiconduit.github.io")
+    youtube_desc = f"""コメントに「AI Conduit」と書くとソースコードを受け取れます。
+
+{youtube_desc_from_plan}
+
+今回のテンプレート配布ページ:
+{gift_url}
+
+GitHub: https://github.com/aiconduit
+#HyperFrames #ClaudeCode #AI自動化 #Shorts"""
     hashtags = post_data.get("hashtags", [])
     gift_file = post_data.get("gift_file","reviewer.md")
 
