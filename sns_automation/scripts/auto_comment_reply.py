@@ -59,9 +59,9 @@ def generate_reply(comment_text, video_title, cerebras_key, deepseek_key):
         f"返信ルール:\n"
         f"- 50文字以内で簡潔に\n"
         f"- フレンドリーで自然な日本語\n"
-        f"- 絵文字を1つ使う\n"
+        f"- 絵文字は使わない\n"
         f"- コメントの内容に具体的に反応する\n"
-        f"- 「AI」コメントには「プレゼントを概要欄から受け取ってください」を追加\n"
+        f"- \"AI Conduit\"というコメントには必ず\"ソースコードはこちら: https://aiconduit.github.io/gifts/\"を含める\n"
         f"- スパム・荒らしには返信しない（空文字を返す）\n\n"
         f"返信文のみ出力（他のテキスト不要）:"
     )
