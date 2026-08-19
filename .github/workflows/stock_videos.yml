@@ -180,3 +180,4 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
           name: stock-${{ github.event.inputs.sample_name }}-${{ github.run_number }}
           path: output.mp4
           retention-days: 7
+# refresh 2026年 8月19日 水曜日 12時21分35秒 JST
