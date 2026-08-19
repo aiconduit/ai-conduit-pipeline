@@ -43,22 +43,22 @@ jobs:
           import asyncio, edge_tts, os
 
           narrations = {
-            'variables-launch': 'HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。Claude Codeと組み合わせれば全自動で作れます。コメントにAI Conduitと書いてソースコードを受け取ってください。',
-            'spacex-launch': 'Claude CodeとHyperFramesを使ったシネマティック動画です。コメントにAI Conduitと書いてソースコードを受け取ってください。',
-            'cloud-render-launch': 'GitHub ActionsとHyperFramesを組み合わせた完全自動動画生成パイプラインです。コメントにAI Conduitと書いてください。',
-            'hyperframes-launch': 'HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。コメントにAI Conduitと書いてください。',
-            'claude-paper-launch': 'Claude Paperを紹介します。コメントにAI Conduitと書いてソースコードを受け取ってください。',
-            'figma-launch': 'FigmaのデザインデータをHyperFramesで動画化する方法です。コメントにAI Conduitと書いてください。',
-            'timeline-launch': 'HyperFramesのTimeline機能で複雑なアニメーションを作れます。コメントにAI Conduitと書いてください。',
-            'liquid-brand-refraction': 'HyperFramesのShader機能でリキッドエフェクトを作る方法です。コメントにAI Conduitと書いてください。',
-            'pr-to-video-launch': 'Pull RequestをHyperFramesで自動動画化します。コメントにAI Conduitと書いてください。',
-            'sfx-music-launch': 'HyperFramesで音楽と効果音付きの動画を作る方法です。コメントにAI Conduitと書いてください。',
-            'texture-launch-video': 'HyperFramesのテクスチャエフェクトで映像に深みを出す方法です。コメントにAI Conduitと書いてください。',
-            'vfx-heygen-combined': 'Three.jsとHyperFramesを組み合わせたVFXの作り方です。コメントにAI Conduitと書いてください。',
-            'HF-heygen-stripe': 'StripeとHyperFramesを組み合わせた動画自動生成システムです。コメントにAI Conduitと書いてください。',
-            'frame-md-launch-storyboard': 'MarkdownからHyperFramesで動画を自動生成します。コメントにAI Conduitと書いてください。',
-            'website-to-hyperframes': 'ウェブサイトをHyperFramesで動画に変換する方法です。コメントにAI Conduitと書いてください。',
-            'claude-design-send-hyperframes-launch': 'Claude DesignとHyperFramesでデザインをそのまま動画に変換します。コメントにAI Conduitと書いてください。',
+            'variables-launch': 'HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。Claude Codeと組み合わせれば全自動で作れます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いて役に立ったらいいねと保存もお願いします。',
+            'spacex-launch': 'Claude CodeとHyperFramesを使ったシネマティック動画です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いて役に立ったらいいねと保存もお願いします。',
+            'cloud-render-launch': 'GitHub ActionsとHyperFramesを組み合わせた完全自動動画生成パイプラインです。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'hyperframes-launch': 'HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'claude-paper-launch': 'Claude Paperを紹介します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いて役に立ったらいいねと保存もお願いします。',
+            'figma-launch': 'FigmaのデザインデータをHyperFramesで動画化する方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'timeline-launch': 'HyperFramesのTimeline機能で複雑なアニメーションを作れます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'liquid-brand-refraction': 'HyperFramesのShader機能でリキッドエフェクトを作る方法です。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'pr-to-video-launch': 'Pull RequestをHyperFramesで自動動画化します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'sfx-music-launch': 'HyperFramesで音楽と効果音付きの動画を作る方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'texture-launch-video': 'HyperFramesのテクスチャエフェクトで映像に深みを出す方法です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'vfx-heygen-combined': 'Three.jsとHyperFramesを組み合わせたVFXの作り方です。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'HF-heygen-stripe': 'StripeとHyperFramesを組み合わせた動画自動生成システムです。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'frame-md-launch-storyboard': 'MarkdownからHyperFramesで動画を自動生成します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'website-to-hyperframes': 'ウェブサイトをHyperFramesで動画に変換する方法です。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
+            'claude-design-send-hyperframes-launch': 'Claude DesignとHyperFramesでデザインをそのまま動画に変換します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。役に立ったらいいねと保存もお願いします。',
           }
 
           name = os.environ.get('SAMPLE_NAME', 'variables-launch')
