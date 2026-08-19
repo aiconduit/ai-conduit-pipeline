@@ -18,31 +18,31 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install system deps
+      - name: Install deps
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-noto-cjk git-lfs
-          pip install edge-tts openai-whisper --quiet
-      - name: Install HyperFrames
-        run: npm install -g hyperframes --ignore-scripts
-      - name: Clone sample with LFS
+          pip install edge-tts --quiet
+          npm install -g hyperframes --ignore-scripts
+      - name: Clone sample
         run: |
           git lfs install
           git clone --depth=1 https://github.com/heygen-com/hyperframes-launches.git hf_launches
           cd hf_launches && git lfs pull
-      - name: Generate TTS
+      - name: Generate TTS and subtitles
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
-          python3 -c "
+          python3 << 'PYEOF'
           import asyncio, edge_tts, os
+
           narrations = {
             'variables-launch': 'HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。Claude Codeと組み合わせれば全自動で作れます。コメントにAI Conduitと書いてソースコードを受け取ってください。',
-            'spacex-launch': 'Claude CodeとHyperFramesを使ったシネマティック動画です。コードを書くだけでこのような動画が自動生成できます。コメントにAI Conduitと書いてソースコードを受け取ってください。',
-            'cloud-render-launch': 'GitHub ActionsとHyperFramesを組み合わせた完全自動動画生成パイプラインです。毎日自動で動画を生成してYouTubeに投稿します。コメントにAI Conduitと書いてください。',
-            'hyperframes-launch': 'HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できる完全無料のフレームワークです。コメントにAI Conduitと書いてください。',
-            'claude-paper-launch': 'Claude Paperを紹介します。AIの思考プロセスを可視化する機能です。コメントにAI Conduitと書いてソースコードを受け取ってください。',
-            'figma-launch': 'FigmaのデザインデータをHyperFramesで動画化する方法を紹介します。コメントにAI Conduitと書いてください。',
+            'spacex-launch': 'Claude CodeとHyperFramesを使ったシネマティック動画です。コメントにAI Conduitと書いてソースコードを受け取ってください。',
+            'cloud-render-launch': 'GitHub ActionsとHyperFramesを組み合わせた完全自動動画生成パイプラインです。コメントにAI Conduitと書いてください。',
+            'hyperframes-launch': 'HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。コメントにAI Conduitと書いてください。',
+            'claude-paper-launch': 'Claude Paperを紹介します。コメントにAI Conduitと書いてソースコードを受け取ってください。',
+            'figma-launch': 'FigmaのデザインデータをHyperFramesで動画化する方法です。コメントにAI Conduitと書いてください。',
             'timeline-launch': 'HyperFramesのTimeline機能で複雑なアニメーションを作れます。コメントにAI Conduitと書いてください。',
             'liquid-brand-refraction': 'HyperFramesのShader機能でリキッドエフェクトを作る方法です。コメントにAI Conduitと書いてください。',
             'pr-to-video-launch': 'Pull RequestをHyperFramesで自動動画化します。コメントにAI Conduitと書いてください。',
@@ -54,14 +54,52 @@ jobs:
             'website-to-hyperframes': 'ウェブサイトをHyperFramesで動画に変換する方法です。コメントにAI Conduitと書いてください。',
             'claude-design-send-hyperframes-launch': 'Claude DesignとHyperFramesでデザインをそのまま動画に変換します。コメントにAI Conduitと書いてください。',
           }
-          name = os.environ.get('SAMPLE_NAME','variables-launch')
+
+          name = os.environ.get('SAMPLE_NAME', 'variables-launch')
           text = narrations.get(name, 'HyperFramesサンプル動画です。コメントにAI Conduitと書いてください。')
+
           async def gen():
+              words = []
               c = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
               await c.save('narration.mp3')
-          asyncio.run(gen())
-          print('TTS完了:', os.path.getsize('narration.mp3')//1024, 'KB')
-          "
+              c2 = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
+              async for ev in c2.stream():
+                  if ev['type'] == 'WordBoundary':
+                      start = ev['offset'] / 10_000_000
+                      end = start + ev['duration'] / 10_000_000
+                      words.append((start, end, ev['text']))
+              return words
+
+          words = asyncio.run(gen())
+          print(f'TTS完了: {os.path.getsize("narration.mp3")//1024}KB, {len(words)}単語')
+
+          # グループ化して字幕作成
+          groups = []
+          group = []
+          for start, end, word in words:
+              group.append((start, end, word))
+              combined = ''.join(w for _,_,w in group)
+              if len(combined) >= 15 or word in ['。', 'ください']:
+                  groups.append((group[0][0], group[-1][1], combined))
+                  group = []
+          if group:
+              groups.append((group[0][0], group[-1][1], ''.join(w for _,_,w in group)))
+
+          ass = '[Script Info]\nScriptType: v4.00+\nPlayResX: 1080\nPlayResY: 1920\n\n'
+          ass += '[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, Bold, BorderStyle, Outline, Alignment, MarginV\n'
+          ass += 'Style: Default,Noto Sans CJK JP,54,&H00FFFFFF,&H00000000,-1,1,2,2,120\n\n'
+          ass += '[Events]\nFormat: Layer, Start, End, Style, Text\n'
+
+          def fmt(s):
+              h=int(s//3600); m=int((s%3600)//60); sec=s%60
+              return f'{h}:{m:02d}:{sec:05.2f}'
+
+          for s, e, t in groups:
+              ass += f'Dialogue: 0,{fmt(s)},{fmt(e)},Default,{t}\n'
+
+          open('narration.ass', 'w', encoding='utf-8').write(ass)
+          print(f'字幕完了: {len(groups)}行')
+          PYEOF
       - name: Remove audio and render
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
@@ -81,11 +119,7 @@ jobs:
           env = {**os.environ, 'HF_VIDEO_COVERAGE_THRESHOLD': '0'}
           r = subprocess.run(['hyperframes', 'render', path, '-o', 'silent.mp4'], env=env, timeout=600)
           print('render:', r.returncode, os.path.exists('silent.mp4'))
-      - name: Generate subtitles with Whisper
-        run: |
-          python3 -m whisper narration.mp3 --language ja --output_format ass --output_dir . --model tiny 2>/dev/null || echo "whisper失敗"
-          ls -la *.ass 2>/dev/null || echo "ASSファイルなし"
-      - name: Merge video audio subtitles
+      - name: Merge with subtitles
         run: |
           if [ -f narration.ass ]; then
             ffmpeg -y -i silent.mp4 -i narration.mp3 \
@@ -95,7 +129,6 @@ jobs:
           else
             ffmpeg -y -i silent.mp4 -i narration.mp3 \
               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
-            echo "字幕なし完成"
           fi
           ls -lh output.mp4
       - name: Upload artifact
