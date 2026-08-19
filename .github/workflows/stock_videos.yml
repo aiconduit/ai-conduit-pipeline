@@ -65,31 +65,43 @@ jobs:
           text = narrations.get(name, 'HyperFramesサンプル動画です。コメントにAI Conduitと書いてください。')
 
           async def gen():
+              # TTSタイムスタンプを取得
               words = []
               c = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
-              await c.save('narration.mp3')
-              c2 = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
-              async for ev in c2.stream():
-                  if ev['type'] == 'WordBoundary':
+              async for ev in c.stream():
+                  if ev['type'] == 'audio':
+                      pass
+                  elif ev['type'] == 'WordBoundary':
                       start = ev['offset'] / 10_000_000
                       end = start + ev['duration'] / 10_000_000
                       words.append((start, end, ev['text']))
+              # MP3保存
+              c2 = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
+              await c2.save('narration.mp3')
               return words
 
           words = asyncio.run(gen())
-          print(f'TTS完了: {os.path.getsize("narration.mp3")//1024}KB, {len(words)}単語')
+          dur = os.path.getsize('narration.mp3') / (128*1024/8)
+          print(f'TTS完了: {os.path.getsize("narration.mp3")//1024}KB, {len(words)}単語, 推定{dur:.1f}秒')
 
-          # グループ化して字幕作成
-          groups = []
-          group = []
-          for start, end, word in words:
-              group.append((start, end, word))
-              combined = ''.join(w for _,_,w in group)
-              if len(combined) >= 15 or word in ['。', 'ください']:
-                  groups.append((group[0][0], group[-1][1], combined))
-                  group = []
-          if group:
-              groups.append((group[0][0], group[-1][1], ''.join(w for _,_,w in group)))
+          if words:
+              # WordBoundaryでグループ化
+              groups = []
+              group = []
+              for start, end, word in words:
+                  group.append((start, end, word))
+                  combined = ''.join(w for _,_,w in group)
+                  if len(combined) >= 12 or any(p in word for p in ['。', 'す', 'た', 'ね']):
+                      groups.append((group[0][0], group[-1][1], combined))
+                      group = []
+              if group:
+                  groups.append((group[0][0], group[-1][1], ''.join(w for _,_,w in group)))
+          else:
+              # フォールバック：テキストを均等分割
+              sentences = [s.strip() for s in text.replace('。', '。|').replace('、', '、|').split('|') if s.strip()]
+              dur_per = dur / max(len(sentences), 1)
+              groups = [(i*dur_per, (i+1)*dur_per, s) for i, s in enumerate(sentences)]
+              print(f'フォールバック字幕: {len(groups)}行')
 
           ass = '[Script Info]\nScriptType: v4.00+\nPlayResX: 1080\nPlayResY: 1920\n\n'
           ass += '[V4+ Styles]\nFormat: Name, Fontname, Fontsize, PrimaryColour, OutlineColour, Bold, BorderStyle, Outline, Alignment, MarginV\n'
