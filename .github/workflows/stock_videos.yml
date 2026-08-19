@@ -32,7 +32,7 @@ jobs:
 
       - name: Install deps
         run: |
-          sudo apt-get install -y git-lfs --no-install-recommends -qq
+          sudo apt-get install -y git-lfs ffmpeg --no-install-recommends -qq
           pip install edge-tts --quiet
           npm install -g hyperframes --ignore-scripts
       - name: Clone sample
