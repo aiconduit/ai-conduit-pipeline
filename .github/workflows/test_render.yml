@@ -133,34 +133,21 @@ jobs:
           print(f"TTS: {os.path.getsize('narration.mp3')//1024}KB, 字幕: {len(groups)}行")
       - name: Merge video audio character subtitles
         run: |
-          # drawtext用フィルターを生成
-          python3 -c "
-          import re
-          srt = open('narration.srt').read()
-          entries = re.findall(r'[0-9]+
-([0-9:,]+ --> [0-9:,]+)
-(.+?)
-
-', srt, re.DOTALL)
-          def to_sec(t):
-              h,m,s = t.replace(',','.').split(':')
-              return float(h)*3600+float(m)*60+float(s)
-          filters = []
-          for timing, text in entries:
-              st,et = timing.split(' --> ')
-              s,e = to_sec(st),to_sec(et)
-              safe = text.strip().replace(chr(39), chr(92)+chr(39)).replace(':','\\:').replace(',','\\,')
-              f = "drawtext=text='" + safe + "':x=(w-text_w)/2:y=1200:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t," + str(s) + "," + str(e) + ")'"
-              filters.append(f)
-          open('subtitle_filter.txt','w').write(','.join(filters))
-          print(len(filters))
-          "
-
-          NFILTERS=$(cat subtitle_filter.txt | python3 -c "import sys; print(len(sys.stdin.read().split(',')))" 2>/dev/null || echo "0")
-          echo "字幕フィルター数: $NFILTERS"
-
-          ffmpeg -y             -i raw.mp4             -i test_render/character_main.png             -i narration.mp3             -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]"             -map "[vout]" -map "2:a"             -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
-          echo "合成完了"
+          SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>/dev/null || echo "")
+          echo "字幕フィルター長: ${#SUBFILTER}"
+          if [ -n "$SUBFILTER" ]; then
+            ffmpeg -y \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \
+              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            echo "字幕あり合成完了"
+          else
+            ffmpeg -y \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]" \
+              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            echo "字幕なし合成完了"
+          fi
           ls -lh output.mp4
       - name: Upload
         uses: actions/upload-artifact@v4
