@@ -79,10 +79,88 @@ jobs:
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 raw.mp4
           ls -lh raw.mp4
 
-      - name: Add character overlay
+      - name: Generate TTS and subtitles
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
-          # キャラクター画像をffmpegでオーバーレイ（右下）
-          ffmpeg -y             -i raw.mp4             -i test_render/character_main.png             -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100"             -c:a copy output.mp4
+          pip install edge-tts --quiet
+          python3 << 'PYEOF2'
+          import asyncio, edge_tts, os, re, subprocess
+
+          narrations = {'figma-launch': 'FigmaのデザインをそのままHyperFramesで動画にできます。Claude Codeと組み合わせれば、デザインから動画まで完全自動化できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'variables-launch': 'HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'spacex-launch': 'Claude CodeとHyperFramesを使ったシネマティック動画です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'hyperframes-launch': 'HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'cloud-render-launch': 'GitHub ActionsとHyperFramesで完全自動動画生成パイプラインです。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。'}
+
+          name = os.environ.get('SAMPLE_NAME', 'figma-launch')
+          text = narrations.get(name, 'HyperFramesのサンプル動画です。コメントにAI Conduitと書いてください。')
+
+          async def gen():
+              words = []
+              audio_chunks = []
+              c = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
+              async for ev in c.stream():
+                  if ev['type'] == 'audio':
+                      audio_chunks.append(ev['data'])
+                  elif ev['type'] == 'WordBoundary':
+                      start = ev['offset'] / 10_000_000
+                      end = start + ev['duration'] / 10_000_000
+                      words.append((start, end, ev['text']))
+              with open('narration.mp3', 'wb') as f:
+                  for chunk in audio_chunks:
+                      f.write(chunk)
+              return words
+
+          words = asyncio.run(gen())
+          print(f'TTS: {os.path.getsize("narration.mp3")//1024}KB, {len(words)}単語')
+
+          # 音声の実際の長さを取得
+          r = subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0','narration.mp3'],
+                             capture_output=True, text=True)
+          dur = float(r.stdout.strip()) if r.stdout.strip() else 10.0
+
+          # フォールバック：句点で均等分割
+          if not words:
+              sentences = [s.strip() for s in text.replace('。', '。\n').split('\n') if s.strip()]
+              dur_per = dur / max(len(sentences), 1)
+              groups = [(i*dur_per, (i+1)*dur_per, s) for i, s in enumerate(sentences)]
+          else:
+              groups = []
+              group = []
+              for start, end, word in words:
+                  group.append((start, end, word))
+                  combined = ''.join(w for _,_,w in group)
+                  if len(combined) >= 12 or any(p in word for p in ['。', 'す', 'た', 'い']):
+                      groups.append((group[0][0], group[-1][1], combined))
+                      group = []
+              if group:
+                  groups.append((group[0][0], group[-1][1], ''.join(w for _,_,w in group)))
+
+          # SRT字幕生成
+          def fmt(s):
+              h=int(s//3600); m=int((s%3600)//60); sec=s%60
+              return f'{h:02d}:{m:02d}:{sec:06.3f}'.replace('.', ',')
+
+          srt = ''
+          for i, (s, e, t) in enumerate(groups, 1):
+              srt += f'{i}\n{fmt(s)} --> {fmt(e)}\n{t}\n\n'
+
+          with open('narration.srt', 'w', encoding='utf-8') as f:
+              f.write(srt)
+          print(f'字幕: {len(groups)}行')
+          PYEOF2
+
+      - name: Add character overlay audio subtitles
+        run: |
+          sudo apt-get install -y fonts-noto-cjk --no-install-recommends -qq 2>/dev/null || true
+          # 字幕をASSに変換
+          ffmpeg -y -i narration.srt narration.ass 2>/dev/null || true
+
+          # キャラ + 音声 + 字幕を合成
+          if [ -f narration.ass ]; then
+            ffmpeg -y               -i raw.mp4               -i test_render/character_main.png               -i narration.mp3               -filter_complex "                [1:v]scale=iw*0.65:-1[char];                [0:v][char]overlay=W-w-20:H-h-100[vchar];                [vchar]ass=narration.ass[vout]"               -map "[vout]" -map "2:a"               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            echo "字幕+音声+キャラ合成完了"
+          else
+            ffmpeg -y               -i raw.mp4               -i test_render/character_main.png               -i narration.mp3               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]"               -map "[vout]" -map "2:a"               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            echo "音声+キャラ合成完了"
+          fi
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 output.mp4
           ls -lh output.mp4
       - name: Upload
