@@ -143,6 +143,7 @@ if __name__ == "__main__":
     name = sys.argv[1] if len(sys.argv) > 1 else "figma-launch"
     audio_out = sys.argv[2] if len(sys.argv) > 2 else "narration.mp3"
     html_out = sys.argv[3] if len(sys.argv) > 3 else "captions.html"
+    srt_out = sys.argv[4] if len(sys.argv) > 4 else "narration.srt"
 
     text = NARRATIONS.get(name, "HyperFramesのサンプル動画です。コメントにAI Conduitと書いてください。")
     
@@ -152,4 +153,16 @@ if __name__ == "__main__":
     html = gen_caption_html(groups, dur)
     
     open(html_out, "w", encoding="utf-8").write(html)
+    
+    # SRTも出力
+    def fmt(s):
+        h=int(s//3600); m=int((s%3600)//60); sec=s%60
+        return f"{h:02d}:{m:02d}:{sec:06.3f}".replace(".", ",")
+    
+    srt = ""
+    for i, g in enumerate(groups):
+        text_line = "".join(w["text"] for w in g["words"])
+        srt += f"{i+1}\n{fmt(g['in'])} --> {fmt(g['out'])}\n{text_line}\n\n"
+    
+    open(srt_out, "w", encoding="utf-8").write(srt)
     print(f"done: {len(groups)}groups {dur:.2f}s")
