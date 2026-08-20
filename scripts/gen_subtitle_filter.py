@@ -1,4 +1,4 @@
-import re, sys
+import re, sys, os
 
 srt_path = sys.argv[1] if len(sys.argv) > 1 else 'narration.srt'
 srt = open(srt_path).read()
@@ -10,39 +10,26 @@ def to_sec(t):
     h,m,s = t.replace(',','.').split(':')
     return float(h)*3600+float(m)*60+float(s)
 
-def split_text(text, max_len=14):
-    """テキストを指定文字数で折り返す"""
-    lines = []
-    while len(text) > max_len:
-        # 句点・読点で分割
-        idx = -1
-        for p in ['。', '、', 'す', 'た', 'い']:
-            pos = text[:max_len+2].rfind(p)
-            if pos > 0 and pos > idx:
-                idx = pos
-        if idx < 0:
-            idx = max_len
-        else:
-            idx += 1
-        lines.append(text[:idx])
-        text = text[idx:]
-    if text:
-        lines.append(text)
-    return lines
+# 日本語フォントパスを検索
+font_candidates = [
+    '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/noto-cjk/NotoSansCJKjp-Regular.otf',
+    '/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf',
+]
+fontfile = ''
+for f in font_candidates:
+    if os.path.exists(f):
+        fontfile = f
+        break
+
+font_opt = f":fontfile='{fontfile}'" if fontfile else ""
 
 filters = []
 for timing, text in entries:
     st, et = timing.split(' --> ')
     s, e = to_sec(st), to_sec(et)
-    lines = split_text(text.strip())
-    dur = (e - s) / max(len(lines), 1)
-    
-    for i, line in enumerate(lines):
-        ls = s + i * dur
-        le = s + (i + 1) * dur
-        safe = line.replace("'", "\\'").replace(':', '\\:').replace(',', '\\,')
-        y = 1150 + i * 65
-        f = f"drawtext=text='{safe}':x=(w-text_w)/2:y={y}:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,{ls},{le})'"
-        filters.append(f)
+    safe = text.strip().replace("'", "\\'").replace(':', '\\:').replace(',', '\\,')
+    f = f"drawtext=text='{safe}'{font_opt}:x=(w-text_w)/2:y=1150:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,{s},{e})'"
+    filters.append(f)
 
 print(','.join(filters))

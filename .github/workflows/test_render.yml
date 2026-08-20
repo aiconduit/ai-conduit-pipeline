@@ -17,7 +17,7 @@ jobs:
           node-version: "22"
       - name: Install
         run: |
-          sudo apt-get install -y ffmpeg git-lfs --no-install-recommends -qq
+          sudo apt-get install -y ffmpeg git-lfs fonts-noto-cjk --no-install-recommends -qq
           pip install edge-tts --quiet
           npm install -g hyperframes --ignore-scripts
       - name: Clone sample
