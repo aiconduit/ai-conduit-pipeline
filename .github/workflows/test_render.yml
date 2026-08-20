@@ -147,22 +147,35 @@ jobs:
           print(f'字幕: {len(groups)}行')
           PYEOF2
 
+
       - name: Add character overlay audio subtitles
         run: |
-          sudo apt-get install -y fonts-noto-cjk --no-install-recommends -qq 2>/dev/null || true
-          # 字幕をASSに変換
-          ffmpeg -y -i narration.srt narration.ass 2>/dev/null || true
-
-          # キャラ + 音声 + 字幕を合成
-          if [ -f narration.ass ]; then
-            ffmpeg -y               -i raw.mp4               -i test_render/character_main.png               -i narration.mp3               -filter_complex "                [1:v]scale=iw*0.65:-1[char];                [0:v][char]overlay=W-w-20:H-h-100[vchar];                [vchar]ass=narration.ass[vout]"               -map "[vout]" -map "2:a"               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
-            echo "字幕+音声+キャラ合成完了"
-          else
-            ffmpeg -y               -i raw.mp4               -i test_render/character_main.png               -i narration.mp3               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]"               -map "[vout]" -map "2:a"               -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
-            echo "音声+キャラ合成完了"
-          fi
-          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 output.mp4
+          python3 << 'SUBEOF'
+          import re
+          srt = open('narration.srt').read()
+          entries = re.findall(r'\\d+\\n([\\d:,]+ --> [\\d:,]+)\\n(.+?)\\n\\n', srt, re.DOTALL)
+          def to_sec(t):
+              h,m,s = t.replace(',','.').split(':')
+              return float(h)*3600+float(m)*60+float(s)
+          filters = []
+          for timing, text in entries:
+              st_str,et_str = timing.split(' --> ')
+              st,et = to_sec(st_str),to_sec(et_str)
+              safe = text.strip().replace("'","\'").replace(':','\\:')
+              filters.append(f"drawtext=text='{safe}':x=(w-text_w)/2:y=1200:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,{st},{et})'")
+          open('subtitle_filter.txt','w').write(','.join(filters))
+          print(f'字幕: {len(filters)}行')
+          SUBEOF
+          SUBFILTER=$(cat subtitle_filter.txt)
+          ffmpeg -y \\
+            -i raw.mp4 \\
+            -i test_render/character_main.png \\
+            -i narration.mp3 \\
+            -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \\
+            -map "[vout]" -map "2:a" \\
+            -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
           ls -lh output.mp4
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
