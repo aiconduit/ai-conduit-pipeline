@@ -71,66 +71,56 @@ jobs:
           if os.path.exists(char_src):
               shutil.copy(char_src, char_dst)
           print("done")
-      - name: Render
-        run: |
-          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
-          ls -lh raw.mp4
-      - name: Generate TTS
+      - name: Inject caption composition
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         shell: python3 {0}
         run: |
-          import asyncio, edge_tts, os, subprocess, re
-          narrations = {
-            "figma-launch": "FigmaのデザインをHyperFramesで動画にする方法です。実際のデザインをそのまま動画のアセットとして使えます。Adobe After Effectsは不要。HTMLだけで完結します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
-            "variables-launch": "HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
-            "spacex-launch": "Claude CodeとHyperFramesを使ったシネマティック動画です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
-            "hyperframes-launch": "HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
-            "cloud-render-launch": "GitHub ActionsとHyperFramesで完全自動動画生成パイプラインです。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
-          }
+          import re, os, shutil
+
           name = os.environ["SAMPLE_NAME"]
-          text = narrations.get(name, "HyperFramesのサンプル動画です。コメントにAI Conduitと書いてください。")
-          async def gen():
-              words = []
-              chunks = []
-              c = edge_tts.Communicate(text, voice="ja-JP-KeitaNeural", rate="+8%")
-              async for ev in c.stream():
-                  if ev["type"] == "audio":
-                      chunks.append(ev["data"])
-                  elif ev["type"] == "WordBoundary":
-                      start = ev["offset"] / 10_000_000
-                      end = start + ev["duration"] / 10_000_000
-                      words.append((start, end, ev["text"]))
-              with open("narration.mp3", "wb") as f:
-                  for chunk in chunks:
-                      f.write(chunk)
-              return words
-          words = asyncio.run(gen())
-          r = subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0","narration.mp3"], capture_output=True, text=True)
-          dur = float(r.stdout.strip()) if r.stdout.strip() else 10.0
-          if not words:
-              sentences = [s.strip() for s in text.replace("。", "。\n").split("\n") if s.strip()]
-              dur_per = dur / max(len(sentences), 1)
-              groups = [(i*dur_per, (i+1)*dur_per, s) for i, s in enumerate(sentences)]
+          src = f"hf_launches/{name}"
+          
+          # captions.htmlをcompositionsに追加
+          cap_dst = f"{src}/compositions/captions.html"
+          shutil.copy("captions.html", cap_dst)
+          print(f"✅ captions.html追加: {cap_dst}")
+
+          # index.htmlにcaptionsを追加
+          idx = open(f"{src}/index.html").read()
+          
+          # 既存のdata-durationを取得
+          dur_match = re.search(r'data-duration="([^"]+)"', idx)
+          total_dur = dur_match.group(1) if dur_match else "60"
+          
+          # </body>の前にcaptionsを追加
+          cap_tag = f'''  <div
+    data-composition-id="captions"
+    data-src="compositions/captions.html"
+    data-start="0"
+    data-duration="{total_dur}"
+    data-track-index="99"
+  ></div>'''
+          
+          if "captions" not in idx:
+              idx = idx.replace("</body>", cap_tag + "\n</body>")
+              open(f"{src}/index.html", "w").write(idx)
+              print("✅ index.htmlにcaptions追加")
           else:
-              groups = []
-              group = []
-              for start, end, word in words:
-                  group.append((start, end, word))
-                  combined = "".join(w for _,_,w in group)
-                  if len(combined) >= 12 or any(p in word for p in ["。","す","た","い"]):
-                      groups.append((group[0][0], group[-1][1], combined))
-                      group = []
-              if group:
-                  groups.append((group[0][0], group[-1][1], "".join(w for _,_,w in group)))
-          def fmt(s):
-              h=int(s//3600); m=int((s%3600)//60); sec=s%60
-              return f"{h:02d}:{m:02d}:{sec:06.3f}".replace(".", ",")
-          srt = ""
-          for i, (s, e, t) in enumerate(groups, 1):
-              srt += f"{i}\n{fmt(s)} --> {fmt(e)}\n{t}\n\n"
-          open("narration.srt", "w", encoding="utf-8").write(srt)
-          print(f"TTS: {os.path.getsize('narration.mp3')//1024}KB, 字幕: {len(groups)}行")
+              print("既にcaptions追加済み")
+
+      - name: Render
+        run: |
+          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
+          ls -lh raw.mp4
+      - name: Generate TTS and caption composition
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_caption_composition.py             "$SAMPLE_NAME"             narration.mp3             captions.html
+          echo "✅ TTS+字幕composition生成完了"
+          ls -lh narration.mp3 captions.html
       - name: Merge video audio character subtitles
         run: |
           SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>/dev/null || echo "")
