@@ -74,28 +74,11 @@
   }
 </style>
 <style>
-html, body {
-  width: 1080px !important;
-  height: 1920px !important;
-  margin: 0 !important;
-  background: #000 !important;
-  overflow: hidden !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-body > div[data-composition-id],
-body > div:first-of-type {
-  width: 1920px !important;
-  height: 1080px !important;
-  transform: scale(0.5625) !important;
-  transform-origin: center center !important;
-  flex-shrink: 0 !important;
-  position: relative !important;
-}
+html,body{width:1080px!important;height:1920px!important;margin:0!important;background:#000!important;overflow:hidden!important;}
+.hf-stage-wrapper{position:absolute;left:0;top:656.25px;width:1920px;height:1080px;transform:scale(0.5625);transform-origin:top left;overflow:hidden;}
 </style>
 </head>
-<body>
+<body><div class="hf-stage-wrapper">
 <div id="scene-06" data-composition-id="scene-06" data-width="1080" data-height="1920" data-duration="3.5">
 
   <div class="grid" id="grid">
@@ -163,5 +146,5 @@ tl.to("#grid", {
 
 window.__timelines["scene-06"] = tl;
 </script>
-</body>
+</div></body>
 </html>
