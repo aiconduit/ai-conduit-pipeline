@@ -65,7 +65,34 @@ jobs:
           h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
           h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
           open(f"{src}/index.html", 'w').write(h)
-          print("完了")
+
+          # キャラクターを各compositionの下部に追加
+          char_css = """
+.hf-character {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 540px;
+  height: auto;
+  z-index: 100;
+}
+"""
+          char_html = '<img class="hf-character" src="../../character_main.png" />'
+
+          if os.path.exists(comp_dir):
+              for f in sorted(os.listdir(comp_dir)):
+                  if not f.endswith('.html'): continue
+                  p = f"{comp_dir}/{f}"
+                  h = open(p).read()
+                  # キャラクターCSS追加
+                  h = h.replace('</style>', char_css + '
+</style>')
+                  # キャラクター画像をwrapper内に追加
+                  h = h.replace('</div></body>', char_html + '</div></body>')
+                  open(p, 'w').write(h)
+
+          print("✅ キャラクター追加完了")
       - name: Render
         run: |
           HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o output.mp4
