@@ -150,30 +150,55 @@ jobs:
 
       - name: Add character overlay audio subtitles
         run: |
-          python3 << 'SUBEOF'
-          import re
-          srt = open('narration.srt').read()
-          entries = re.findall(r'\\d+\\n([\\d:,]+ --> [\\d:,]+)\\n(.+?)\\n\\n', srt, re.DOTALL)
-          def to_sec(t):
-              h,m,s = t.replace(',','.').split(':')
-              return float(h)*3600+float(m)*60+float(s)
-          filters = []
-          for timing, text in entries:
-              st_str,et_str = timing.split(' --> ')
-              st,et = to_sec(st_str),to_sec(et_str)
-              safe = text.strip().replace("'","\'").replace(':','\\:')
-              filters.append(f"drawtext=text='{safe}':x=(w-text_w)/2:y=1200:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,{st},{et})'")
-          open('subtitle_filter.txt','w').write(','.join(filters))
-          print(f'字幕: {len(filters)}行')
-          SUBEOF
-          SUBFILTER=$(cat subtitle_filter.txt)
-          ffmpeg -y \\
-            -i raw.mp4 \\
-            -i test_render/character_main.png \\
-            -i narration.mp3 \\
-            -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \\
-            -map "[vout]" -map "2:a" \\
-            -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+          # SRTからdrawtext用フィルターを生成
+          python3 -c "
+          import re, os
+          if not os.path.exists('narration.srt'):
+              open('subtitle_filter.txt','w').write('')
+              print('SRTなし')
+          else:
+              srt = open('narration.srt').read()
+              entries = re.findall(r'[0-9]+
+([0-9:,]+ --> [0-9:,]+)
+(.+?)
+
+', srt, re.DOTALL)
+              def to_sec(t):
+                  h,m,s = t.replace(',','.').split(':')
+                  return float(h)*3600+float(m)*60+float(s)
+              filters = []
+              for timing, text in entries:
+                  st_str,et_str = timing.split(' --> ')
+                  st,et = to_sec(st_str),to_sec(et_str)
+                  safe = text.strip().replace(chr(39),chr(92)+chr(39)).replace(':',chr(92)+':')
+                  filters.append("drawtext=text='"+safe+"':x=(w-text_w)/2:y=1200:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,"+str(st)+","+str(et)+")'")
+              open('subtitle_filter.txt','w').write(','.join(filters))
+              print(f'字幕: {len(filters)}行')
+          "
+
+          SUBFILTER=$(cat subtitle_filter.txt 2>/dev/null || echo "")
+
+          if [ -z "$SUBFILTER" ]; then
+            # 字幕なしで合成
+            ffmpeg -y \
+              -i raw.mp4 \
+              -i test_render/character_main.png \
+              -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]" \
+              -map "[vout]" -map "2:a" \
+              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            echo "字幕なし合成完了"
+          else
+            # 字幕ありで合成
+            ffmpeg -y \
+              -i raw.mp4 \
+              -i test_render/character_main.png \
+              -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \
+              -map "[vout]" -map "2:a" \
+              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+            echo "字幕あり合成完了"
+          fi
           ls -lh output.mp4
 
       - name: Upload
