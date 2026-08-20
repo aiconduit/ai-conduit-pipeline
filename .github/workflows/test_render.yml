@@ -3,9 +3,9 @@ on:
   workflow_dispatch:
     inputs:
       sample_name:
-        description: 'Sample name'
+        description: Sample name
         required: true
-        default: 'figma-launch'
+        default: figma-launch
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -37,13 +37,13 @@ jobs:
           dh = re.search(r'data-height="(\d+)"', idx_html)
           orig_w = int(dw.group(1)) if dw else 1080
           orig_h = int(dh.group(1)) if dh else 1080
-          print(f"元サイズ: {orig_w}x{orig_h}")
           canvas_w, canvas_h = 1080, 1920
           left_offset = (canvas_w - orig_w) / 2
           top_offset = (canvas_h - orig_h) / 2
           audio_p = re.compile(r'<audio[^>]*>.*?</audio>', re.DOTALL)
-          hf_audio_p = re.compile(r'<hf-audio[^>]*/>')
-          css = f"<style>\nhtml,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}\n.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}\n</style>"
+          hf_p = re.compile(r'<hf-audio[^>]*/>')
+          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}.hf-character{{position:absolute;bottom:0;right:0;width:320px;height:auto;z-index:100;}}</style>"
+          char_img = '<img class="hf-character" src="../../character_main.png" />'
           comp_dir = f"{src}/compositions"
           if os.path.exists(comp_dir):
               for f in sorted(os.listdir(comp_dir)):
@@ -51,48 +51,21 @@ jobs:
                   p = f"{comp_dir}/{f}"
                   h = open(p).read()
                   h = audio_p.sub('', h)
-                  h = hf_audio_p.sub('', h)
+                  h = hf_p.sub('', h)
                   h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
                   h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
                   h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
-                  h = h.replace('</head>', css + '\n</head>')
-                  h = re.sub(r'(<body[^>]*>)(.*?)(</body>)', lambda m: m.group(1)+'<div class="hf-stage-wrapper">'+m.group(2)+'</div>'+m.group(3), h, flags=re.DOTALL)
+                  h = h.replace('</head>', css + '</head>')
+                  h = re.sub(r'(<body[^>]*>)(.*?)(</body>)', lambda m: m.group(1)+'<div class="hf-stage-wrapper">'+m.group(2)+char_img+'</div>'+m.group(3), h, flags=re.DOTALL)
                   open(p, 'w').write(h)
           h = open(f"{src}/index.html").read()
           h = audio_p.sub('', h)
-          h = hf_audio_p.sub('', h)
+          h = hf_p.sub('', h)
           h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
           h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
           h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
           open(f"{src}/index.html", 'w').write(h)
-
-          # キャラクターを各compositionの下部に追加
-          char_css = """
-.hf-character {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 540px;
-  height: auto;
-  z-index: 100;
-}
-"""
-          char_html = '<img class="hf-character" src="../../character_main.png" />'
-
-          if os.path.exists(comp_dir):
-              for f in sorted(os.listdir(comp_dir)):
-                  if not f.endswith('.html'): continue
-                  p = f"{comp_dir}/{f}"
-                  h = open(p).read()
-                  # キャラクターCSS追加
-                  h = h.replace('</style>', char_css + '
-</style>')
-                  # キャラクター画像をwrapper内に追加
-                  h = h.replace('</div></body>', char_html + '</div></body>')
-                  open(p, 'w').write(h)
-
-          print("✅ キャラクター追加完了")
+          print("done")
       - name: Render
         run: |
           HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o output.mp4
@@ -104,4 +77,3 @@ jobs:
           name: test-vertical-${{ github.run_number }}
           path: output.mp4
           retention-days: 3
-# 2026年 8月20日 木曜日 13時25分35秒 JST
