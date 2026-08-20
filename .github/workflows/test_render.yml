@@ -16,7 +16,7 @@ jobs:
           npm install -g hyperframes --ignore-scripts
       - name: Render
         run: |
-          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render test_render/var_scale -o output.mp4
+          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render test_render/var_scale --resolution portrait -o output.mp4
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 output.mp4
           ls -lh output.mp4
       - name: Upload
