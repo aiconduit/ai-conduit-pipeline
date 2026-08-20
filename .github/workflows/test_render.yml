@@ -56,7 +56,7 @@ jobs:
                   h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
                   h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
                   h = h.replace('</head>', css + '</head>')
-                  h = re.sub(r'(<body[^>]*>)(.*?)(</body>)', lambda m: m.group(1)+'<div class="hf-stage-wrapper">'+m.group(2)+char_img+'</div>'+m.group(3), h, flags=re.DOTALL)
+                  h = re.sub(r'(<body[^>]*>)(.*?)(</body>)', lambda m: m.group(1)+'<div class="hf-stage-wrapper">'+m.group(2)+'</div>'+char_img+m.group(3), h, flags=re.DOTALL)
                   open(p, 'w').write(h)
           h = open(f"{src}/index.html").read()
           h = audio_p.sub('', h)
