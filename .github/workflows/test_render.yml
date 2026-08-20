@@ -75,7 +75,14 @@ jobs:
           print("done")
       - name: Render
         run: |
-          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o output.mp4
+          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
+          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 raw.mp4
+          ls -lh raw.mp4
+
+      - name: Add character overlay
+        run: |
+          # キャラクター画像をffmpegでオーバーレイ（右下）
+          ffmpeg -y             -i raw.mp4             -i test_render/character_main.png             -filter_complex "[1:v]scale=400:-1[char];[0:v][char]overlay=W-w-20:H-h-20"             -c:a copy output.mp4
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 output.mp4
           ls -lh output.mp4
       - name: Upload
