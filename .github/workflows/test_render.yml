@@ -82,7 +82,7 @@ jobs:
         run: |
           import asyncio, edge_tts, os, subprocess, re
           narrations = {
-            "figma-launch": "FigmaのデザインをそのままHyperFramesで動画にできます。Claude Codeと組み合わせれば、デザインから動画まで完全自動化できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
+            "figma-launch": "FigmaのデザインをHyperFramesで動画にする方法です。実際のデザインをそのまま動画のアセットとして使えます。Adobe After Effectsは不要。HTMLだけで完結します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
             "variables-launch": "HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
             "spacex-launch": "Claude CodeとHyperFramesを使ったシネマティック動画です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
             "hyperframes-launch": "HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
