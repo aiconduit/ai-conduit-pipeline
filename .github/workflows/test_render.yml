@@ -82,7 +82,7 @@ jobs:
       - name: Add character overlay
         run: |
           # キャラクター画像をffmpegでオーバーレイ（右下）
-          ffmpeg -y             -i raw.mp4             -i test_render/character_main.png             -filter_complex "[1:v]scale=400:-1[char];[0:v][char]overlay=W-w-20:H-h-20"             -c:a copy output.mp4
+          ffmpeg -y             -i raw.mp4             -i test_render/character_main.png             -filter_complex "[1:v]scale=700:-1[char];[0:v][char]overlay=W-w-10:H-h-10"             -c:a copy output.mp4
           ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 output.mp4
           ls -lh output.mp4
       - name: Upload
