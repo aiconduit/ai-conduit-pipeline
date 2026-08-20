@@ -71,6 +71,18 @@ jobs:
           if os.path.exists(char_src):
               shutil.copy(char_src, char_dst)
           print("done")
+      - name: Render
+        run: |
+          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
+          ls -lh raw.mp4
+      - name: Generate TTS and caption composition
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_caption_composition.py             "$SAMPLE_NAME"             narration.mp3             captions.html
+          echo "✅ TTS+字幕composition生成完了"
+          ls -lh narration.mp3 captions.html
       - name: Inject caption composition
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
@@ -96,18 +108,6 @@ jobs:
               idx = idx.replace("</body>", cap_tag + "\n</body>")
               open(f"{src}/index.html", "w").write(idx)
           print("done")
-      - name: Render
-        run: |
-          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
-          ls -lh raw.mp4
-      - name: Generate TTS and caption composition
-        env:
-          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
-        run: |
-          pip install edge-tts --quiet 2>/dev/null
-          python3 scripts/gen_caption_composition.py             "$SAMPLE_NAME"             narration.mp3             captions.html
-          echo "✅ TTS+字幕composition生成完了"
-          ls -lh narration.mp3 captions.html
       - name: Merge video audio character subtitles
         run: |
           SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>/dev/null || echo "")
