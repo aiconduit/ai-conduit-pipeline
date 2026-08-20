@@ -83,46 +83,33 @@ jobs:
           python3 scripts/gen_caption_composition.py             "$SAMPLE_NAME"             narration.mp3             captions.html
           echo "✅ TTS+字幕composition生成完了"
           ls -lh narration.mp3 captions.html
-      - name: Inject caption composition
-        env:
-          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
-        shell: python3 {0}
-        run: |
-          import re, os, shutil
-          name = os.environ["SAMPLE_NAME"]
-          src = f"hf_launches/{name}"
-          shutil.copy("captions.html", f"{src}/compositions/captions.html")
-          idx = open(f"{src}/index.html").read()
-          dur_match = re.search(r'data-duration="([^"]+)"', idx)
-          total_dur = dur_match.group(1) if dur_match else "60"
-          cap_tag = (
-              '  <div ' +
-              'data-composition-id="captions" ' +
-              'data-src="compositions/captions.html" ' +
-              'data-start="0" ' +
-              f'data-duration="{total_dur}" ' +
-              'data-track-index="99">' +
-              '</div>'
-          )
-          if "captions" not in idx:
-              idx = idx.replace("</body>", cap_tag + "\n</body>")
-              open(f"{src}/index.html", "w").write(idx)
-          print("done")
       - name: Merge video audio character subtitles
         run: |
-          SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>/dev/null || echo "")
+          # 動画の長さを取得
+          VIDEO_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 raw.mp4)
+          echo "動画長: ${VIDEO_DUR}秒"
+
+          # 動画の長さに合わせた字幕フィルターを生成
+          SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt "$VIDEO_DUR" 2>/dev/null || echo "")
           echo "字幕フィルター長: ${#SUBFILTER}"
+
           if [ -n "$SUBFILTER" ]; then
             ffmpeg -y \
-              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -i raw.mp4 \
+              -i test_render/character_main.png \
+              -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \
-              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+              -map "[vout]" -map "2:a" \
+              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
             echo "字幕あり合成完了"
           else
             ffmpeg -y \
-              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -i raw.mp4 \
+              -i test_render/character_main.png \
+              -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]" \
-              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+              -map "[vout]" -map "2:a" \
+              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
             echo "字幕なし合成完了"
           fi
           ls -lh output.mp4
