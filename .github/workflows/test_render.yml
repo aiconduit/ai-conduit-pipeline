@@ -9,15 +9,16 @@ on:
 jobs:
   render:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
       - name: Install
         run: |
           sudo apt-get install -y ffmpeg git-lfs --no-install-recommends -qq
+          pip install edge-tts --quiet
           npm install -g hyperframes --ignore-scripts
       - name: Clone sample
         run: |
@@ -29,8 +30,8 @@ jobs:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         shell: python3 {0}
         run: |
-          import re, os
-          name = os.environ['SAMPLE_NAME']
+          import re, os, shutil
+          name = os.environ["SAMPLE_NAME"]
           src = f"hf_launches/{name}"
           idx_html = open(f"{src}/index.html").read()
           dw = re.search(r'data-width="(\d+)"', idx_html)
@@ -40,85 +41,75 @@ jobs:
           canvas_w, canvas_h = 1080, 1920
           left_offset = (canvas_w - orig_w) / 2
           top_offset = (canvas_h - orig_h) / 2
-          audio_p = re.compile(r'<audio[^>]*>.*?</audio>', re.DOTALL)
-          hf_p = re.compile(r'<hf-audio[^>]*/>')
-          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}.hf-character{{position:absolute;bottom:0;right:0;width:320px;height:auto;z-index:100;}}</style>"
-          char_img = '<img class="hf-character" src="../assets/character_main.png" />'
+          audio_p = re.compile(r"<audio[^>]*>.*?</audio>", re.DOTALL)
+          hf_p = re.compile(r"<hf-audio[^>]*/?>")
+          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}</style>"
           comp_dir = f"{src}/compositions"
           if os.path.exists(comp_dir):
               for f in sorted(os.listdir(comp_dir)):
-                  if not f.endswith('.html'): continue
+                  if not f.endswith(".html"): continue
                   p = f"{comp_dir}/{f}"
                   h = open(p).read()
-                  h = audio_p.sub('', h)
-                  h = hf_p.sub('', h)
+                  h = audio_p.sub("", h)
+                  h = hf_p.sub("", h)
                   h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
                   h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
                   h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
-                  h = h.replace('</head>', css + '</head>')
-                  h = re.sub(r'(<body[^>]*>)(.*?)(</body>)', lambda m: m.group(1)+'<div class="hf-stage-wrapper">'+m.group(2)+'</div>'+char_img+m.group(3), h, flags=re.DOTALL)
-                  open(p, 'w').write(h)
+                  h = h.replace("</head>", css + "</head>")
+                  h = re.sub(r"(<body[^>]*>)(.*?)(</body>)", lambda m: m.group(1)+"<div class=\"hf-stage-wrapper\">"+m.group(2)+"</div>"+m.group(3), h, flags=re.DOTALL)
+                  open(p, "w").write(h)
           h = open(f"{src}/index.html").read()
-          h = audio_p.sub('', h)
-          h = hf_p.sub('', h)
+          h = audio_p.sub("", h)
+          h = hf_p.sub("", h)
           h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
           h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
           h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
-          open(f"{src}/index.html", 'w').write(h)
-          # キャラクター画像をassetsにコピー
-          import shutil
+          open(f"{src}/index.html", "w").write(h)
+          # キャラクター画像コピー
           char_src = "test_render/character_main.png"
           char_dst = f"{src}/assets/character_main.png"
           if os.path.exists(char_src):
               shutil.copy(char_src, char_dst)
-              print("character copied")
           print("done")
       - name: Render
         run: |
           HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
-          ffprobe -v error -select_streams v:0 -show_entries stream=width,height -of csv=p=0 raw.mp4
           ls -lh raw.mp4
-
-      - name: Generate TTS and subtitles
+      - name: Generate TTS
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        shell: python3 {0}
         run: |
-          pip install edge-tts --quiet
-          python3 << 'PYEOF2'
-          import asyncio, edge_tts, os, re, subprocess
-
-          narrations = {'figma-launch': 'FigmaのデザインをそのままHyperFramesで動画にできます。Claude Codeと組み合わせれば、デザインから動画まで完全自動化できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'variables-launch': 'HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'spacex-launch': 'Claude CodeとHyperFramesを使ったシネマティック動画です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'hyperframes-launch': 'HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。', 'cloud-render-launch': 'GitHub ActionsとHyperFramesで完全自動動画生成パイプラインです。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。'}
-
-          name = os.environ.get('SAMPLE_NAME', 'figma-launch')
-          text = narrations.get(name, 'HyperFramesのサンプル動画です。コメントにAI Conduitと書いてください。')
-
+          import asyncio, edge_tts, os, subprocess, re
+          narrations = {
+            "figma-launch": "FigmaのデザインをそのままHyperFramesで動画にできます。Claude Codeと組み合わせれば、デザインから動画まで完全自動化できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
+            "variables-launch": "HyperFramesのVariables機能を紹介します。1つのHTMLファイルで複数バージョンの動画を自動生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
+            "spacex-launch": "Claude CodeとHyperFramesを使ったシネマティック動画です。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
+            "hyperframes-launch": "HyperFramesとは何か徹底解説します。HTMLを書くだけでMP4動画が生成できます。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
+            "cloud-render-launch": "GitHub ActionsとHyperFramesで完全自動動画生成パイプラインです。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
+          }
+          name = os.environ["SAMPLE_NAME"]
+          text = narrations.get(name, "HyperFramesのサンプル動画です。コメントにAI Conduitと書いてください。")
           async def gen():
               words = []
-              audio_chunks = []
-              c = edge_tts.Communicate(text, voice='ja-JP-KeitaNeural', rate='+8%')
+              chunks = []
+              c = edge_tts.Communicate(text, voice="ja-JP-KeitaNeural", rate="+8%")
               async for ev in c.stream():
-                  if ev['type'] == 'audio':
-                      audio_chunks.append(ev['data'])
-                  elif ev['type'] == 'WordBoundary':
-                      start = ev['offset'] / 10_000_000
-                      end = start + ev['duration'] / 10_000_000
-                      words.append((start, end, ev['text']))
-              with open('narration.mp3', 'wb') as f:
-                  for chunk in audio_chunks:
+                  if ev["type"] == "audio":
+                      chunks.append(ev["data"])
+                  elif ev["type"] == "WordBoundary":
+                      start = ev["offset"] / 10_000_000
+                      end = start + ev["duration"] / 10_000_000
+                      words.append((start, end, ev["text"]))
+              with open("narration.mp3", "wb") as f:
+                  for chunk in chunks:
                       f.write(chunk)
               return words
-
           words = asyncio.run(gen())
-          print(f'TTS: {os.path.getsize("narration.mp3")//1024}KB, {len(words)}単語')
-
-          # 音声の実際の長さを取得
-          r = subprocess.run(['ffprobe','-v','error','-show_entries','format=duration','-of','csv=p=0','narration.mp3'],
-                             capture_output=True, text=True)
+          r = subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0","narration.mp3"], capture_output=True, text=True)
           dur = float(r.stdout.strip()) if r.stdout.strip() else 10.0
-
-          # フォールバック：句点で均等分割
           if not words:
-              sentences = [s.strip() for s in text.replace('。', '。\n').split('\n') if s.strip()]
+              sentences = [s.strip() for s in text.replace("。", "。\n").split("\n") if s.strip()]
               dur_per = dur / max(len(sentences), 1)
               groups = [(i*dur_per, (i+1)*dur_per, s) for i, s in enumerate(sentences)]
           else:
@@ -126,81 +117,51 @@ jobs:
               group = []
               for start, end, word in words:
                   group.append((start, end, word))
-                  combined = ''.join(w for _,_,w in group)
-                  if len(combined) >= 12 or any(p in word for p in ['。', 'す', 'た', 'い']):
+                  combined = "".join(w for _,_,w in group)
+                  if len(combined) >= 12 or any(p in word for p in ["。","す","た","い"]):
                       groups.append((group[0][0], group[-1][1], combined))
                       group = []
               if group:
-                  groups.append((group[0][0], group[-1][1], ''.join(w for _,_,w in group)))
-
-          # SRT字幕生成
+                  groups.append((group[0][0], group[-1][1], "".join(w for _,_,w in group)))
           def fmt(s):
               h=int(s//3600); m=int((s%3600)//60); sec=s%60
-              return f'{h:02d}:{m:02d}:{sec:06.3f}'.replace('.', ',')
-
-          srt = ''
+              return f"{h:02d}:{m:02d}:{sec:06.3f}".replace(".", ",")
+          srt = ""
           for i, (s, e, t) in enumerate(groups, 1):
-              srt += f'{i}\n{fmt(s)} --> {fmt(e)}\n{t}\n\n'
-
-          with open('narration.srt', 'w', encoding='utf-8') as f:
-              f.write(srt)
-          print(f'字幕: {len(groups)}行')
-          PYEOF2
-
-
-      - name: Add character overlay audio subtitles
+              srt += f"{i}\n{fmt(s)} --> {fmt(e)}\n{t}\n\n"
+          open("narration.srt", "w", encoding="utf-8").write(srt)
+          print(f"TTS: {os.path.getsize('narration.mp3')//1024}KB, 字幕: {len(groups)}行")
+      - name: Merge video audio character subtitles
         run: |
-          # SRTからdrawtext用フィルターを生成
+          # drawtext用フィルターを生成
           python3 -c "
-          import re, os
-          if not os.path.exists('narration.srt'):
-              open('subtitle_filter.txt','w').write('')
-              print('SRTなし')
-          else:
-              srt = open('narration.srt').read()
-              entries = re.findall(r'[0-9]+
+          import re
+          srt = open('narration.srt').read()
+          entries = re.findall(r'[0-9]+
 ([0-9:,]+ --> [0-9:,]+)
 (.+?)
 
 ', srt, re.DOTALL)
-              def to_sec(t):
-                  h,m,s = t.replace(',','.').split(':')
-                  return float(h)*3600+float(m)*60+float(s)
-              filters = []
-              for timing, text in entries:
-                  st_str,et_str = timing.split(' --> ')
-                  st,et = to_sec(st_str),to_sec(et_str)
-                  safe = text.strip().replace(chr(39),chr(92)+chr(39)).replace(':',chr(92)+':')
-                  filters.append("drawtext=text='"+safe+"':x=(w-text_w)/2:y=1200:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,"+str(st)+","+str(et)+")'")
-              open('subtitle_filter.txt','w').write(','.join(filters))
-              print(f'字幕: {len(filters)}行')
+          def to_sec(t):
+              h,m,s = t.replace(',','.').split(':')
+              return float(h)*3600+float(m)*60+float(s)
+          filters = []
+          for timing, text in entries:
+              st,et = timing.split(' --> ')
+              s,e = to_sec(st),to_sec(et)
+              safe = text.strip().replace(chr(39), chr(92)+chr(39)).replace(':','\\:').replace(',','\\,')
+              f = "drawtext=text='" + safe + "':x=(w-text_w)/2:y=1200:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t," + str(s) + "," + str(e) + ")'"
+              filters.append(f)
+          open('subtitle_filter.txt','w').write(','.join(filters))
+          print(len(filters))
           "
 
-          SUBFILTER=$(cat subtitle_filter.txt 2>/dev/null || echo "")
+          NFILTERS=$(cat subtitle_filter.txt | python3 -c "import sys; print(len(sys.stdin.read().split(',')))" 2>/dev/null || echo "0")
+          echo "字幕フィルター数: $NFILTERS"
 
-          if [ -z "$SUBFILTER" ]; then
-            # 字幕なしで合成
-            ffmpeg -y \
-              -i raw.mp4 \
-              -i test_render/character_main.png \
-              -i narration.mp3 \
-              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]" \
-              -map "[vout]" -map "2:a" \
-              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
-            echo "字幕なし合成完了"
-          else
-            # 字幕ありで合成
-            ffmpeg -y \
-              -i raw.mp4 \
-              -i test_render/character_main.png \
-              -i narration.mp3 \
-              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \
-              -map "[vout]" -map "2:a" \
-              -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
-            echo "字幕あり合成完了"
-          fi
+          ffmpeg -y             -i raw.mp4             -i test_render/character_main.png             -i narration.mp3             -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]"             -map "[vout]" -map "2:a"             -c:v libx264 -c:a aac -shortest -pix_fmt yuv420p output.mp4
+          echo "合成完了"
           ls -lh output.mp4
-
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
