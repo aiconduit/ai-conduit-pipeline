@@ -34,17 +34,9 @@ def wrap_text(text, max_chars=14):
         lines.append(text)
     return lines
 
-font_candidates = [
-    '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
-    '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
-    '/usr/share/fonts/noto-cjk/NotoSansCJKjp-Bold.otf',
-    '/usr/share/fonts/noto-cjk/NotoSansCJKjp-Regular.otf',
-]
-fontname = "Noto Sans CJK JP"
-for f in font_candidates:
-    if os.path.exists(f):
-        fontname = "Noto Sans CJK JP Bold" if 'Bold' in f else "Noto Sans CJK JP"
-        break
+# NotoSansCJKのBoldフォントを直接指定
+font_path = '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc'
+fontname = "NotoSansCJKjp-Bold"
 
 ass_header = f"""[Script Info]
 ScriptType: v4.00+
@@ -54,7 +46,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,{fontname},60,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,0,2,80,80,780,1
+Style: Default,{fontname},60,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,0,0,0,0,100,100,0,0,1,3,0,2,80,80,780,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
