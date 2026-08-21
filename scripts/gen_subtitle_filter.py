@@ -38,7 +38,7 @@ for timing, text in entries:
     s = to_sec(st_str) * scale
     e = to_sec(et_str) * scale
     safe = text.strip().replace("'", "\\'").replace(':', '\\:').replace(',', '\\,')
-    f = f"drawtext=text='{safe}'{font_opt}:x=20:y=1200:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,{s:.3f},{e:.3f})'"
+    f = f"drawtext=text='{safe}'{font_opt}:x=20:y=1120:fontsize=52:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,{s:.3f},{e:.3f})'"
     filters.append(f)
 
 print(','.join(filters))
