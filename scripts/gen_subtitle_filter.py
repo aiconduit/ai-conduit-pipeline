@@ -19,7 +19,7 @@ font_candidates = [
 fontfile = next((f for f in font_candidates if os.path.exists(f)), '')
 font_opt = f":fontfile='{fontfile}'" if fontfile else ""
 
-MAX_CHARS = 20  # 1行最大20文字（fontsize=72px、1080px幅に収まる）
+MAX_CHARS = 13  # 1行最大20文字（fontsize=72px、1080px幅に収まる）
 
 def split_text(text, max_chars=MAX_CHARS):
     """テキストを最大max_chars文字で分割"""
