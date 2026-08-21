@@ -82,7 +82,7 @@ jobs:
           pip install edge-tts --quiet 2>/dev/null
           python3 scripts/gen_caption_composition.py             "$SAMPLE_NAME"             narration.mp3             captions.html             narration.srt
           echo "✅ TTS+字幕composition生成完了"
-          ls -lh narration.mp3 captions.html
+          ls -lh narration.mp3 narration.srt 2>/dev/null || true
       - name: Merge video audio character subtitles
         run: |
           # 動画の長さを取得
