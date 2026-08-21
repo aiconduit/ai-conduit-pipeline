@@ -1,0 +1,29 @@
+{
+  "timestamp": "2026-08-21T13:36:07.393507+00:00",
+  "results": [
+    {
+      "video_id": "_N1F5YIjDk0",
+      "title": "エンジニアあるある【ミーム動画】就活100社落ち #Shorts",
+      "views": 4,
+      "age_hours": 599.7906648630556,
+      "reason": "7日後累計4<300",
+      "action": "private"
+    },
+    {
+      "video_id": "zvUHjSnTXoc",
+      "title": "【DeepSeek×AI】就活を自動化するGitHubツール解説 #Shorts",
+      "views": 1,
+      "age_hours": 599.7926093075,
+      "reason": "7日後累計1<300",
+      "action": "private"
+    },
+    {
+      "video_id": "QpexBtSArHs",
+      "title": "【AI Conduit】就活を自動化するGitHubツールがヤバすぎた #Sho",
+      "views": 163,
+      "age_hours": 599.8609426408334,
+      "reason": "7日後累計163<300",
+      "action": "private"
+    }
+  ]
+}
