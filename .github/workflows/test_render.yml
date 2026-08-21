@@ -90,7 +90,7 @@ jobs:
           echo "動画長: ${VIDEO_DUR}秒"
 
           # 動画の長さに合わせた字幕フィルターを生成
-          SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt "$VIDEO_DUR" 2>&1) && echo "SUBFILTER=$SUBFILTER" || SUBFILTER=""
+          SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>&1) && echo "SUBFILTER_LEN=${#SUBFILTER}" || SUBFILTER=""
           echo "字幕フィルター長: ${#SUBFILTER}"
 
           if [ -n "$SUBFILTER" ]; then
