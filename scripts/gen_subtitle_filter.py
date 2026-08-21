@@ -1,8 +1,4 @@
 #!/usr/bin/env python3
-"""
-SRTからASSファイルを生成する
-GitHub ActionsのffmpegはlibASSをサポートしている
-"""
 import re, sys, os
 
 srt_path = sys.argv[1] if len(sys.argv) > 1 else 'narration.srt'
@@ -21,7 +17,23 @@ def fmt_ass(s):
     cs = int((sec % 1) * 100)
     return f"{h}:{m:02d}:{int(sec):02d}.{cs:02d}"
 
-# フォントパス確認
+def wrap_text(text, max_chars=14):
+    lines = []
+    while len(text) > max_chars:
+        cut = max_chars
+        for i in range(min(max_chars, len(text)-1), 3, -1):
+            if text[i] in '\u3002\u3001':
+                cut = i + 1
+                break
+        lines.append(text[:cut])
+        text = text[cut:]
+        if text and text[0] in '\u3002\u3001':
+            lines[-1] = lines[-1] + text[0]
+            text = text[1:]
+    if text:
+        lines.append(text)
+    return lines
+
 font_candidates = [
     '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
     '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
@@ -31,11 +43,10 @@ font_candidates = [
 fontname = "Noto Sans CJK JP"
 for f in font_candidates:
     if os.path.exists(f):
-        if 'Bold' in f:
-            fontname = "Noto Sans CJK JP Bold"
+        fontname = "Noto Sans CJK JP Bold" if 'Bold' in f else "Noto Sans CJK JP"
         break
 
-ass = f"""[Script Info]
+ass_header = f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: 1080
 PlayResY: 1920
@@ -49,11 +60,14 @@ Style: Default,{fontname},60,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
+ass = ass_header
 for timing, text in entries:
     st, et = timing.split(' --> ')
     s, e = to_sec(st), to_sec(et)
     clean = text.strip().replace('\n', ' ')
-    ass += f"Dialogue: 0,{fmt_ass(s)},{fmt_ass(e)},Default,,0,0,0,,{{\\fad(150,150)}}{clean}\n"
+    lines = wrap_text(clean)
+    wrapped = r'\N'.join(lines)
+    ass += f"Dialogue: 0,{fmt_ass(s)},{fmt_ass(e)},Default,,0,0,0,,{{\\fad(150,150)}}{wrapped}\n"
 
 open(ass_path, "w", encoding="utf-8").write(ass)
 print(f"ass:{ass_path}:{len(entries)}")
