@@ -85,32 +85,29 @@ jobs:
           ls -lh narration.mp3 narration.srt 2>/dev/null || true
       - name: Merge video audio character subtitles
         run: |
-          # 動画の長さを取得
-          VIDEO_DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 raw.mp4)
-          echo "動画長: ${VIDEO_DUR}秒"
+          # SRT→ASSに変換
+          python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
+          echo "ASS生成: $(wc -l < narration.ass)行"
 
-          # 動画の長さに合わせた字幕フィルターを生成
-          SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>&1) && echo "SUBFILTER_LEN=${#SUBFILTER}" || SUBFILTER=""
-          echo "字幕フィルター長: ${#SUBFILTER}"
+          # libassサポート確認
+          ffmpeg -filters 2>&1 | grep -i "ass" | head -3
 
-          if [ -n "$SUBFILTER" ]; then
+          # キャラ + 音声 + ASS字幕を合成
+          if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
             ffmpeg -y \
-              -i raw.mp4 \
-              -i test_render/character_main.png \
-              -i narration.mp3 \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]ass=narration.ass[vout]" \
+              -map "[vout]" -map "2:a" \
+              -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
+            echo "ASS字幕あり合成完了"
+          else
+            echo "libass未対応 → drawtext使用"
+            SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>/dev/null || echo "")
+            ffmpeg -y \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \
               -map "[vout]" -map "2:a" \
               -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
-            echo "字幕あり合成完了"
-          else
-            ffmpeg -y \
-              -i raw.mp4 \
-              -i test_render/character_main.png \
-              -i narration.mp3 \
-              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vout]" \
-              -map "[vout]" -map "2:a" \
-              -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
-            echo "字幕なし合成完了"
           fi
           ls -lh output.mp4
       - name: Upload

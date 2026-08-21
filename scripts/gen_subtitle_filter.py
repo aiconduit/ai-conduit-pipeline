@@ -1,6 +1,12 @@
-import re, sys, os, subprocess
+#!/usr/bin/env python3
+"""
+SRTからASSファイルを生成する
+GitHub ActionsのffmpegはlibASSをサポートしている
+"""
+import re, sys, os
 
 srt_path = sys.argv[1] if len(sys.argv) > 1 else 'narration.srt'
+ass_path = sys.argv[2] if len(sys.argv) > 2 else 'narration.ass'
 
 srt = open(srt_path).read()
 pattern = re.compile(r'\d+\n(\d{2}:\d{2}:\d{2},\d+ --> \d{2}:\d{2}:\d{2},\d+)\n(.+?)\n\n', re.DOTALL)
@@ -10,49 +16,44 @@ def to_sec(t):
     h,m,s = t.replace(',','.').split(':')
     return float(h)*3600+float(m)*60+float(s)
 
-# 日本語フォントパス
+def fmt_ass(s):
+    h=int(s//3600); m=int((s%3600)//60); sec=s%60
+    cs = int((sec % 1) * 100)
+    return f"{h}:{m:02d}:{int(sec):02d}.{cs:02d}"
+
+# フォントパス確認
 font_candidates = [
+    '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
     '/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+    '/usr/share/fonts/noto-cjk/NotoSansCJKjp-Bold.otf',
     '/usr/share/fonts/noto-cjk/NotoSansCJKjp-Regular.otf',
-    '/usr/share/fonts/opentype/noto/NotoSansCJKjp-Regular.otf',
 ]
-fontfile = next((f for f in font_candidates if os.path.exists(f)), '')
-font_opt = f":fontfile='{fontfile}'" if fontfile else ""
+fontname = "Noto Sans CJK JP"
+for f in font_candidates:
+    if os.path.exists(f):
+        if 'Bold' in f:
+            fontname = "Noto Sans CJK JP Bold"
+        break
 
-MAX_CHARS = 13  # 1行最大20文字（fontsize=72px、1080px幅に収まる）
+ass = f"""[Script Info]
+ScriptType: v4.00+
+PlayResX: 1080
+PlayResY: 1920
+ScaledBorderAndShadow: yes
 
-def split_text(text, max_chars=MAX_CHARS):
-    """テキストを最大max_chars文字で分割"""
-    lines = []
-    while len(text) > max_chars:
-        # 句点・読点で分割を優先
-        cut = max_chars
-        for p in ['。', '、', 'す', 'た', 'い', 'す']:
-            pos = text[:max_chars+1].rfind(p)
-            if pos > max_chars // 2:
-                cut = pos + 1
-                break
-        lines.append(text[:cut])
-        text = text[cut:]
-    if text:
-        lines.append(text)
-    return lines
+[V4+ Styles]
+Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
+Style: Default,{fontname},72,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,-1,0,0,0,100,100,0,0,1,3,0,2,40,40,1120,1
 
-filters = []
+[Events]
+Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
+"""
+
 for timing, text in entries:
-    st_str, et_str = timing.split(' --> ')
-    s = to_sec(st_str)
-    e = to_sec(et_str)
-    
-    lines = split_text(text.strip())
-    dur = e - s
-    line_dur = dur / max(len(lines), 1)
-    
-    for i, line in enumerate(lines):
-        ls = s + i * line_dur
-        le = s + (i + 1) * line_dur
-        safe = line.replace("'", "\\'").replace(':', '\\:').replace(',', '\\,')
-        f = f"drawtext=text='{safe}'{font_opt}:x=20:y=1120:fontsize=72:fontcolor=white:borderw=3:bordercolor=black:enable='between(t,{ls:.3f},{le:.3f})'"
-        filters.append(f)
+    st, et = timing.split(' --> ')
+    s, e = to_sec(st), to_sec(et)
+    clean = text.strip().replace('\n', ' ')
+    ass += f"Dialogue: 0,{fmt_ass(s)},{fmt_ass(e)},Default,,0,0,0,,{{\\fad(150,150)}}{clean}\n"
 
-print(','.join(filters))
+open(ass_path, "w", encoding="utf-8").write(ass)
+print(f"ass:{ass_path}:{len(entries)}")
