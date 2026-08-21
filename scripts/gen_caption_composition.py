@@ -4,16 +4,16 @@ import asyncio, edge_tts, subprocess, json, sys, os, re
 # サンプル別ナレーションセグメント（開始秒, 終了秒, テキスト）
 NARRATION_SEGMENTS = {
     "figma-launch": [
-        (0.0,   11.8,  "FigmaのデザインをHyperFramesで動画にできます。"),
-        (11.8,  15.1,  "インストールは一行で完了。"),
-        (15.1,  20.0,  "AI Conduitチャンネルです。"),
-        (20.0,  22.9,  "どんなデザインでも動画にできます。"),
-        (24.0,  26.2,  "figmaで簡単連携。"),
-        (26.2,  44.1,  "Claude Codeがフレームを読み込んで動画を生成します。HTMLを書くだけでプロ品質の動画が完成します。"),
-        (44.1,  49.4,  "FigmaのリンクをコピーするだけでOKです。"),
-        (49.4,  52.4,  "こんなに簡単になりました。"),
+        (0.0,   11.8,  "FigmaのデザインをそのままAIで動画にできる時代が来ました。デザイナーが求めていた機能がついに実現しました。"),
+        (11.8,  15.1,  "npxコマンド一発でインストール完了。"),
+        (15.1,  20.0,  "AI Conduitチャンネルでは毎日AIの最新情報をお届けしています。"),
+        (20.0,  22.9,  "どんなデザインでも動画になります。"),
+        (24.0,  26.2,  "スラッシュfigmaで連携。"),
+        (26.2,  44.1,  "Claude CodeがFigmaのフレームを読み込んで自動でHTMLを生成します。コードを書く必要は一切ありません。そのままHyperFramesでMP4動画に変換されます。"),
+        (44.1,  49.4,  "FigmaのデザインのリンクをコピーしてClaude Codeに貼るだけです。"),
+        (49.4,  52.4,  "デザインから動画がこんなに簡単に。"),
         (52.4,  54.4,  "モーションも自動生成。"),
-        (54.4,  64.0,  "いいねと保存をお願いします。コメントにAI Conduitと書いてください。"),
+        (54.4,  64.0,  "役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書くとソースコードをプレゼントします。"),
     ],
 }
 
@@ -72,10 +72,16 @@ if __name__ == "__main__":
         if r.returncode != 0:
             print(f"ffmpeg error: {r.stderr[-200:]}")
 
-        # SRT生成
+        # SRT生成（音声の実際の長さに合わせる）
         srt = ""
-        for i, (s, e, t) in enumerate(segments, 1):
-            srt += f"{i}\n{fmt_srt(s)} --> {fmt_srt(e)}\n{t}\n\n"
+        for i, (seg_start, seg_end, text) in enumerate(segments, 1):
+            seg_path = f"/tmp/_seg_{i-1:02d}.mp3"
+            if os.path.exists(seg_path):
+                r = subprocess.run(["ffprobe","-v","error","-show_entries","format=duration","-of","csv=p=0",seg_path], capture_output=True, text=True)
+                audio_dur = float(r.stdout.strip()) if r.stdout.strip() else seg_end - seg_start
+            else:
+                audio_dur = seg_end - seg_start
+            srt += f"{i}\n{fmt_srt(seg_start)} --> {fmt_srt(seg_start + audio_dur)}\n{text}\n\n"
         open(srt_out, "w").write(srt)
 
     else:
