@@ -43,11 +43,22 @@ jobs:
           orig_w = int(dw.group(1)) if dw else 1080
           orig_h = int(dh.group(1)) if dh else 1080
           canvas_w, canvas_h = 1080, 1920
-          left_offset = (canvas_w - orig_w) / 2
-          top_offset = (canvas_h - orig_h) / 2
+          # スケールして中央配置（横幅に合わせてスケールダウン）
+          if orig_w > canvas_w:
+              scale = canvas_w / orig_w
+              scaled_w = canvas_w
+              scaled_h = int(orig_h * scale)
+              left_offset = 0
+              top_offset = (canvas_h - scaled_h) / 2
+          else:
+              scale = 1.0
+              scaled_w = orig_w
+              scaled_h = orig_h
+              left_offset = (canvas_w - orig_w) / 2
+              top_offset = (canvas_h - orig_h) / 2
           audio_p = re.compile(r"<audio[^>]*>.*?</audio>", re.DOTALL)
           hf_p = re.compile(r"<hf-audio[^>]*/?>")
-          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}</style>"
+          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:0px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;transform:scale({scale});transform-origin:top left;overflow:hidden;}}</style>"
           comp_dir = f"{src}/compositions"
           if os.path.exists(comp_dir):
               for f in sorted(os.listdir(comp_dir)):
