@@ -2,6 +2,22 @@
 import asyncio, edge_tts, subprocess, sys, os
 
 NARRATION_DATA = {
+    "claude-design-send-hyperframes-launch": {
+        "chunks": [
+            "Claude DesignとHyperFramesを組み合わせると、デザインから動画まで全自動で作れます。",
+            "これまでデザインを動画にするには専門的なスキルと多くの時間が必要でした。",
+            "まずClaude Designにファイルをインポートします。",
+            "スライドやランディングページなど、様々なデザインに対応しています。",
+            "Claude Designに作りたい動画の指示を出すだけです。",
+            "AIが自動でシーン構成を考えて動画を生成します。コードを書く必要は一切ありません。",
+            "完成したデザインをHyperFramesにインポートします。",
+            "たったこれだけでプロ品質の動画が完成します。",
+            "Claude DesignがデザインしてHyperFramesが動画にしてHeyGenが仕上げます。",
+            "役に立ったらいいねと保存をお願いします。",
+            "コメントにAI Conduitと書くとソースコードをプレゼントします。",
+        ],
+        "rate": "+15%",
+    },
     "figma-launch": {
         "chunks": [
             "FigmaのデザインをそのままAIで動画にできる時代が来ました。",
