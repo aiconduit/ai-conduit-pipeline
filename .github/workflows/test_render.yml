@@ -37,7 +37,7 @@ jobs:
           import re, os, shutil
           name = os.environ["SAMPLE_NAME"]
           # プリレンダリング済みの場合はスキップ
-          prerendered = ["heygen-apple-motion"]
+          prerendered = ["heygen-apple-motion", "heygen-ui-motion"]
           if name in prerendered:
               import shutil as sh2
               sh2.copy(f"test_render/{name}.mp4", "raw.mp4")
@@ -87,7 +87,7 @@ jobs:
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
-          if [ "$SAMPLE_NAME" = "heygen-apple-motion" ]; then
+          if [ "$SAMPLE_NAME" = "heygen-apple-motion" ] || [ "$SAMPLE_NAME" = "heygen-ui-motion" ]; then
             ls -la test_render/ || echo "test_render not found"
             cp test_render/heygen-apple-motion.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画を使用" || echo "❌ ファイルが見つかりません"
           else
@@ -143,6 +143,7 @@ jobs:
           sample_name = os.environ.get("SAMPLE_NAME", "figma-launch")
           gift_url = f"https://aiconduit.github.io/gifts/#{sample_name}"
           titles = {
+            "heygen-ui-motion": "HeyGen UIをHyperFramesでアニメーション化する方法 #Shorts",
             "heygen-apple-motion": "HeyGen + HyperFramesでAIアバター動画を自動生成する方法 #Shorts",
             "claude-design-send-hyperframes-launch": "Claude DesignとHyperFramesでデザインを動画化する方法 #Shorts",
             "figma-launch": "FigmaのデザインをHyperFramesで動画化する方法 #Shorts",

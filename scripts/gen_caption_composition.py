@@ -2,6 +2,19 @@
 import asyncio, edge_tts, subprocess, sys, os
 
 NARRATION_DATA = {
+    "heygen-ui-motion": {
+        "chunks": [
+            "HeyGenのUIをHyperFramesでアニメーション化する方法を紹介します。",
+            "サインインからアカウント作成まで、滑らかなUIアニメーションが作れます。",
+            "バウンシーなエフェクトもたった数行のHTMLで実現できます。",
+            "コードの知識がなくても、プロ品質のUIアニメーションが作れます。",
+            "必要なアセットを追加するだけで、AIが動画を自動生成します。",
+            "HeyGenとHyperFramesで、UIデモ動画が簡単に作れます。",
+            "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+            "概要欄のリンクからテンプレートを無料で受け取れます。",
+        ],
+        "rate": "+15%",
+    },
     "heygen-apple-motion": {
         "chunks": [
             "HeyGenとHyperFramesを組み合わせると、AIアバター動画が自動で作れます。",
