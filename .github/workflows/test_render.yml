@@ -37,38 +37,44 @@ jobs:
           import re, os, shutil
           name = os.environ["SAMPLE_NAME"]
           src = f"hf_launches/{name}"
-          # assetsをコピー
-          shutil.copytree(src, f"test_render", dirs_exist_ok=True)
-          # character_main.pngをtest_render/assetsにコピー
-          char_src = "test_render/character_main.png"
-          if not os.path.exists(char_src):
-              for root, dirs, files in os.walk("."):
-                  for f in files:
-                      if f == "character_main.png":
-                          shutil.copy(os.path.join(root, f), char_src)
-                          break
-          # サイズを取得して保存（後のffmpegステップで使う）
           idx_html = open(f"{src}/index.html").read()
           dw = re.search(r'data-width="(\d+)"', idx_html)
           dh = re.search(r'data-height="(\d+)"', idx_html)
           orig_w = int(dw.group(1)) if dw else 1080
           orig_h = int(dh.group(1)) if dh else 1080
-          open("/tmp/orig_size.txt", "w").write(f"{orig_w},{orig_h}")
-          print(f"元サイズ: {orig_w}x{orig_h}")
-          # audio除去のみ（HTMLの書き換えはしない）
-          import re as re2
-          audio_p = re2.compile(r"<audio[^>]*>.*?</audio>", re2.DOTALL)
-          hf_p = re2.compile(r"<hf-audio[^>]*/?>")
+          canvas_w, canvas_h = 1080, 1920
+          left_offset = (canvas_w - orig_w) / 2
+          top_offset = (canvas_h - orig_h) / 2
+          audio_p = re.compile(r"<audio[^>]*>.*?</audio>", re.DOTALL)
+          hf_p = re.compile(r"<hf-audio[^>]*/?>")
+          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}</style>"
           comp_dir = f"{src}/compositions"
           if os.path.exists(comp_dir):
               for f in sorted(os.listdir(comp_dir)):
                   if not f.endswith(".html"): continue
-                  p = f"test_render/compositions/{f}"
+                  p = f"{comp_dir}/{f}"
                   h = open(p).read()
                   h = audio_p.sub("", h)
                   h = hf_p.sub("", h)
+                  h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
+                  h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
+                  h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
+                  h = h.replace("</head>", css + "</head>")
+                  h = re.sub(r"(<body[^>]*>)(.*?)(</body>)", lambda m: m.group(1)+"<div class=\"hf-stage-wrapper\">"+m.group(2)+"</div>"+m.group(3), h, flags=re.DOTALL)
                   open(p, "w").write(h)
-          print("✅ Convert to vertical完了（ffmpegで後処理）")
+          h = open(f"{src}/index.html").read()
+          h = audio_p.sub("", h)
+          h = hf_p.sub("", h)
+          h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
+          h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
+          h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
+          open(f"{src}/index.html", "w").write(h)
+          # キャラクター画像コピー
+          char_src = "test_render/character_main.png"
+          char_dst = f"{src}/assets/character_main.png"
+          if os.path.exists(char_src):
+              shutil.copy(char_src, char_dst)
+          print("done")
       - name: Render
         run: |
           HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
@@ -83,46 +89,32 @@ jobs:
           ls -lh narration.mp3 narration.srt 2>/dev/null || true
       - name: Merge video audio character subtitles
         run: |
-          # 元サイズ取得
-          ORIG_SIZE=$(cat /tmp/orig_size.txt 2>/dev/null || echo "1080,1080")
-          ORIG_W=$(echo $ORIG_SIZE | cut -d',' -f1)
-          ORIG_H=$(echo $ORIG_SIZE | cut -d',' -f2)
-          echo "元サイズ: ${ORIG_W}x${ORIG_H}"
-
-          # 縦型変換（1080x1920）
-          if [ "$ORIG_W" -gt "1080" ]; then
-            SCALE_H=$(python3 -c "print(int(${ORIG_H} * 1080 / ${ORIG_W}))")
-            PAD_TOP=$(python3 -c "print((1920 - ${SCALE_H}) // 2)")
-            echo "縦型変換: scale=1080:${SCALE_H}, pad=1080:1920:0:${PAD_TOP}"
-            ffmpeg -y -i raw.mp4               -vf "scale=1080:${SCALE_H},pad=1080:1920:0:${PAD_TOP}:black"               -c:v libx264 -an vertical.mp4
-          else
-            cp raw.mp4 vertical.mp4
-          fi
-          echo "縦型変換完了: $(ffprobe -v error -show_entries format=duration -of csv=p=0 vertical.mp4)秒"
-
           # SRT→ASSに変換
           python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
           echo "ASS生成: $(wc -l < narration.ass)行"
 
+          # libassサポート確認
+          ffmpeg -filters 2>&1 | grep -i "ass" | head -3
+
           # キャラ + 音声 + ASS字幕を合成
           if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
             ffmpeg -y \
-              -i vertical.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]ass=narration.ass[vout]" \
               -map "[vout]" -map "2:a" \
               -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
             echo "ASS字幕あり合成完了"
           else
+            echo "libass未対応 → drawtext使用"
             SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>/dev/null || echo "")
             ffmpeg -y \
-              -i vertical.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \
               -map "[vout]" -map "2:a" \
               -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
           fi
           ls -lh output.mp4
       - name: Upload to YouTube
-        if: ${{ github.event.inputs.upload == 'true' }}
         env:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
@@ -175,6 +167,59 @@ jobs:
           else:
               print(f"❌ 投稿失敗: {r3.status_code}")
               exit(1)
+      - name: Upload to YouTube
+        if: ${{ github.event.inputs.upload == 'true' }}
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        shell: python3 {0}
+        run: |
+          import os, requests
+          from pathlib import Path
+          sample_name = os.environ.get("SAMPLE_NAME", "figma-launch")
+          gift_url = f"https://aiconduit.github.io/gifts/#{sample_name}"
+          titles = {
+            "figma-launch": "FigmaのデザインをHyperFramesで動画化する方法 #Shorts",
+            "variables-launch": "HyperFramesのVariables機能で動画を自動生成する方法 #Shorts",
+            "cloud-render-launch": "GitHub Actions + HyperFramesで動画を完全自動投稿する方法 #Shorts",
+          }
+          title = titles.get(sample_name, f"HyperFrames {sample_name} #Shorts")
+          description = f"コメントに「AI Conduit」と書くとソースコードを受け取れます。\n\n今回のテンプレート配布ページ:\n{gift_url}\n\n役に立ったらいいねと保存をお願いします。\n\nGitHub: https://github.com/aiconduit\n#HyperFrames #ClaudeCode #AI自動化 #Shorts"
+          r = requests.post("https://oauth2.googleapis.com/token", data={
+              "grant_type": "refresh_token",
+              "refresh_token": os.environ["YOUTUBE_REFRESH_TOKEN"],
+              "client_id": os.environ["YOUTUBE_CLIENT_ID"],
+              "client_secret": os.environ["YOUTUBE_CLIENT_SECRET"],
+          })
+          token = r.json().get("access_token", "")
+          if not token:
+              print(f"トークン取得失敗: {r.text}")
+              exit(1)
+          metadata = {
+              "snippet": {"title": title[:100], "description": description, "tags": ["HyperFrames","ClaudeCode","AI自動化","Shorts"], "categoryId": "28", "defaultLanguage": "ja"},
+              "status": {"privacyStatus": "public", "selfDeclaredMadeForKids": False}
+          }
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+          r2 = requests.post(
+              "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+              headers=headers, json=metadata)
+          upload_url = r2.headers.get("Location", "")
+          if not upload_url:
+              print(f"アップロードURL取得失敗: {r2.status_code}")
+              exit(1)
+          video_path = Path("output.mp4")
+          video_size = video_path.stat().st_size
+          with open(video_path, "rb") as f:
+              r3 = requests.put(upload_url, data=f, headers={"Content-Length": str(video_size), "Content-Type": "video/mp4"})
+          if r3.status_code in [200, 201]:
+              video_id = r3.json().get("id", "")
+              print(f"✅ YouTube投稿成功: https://youtube.com/shorts/{video_id}")
+          else:
+              print(f"❌ 投稿失敗: {r3.status_code}")
+              exit(1)
+
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
