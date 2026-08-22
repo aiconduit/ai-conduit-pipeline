@@ -2,6 +2,22 @@
 import asyncio, edge_tts, subprocess, sys, os
 
 NARRATION_DATA = {
+    "heygen-apple-motion": {
+        "chunks": [
+            "HeyGenとHyperFramesを組み合わせると、AIアバター動画が自動で作れます。",
+            "これまでアバター動画を作るには専門的な知識と時間が必要でした。",
+            "42種類以上のアバターから好きなキャラクターを選べます。",
+            "バウンシーなアニメーションもHyperFramesで簡単に実装できます。",
+            "必要なアセットを追加するだけで、プロ品質のB-roll映像が完成します。",
+            "HeyGenはAI動画生成の最前線を走っています。",
+            "Make a videoと入力するだけで、ブランド動画が自動生成されます。",
+            "コードなしでここまでできるのがHyperFramesの強みです。",
+            "プロ品質の動画が誰でも簡単に作れる時代になりました。",
+            "役に立ったらいいねと保存をお願いします。",
+            "コメントにAI Conduitと書くとソースコードをプレゼントします。",
+        ],
+        "rate": "+15%",
+    },
     "claude-design-send-hyperframes-launch": {
         "chunks": [
             "Claude DesignとHyperFramesを組み合わせると、デザインから動画まで全自動で作れます。",
