@@ -6,16 +6,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: List and delete videos
+      - name: Delete all videos except figma-launch
         env:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
           YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
         shell: python3 {0}
         run: |
-          import os, requests, json
+          import os, requests, time
 
-          # トークン取得
+          KEEP_VIDEO_ID = "-m8hTZQUPkY"
+
           r = requests.post("https://oauth2.googleapis.com/token", data={
               "grant_type": "refresh_token",
               "refresh_token": os.environ["YOUTUBE_REFRESH_TOKEN"],
@@ -25,15 +26,38 @@ jobs:
           token = r.json().get("access_token", "")
           headers = {"Authorization": f"Bearer {token}"}
 
-          # 動画一覧取得
-          r2 = requests.get(
-              "https://www.googleapis.com/youtube/v3/search",
-              params={"part": "snippet", "forMine": "true", "type": "video", "maxResults": 50},
-              headers=headers
-          )
-          items = r2.json().get("items", [])
-          print(f"動画数: {len(items)}")
-          for item in items:
+          # 全動画取得（ページネーション対応）
+          all_videos = []
+          next_page = None
+          while True:
+              params = {"part": "snippet", "forMine": "true", "type": "video", "maxResults": 50}
+              if next_page:
+                  params["pageToken"] = next_page
+              r2 = requests.get("https://www.googleapis.com/youtube/v3/search", params=params, headers=headers)
+              data = r2.json()
+              all_videos.extend(data.get("items", []))
+              next_page = data.get("nextPageToken")
+              if not next_page:
+                  break
+
+          print(f"総動画数: {len(all_videos)}")
+          deleted = 0
+          for item in all_videos:
               vid = item["id"]["videoId"]
               title = item["snippet"]["title"]
-              print(f"  {vid}: {title}")
+              if vid == KEEP_VIDEO_ID:
+                  print(f"  KEEP: {vid}: {title}")
+                  continue
+              r3 = requests.delete(
+                  f"https://www.googleapis.com/youtube/v3/videos",
+                  params={"id": vid},
+                  headers=headers
+              )
+              if r3.status_code == 204:
+                  print(f"  ✅ 削除: {vid}: {title}")
+                  deleted += 1
+              else:
+                  print(f"  ❌ 失敗: {vid}: {r3.status_code}")
+              time.sleep(0.5)
+
+          print(f"\n削除完了: {deleted}本")
