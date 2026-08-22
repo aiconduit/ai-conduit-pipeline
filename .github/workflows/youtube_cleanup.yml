@@ -26,14 +26,21 @@ jobs:
           token = r.json().get("access_token", "")
           headers = {"Authorization": f"Bearer {token}"}
 
-          # 全動画取得（ページネーション対応）
+          # チャンネルID取得
+          r0 = requests.get("https://www.googleapis.com/youtube/v3/channels",
+              params={"part": "contentDetails", "mine": "true"}, headers=headers)
+          uploads_id = r0.json()["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
+          print(f"uploadsプレイリスト: {uploads_id}")
+
+          # uploadsプレイリストから全動画取得
           all_videos = []
           next_page = None
           while True:
-              params = {"part": "snippet", "forMine": "true", "type": "video", "maxResults": 50}
+              params = {"part": "snippet", "playlistId": uploads_id, "maxResults": 50}
               if next_page:
                   params["pageToken"] = next_page
-              r2 = requests.get("https://www.googleapis.com/youtube/v3/search", params=params, headers=headers)
+              r2 = requests.get("https://www.googleapis.com/youtube/v3/playlistItems",
+                  params=params, headers=headers)
               data = r2.json()
               all_videos.extend(data.get("items", []))
               next_page = data.get("nextPageToken")
@@ -43,21 +50,19 @@ jobs:
           print(f"総動画数: {len(all_videos)}")
           deleted = 0
           for item in all_videos:
-              vid = item["id"]["videoId"]
+              vid = item["snippet"]["resourceId"]["videoId"]
               title = item["snippet"]["title"]
               if vid == KEEP_VIDEO_ID:
                   print(f"  KEEP: {vid}: {title}")
                   continue
               r3 = requests.delete(
-                  f"https://www.googleapis.com/youtube/v3/videos",
-                  params={"id": vid},
-                  headers=headers
-              )
+                  "https://www.googleapis.com/youtube/v3/videos",
+                  params={"id": vid}, headers=headers)
               if r3.status_code == 204:
-                  print(f"  ✅ 削除: {vid}: {title}")
+                  print(f"  OK: {vid}: {title[:40]}")
                   deleted += 1
               else:
-                  print(f"  ❌ 失敗: {vid}: {r3.status_code}")
-              time.sleep(0.5)
+                  print(f"  NG: {vid}: {r3.status_code}")
+              time.sleep(0.3)
 
-          print(f"\n削除完了: {deleted}本")
+          print(f"削除完了: {deleted}本")
