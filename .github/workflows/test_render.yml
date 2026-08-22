@@ -39,7 +39,9 @@ jobs:
           # プリレンダリング済みの場合はスキップ
           prerendered = ["heygen-apple-motion"]
           if name in prerendered:
-              shutil.copytree(f"test_render", f"test_render_work", dirs_exist_ok=True)
+              import shutil as sh2
+              sh2.copy(f"test_render/{name}.mp4", "raw.mp4")
+              sh2.copytree(f"test_render", f"test_render_copy", dirs_exist_ok=True)
               print(f"✅ プリレンダリング済み: {name}")
               exit(0)
           src = f"hf_launches/{name}"
@@ -86,8 +88,8 @@ jobs:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
           if [ "$SAMPLE_NAME" = "heygen-apple-motion" ]; then
-            cp test_render/heygen-apple-motion.mp4 raw.mp4
-            echo "✅ プリレンダリング済み動画を使用"
+            ls -la test_render/ || echo "test_render not found"
+            cp test_render/heygen-apple-motion.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画を使用" || echo "❌ ファイルが見つかりません"
           else
             HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/$SAMPLE_NAME -o raw.mp4
           fi
