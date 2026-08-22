@@ -37,55 +37,38 @@ jobs:
           import re, os, shutil
           name = os.environ["SAMPLE_NAME"]
           src = f"hf_launches/{name}"
+          # assetsをコピー
+          shutil.copytree(src, f"test_render", dirs_exist_ok=True)
+          # character_main.pngをtest_render/assetsにコピー
+          char_src = "test_render/character_main.png"
+          if not os.path.exists(char_src):
+              for root, dirs, files in os.walk("."):
+                  for f in files:
+                      if f == "character_main.png":
+                          shutil.copy(os.path.join(root, f), char_src)
+                          break
+          # サイズを取得して保存（後のffmpegステップで使う）
           idx_html = open(f"{src}/index.html").read()
           dw = re.search(r'data-width="(\d+)"', idx_html)
           dh = re.search(r'data-height="(\d+)"', idx_html)
           orig_w = int(dw.group(1)) if dw else 1080
           orig_h = int(dh.group(1)) if dh else 1080
-          canvas_w, canvas_h = 1080, 1920
-          # スケールして中央配置（横幅に合わせてスケールダウン）
-          if orig_w > canvas_w:
-              scale = canvas_w / orig_w
-              scaled_w = canvas_w
-              scaled_h = int(orig_h * scale)
-              left_offset = 0
-              top_offset = (canvas_h - scaled_h) / 2
-          else:
-              scale = 1.0
-              scaled_w = orig_w
-              scaled_h = orig_h
-              left_offset = (canvas_w - orig_w) / 2
-              top_offset = (canvas_h - orig_h) / 2
-          audio_p = re.compile(r"<audio[^>]*>.*?</audio>", re.DOTALL)
-          hf_p = re.compile(r"<hf-audio[^>]*/?>")
-          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:0px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;transform:scale({scale});transform-origin:top left;overflow:hidden;}}</style>"
+          open("/tmp/orig_size.txt", "w").write(f"{orig_w},{orig_h}")
+          print(f"元サイズ: {orig_w}x{orig_h}")
+          # audio除去のみ（HTMLの書き換えはしない）
+          import re as re2
+          audio_p = re2.compile(r"<audio[^>]*>.*?</audio>", re2.DOTALL)
+          hf_p = re2.compile(r"<hf-audio[^>]*/?>")
           comp_dir = f"{src}/compositions"
           if os.path.exists(comp_dir):
               for f in sorted(os.listdir(comp_dir)):
                   if not f.endswith(".html"): continue
-                  p = f"{comp_dir}/{f}"
+                  p = f"test_render/compositions/{f}"
                   h = open(p).read()
                   h = audio_p.sub("", h)
                   h = hf_p.sub("", h)
-                  h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
-                  h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
-                  h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
-                  h = h.replace("</head>", css + "</head>")
-                  h = re.sub(r"(<body[^>]*>)(.*?)(</body>)", lambda m: m.group(1)+"<div class=\"hf-stage-wrapper\">"+m.group(2)+"</div>"+m.group(3), h, flags=re.DOTALL)
                   open(p, "w").write(h)
-          h = open(f"{src}/index.html").read()
-          h = audio_p.sub("", h)
-          h = hf_p.sub("", h)
-          h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
-          h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
-          h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
-          open(f"{src}/index.html", "w").write(h)
-          # キャラクター画像コピー
-          char_src = "test_render/character_main.png"
-          char_dst = f"{src}/assets/character_main.png"
-          if os.path.exists(char_src):
-              shutil.copy(char_src, char_dst)
-          print("done")
+          print("✅ Convert to vertical完了（ffmpegで後処理）")
       - name: Render
         run: |
           HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/${{ github.event.inputs.sample_name }} -o raw.mp4
@@ -100,26 +83,39 @@ jobs:
           ls -lh narration.mp3 narration.srt 2>/dev/null || true
       - name: Merge video audio character subtitles
         run: |
+          # 元サイズ取得
+          ORIG_SIZE=$(cat /tmp/orig_size.txt 2>/dev/null || echo "1080,1080")
+          ORIG_W=$(echo $ORIG_SIZE | cut -d',' -f1)
+          ORIG_H=$(echo $ORIG_SIZE | cut -d',' -f2)
+          echo "元サイズ: ${ORIG_W}x${ORIG_H}"
+
+          # 縦型変換（1080x1920）
+          if [ "$ORIG_W" -gt "1080" ]; then
+            SCALE_H=$(python3 -c "print(int(${ORIG_H} * 1080 / ${ORIG_W}))")
+            PAD_TOP=$(python3 -c "print((1920 - ${SCALE_H}) // 2)")
+            echo "縦型変換: scale=1080:${SCALE_H}, pad=1080:1920:0:${PAD_TOP}"
+            ffmpeg -y -i raw.mp4               -vf "scale=1080:${SCALE_H},pad=1080:1920:0:${PAD_TOP}:black"               -c:v libx264 -an vertical.mp4
+          else
+            cp raw.mp4 vertical.mp4
+          fi
+          echo "縦型変換完了: $(ffprobe -v error -show_entries format=duration -of csv=p=0 vertical.mp4)秒"
+
           # SRT→ASSに変換
           python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
           echo "ASS生成: $(wc -l < narration.ass)行"
 
-          # libassサポート確認
-          ffmpeg -filters 2>&1 | grep -i "ass" | head -3
-
           # キャラ + 音声 + ASS字幕を合成
           if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
             ffmpeg -y \
-              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -i vertical.mp4 -i test_render/character_main.png -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]ass=narration.ass[vout]" \
               -map "[vout]" -map "2:a" \
               -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
             echo "ASS字幕あり合成完了"
           else
-            echo "libass未対応 → drawtext使用"
             SUBFILTER=$(python3 scripts/gen_subtitle_filter.py narration.srt 2>/dev/null || echo "")
             ffmpeg -y \
-              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -i vertical.mp4 -i test_render/character_main.png -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]${SUBFILTER}[vout]" \
               -map "[vout]" -map "2:a" \
               -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
