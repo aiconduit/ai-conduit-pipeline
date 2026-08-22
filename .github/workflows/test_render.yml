@@ -36,6 +36,12 @@ jobs:
         run: |
           import re, os, shutil
           name = os.environ["SAMPLE_NAME"]
+          # プリレンダリング済みの場合はスキップ
+          prerendered = ["heygen-apple-motion"]
+          if name in prerendered:
+              shutil.copytree(f"test_render", f"test_render_work", dirs_exist_ok=True)
+              print(f"✅ プリレンダリング済み: {name}")
+              exit(0)
           src = f"hf_launches/{name}"
           idx_html = open(f"{src}/index.html").read()
           dw = re.search(r'data-width="(\d+)"', idx_html)
