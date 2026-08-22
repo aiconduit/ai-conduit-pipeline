@@ -111,6 +111,7 @@ jobs:
           fi
           ls -lh output.mp4
       - name: Upload to YouTube
+        if: ${{ github.event.inputs.upload == 'true' }}
         env:
           YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
           YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
