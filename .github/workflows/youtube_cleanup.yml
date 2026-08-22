@@ -26,11 +26,18 @@ jobs:
           token = r.json().get("access_token", "")
           headers = {"Authorization": f"Bearer {token}"}
 
-          # チャンネルID取得
+          # チャンネル情報確認
           r0 = requests.get("https://www.googleapis.com/youtube/v3/channels",
-              params={"part": "contentDetails", "mine": "true"}, headers=headers)
-          uploads_id = r0.json()["items"][0]["contentDetails"]["relatedPlaylists"]["uploads"]
-          print(f"uploadsプレイリスト: {uploads_id}")
+              params={"part": "contentDetails,snippet", "mine": "true"}, headers=headers)
+          print(f"チャンネルレスポンス: {r0.status_code}")
+          data0 = r0.json()
+          if "items" not in data0 or len(data0["items"]) == 0:
+              print(f"チャンネル取得失敗: {data0}")
+              exit(1)
+          channel = data0["items"][0]
+          print(f"チャンネル名: {channel['snippet']['title']}")
+          uploads_id = channel["contentDetails"]["relatedPlaylists"]["uploads"]
+          print(f"uploadsID: {uploads_id}")
 
           # uploadsプレイリストから全動画取得
           all_videos = []
@@ -41,8 +48,11 @@ jobs:
                   params["pageToken"] = next_page
               r2 = requests.get("https://www.googleapis.com/youtube/v3/playlistItems",
                   params=params, headers=headers)
+              print(f"playlistItems: {r2.status_code}")
               data = r2.json()
-              all_videos.extend(data.get("items", []))
+              items = data.get("items", [])
+              all_videos.extend(items)
+              print(f"  取得: {len(items)}本")
               next_page = data.get("nextPageToken")
               if not next_page:
                   break
@@ -62,7 +72,7 @@ jobs:
                   print(f"  OK: {vid}: {title[:40]}")
                   deleted += 1
               else:
-                  print(f"  NG: {vid}: {r3.status_code}")
+                  print(f"  NG: {vid}: {r3.status_code} {r3.text[:100]}")
               time.sleep(0.3)
 
           print(f"削除完了: {deleted}本")
