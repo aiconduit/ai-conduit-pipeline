@@ -1,0 +1,39 @@
+name: YouTube Cleanup
+on:
+  workflow_dispatch:
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: List and delete videos
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        shell: python3 {0}
+        run: |
+          import os, requests, json
+
+          # トークン取得
+          r = requests.post("https://oauth2.googleapis.com/token", data={
+              "grant_type": "refresh_token",
+              "refresh_token": os.environ["YOUTUBE_REFRESH_TOKEN"],
+              "client_id": os.environ["YOUTUBE_CLIENT_ID"],
+              "client_secret": os.environ["YOUTUBE_CLIENT_SECRET"],
+          })
+          token = r.json().get("access_token", "")
+          headers = {"Authorization": f"Bearer {token}"}
+
+          # 動画一覧取得
+          r2 = requests.get(
+              "https://www.googleapis.com/youtube/v3/search",
+              params={"part": "snippet", "forMine": "true", "type": "video", "maxResults": 50},
+              headers=headers
+          )
+          items = r2.json().get("items", [])
+          print(f"動画数: {len(items)}")
+          for item in items:
+              vid = item["id"]["videoId"]
+              title = item["snippet"]["title"]
+              print(f"  {vid}: {title}")
