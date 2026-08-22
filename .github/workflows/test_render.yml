@@ -6,6 +6,10 @@ on:
         description: Sample name
         required: true
         default: figma-launch
+      upload:
+        description: 'Upload to YouTube (true/false)'
+        required: false
+        default: 'false'
 jobs:
   render:
     runs-on: ubuntu-latest
