@@ -146,6 +146,7 @@ jobs:
             "heygen-ui-motion": "HeyGen UIをHyperFramesでアニメーション化する方法 #Shorts",
             "heygen-apple-motion": "HeyGen + HyperFramesでAIアバター動画を自動生成する方法 #Shorts",
             "claude-design-send-hyperframes-launch": "Claude DesignとHyperFramesでデザインを動画化する方法 #Shorts",
+            "figma-launch-v2": "FigmaデザインをMP4動画に変換する仕組みを解説 #Shorts",
             "figma-launch": "FigmaのデザインをHyperFramesで動画化する方法 #Shorts",
             "variables-launch": "HyperFramesのVariables機能で動画を自動生成する方法 #Shorts",
             "cloud-render-launch": "GitHub Actions + HyperFramesで動画を完全自動投稿する方法 #Shorts",
