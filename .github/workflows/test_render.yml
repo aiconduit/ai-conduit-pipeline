@@ -37,6 +37,10 @@ jobs:
           import re, os, shutil
           name = os.environ["SAMPLE_NAME"]
           # プリレンダリング済みの場合はスキップ
+          # v2サンプルは元のサンプルにリダイレクト
+          aliases = {"figma-launch-v2": "figma-launch"}
+          if name in aliases:
+              name = aliases[name]
           prerendered = ["heygen-apple-motion", "heygen-ui-motion"]
           if name in prerendered:
               import shutil as sh2
@@ -87,7 +91,11 @@ jobs:
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
-          if [ "$SAMPLE_NAME" = "heygen-apple-motion" ] || [ "$SAMPLE_NAME" = "heygen-ui-motion" ]; then
+          # エイリアス処理
+          RENDER_SAMPLE=$SAMPLE_NAME
+          [ "$SAMPLE_NAME" = "figma-launch-v2" ] && RENDER_SAMPLE="figma-launch"
+          if [ "$RENDER_SAMPLE" = "heygen-apple-motion" ] || [ "$RENDER_SAMPLE" = "heygen-ui-motion" ]; then
+            cp test_render/${RENDER_SAMPLE}.mp4 raw.mp4 && echo "✅ プリレンダリング済み"
             ls -la test_render/ || echo "test_render not found"
             cp test_render/heygen-apple-motion.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画を使用" || echo "❌ ファイルが見つかりません"
           else
