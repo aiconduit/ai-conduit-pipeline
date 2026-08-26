@@ -171,14 +171,14 @@ if __name__ == "__main__":
 # html-anything紹介動画（縦型オリジナル）
 NARRATION_DATA["html-anything-launch"] = {
     "chunks": [
-        "Claude CodeでHTMLを書くだけで動画が作れる時代になりました。",
-        "html-anythingというツールがGitHubで8000スター超えの大バズりです。",
-        "AIエージェントがHTMLを自動生成して、そのままShortsやReelsに変換できます。",
-        "Claude Code、Cursor、Gemini、Qwenなど主要AIに全対応しています。",
-        "APIキーも不要です。手元のAIエージェントだけで動きます。",
+        "HTMLを書くだけで動画になる時代が来ました。",
+        "html-anythingがGitHubで8000スター超えの大バズりです。",
+        "AIエージェントがHTMLを自動生成して、そのまま縦動画に変換できます。",
+        "Claude Code、Cursor、Geminiなど9つの主要AIエージェントに全対応しています。",
+        "APIキーは一切不要です。手元のAIエージェントだけで動きます。",
         "75種類のスキルと9つの出力形式に対応しています。",
-        "雑誌風、スライド、ポスター、SNS投稿、データレポートも一発生成。",
-        "HyperFramesと組み合わせれば完全自動の動画制作パイプラインが完成します。",
+        "npxコマンド一発でスキルを追加して、HyperFramesで動画を自動生成できます。",
+        "完全自動パイプラインで毎日YouTube Shortsを投稿できる時代になりました。",
         "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
         "概要欄のリンクからテンプレートを無料で受け取れます。",
     ],
