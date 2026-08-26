@@ -5,209 +5,337 @@
 <meta name="viewport" content="width=1080, height=1920" />
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=block');
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    width: 1080px;
-    height: 1920px;
-    overflow: hidden;
-    background: #0a0a0a;
-    font-family: 'Inter', sans-serif;
-    color: #fff;
-  }
-  #root {
-    position: relative;
-    width: 1080px;
-    height: 1920px;
-    overflow: hidden;
-  }
-  .scene {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 60px 60px 960px 60px;
-  }
-  /* シーン1: フック */
-  #scene-01 { background: #0a0a0a; }
-  .hook-label {
-    font-size: 32px;
-    font-weight: 700;
-    color: #888;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    margin-bottom: 32px;
-  }
-  .hook-title {
-    font-size: 88px;
-    font-weight: 900;
-    line-height: 1.05;
-    text-align: center;
-    letter-spacing: -0.03em;
-  }
-  .hook-title .accent { color: #F59E0B; }
-  .hook-title .white { color: #fff; }
-  .stars-badge {
-    margin-top: 40px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #1a1a1a;
-    border: 1px solid #333;
-    border-radius: 50px;
-    padding: 16px 32px;
-    font-size: 28px;
-    font-weight: 700;
-    color: #F59E0B;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&family=JetBrains+Mono:wght@400;600&display=block');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  width: 1080px; height: 1920px;
+  overflow: hidden;
+  background: #0a0a0a;
+  font-family: 'Inter', sans-serif;
+  color: #e0e0e0;
+}
+#root { position: relative; width: 1080px; height: 1920px; overflow: hidden; }
 
-  /* シーン2: ツール説明 */
-  #scene-02 { background: #0f0f0f; }
-  .tool-name {
-    font-size: 56px;
-    font-weight: 900;
-    color: #F59E0B;
-    margin-bottom: 24px;
-    text-align: center;
-  }
-  .tool-desc {
-    font-size: 40px;
-    font-weight: 700;
-    color: #fff;
-    text-align: center;
-    line-height: 1.3;
-  }
-  .tool-sub {
-    font-size: 28px;
-    color: #888;
-    text-align: center;
-    margin-top: 20px;
-    line-height: 1.5;
-  }
+/* ── 共通パーティクル背景 ── */
+#bg-canvas {
+  position: absolute; inset: 0; width: 1080px; height: 1920px; z-index: 0; opacity: 0.5;
+}
 
-  /* シーン3: 機能リスト */
-  #scene-03 { background: #0a0a0a; }
-  .feature-list {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    width: 100%;
-  }
-  .feature-item {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-    background: #1a1a1a;
-    border-radius: 16px;
-    padding: 28px 32px;
-    border-left: 4px solid #F59E0B;
-  }
-  .feature-icon { font-size: 44px; }
-  .feature-text { font-size: 32px; font-weight: 700; color: #fff; line-height: 1.3; }
+/* ── 全シーン共通 ── */
+.scene {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start;
+  padding: 100px 72px 960px;
+  z-index: 1;
+}
 
-  /* シーン4: CTA */
-  #scene-04 { background: #0a0a0a; }
-  .cta-title {
-    font-size: 72px;
-    font-weight: 900;
-    text-align: center;
-    line-height: 1.1;
-    margin-bottom: 40px;
-  }
-  .cta-badge {
-    background: #F59E0B;
-    color: #000;
-    font-size: 36px;
-    font-weight: 900;
-    padding: 24px 56px;
-    border-radius: 100px;
-    text-align: center;
-  }
+/* ── Scene 1: フック ── */
+#scene-01 { background: transparent; }
+.s1-eyebrow {
+  font-size: 26px; font-weight: 300; letter-spacing: 0.2em;
+  color: #06b6d4; text-transform: uppercase; margin-bottom: 48px;
+}
+.s1-stars {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(124,58,237,0.15); border: 1px solid #7c3aed;
+  border-radius: 9999px; padding: 14px 36px;
+  font-size: 26px; font-weight: 300; color: #e0e0e0;
+  margin-bottom: 56px;
+}
+.s1-title {
+  font-size: 96px; font-weight: 200; line-height: 1.05;
+  text-align: center; letter-spacing: 0.02em;
+}
+.s1-title .accent-cyan { color: #06b6d4; }
+.s1-title .accent-purple { color: #7c3aed; }
+.s1-title .thin { font-weight: 200; color: #e0e0e0; }
+
+/* GitHub badge */
+.gh-badge {
+  margin-top: 56px;
+  display: flex; align-items: center; gap: 16px;
+  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px; padding: 20px 36px;
+}
+.gh-badge svg { width: 40px; height: 40px; fill: #e0e0e0; }
+.gh-badge-text { font-size: 28px; font-weight: 300; }
+.gh-badge-stars { font-size: 28px; font-weight: 700; color: #06b6d4; }
+
+/* ── Scene 2: ツール説明 ── */
+#scene-02 { background: transparent; }
+.s2-logo-row {
+  display: flex; align-items: center; gap: 24px; margin-bottom: 48px;
+}
+.s2-logo-box {
+  width: 88px; height: 88px; border-radius: 20px;
+  background: rgba(124,58,237,0.2); border: 1px solid #7c3aed;
+  display: flex; align-items: center; justify-content: center;
+}
+.s2-logo-box svg { width: 52px; height: 52px; }
+.s2-plus { font-size: 48px; font-weight: 200; color: #555; }
+.s2-title {
+  font-size: 64px; font-weight: 200; letter-spacing: 0.05em;
+  color: #06b6d4; margin-bottom: 32px; text-align: center;
+}
+.s2-desc {
+  font-size: 40px; font-weight: 300; color: #e0e0e0;
+  text-align: center; line-height: 1.5; margin-bottom: 40px;
+}
+.ai-chips {
+  display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
+}
+.ai-chip {
+  background: rgba(6,182,212,0.1); border: 1px solid rgba(6,182,212,0.3);
+  border-radius: 9999px; padding: 12px 28px;
+  font-size: 26px; font-weight: 300; color: #06b6d4;
+}
+
+/* ── Scene 3: Terminal / コードスニペット ── */
+#scene-03 { background: transparent; }
+.s3-label {
+  font-size: 28px; font-weight: 300; color: #7c3aed;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.terminal {
+  width: 100%; background: #0f0f0f;
+  border: 1px solid rgba(124,58,237,0.4);
+  border-radius: 16px; overflow: hidden;
+}
+.terminal-bar {
+  background: #1a1a1a; padding: 16px 24px;
+  display: flex; align-items: center; gap: 10px;
+}
+.dot { width: 14px; height: 14px; border-radius: 50%; }
+.dot-r { background: #ff5f57; }
+.dot-y { background: #ffbd2e; }
+.dot-g { background: #28c840; }
+.terminal-title { font-size: 22px; color: #555; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
+.terminal-body { padding: 32px; font-family: 'JetBrains Mono', monospace; font-size: 28px; line-height: 1.8; }
+.t-comment { color: #555; }
+.t-cmd { color: #06b6d4; }
+.t-str { color: #7c3aed; }
+.t-output { color: #28c840; }
+.cursor { display: inline-block; width: 14px; height: 28px; background: #06b6d4; animation: blink 1s step-end infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+/* feature pills under terminal */
+.feat-pills { display: flex; flex-direction: column; gap: 20px; width: 100%; margin-top: 32px; }
+.feat-pill {
+  display: flex; align-items: center; gap: 20px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; padding: 22px 28px;
+}
+.feat-pill-icon { font-size: 36px; }
+.feat-pill-text { font-size: 30px; font-weight: 300; color: #e0e0e0; }
+.feat-pill-badge {
+  margin-left: auto; font-size: 22px; font-weight: 600;
+  color: #06b6d4; letter-spacing: 0.05em;
+}
+
+/* ── Scene 4: CTA ── */
+#scene-04 { background: transparent; padding-top: 120px; }
+.s4-glow {
+  position: absolute; top: 60px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%);
+  z-index: 0;
+}
+.s4-content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; }
+.s4-title {
+  font-size: 76px; font-weight: 200; text-align: center;
+  line-height: 1.15; letter-spacing: 0.02em; margin-bottom: 48px;
+}
+.s4-title .purple { color: #7c3aed; font-weight: 700; }
+.s4-cta {
+  background: linear-gradient(135deg, #7c3aed, #06b6d4);
+  border-radius: 9999px; padding: 28px 72px;
+  font-size: 34px; font-weight: 700; color: #fff; text-align: center;
+  margin-bottom: 32px;
+}
+.s4-sub { font-size: 28px; font-weight: 300; color: #555; text-align: center; }
 </style>
 </head>
 <body>
-<div id="root" data-composition-id="html-anything-launch" data-start="0" data-width="1080" data-height="1920" data-duration="38">
+<div id="root" data-composition-id="html-anything-launch" data-start="0" data-width="1080" data-height="1920" data-duration="40">
 
-  <!-- Scene 1: フック (0-8s) -->
-  <div id="scene-01" class="scene" data-composition-id="scene-01" data-start="0" data-duration="8" data-track-index="1">
-    <div class="hook-label" id="label1">GitHub トレンド急上昇</div>
-    <div class="hook-title">
-      <span class="white" id="h1">HTMLを書くだけで</span><br>
-      <span class="accent" id="h2">動画になる</span><br>
-      <span class="white" id="h3">時代が来た</span>
-    </div>
-    <div class="stars-badge" id="stars">⭐ 8,400+ Stars</div>
+<!-- パーティクル背景 -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- Scene 1: フック (0-9s) -->
+<div id="scene-01" class="scene" data-composition-id="scene-01" data-start="0" data-duration="9" data-track-index="1">
+  <div class="s1-eyebrow" id="s1-eyebrow">GitHub トレンド急上昇 🔥</div>
+  <div class="s1-stars" id="s1-stars">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="#7c3aed"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+    8,400+ Stars
   </div>
-
-  <!-- Scene 2: ツール説明 (8-18s) -->
-  <div id="scene-02" class="scene" data-composition-id="scene-02" data-start="8" data-duration="10" data-track-index="1">
-    <div class="tool-name" id="toolname">html-anything</div>
-    <div class="tool-desc" id="tooldesc">AIエージェントがHTMLを<br>自動生成して動画化</div>
-    <div class="tool-sub" id="toolsub">Claude Code / Cursor / Gemini<br>全対応・APIキー不要</div>
+  <div class="s1-title" id="s1-title">
+    <span class="thin">HTMLを書くだけで</span><br>
+    <span class="accent-cyan">動画になる</span><br>
+    <span class="thin">時代が来た</span>
   </div>
-
-  <!-- Scene 3: 機能 (18-30s) -->
-  <div id="scene-03" class="scene" data-composition-id="scene-03" data-start="18" data-duration="12" data-track-index="1">
-    <div class="feature-list">
-      <div class="feature-item" id="f1">
-        <span class="feature-icon">🎬</span>
-        <span class="feature-text">Shorts・Reels自動変換</span>
-      </div>
-      <div class="feature-item" id="f2">
-        <span class="feature-icon">🛠️</span>
-        <span class="feature-text">75スキル×9出力形式</span>
-      </div>
-      <div class="feature-item" id="f3">
-        <span class="feature-icon">🔑</span>
-        <span class="feature-text">APIキー完全不要</span>
-      </div>
-      <div class="feature-item" id="f4">
-        <span class="feature-icon">⚡</span>
-        <span class="feature-text">HyperFramesで完全自動化</span>
-      </div>
+  <div class="gh-badge" id="gh-badge">
+    <!-- GitHub SVG -->
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+    <div>
+      <div class="gh-badge-text">nexu-io/html-anything</div>
+      <div class="gh-badge-stars">⭐ 8,464 Stars</div>
     </div>
   </div>
+</div>
 
-  <!-- Scene 4: CTA (30-38s) -->
-  <div id="scene-04" class="scene" data-composition-id="scene-04" data-start="30" data-duration="8" data-track-index="1">
-    <div class="cta-title" id="ctatitle">コメントに<br><span style="color:#F59E0B">AI Conduit</span><br>と書いてね</div>
-    <div class="cta-badge" id="ctabadge">いいね＆保存お願いします</div>
+<!-- Scene 2: ツール説明 (9-20s) -->
+<div id="scene-02" class="scene" data-composition-id="scene-02" data-start="9" data-duration="11" data-track-index="1">
+  <div class="s2-logo-row" id="s2-logo-row">
+    <div class="s2-logo-box">
+      <!-- Claude logo -->
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4.709 15.955l4.72-2.647.08-.23-.08-.232-4.72-2.648v-1.04l5.545 3.128v.783L4.709 16.994v-1.04zm7.193 1.79l-1.002-.437 3.892-8.962 1.001.437-3.89 8.962z" fill="#06b6d4"/><path d="M19.291 15.955l-4.72-2.647v-.782l5.545-3.128v1.04l-4.72 2.648-.08.231.08.231 4.72 2.648v1.04l-5.545-3.129v-.782l4.72-2.647v1.039z" fill="#7c3aed"/></svg>
+    </div>
+    <div class="s2-plus">+</div>
+    <div class="s2-logo-box">
+      <svg viewBox="0 0 24 24" fill="#e0e0e0" xmlns="http://www.w3.org/2000/svg"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+    </div>
+    <div class="s2-plus">+</div>
+    <div class="s2-logo-box" style="background:rgba(6,182,212,0.2);border-color:#06b6d4;">
+      <svg viewBox="0 0 24 24" fill="#06b6d4" xmlns="http://www.w3.org/2000/svg"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    </div>
   </div>
+  <div class="s2-title" id="s2-title">html-anything</div>
+  <div class="s2-desc" id="s2-desc">AIエージェントがHTMLを<br>自動生成して動画化</div>
+  <div class="ai-chips" id="ai-chips">
+    <div class="ai-chip">Claude Code</div>
+    <div class="ai-chip">Cursor</div>
+    <div class="ai-chip">Gemini</div>
+    <div class="ai-chip">Qwen</div>
+    <div class="ai-chip">APIキー不要</div>
+  </div>
+</div>
+
+<!-- Scene 3: Terminal + 機能 (20-33s) -->
+<div id="scene-03" class="scene" data-composition-id="scene-03" data-start="20" data-duration="13" data-track-index="1">
+  <div class="s3-label" id="s3-label">// 実行デモ</div>
+  <div class="terminal" id="terminal">
+    <div class="terminal-bar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span class="terminal-title">claude-code ~ html-anything</span>
+    </div>
+    <div class="terminal-body">
+      <div class="t-comment" id="t-line1"># HyperFramesと連携</div>
+      <div id="t-line2"><span class="t-cmd">npx</span> <span class="t-str">skills add html-anything</span></div>
+      <div id="t-line3"><span class="t-cmd">hyperframes</span> <span class="t-str">render</span> shorts/</div>
+      <div id="t-line4"><span class="t-output">✓ output.mp4 生成完了</span></div>
+      <div id="t-line5"><span class="t-output">✓ YouTube Shorts 投稿完了</span></div>
+      <div><span class="cursor"></span></div>
+    </div>
+  </div>
+  <div class="feat-pills" id="feat-pills">
+    <div class="feat-pill" id="fp1">
+      <span class="feat-pill-icon">🎬</span>
+      <span class="feat-pill-text">Shorts・Reels自動変換</span>
+      <span class="feat-pill-badge">9形式</span>
+    </div>
+    <div class="feat-pill" id="fp2">
+      <span class="feat-pill-icon">🛠️</span>
+      <span class="feat-pill-text">スキル対応</span>
+      <span class="feat-pill-badge">75種類</span>
+    </div>
+    <div class="feat-pill" id="fp3">
+      <span class="feat-pill-icon">⚡</span>
+      <span class="feat-pill-text">完全自動パイプライン</span>
+      <span class="feat-pill-badge">無料</span>
+    </div>
+  </div>
+</div>
+
+<!-- Scene 4: CTA (33-40s) -->
+<div id="scene-04" class="scene" data-composition-id="scene-04" data-start="33" data-duration="7" data-track-index="1">
+  <div class="s4-glow"></div>
+  <div class="s4-content">
+    <div class="s4-title" id="s4-title">
+      コメントに<br>
+      <span class="purple">AI Conduit</span><br>
+      と書いてね
+    </div>
+    <div class="s4-cta" id="s4-cta">いいね＆保存お願いします</div>
+    <div class="s4-sub" id="s4-sub">概要欄からテンプレート無料配布中</div>
+  </div>
+</div>
 
 </div>
+
 <script>
+// ── パーティクル背景 ──
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = 1080; canvas.height = 1920;
+const particles = Array.from({length: 80}, () => ({
+  x: Math.random() * 1080,
+  y: Math.random() * 1920,
+  r: Math.random() * 2 + 0.5,
+  vx: (Math.random() - 0.5) * 0.3,
+  vy: (Math.random() - 0.5) * 0.3,
+  hue: Math.random() > 0.5 ? '#06b6d4' : '#7c3aed',
+  alpha: Math.random() * 0.4 + 0.1
+}));
+
+function drawParticles() {
+  ctx.clearRect(0, 0, 1080, 1920);
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fillStyle = p.hue;
+    ctx.globalAlpha = p.alpha;
+    ctx.fill();
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0 || p.x > 1080) p.vx *= -1;
+    if (p.y < 0 || p.y > 1920) p.vy *= -1;
+  });
+  ctx.globalAlpha = 1;
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+
+// ── GSAP Timelines ──
 window.__timelines = window.__timelines || {};
 
 // Scene 1
 const tl1 = gsap.timeline({ paused: true });
-tl1.from("#label1", { y: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
-tl1.from("#h1", { y: 50, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.4);
-tl1.from("#h2", { y: 50, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.7);
-tl1.from("#h3", { y: 50, opacity: 0, duration: 0.6, ease: "power3.out" }, 1.0);
-tl1.from("#stars", { scale: 0.8, opacity: 0, duration: 0.5, ease: "back.out(1.7)" }, 1.4);
+tl1.from("#s1-eyebrow", { y: 20, opacity: 0, duration: 0.7, ease: "sine.inOut" }, 0.3);
+tl1.from("#s1-stars", { scale: 0.9, opacity: 0, duration: 0.7, ease: "back.out(1.7)" }, 0.7);
+tl1.from("#s1-title", { y: 60, opacity: 0, duration: 1.0, ease: "sine.inOut" }, 1.1);
+tl1.from("#gh-badge", { y: 30, opacity: 0, duration: 0.7, ease: "sine.inOut" }, 2.0);
 window.__timelines["scene-01"] = tl1;
 
 // Scene 2
 const tl2 = gsap.timeline({ paused: true });
-tl2.from("#toolname", { y: 40, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.2);
-tl2.from("#tooldesc", { y: 30, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.6);
-tl2.from("#toolsub", { y: 20, opacity: 0, duration: 0.5, ease: "power3.out" }, 1.0);
+tl2.from("#s2-logo-row > *", { scale: 0.7, opacity: 0, duration: 0.5, stagger: 0.15, ease: "back.out(1.7)" }, 0.3);
+tl2.from("#s2-title", { y: 30, opacity: 0, duration: 0.8, ease: "sine.inOut" }, 1.0);
+tl2.from("#s2-desc", { y: 20, opacity: 0, duration: 0.7, ease: "sine.inOut" }, 1.5);
+tl2.from(".ai-chip", { scale: 0.8, opacity: 0, duration: 0.4, stagger: 0.1, ease: "back.out(1.7)" }, 2.0);
 window.__timelines["scene-02"] = tl2;
 
 // Scene 3
 const tl3 = gsap.timeline({ paused: true });
-tl3.from("#f1", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
-tl3.from("#f2", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.5);
-tl3.from("#f3", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.8);
-tl3.from("#f4", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 1.1);
+tl3.from("#s3-label", { opacity: 0, duration: 0.5, ease: "sine.inOut" }, 0.2);
+tl3.from("#terminal", { y: 40, opacity: 0, duration: 0.8, ease: "sine.inOut" }, 0.5);
+tl3.from("#t-line1", { opacity: 0, duration: 0.3 }, 1.2);
+tl3.from("#t-line2", { opacity: 0, duration: 0.3 }, 1.8);
+tl3.from("#t-line3", { opacity: 0, duration: 0.3 }, 2.4);
+tl3.from("#t-line4", { opacity: 0, duration: 0.3 }, 3.0);
+tl3.from("#t-line5", { opacity: 0, duration: 0.3 }, 3.6);
+tl3.from("#fp1", { x: -40, opacity: 0, duration: 0.5, ease: "power3.out" }, 4.5);
+tl3.from("#fp2", { x: -40, opacity: 0, duration: 0.5, ease: "power3.out" }, 4.9);
+tl3.from("#fp3", { x: -40, opacity: 0, duration: 0.5, ease: "power3.out" }, 5.3);
 window.__timelines["scene-03"] = tl3;
 
 // Scene 4
 const tl4 = gsap.timeline({ paused: true });
-tl4.from("#ctatitle", { scale: 0.9, opacity: 0, duration: 0.7, ease: "back.out(1.7)" }, 0.2);
-tl4.from("#ctabadge", { y: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.8);
+tl4.from("#s4-title", { scale: 0.9, opacity: 0, duration: 1.0, ease: "sine.inOut" }, 0.3);
+tl4.from("#s4-cta", { y: 30, opacity: 0, duration: 0.7, ease: "back.out(1.7)" }, 1.2);
+tl4.from("#s4-sub", { opacity: 0, duration: 0.5, ease: "sine.inOut" }, 1.9);
 window.__timelines["scene-04"] = tl4;
 </script>
 </body>
