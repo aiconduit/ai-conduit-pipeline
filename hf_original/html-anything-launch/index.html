@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800;900&display=block');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+    background: #0a0a0a;
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+  }
+  #root {
+    position: relative;
+    width: 1080px;
+    height: 1920px;
+    overflow: hidden;
+  }
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 60px 960px 60px;
+  }
+  /* シーン1: フック */
+  #scene-01 { background: #0a0a0a; }
+  .hook-label {
+    font-size: 32px;
+    font-weight: 700;
+    color: #888;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .hook-title {
+    font-size: 88px;
+    font-weight: 900;
+    line-height: 1.05;
+    text-align: center;
+    letter-spacing: -0.03em;
+  }
+  .hook-title .accent { color: #F59E0B; }
+  .hook-title .white { color: #fff; }
+  .stars-badge {
+    margin-top: 40px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 50px;
+    padding: 16px 32px;
+    font-size: 28px;
+    font-weight: 700;
+    color: #F59E0B;
+  }
+
+  /* シーン2: ツール説明 */
+  #scene-02 { background: #0f0f0f; }
+  .tool-name {
+    font-size: 56px;
+    font-weight: 900;
+    color: #F59E0B;
+    margin-bottom: 24px;
+    text-align: center;
+  }
+  .tool-desc {
+    font-size: 40px;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .tool-sub {
+    font-size: 28px;
+    color: #888;
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.5;
+  }
+
+  /* シーン3: 機能リスト */
+  #scene-03 { background: #0a0a0a; }
+  .feature-list {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+    width: 100%;
+  }
+  .feature-item {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    background: #1a1a1a;
+    border-radius: 16px;
+    padding: 28px 32px;
+    border-left: 4px solid #F59E0B;
+  }
+  .feature-icon { font-size: 44px; }
+  .feature-text { font-size: 32px; font-weight: 700; color: #fff; line-height: 1.3; }
+
+  /* シーン4: CTA */
+  #scene-04 { background: #0a0a0a; }
+  .cta-title {
+    font-size: 72px;
+    font-weight: 900;
+    text-align: center;
+    line-height: 1.1;
+    margin-bottom: 40px;
+  }
+  .cta-badge {
+    background: #F59E0B;
+    color: #000;
+    font-size: 36px;
+    font-weight: 900;
+    padding: 24px 56px;
+    border-radius: 100px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="html-anything-launch" data-start="0" data-width="1080" data-height="1920" data-duration="38">
+
+  <!-- Scene 1: フック (0-8s) -->
+  <div id="scene-01" class="scene" data-composition-id="scene-01" data-start="0" data-duration="8" data-track-index="1">
+    <div class="hook-label" id="label1">GitHub トレンド急上昇</div>
+    <div class="hook-title">
+      <span class="white" id="h1">HTMLを書くだけで</span><br>
+      <span class="accent" id="h2">動画になる</span><br>
+      <span class="white" id="h3">時代が来た</span>
+    </div>
+    <div class="stars-badge" id="stars">⭐ 8,400+ Stars</div>
+  </div>
+
+  <!-- Scene 2: ツール説明 (8-18s) -->
+  <div id="scene-02" class="scene" data-composition-id="scene-02" data-start="8" data-duration="10" data-track-index="1">
+    <div class="tool-name" id="toolname">html-anything</div>
+    <div class="tool-desc" id="tooldesc">AIエージェントがHTMLを<br>自動生成して動画化</div>
+    <div class="tool-sub" id="toolsub">Claude Code / Cursor / Gemini<br>全対応・APIキー不要</div>
+  </div>
+
+  <!-- Scene 3: 機能 (18-30s) -->
+  <div id="scene-03" class="scene" data-composition-id="scene-03" data-start="18" data-duration="12" data-track-index="1">
+    <div class="feature-list">
+      <div class="feature-item" id="f1">
+        <span class="feature-icon">🎬</span>
+        <span class="feature-text">Shorts・Reels自動変換</span>
+      </div>
+      <div class="feature-item" id="f2">
+        <span class="feature-icon">🛠️</span>
+        <span class="feature-text">75スキル×9出力形式</span>
+      </div>
+      <div class="feature-item" id="f3">
+        <span class="feature-icon">🔑</span>
+        <span class="feature-text">APIキー完全不要</span>
+      </div>
+      <div class="feature-item" id="f4">
+        <span class="feature-icon">⚡</span>
+        <span class="feature-text">HyperFramesで完全自動化</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scene 4: CTA (30-38s) -->
+  <div id="scene-04" class="scene" data-composition-id="scene-04" data-start="30" data-duration="8" data-track-index="1">
+    <div class="cta-title" id="ctatitle">コメントに<br><span style="color:#F59E0B">AI Conduit</span><br>と書いてね</div>
+    <div class="cta-badge" id="ctabadge">いいね＆保存お願いします</div>
+  </div>
+
+</div>
+<script>
+window.__timelines = window.__timelines || {};
+
+// Scene 1
+const tl1 = gsap.timeline({ paused: true });
+tl1.from("#label1", { y: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+tl1.from("#h1", { y: 50, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.4);
+tl1.from("#h2", { y: 50, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.7);
+tl1.from("#h3", { y: 50, opacity: 0, duration: 0.6, ease: "power3.out" }, 1.0);
+tl1.from("#stars", { scale: 0.8, opacity: 0, duration: 0.5, ease: "back.out(1.7)" }, 1.4);
+window.__timelines["scene-01"] = tl1;
+
+// Scene 2
+const tl2 = gsap.timeline({ paused: true });
+tl2.from("#toolname", { y: 40, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.2);
+tl2.from("#tooldesc", { y: 30, opacity: 0, duration: 0.6, ease: "power3.out" }, 0.6);
+tl2.from("#toolsub", { y: 20, opacity: 0, duration: 0.5, ease: "power3.out" }, 1.0);
+window.__timelines["scene-02"] = tl2;
+
+// Scene 3
+const tl3 = gsap.timeline({ paused: true });
+tl3.from("#f1", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.2);
+tl3.from("#f2", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.5);
+tl3.from("#f3", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.8);
+tl3.from("#f4", { x: -60, opacity: 0, duration: 0.5, ease: "power3.out" }, 1.1);
+window.__timelines["scene-03"] = tl3;
+
+// Scene 4
+const tl4 = gsap.timeline({ paused: true });
+tl4.from("#ctatitle", { scale: 0.9, opacity: 0, duration: 0.7, ease: "back.out(1.7)" }, 0.2);
+tl4.from("#ctabadge", { y: 30, opacity: 0, duration: 0.5, ease: "power3.out" }, 0.8);
+window.__timelines["scene-04"] = tl4;
+</script>
+</body>
+</html>

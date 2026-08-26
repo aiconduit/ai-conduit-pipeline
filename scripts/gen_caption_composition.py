@@ -167,3 +167,20 @@ if __name__ == "__main__":
         open(srt_out, "w", encoding="utf-8").write(srt)
         open(html_out, "w", encoding="utf-8").write("")
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
+
+# html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["html-anything-launch"] = {
+    "chunks": [
+        "Claude CodeでHTMLを書くだけで動画が作れる時代になりました。",
+        "html-anythingというツールがGitHubで8000スター超えの大バズりです。",
+        "AIエージェントがHTMLを自動生成して、そのままShortsやReelsに変換できます。",
+        "Claude Code、Cursor、Gemini、Qwenなど主要AIに全対応しています。",
+        "APIキーも不要です。手元のAIエージェントだけで動きます。",
+        "75種類のスキルと9つの出力形式に対応しています。",
+        "雑誌風、スライド、ポスター、SNS投稿、データレポートも一発生成。",
+        "HyperFramesと組み合わせれば完全自動の動画制作パイプラインが完成します。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄のリンクからテンプレートを無料で受け取れます。",
+    ],
+    "rate": "+15%",
+}
