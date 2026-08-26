@@ -30,7 +30,12 @@ jobs:
           git clone --depth=1 https://github.com/heygen-com/hyperframes-launches.git hf_launches
           CLONE_NAME="${{ github.event.inputs.sample_name }}"
           [ "$CLONE_NAME" = "figma-launch-v2" ] && CLONE_NAME="figma-launch"
-          cd hf_launches && git lfs pull --include="${CLONE_NAME}/**"
+          # hf_originalのサンプルはclone不要（リポジトリ内に含まれる）
+          if [ ! -d "hf_original/${{ github.event.inputs.sample_name }}" ]; then
+            cd hf_launches && git lfs pull --include="${CLONE_NAME}/**"
+          else
+            echo "✅ hf_originalサンプルを使用: ${{ github.event.inputs.sample_name }}"
+          fi
       - name: Convert to vertical
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
@@ -50,7 +55,12 @@ jobs:
               sh2.copytree(f"test_render", f"test_render_copy", dirs_exist_ok=True)
               print(f"✅ プリレンダリング済み: {name}")
               exit(0)
-          src = f"hf_launches/{name}"
+          # hf_originalを優先、なければhf_launches
+          if os.path.exists(f"hf_original/{name}"):
+              src = f"hf_original/{name}"
+              print(f"✅ hf_original使用: {name}")
+          else:
+              src = f"hf_launches/{name}"
           idx_html = open(f"{src}/index.html").read()
           dw = re.search(r'data-width="(\d+)"', idx_html)
           dh = re.search(r'data-height="(\d+)"', idx_html)
@@ -101,7 +111,12 @@ jobs:
             ls -la test_render/ || echo "test_render not found"
             cp test_render/heygen-apple-motion.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画を使用" || echo "❌ ファイルが見つかりません"
           else
+            # hf_originalを優先
+          if [ -d "hf_original/$RENDER_SAMPLE" ]; then
+            HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_original/$RENDER_SAMPLE -o raw.mp4
+          else
             HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/$RENDER_SAMPLE -o raw.mp4
+          fi
           fi
           ls -lh raw.mp4
       - name: Generate TTS and caption composition
