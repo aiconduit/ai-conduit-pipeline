@@ -1,0 +1,99 @@
+<template>
+<div id="act2" data-composition-id="act2" data-start="0" data-duration="12"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800&display=block');
+  #act2{font-family:'Inter',sans-serif;background:#000;}
+  #a2-grid{
+    position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);
+    background-size:72px 72px;
+  }
+  #a2-glow{
+    position:absolute;top:-100px;right:-200px;
+    width:700px;height:700px;border-radius:50%;
+    background:radial-gradient(circle,rgba(6,182,212,0.14) 0%,transparent 65%);
+  }
+  /* section label */
+  #a2-label{
+    position:absolute;top:100px;left:64px;
+    font-size:22px;font-weight:300;letter-spacing:0.2em;
+    color:rgba(255,255,255,0.3);text-transform:uppercase;
+    will-change:opacity;
+  }
+  /* 大見出し */
+  #a2-head{
+    position:absolute;top:148px;left:64px;right:64px;
+    font-size:80px;font-weight:700;color:#fff;
+    letter-spacing:-0.03em;line-height:1.05;
+    will-change:transform,opacity;
+  }
+  #a2-head em{font-style:normal;color:#06b6d4;}
+  /* showcase画像 */
+  #a2-img-wrap{
+    position:absolute;top:380px;left:48px;right:48px;
+    border-radius:20px;overflow:hidden;
+    border:1px solid rgba(255,255,255,0.07);
+    box-shadow:0 32px 80px -16px rgba(0,0,0,0.8);
+    will-change:transform,opacity;
+  }
+  #a2-img-wrap img{width:100%;display:block;}
+  /* AIグリッド */
+  #a2-grid-agents{
+    position:absolute;top:772px;left:48px;right:48px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    will-change:transform,opacity;
+  }
+  .a2-agent{
+    background:rgba(255,255,255,0.04);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:14px;padding:24px 16px;
+    text-align:center;
+  }
+  .a2-agent-name{font-size:27px;font-weight:600;color:#fff;letter-spacing:-0.01em;}
+  .a2-agent-sub{font-size:19px;font-weight:300;color:rgba(255,255,255,0.35);margin-top:4px;}
+  /* 説明文 */
+  #a2-desc{
+    position:absolute;top:1052px;left:64px;right:64px;
+    font-size:36px;font-weight:300;color:rgba(255,255,255,0.6);
+    line-height:1.6;letter-spacing:-0.005em;
+    will-change:transform,opacity;
+  }
+  #a2-desc strong{color:#fff;font-weight:600;}
+</style>
+<div id="a2-grid"></div>
+<div id="a2-glow"></div>
+<div id="a2-label">// What it does</div>
+<div id="a2-head">AIが<em>HTML</em>を<br>自動生成して<br>動画化する</div>
+<div id="a2-img-wrap">
+  <img src="https://repo-assets.open-design.ai/resources/images/hero.png"
+       crossorigin="anonymous" alt="Open Design" />
+</div>
+<div id="a2-grid-agents">
+  <div class="a2-agent"><div class="a2-agent-name">Claude Code</div><div class="a2-agent-sub">Anthropic</div></div>
+  <div class="a2-agent"><div class="a2-agent-name">Cursor</div><div class="a2-agent-sub">Agent</div></div>
+  <div class="a2-agent"><div class="a2-agent-name">Gemini CLI</div><div class="a2-agent-sub">Google</div></div>
+  <div class="a2-agent"><div class="a2-agent-name">Codex</div><div class="a2-agent-sub">OpenAI</div></div>
+  <div class="a2-agent"><div class="a2-agent-name">Qwen</div><div class="a2-agent-sub">Alibaba</div></div>
+  <div class="a2-agent"><div class="a2-agent-name">Aider</div><div class="a2-agent-sub">Open Source</div></div>
+</div>
+<div id="a2-desc">
+  <strong>APIキー不要。</strong>手元のAIエージェントだけで動く。<br>
+  75スキル × 9出力形式に対応。
+</div>
+<script>
+(function(){
+  CustomEase.create("hf-out","M0,0 C0.16,1 0.3,1 1,1");
+  var tl = gsap.timeline({paused:true});
+  tl.from("#a2-label",{opacity:0,duration:0.5},0.1);
+  tl.from("#a2-head",{y:50,opacity:0,duration:0.8,ease:"hf-out"},0.3);
+  tl.from("#a2-img-wrap",{y:40,opacity:0,scale:0.97,duration:0.9,ease:"hf-out"},0.8);
+  tl.from(".a2-agent",{y:30,opacity:0,duration:0.4,stagger:0.07,ease:"power3.out"},1.8);
+  tl.from("#a2-desc",{y:20,opacity:0,duration:0.7,ease:"hf-out"},3.0);
+  window.__timelines["act2"] = tl;
+})();
+</script>
+</div>
+</template>

@@ -1,0 +1,100 @@
+<template>
+<div id="act1" data-composition-id="act1" data-start="0" data-duration="8"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
+  #act1 { font-family:'Inter',sans-serif; background:#000; }
+  /* グリッド背景 */
+  #a1-grid {
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size:72px 72px;
+    will-change:opacity;
+  }
+  /* パープルグロー */
+  #a1-glow {
+    position:absolute;top:-200px;left:50%;transform:translateX(-50%);
+    width:900px;height:900px;border-radius:50%;
+    background:radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 65%);
+    will-change:transform,opacity;
+  }
+  /* GitHub stars badge */
+  #a1-badge {
+    position:absolute;top:148px;left:50%;transform:translateX(-50%);
+    white-space:nowrap;
+    display:flex;align-items:center;gap:16px;
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:9999px;padding:14px 36px;
+    font-size:26px;font-weight:300;letter-spacing:0.04em;color:rgba(255,255,255,0.6);
+    will-change:transform,opacity;
+  }
+  #a1-badge .dot {width:8px;height:8px;border-radius:50%;background:#7c3aed;}
+  /* メインテキスト */
+  #a1-line1 {
+    position:absolute;top:256px;left:0;right:0;text-align:center;
+    font-size:76px;font-weight:200;color:rgba(255,255,255,0.55);
+    letter-spacing:-0.01em;line-height:1;
+    will-change:transform,opacity;
+  }
+  #a1-line2 {
+    position:absolute;top:348px;left:0;right:0;text-align:center;
+    font-size:108px;font-weight:800;color:#fff;
+    letter-spacing:-0.03em;line-height:1;
+    will-change:transform,opacity;
+  }
+  #a1-line3 {
+    position:absolute;top:466px;left:0;right:0;text-align:center;
+    font-size:76px;font-weight:200;color:rgba(255,255,255,0.55);
+    letter-spacing:-0.01em;line-height:1;
+    will-change:transform,opacity;
+  }
+  /* banner画像 */
+  #a1-img-wrap {
+    position:absolute;top:592px;left:48px;right:48px;
+    border-radius:24px;overflow:hidden;
+    border:1px solid rgba(255,255,255,0.08);
+    box-shadow:0 48px 120px -24px rgba(0,0,0,0.9);
+    will-change:transform,opacity;
+  }
+  #a1-img-wrap img{width:100%;display:block;}
+  #a1-img-overlay{
+    position:absolute;inset:0;
+    background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.85) 100%);
+  }
+  /* Stars count */
+  #a1-stars {
+    position:absolute;bottom:24px;left:32px;
+    font-size:28px;font-weight:700;color:#fff;letter-spacing:-0.01em;
+  }
+  #a1-stars span{color:rgba(255,255,255,0.4);font-weight:300;font-size:24px;}
+</style>
+<div id="a1-grid"></div>
+<div id="a1-glow"></div>
+<div id="a1-badge"><span class="dot"></span>GitHub トレンド急上昇<span class="dot"></span></div>
+<div id="a1-line1">HTMLを書くだけで</div>
+<div id="a1-line2">動画になる</div>
+<div id="a1-line3">時代が来た</div>
+<div id="a1-img-wrap">
+  <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/assets/banner.png"
+       crossorigin="anonymous" alt="html-anything" />
+  <div id="a1-img-overlay"></div>
+  <div id="a1-stars">8,464 Stars <span>· nexu-io/html-anything</span></div>
+</div>
+<script>
+(function(){
+  var tl = gsap.timeline({paused:true});
+  CustomEase.create("hf-out","M0,0 C0.16,1 0.3,1 1,1");
+  tl.from("#a1-glow",{scale:0.6,opacity:0,duration:2.0,ease:"sine.inOut"},0);
+  tl.from("#a1-badge",{y:-20,opacity:0,duration:0.6,ease:"power3.out"},0.3);
+  tl.from("#a1-line1",{y:40,opacity:0,duration:0.7,ease:"hf-out"},0.6);
+  tl.from("#a1-line2",{y:50,opacity:0,duration:0.8,ease:"hf-out"},0.9);
+  tl.from("#a1-line3",{y:40,opacity:0,duration:0.7,ease:"hf-out"},1.2);
+  tl.from("#a1-img-wrap",{y:60,opacity:0,scale:0.96,duration:1.0,ease:"hf-out"},1.6);
+  window.__timelines["act1"] = tl;
+})();
+</script>
+</div>
+</template>

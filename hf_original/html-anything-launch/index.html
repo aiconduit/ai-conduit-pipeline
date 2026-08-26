@@ -1,240 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=1080, height=1920" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=1080, height=1920">
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/CustomEase.min.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&family=JetBrains+Mono:wght@400;600&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=block');
 *{margin:0;padding:0;box-sizing:border-box;}
-body{width:1080px;height:1920px;overflow:hidden;background:#060608;font-family:'Inter',sans-serif;color:#e8e8f0;}
-#root{position:relative;width:1080px;height:1920px;overflow:hidden;}
-
-/* ── 共通背景グラデーション ── */
-.bg-grad{
-  position:absolute;inset:0;z-index:0;
-  background:radial-gradient(ellipse 800px 600px at 50% -100px, rgba(124,58,237,0.18) 0%, transparent 70%),
-             radial-gradient(ellipse 600px 400px at 100% 50%, rgba(6,182,212,0.08) 0%, transparent 60%),
-             #060608;
-}
-/* グリッドライン */
-.bg-grid{
-  position:absolute;inset:0;z-index:0;
-  background-image:linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-                   linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size:80px 80px;
-}
-
-/* ── シーン共通 ── */
-.scene{position:absolute;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center;padding:80px 64px 960px;}
-
-/* ── Scene 1: フック ── */
-.s1-tag{
-  font-size:24px;font-weight:300;letter-spacing:0.25em;color:#06b6d4;
-  text-transform:uppercase;margin-bottom:40px;
-  display:flex;align-items:center;gap:12px;
-}
-.s1-tag::before,.s1-tag::after{content:'';flex:1;height:1px;background:rgba(6,182,212,0.3);}
-.s1-stars{
-  display:flex;align-items:center;gap:12px;margin-bottom:44px;
-  background:rgba(124,58,237,0.12);border:1px solid rgba(124,58,237,0.4);
-  border-radius:9999px;padding:12px 32px;font-size:24px;font-weight:300;
-}
-.s1-title{font-size:88px;font-weight:200;line-height:1.08;text-align:center;letter-spacing:0.01em;margin-bottom:48px;}
-.s1-title b{font-weight:800;color:#06b6d4;display:block;}
-.s1-title em{font-style:normal;color:#7c3aed;}
-
-/* banner画像 */
-.banner-wrap{
-  width:952px;border-radius:20px;overflow:hidden;
-  border:1px solid rgba(255,255,255,0.08);
-  box-shadow:0 40px 120px -30px rgba(0,0,0,0.8), 0 0 0 1px rgba(124,58,237,0.2);
-  position:relative;
-}
-.banner-wrap img{width:100%;display:block;}
-.banner-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to bottom, transparent 60%, rgba(6,6,8,0.9) 100%);
-}
-.banner-badge{
-  position:absolute;bottom:20px;left:24px;right:24px;
-  display:flex;gap:12px;flex-wrap:wrap;
-}
-.b-chip{
-  background:rgba(6,6,8,0.8);border:1px solid rgba(6,182,212,0.4);
-  border-radius:9999px;padding:8px 20px;font-size:22px;font-weight:300;color:#06b6d4;
-}
-
-/* ── Scene 2: 機能デモ ── */
-#scene-02{padding-top:80px;}
-.s2-head{font-size:32px;font-weight:300;color:#7c3aed;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:36px;}
-.s2-ai-grid{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:16px;width:100%;margin-bottom:36px;
-}
-.ai-card{
-  background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);
-  border-radius:16px;padding:28px 20px;text-align:center;
-  display:flex;flex-direction:column;align-items:center;gap:12px;
-}
-.ai-card-icon{font-size:40px;}
-.ai-card-name{font-size:26px;font-weight:600;color:#e8e8f0;}
-.ai-card-sub{font-size:20px;font-weight:300;color:#555;}
-.s2-showcase{
-  width:100%;border-radius:16px;overflow:hidden;
-  border:1px solid rgba(255,255,255,0.06);
-  box-shadow:0 20px 60px -20px rgba(0,0,0,0.6);
-}
-.s2-showcase img{width:100%;display:block;}
-
-/* ── Scene 3: Terminal ── */
-#scene-03{padding-top:80px;}
-.s3-eyebrow{font-size:26px;font-weight:300;color:#06b6d4;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:28px;}
-.terminal{
-  width:100%;background:#0c0c0e;
-  border:1px solid rgba(124,58,237,0.35);border-radius:16px;overflow:hidden;
-  box-shadow:0 0 60px -10px rgba(124,58,237,0.15);margin-bottom:28px;
-}
-.tbar{background:#141418;padding:16px 20px;display:flex;align-items:center;gap:8px;}
-.dot{width:13px;height:13px;border-radius:50%;}
-.dr{background:#ff5f57;}.dy{background:#ffbd2e;}.dg{background:#28c840;}
-.ttitle{font-size:21px;color:#444;margin-left:8px;font-family:'JetBrains Mono',monospace;}
-.tbody{padding:28px 28px 24px;font-family:'JetBrains Mono',monospace;font-size:26px;line-height:2.0;}
-.tc{color:#444;}.tcmd{color:#06b6d4;}.tstr{color:#7c3aed;}.tok{color:#28c840;}.tpath{color:#e8e8f0;}
-.cur{display:inline-block;width:13px;height:26px;background:#06b6d4;vertical-align:middle;animation:blink 1s step-end infinite;}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
-
-.stat-row{display:flex;gap:16px;width:100%;}
-.stat-card{
-  flex:1;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);
-  border-radius:14px;padding:28px 20px;text-align:center;
-}
-.stat-num{font-size:56px;font-weight:700;color:#06b6d4;line-height:1;}
-.stat-label{font-size:22px;font-weight:300;color:#666;margin-top:8px;}
-
-/* ── Scene 4: CTA ── */
-#scene-04{justify-content:center;padding:80px 64px;}
-.s4-glow{position:absolute;top:0;left:50%;transform:translateX(-50%);width:800px;height:800px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.12) 0%,transparent 70%);z-index:0;}
-.s4-inner{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:40px;}
-.s4-title{font-size:80px;font-weight:200;text-align:center;line-height:1.1;}
-.s4-title strong{font-weight:900;background:linear-gradient(135deg,#7c3aed,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.s4-btn{
-  background:linear-gradient(135deg,#7c3aed,#06b6d4);
-  border-radius:9999px;padding:30px 80px;
-  font-size:36px;font-weight:700;color:#fff;
-}
-.s4-sub{font-size:28px;font-weight:300;color:#444;text-align:center;}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000;}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;}
+.clip{position:absolute;inset:0;will-change:transform,opacity;}
 </style>
 </head>
 <body>
-<div id="root" data-composition-id="html-anything-launch" data-start="0" data-width="1080" data-height="1920" data-duration="42">
+<div id="root"
+  data-composition-id="html-anything-launch"
+  data-start="0" data-width="1080" data-height="1920" data-duration="42">
 
-<!-- Scene 1: フック (0-10s) -->
-<div id="scene-01" class="scene" data-composition-id="scene-01" data-start="0" data-duration="10" data-track-index="1">
-  <div class="bg-grad"></div><div class="bg-grid"></div>
-  <div class="s1-tag" id="s1-tag">GitHub トレンド急上昇</div>
-  <div class="s1-stars" id="s1-stars">⭐ 8,464 Stars · 今日急上昇</div>
-  <div class="s1-title" id="s1-title">
-    HTMLを書くだけで<br>
-    <b>動画になる</b><br>
-    <em>時代が来た</em>
-  </div>
-  <div class="banner-wrap" id="s1-banner">
-    <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/assets/banner.png" alt="html-anything UI" crossorigin="anonymous" />
-    <div class="banner-overlay"></div>
-    <div class="banner-badge">
-      <span class="b-chip">Claude Code</span>
-      <span class="b-chip">Cursor</span>
-      <span class="b-chip">HyperFrames</span>
-      <span class="b-chip">APIキー不要</span>
-    </div>
-  </div>
-</div>
+  <!-- Act 1: Hook (0-8s) -->
+  <div class="clip" data-composition-id="act1"
+       data-composition-src="compositions/act1.html"
+       data-start="0" data-duration="8" data-track-index="1"></div>
 
-<!-- Scene 2: AI対応 (10-22s) -->
-<div id="scene-02" class="scene" data-composition-id="scene-02" data-start="10" data-duration="12" data-track-index="1">
-  <div class="bg-grad"></div><div class="bg-grid"></div>
-  <div class="s2-head" id="s2-head">// 9つのAIエージェントに対応</div>
-  <div class="s2-ai-grid" id="s2-grid">
-    <div class="ai-card"><div class="ai-card-icon">🤖</div><div class="ai-card-name">Claude Code</div><div class="ai-card-sub">Anthropic</div></div>
-    <div class="ai-card"><div class="ai-card-icon">⚡</div><div class="ai-card-name">Cursor</div><div class="ai-card-sub">Agent</div></div>
-    <div class="ai-card"><div class="ai-card-icon">💎</div><div class="ai-card-name">Gemini</div><div class="ai-card-sub">Google</div></div>
-    <div class="ai-card"><div class="ai-card-icon">🔥</div><div class="ai-card-name">Codex</div><div class="ai-card-sub">OpenAI</div></div>
-    <div class="ai-card"><div class="ai-card-icon">🌊</div><div class="ai-card-name">Qwen</div><div class="ai-card-sub">Alibaba</div></div>
-    <div class="ai-card"><div class="ai-card-icon">🚀</div><div class="ai-card-name">Aider</div><div class="ai-card-sub">Open Source</div></div>
-  </div>
-  <div class="s2-showcase" id="s2-showcase">
-    <img src="https://repo-assets.open-design.ai/resources/images/hero.png" alt="Open Design" crossorigin="anonymous" />
-  </div>
-</div>
+  <!-- Act 2: What it does (8-20s) -->
+  <div class="clip" data-composition-id="act2"
+       data-composition-src="compositions/act2.html"
+       data-start="8" data-duration="12" data-track-index="2"></div>
 
-<!-- Scene 3: Terminal (22-34s) -->
-<div id="scene-03" class="scene" data-composition-id="scene-03" data-start="22" data-duration="12" data-track-index="1">
-  <div class="bg-grad"></div><div class="bg-grid"></div>
-  <div class="s3-eyebrow" id="s3-eye">// セットアップ30秒</div>
-  <div class="terminal" id="terminal">
-    <div class="tbar"><div class="dot dr"></div><div class="dot dy"></div><div class="dot dg"></div><span class="ttitle">claude-code</span></div>
-    <div class="tbody">
-      <div id="tl1"><span class="tc"># html-anythingをインストール</span></div>
-      <div id="tl2"><span class="tcmd">npx</span> <span class="tstr">skills add html-anything</span></div>
-      <div id="tl3"><span class="tcmd">hyperframes</span> <span class="tstr">render</span> <span class="tpath">shorts/</span></div>
-      <div id="tl4"><span class="tok">✓</span> <span class="tpath">output.mp4</span> 生成完了 🎬</div>
-      <div id="tl5"><span class="tok">✓</span> YouTube Shorts 投稿完了 🚀</div>
-      <div><span class="cur"></span></div>
-    </div>
-  </div>
-  <div class="stat-row" id="stat-row">
-    <div class="stat-card"><div class="stat-num">75</div><div class="stat-label">スキル数</div></div>
-    <div class="stat-card"><div class="stat-num">9</div><div class="stat-label">出力形式</div></div>
-    <div class="stat-card"><div class="stat-num">¥0</div><div class="stat-label">APIキー</div></div>
-  </div>
-</div>
+  <!-- Act 3: Terminal demo (20-33s) -->
+  <div class="clip" data-composition-id="act3"
+       data-composition-src="compositions/act3.html"
+       data-start="20" data-duration="13" data-track-index="3"></div>
 
-<!-- Scene 4: CTA (34-42s) -->
-<div id="scene-04" class="scene" data-composition-id="scene-04" data-start="34" data-duration="8" data-track-index="1">
-  <div class="bg-grad"></div><div class="bg-grid"></div>
-  <div class="s4-glow"></div>
-  <div class="s4-inner">
-    <div class="s4-title" id="s4t">コメントに<br><strong>AI Conduit</strong><br>と書いてね</div>
-    <div class="s4-btn" id="s4b">いいね＆保存お願いします</div>
-    <div class="s4-sub" id="s4s">概要欄からテンプレート無料配布中</div>
-  </div>
-</div>
+  <!-- Act 4: CTA (33-42s) -->
+  <div class="clip" data-composition-id="act4"
+       data-composition-src="compositions/act4.html"
+       data-start="33" data-duration="9" data-track-index="4"></div>
 
 </div>
-<script>
-window.__timelines = window.__timelines || {};
-CustomEase.create("hf", "M0,0 C0.16,1 0.3,1 1,1");
-
-const tl1 = gsap.timeline({ paused: true });
-tl1.from("#s1-tag", { opacity:0, y:20, duration:0.8, ease:"sine.inOut" }, 0.2);
-tl1.from("#s1-stars", { opacity:0, scale:0.9, duration:0.7, ease:"back.out(1.7)" }, 0.7);
-tl1.from("#s1-title", { opacity:0, y:50, duration:1.0, ease:"sine.inOut" }, 1.1);
-tl1.from("#s1-banner", { opacity:0, y:40, scale:0.97, duration:1.0, ease:"hf" }, 2.0);
-window.__timelines["scene-01"] = tl1;
-
-const tl2 = gsap.timeline({ paused: true });
-tl2.from("#s2-head", { opacity:0, y:20, duration:0.6, ease:"sine.inOut" }, 0.2);
-tl2.from(".ai-card", { opacity:0, scale:0.85, duration:0.5, stagger:0.08, ease:"back.out(1.7)" }, 0.6);
-tl2.from("#s2-showcase", { opacity:0, y:30, duration:0.8, ease:"hf" }, 1.8);
-window.__timelines["scene-02"] = tl2;
-
-const tl3 = gsap.timeline({ paused: true });
-tl3.from("#s3-eye", { opacity:0, duration:0.5 }, 0.2);
-tl3.from("#terminal", { opacity:0, y:30, duration:0.7, ease:"hf" }, 0.5);
-tl3.from("#tl1", { opacity:0, duration:0.3 }, 1.2);
-tl3.from("#tl2", { opacity:0, duration:0.3 }, 1.9);
-tl3.from("#tl3", { opacity:0, duration:0.3 }, 2.6);
-tl3.from("#tl4", { opacity:0, duration:0.3 }, 3.3);
-tl3.from("#tl5", { opacity:0, duration:0.3 }, 4.0);
-tl3.from(".stat-card", { opacity:0, y:20, duration:0.5, stagger:0.12, ease:"back.out(1.7)" }, 5.0);
-window.__timelines["scene-03"] = tl3;
-
-const tl4 = gsap.timeline({ paused: true });
-tl4.from("#s4t", { opacity:0, scale:0.92, duration:1.0, ease:"sine.inOut" }, 0.3);
-tl4.from("#s4b", { opacity:0, y:30, duration:0.7, ease:"back.out(1.7)" }, 1.2);
-tl4.from("#s4s", { opacity:0, duration:0.5, ease:"sine.inOut" }, 2.0);
-window.__timelines["scene-04"] = tl4;
-</script>
+<script>window.__timelines = window.__timelines || {};</script>
 </body>
 </html>

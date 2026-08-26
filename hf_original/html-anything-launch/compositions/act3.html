@@ -1,0 +1,154 @@
+<template>
+<div id="act3" data-composition-id="act3" data-start="0" data-duration="13"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=block');
+  #act3{font-family:'Inter',sans-serif;background:#000;}
+  #a3-grid{
+    position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);
+    background-size:72px 72px;
+  }
+  #a3-glow{
+    position:absolute;bottom:-200px;left:-100px;
+    width:700px;height:700px;border-radius:50%;
+    background:radial-gradient(circle,rgba(124,58,237,0.12) 0%,transparent 65%);
+  }
+  #a3-label{
+    position:absolute;top:100px;left:64px;
+    font-size:22px;font-weight:300;letter-spacing:0.2em;
+    color:rgba(255,255,255,0.3);text-transform:uppercase;
+    will-change:opacity;
+  }
+  #a3-head{
+    position:absolute;top:148px;left:64px;right:64px;
+    font-size:80px;font-weight:700;color:#fff;
+    letter-spacing:-0.03em;line-height:1.05;
+    will-change:transform,opacity;
+  }
+  /* ターミナル */
+  #a3-terminal{
+    position:absolute;top:380px;left:48px;right:48px;
+    background:#0a0a0c;
+    border:1px solid rgba(124,58,237,0.3);
+    border-radius:20px;overflow:hidden;
+    box-shadow:0 0 80px -10px rgba(124,58,237,0.12), 0 32px 80px -16px rgba(0,0,0,0.8);
+    will-change:transform,opacity;
+  }
+  #a3-tbar{
+    background:#111116;padding:18px 22px;
+    display:flex;align-items:center;gap:8px;
+    border-bottom:1px solid rgba(255,255,255,0.05);
+  }
+  .a3-dot{width:13px;height:13px;border-radius:50%;}
+  .a3-dr{background:#ff5f57;}.a3-dy{background:#ffbd2e;}.a3-dg{background:#28c840;}
+  #a3-ttitle{
+    font-size:20px;color:rgba(255,255,255,0.25);
+    margin-left:10px;font-family:'JetBrains Mono',monospace;
+  }
+  #a3-tbody{
+    padding:32px 32px 28px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:27px;line-height:2.1;
+  }
+  .a3-tc{color:rgba(255,255,255,0.25);}
+  .a3-tcmd{color:#06b6d4;}
+  .a3-tstr{color:#7c3aed;}
+  .a3-tok{color:#28c840;}
+  .a3-tpath{color:rgba(255,255,255,0.8);}
+  .a3-cur{
+    display:inline-block;width:13px;height:26px;
+    background:#06b6d4;vertical-align:middle;
+    animation:a3blink 1s step-end infinite;
+  }
+  @keyframes a3blink{0%,100%{opacity:1}50%{opacity:0}}
+  /* stats */
+  #a3-stats{
+    position:absolute;top:832px;left:48px;right:48px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    will-change:transform,opacity;
+  }
+  .a3-stat{
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:16px;padding:32px 20px;text-align:center;
+  }
+  .a3-stat-num{
+    font-size:64px;font-weight:800;color:#fff;
+    letter-spacing:-0.04em;line-height:1;
+  }
+  .a3-stat-num.cyan{color:#06b6d4;}
+  .a3-stat-label{
+    font-size:22px;font-weight:300;
+    color:rgba(255,255,255,0.35);margin-top:10px;
+    letter-spacing:0.02em;
+  }
+  /* 説明 */
+  #a3-desc{
+    position:absolute;top:1068px;left:64px;right:64px;
+    font-size:36px;font-weight:300;
+    color:rgba(255,255,255,0.55);line-height:1.6;
+    will-change:transform,opacity;
+  }
+  #a3-desc strong{color:#fff;font-weight:600;}
+</style>
+<div id="a3-grid"></div>
+<div id="a3-glow"></div>
+<div id="a3-label">// Setup</div>
+<div id="a3-head">30秒で<br>始められる</div>
+<div id="a3-terminal">
+  <div id="a3-tbar">
+    <div class="a3-dot a3-dr"></div>
+    <div class="a3-dot a3-dy"></div>
+    <div class="a3-dot a3-dg"></div>
+    <span id="a3-ttitle">claude-code — html-anything</span>
+  </div>
+  <div id="a3-tbody">
+    <div id="a3-l1"><span class="a3-tc"># スキルを追加</span></div>
+    <div id="a3-l2"><span class="a3-tcmd">npx</span> <span class="a3-tstr">skills add html-anything</span></div>
+    <div id="a3-l3"><span class="a3-tcmd">hyperframes</span> <span class="a3-tstr">render</span> <span class="a3-tpath">shorts/</span></div>
+    <div id="a3-l4"><span class="a3-tok">✓</span> <span class="a3-tpath">output.mp4</span> 生成完了</div>
+    <div id="a3-l5"><span class="a3-tok">✓</span> YouTube Shorts 投稿完了</div>
+    <div><span class="a3-cur"></span></div>
+  </div>
+</div>
+<div id="a3-stats">
+  <div class="a3-stat">
+    <div class="a3-stat-num cyan">75</div>
+    <div class="a3-stat-label">スキル数</div>
+  </div>
+  <div class="a3-stat">
+    <div class="a3-stat-num">9</div>
+    <div class="a3-stat-label">出力形式</div>
+  </div>
+  <div class="a3-stat">
+    <div class="a3-stat-num cyan">¥0</div>
+    <div class="a3-stat-label">APIキー</div>
+  </div>
+</div>
+<div id="a3-desc">
+  <strong>完全自動パイプライン。</strong><br>
+  HyperFramesと組み合わせれば<br>毎日自動投稿できる。
+</div>
+<script>
+(function(){
+  CustomEase.create("hf-out","M0,0 C0.16,1 0.3,1 1,1");
+  var tl = gsap.timeline({paused:true});
+  tl.from("#a3-label",{opacity:0,duration:0.5},0.1);
+  tl.from("#a3-head",{y:50,opacity:0,duration:0.8,ease:"hf-out"},0.3);
+  tl.from("#a3-terminal",{y:40,opacity:0,duration:0.8,ease:"hf-out"},0.8);
+  tl.from("#a3-l1",{opacity:0,duration:0.3},1.5);
+  tl.from("#a3-l2",{opacity:0,duration:0.3},2.1);
+  tl.from("#a3-l3",{opacity:0,duration:0.3},2.7);
+  tl.from("#a3-l4",{opacity:0,duration:0.3},3.3);
+  tl.from("#a3-l5",{opacity:0,duration:0.3},3.9);
+  tl.from("#a3-stats",{y:30,opacity:0,duration:0.7,ease:"hf-out"},4.8);
+  tl.from(".a3-stat",{scale:0.9,opacity:0,duration:0.4,stagger:0.1,ease:"back.out(1.7)"},5.0);
+  tl.from("#a3-desc",{y:20,opacity:0,duration:0.6,ease:"hf-out"},6.2);
+  window.__timelines["act3"] = tl;
+})();
+</script>
+</div>
+</template>
