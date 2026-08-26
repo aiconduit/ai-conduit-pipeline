@@ -1,0 +1,144 @@
+name: Test Render Landscape to Vertical
+on:
+  workflow_dispatch:
+    inputs:
+      sample_name:
+        description: Sample name (landscape 1920x1080)
+        required: true
+        default: variables-launch
+      upload:
+        description: 'Upload to YouTube (true/false)'
+        required: false
+        default: 'false'
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install
+        run: |
+          sudo apt-get install -y ffmpeg git-lfs fonts-noto-cjk --no-install-recommends -qq
+          pip install edge-tts --quiet
+          npm install -g hyperframes --ignore-scripts
+      - name: Clone sample
+        run: |
+          git lfs install
+          git clone --depth=1 https://github.com/heygen-com/hyperframes-launches.git hf_launches
+          cd hf_launches && git lfs pull --include="${{ github.event.inputs.sample_name }}/**"
+      - name: Render landscape (1920x1080 as-is)
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/$SAMPLE_NAME -o landscape_raw.mp4
+          ls -lh landscape_raw.mp4
+      - name: Convert landscape to vertical via ffmpeg
+        run: |
+          # 1920x1080 → 上半分に収める方式
+          # Step1: 中央1080x1080をクロップ (x=420, y=0)
+          # Step2: 1080x1080を上に配置し、下に1080x840の黒スペース(字幕+キャラ用)
+          ffmpeg -y -i landscape_raw.mp4 \
+            -vf "crop=1080:1080:420:0,pad=1080:1920:0:0:black" \
+            -c:v libx264 -crf 18 -preset fast \
+            raw.mp4
+          ls -lh raw.mp4
+          # 解像度確認
+          ffprobe -v quiet -select_streams v:0 -show_entries stream=width,height -of csv=p=0 raw.mp4
+      - name: Generate TTS and caption composition
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_caption_composition.py \
+            "$SAMPLE_NAME" \
+            narration.mp3 \
+            captions.html \
+            narration.srt
+          echo "✅ TTS+字幕composition生成完了"
+          ls -lh narration.mp3 narration.srt 2>/dev/null || true
+      - name: Merge video audio character subtitles
+        run: |
+          python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
+          echo "ASS生成: $(wc -l < narration.ass)行"
+          ffmpeg -filters 2>&1 | grep -i "ass" | head -3
+          if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
+            ffmpeg -y \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "\
+                [0:v][1:v]overlay=W-w-20:H-h-100[v1];\
+                [v1]ass=narration.ass[vout]" \
+              -map "[vout]" -map 2:a \
+              -c:v libx264 -crf 18 -preset fast \
+              -c:a aac -shortest \
+              output.mp4
+          else
+            ffmpeg -y \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "\
+                [0:v][1:v]overlay=W-w-20:H-h-100[vout]" \
+              -map "[vout]" -map 2:a \
+              -c:v libx264 -crf 18 -preset fast \
+              -c:a aac -shortest \
+              output.mp4
+          fi
+          ls -lh output.mp4
+      - name: Upload to YouTube
+        if: ${{ github.event.inputs.upload == 'true' }}
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        shell: python3 {0}
+        run: |
+          import requests, os
+          from pathlib import Path
+          sample_name = os.environ["SAMPLE_NAME"]
+          gift_url = f"https://aiconduit.github.io/gifts/#{sample_name}"
+          titles = {
+            "variables-launch": "HyperFramesのVariables機能で動画を自動生成する方法 #Shorts",
+            "cloud-render-launch": "GitHub Actions + HyperFramesで動画を完全自動投稿する方法 #Shorts",
+          }
+          title = titles.get(sample_name, f"HyperFrames {sample_name} #Shorts")
+          description = f"コメントに「AI Conduit」と書くとソースコードを受け取れます。\n\n今回のテンプレート配布ページ:\n{gift_url}\n\n役に立ったらいいねと保存をお願いします。\n\nGitHub: https://github.com/aiconduit\n#HyperFrames #ClaudeCode #AI自動化 #Shorts"
+          r = requests.post("https://oauth2.googleapis.com/token", data={
+              "grant_type": "refresh_token",
+              "refresh_token": os.environ["YOUTUBE_REFRESH_TOKEN"],
+              "client_id": os.environ["YOUTUBE_CLIENT_ID"],
+              "client_secret": os.environ["YOUTUBE_CLIENT_SECRET"],
+          })
+          token = r.json().get("access_token", "")
+          if not token:
+              print(f"トークン取得失敗: {r.text}")
+              exit(1)
+          metadata = {
+              "snippet": {"title": title[:100], "description": description, "tags": ["HyperFrames","ClaudeCode","AI自動化","Shorts"], "categoryId": "28", "defaultLanguage": "ja"},
+              "status": {"privacyStatus": "public", "selfDeclaredMadeForKids": False}
+          }
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+          r2 = requests.post(
+              "https://www.googleapis.com/upload/youtube/v3/videos?uploadType=resumable&part=snippet,status",
+              headers=headers, json=metadata)
+          upload_url = r2.headers.get("Location", "")
+          if not upload_url:
+              print(f"アップロードURL取得失敗: {r2.status_code}")
+              exit(1)
+          video_path = Path("output.mp4")
+          video_size = video_path.stat().st_size
+          with open(video_path, "rb") as f:
+              r3 = requests.put(upload_url, data=f, headers={"Content-Length": str(video_size), "Content-Type": "video/mp4"})
+          if r3.status_code in [200, 201]:
+              video_id = r3.json().get("id", "")
+              print(f"✅ YouTube投稿成功: https://youtube.com/shorts/{video_id}")
+          else:
+              print(f"❌ 投稿失敗: {r3.status_code}")
+              exit(1)
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: landscape-vertical-${{ github.run_number }}
+          path: output.mp4
+          retention-days: 3
