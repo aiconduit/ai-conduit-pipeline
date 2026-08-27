@@ -1,54 +1,15 @@
 name: Kaggle GPU Test
 on:
   workflow_dispatch:
-    inputs:
-      target_url:
-        description: URL to record
-        required: true
-        default: 'https://open-design.ai/html-anything/'
-      sample_name:
-        description: Sample name
-        required: true
-        default: html-anything-launch
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Push recording kernel to Kaggle
+      - name: Kaggle API + カーネルpush
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
-          TARGET_URL: ${{ github.event.inputs.target_url }}
         run: |
           pip install requests -q
-          python3 kaggle_screen_record.py
-      - name: Wait and download from Kaggle
-        env:
-          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
-        run: |
-          pip install kaggle requests -q
-          python3 -c "
-import os,requests,time
-u=os.environ['KAGGLE_USERNAME'];k=os.environ['KAGGLE_KEY']
-slug=f'{u}/hf-screen-recording'
-for i in range(40):
-    r=requests.get(f'https://www.kaggle.com/api/v1/kernels/{slug}',auth=(u,k),timeout=10)
-    if r.status_code==200:
-        st=r.json().get('currentRunningVersion',{}).get('status','?')
-        print(f'{i*15}s: {st}')
-        if st in ['complete','error']:break
-    time.sleep(15)
-"
-          export KAGGLE_USERNAME=${{ secrets.KAGGLE_USERNAME }}
-          export KAGGLE_KEY=${{ secrets.KAGGLE_KEY }}
-          kaggle kernels output ${{ secrets.KAGGLE_USERNAME }}/hf-screen-recording -p /tmp/kout/ || true
-          [ -f /tmp/kout/screen_raw.mp4 ] && cp /tmp/kout/screen_raw.mp4 screen_raw.mp4 && echo "OK" || echo "No file"
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: kaggle-recording-${{ github.run_number }}
-          path: screen_raw.mp4
-          retention-days: 3
+          python3 kaggle_push.py
