@@ -21,3 +21,5 @@ __pycache__/
 !assets/terminal_test/*.mp4
 !assets/claude_code_demo.mp4
 !assets/before_after.mp4
+variables_test_a/
+variables_test_b/
