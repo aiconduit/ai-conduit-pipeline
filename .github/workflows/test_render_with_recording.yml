@@ -1,0 +1,259 @@
+name: Test Render With Screen Recording
+on:
+  workflow_dispatch:
+    inputs:
+      sample_name:
+        description: Sample name
+        required: true
+        default: html-anything-launch
+      target_url:
+        description: URL to record
+        required: true
+        default: 'https://open-design.ai/html-anything/'
+      upload:
+        description: 'Upload to YouTube (true/false)'
+        required: false
+        default: 'false'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg git-lfs fonts-noto-cjk xvfb --no-install-recommends -qq
+          pip install edge-tts playwright --quiet
+          npx playwright install chromium --with-deps
+          npm install -g hyperframes --ignore-scripts
+
+      - name: Screen recording of target URL
+        env:
+          TARGET_URL: ${{ github.event.inputs.target_url }}
+        run: |
+          # xvfb仮想ディスプレイ起動
+          Xvfb :99 -screen 0 1920x1080x24 &
+          export DISPLAY=:99
+          sleep 2
+
+          # ffmpegでバックグラウンド録画開始（20秒）
+          ffmpeg -y \
+            -f x11grab -framerate 30 -video_size 1920x1080 -i :99 \
+            -t 20 \
+            -c:v libx264 -preset fast -crf 18 \
+            /tmp/screen_raw.mp4 &
+          FFMPEG_PID=$!
+
+          # Playwrightでブラウザ操作
+          python3 << 'PYEOF'
+          import subprocess, time, asyncio
+          from playwright.async_api import async_playwright
+
+          async def record():
+              async with async_playwright() as p:
+                  browser = await p.chromium.launch(
+                      headless=False,
+                      args=["--no-sandbox","--disable-setuid-sandbox","--start-maximized"]
+                  )
+                  ctx = await browser.new_context(viewport={"width":1920,"height":1080})
+                  page = await ctx.new_page()
+                  
+                  import os
+                  url = os.environ.get("TARGET_URL","https://open-design.ai/html-anything/")
+                  print(f"Navigating to {url}")
+                  await page.goto(url, wait_until="networkidle", timeout=30000)
+                  await page.wait_for_timeout(3000)
+                  
+                  # スクロールダウン（コンテンツを見せる）
+                  await page.evaluate("window.scrollTo({top: 400, behavior: 'smooth'})")
+                  await page.wait_for_timeout(2000)
+                  await page.evaluate("window.scrollTo({top: 800, behavior: 'smooth'})")
+                  await page.wait_for_timeout(2000)
+                  await page.evaluate("window.scrollTo({top: 1200, behavior: 'smooth'})")
+                  await page.wait_for_timeout(2000)
+                  await page.evaluate("window.scrollTo({top: 0, behavior: 'smooth'})")
+                  await page.wait_for_timeout(3000)
+                  
+                  await browser.close()
+                  print("Recording done")
+
+          asyncio.run(record())
+          PYEOF
+
+          # ffmpeg終了を待つ
+          wait $FFMPEG_PID || true
+          echo "=== 録画ファイル確認 ==="
+          ls -lh /tmp/screen_raw.mp4 2>/dev/null || echo "録画失敗"
+
+      - name: Process recording for HyperFrames
+        run: |
+          # 録画MP4を複数シーン用にカット
+          if [ -f /tmp/screen_raw.mp4 ]; then
+            # シーン1: 0-5s（トップビュー）
+            ffmpeg -y -ss 0 -t 5 -i /tmp/screen_raw.mp4 -c:v libx264 -crf 20 -preset fast /tmp/scene1.mp4
+            # シーン2: 5-10s（スクロール中）
+            ffmpeg -y -ss 5 -t 5 -i /tmp/screen_raw.mp4 -c:v libx264 -crf 20 -preset fast /tmp/scene2.mp4
+            # シーン3: 10-18s（下部コンテンツ）
+            ffmpeg -y -ss 10 -t 8 -i /tmp/screen_raw.mp4 -c:v libx264 -crf 20 -preset fast /tmp/scene3.mp4
+            echo "=== シーンカット完了 ==="
+            ls -lh /tmp/scene*.mp4
+            # assetsにコピー
+            mkdir -p hf_original/html-anything-launch/assets
+            cp /tmp/scene1.mp4 hf_original/html-anything-launch/assets/bg-scene1.mp4
+            cp /tmp/scene2.mp4 hf_original/html-anything-launch/assets/bg-scene2.mp4
+            cp /tmp/scene3.mp4 hf_original/html-anything-launch/assets/bg-scene3.mp4
+          else
+            echo "録画ファイルなし - スキップ"
+          fi
+
+      - name: Patch compositions with recorded video
+        shell: python3 {0}
+        run: |
+          import os, pathlib
+          
+          # act4: bg-scene1.mp4を使用するように更新
+          act4_path = "hf_original/html-anything-launch/compositions/act4.html"
+          if os.path.exists("hf_original/html-anything-launch/assets/bg-scene1.mp4"):
+              content = open(act4_path).read()
+              # スクリーン画像をビデオに差し替え
+              old_img = '<img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/screenshots/01-entry-view.png" crossorigin="anonymous" alt="entry view" />'
+              new_vid = '<video autoplay muted loop playsinline style="width:100%;display:block;"><source src="assets/bg-scene1.mp4" type="video/mp4"></video>'
+              if old_img in content:
+                  content = content.replace(old_img, new_vid)
+                  open(act4_path, "w").write(content)
+                  print("act4: video差し替え完了")
+              else:
+                  print("act4: img not found, skip")
+          
+          # act5: bg-scene2.mp4
+          act5_path = "hf_original/html-anything-launch/compositions/act5.html"
+          if os.path.exists("hf_original/html-anything-launch/assets/bg-scene2.mp4"):
+              content = open(act5_path).read()
+              old_img = '<img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/screenshots/02-template-picker.png" crossorigin="anonymous" alt="template picker" />'
+              new_vid = '<video autoplay muted loop playsinline style="width:100%;display:block;"><source src="assets/bg-scene2.mp4" type="video/mp4"></video>'
+              if old_img in content:
+                  content = content.replace(old_img, new_vid)
+                  open(act5_path, "w").write(content)
+                  print("act5: video差し替え完了")
+
+      - name: Convert to vertical
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        shell: python3 {0}
+        run: |
+          import re, os, shutil
+          name = os.environ["SAMPLE_NAME"]
+          if os.path.exists(f"hf_original/{name}"):
+              src = f"hf_original/{name}"
+          else:
+              src = f"hf_launches/{name}"
+          idx_html = open(f"{src}/index.html").read()
+          dw = re.search(r'data-width="(\d+)"', idx_html)
+          dh = re.search(r'data-height="(\d+)"', idx_html)
+          orig_w = int(dw.group(1)) if dw else 1080
+          orig_h = int(dh.group(1)) if dh else 1920
+          canvas_w, canvas_h = 1080, 1920
+          audio_p = re.compile(r"<audio[^>]*>.*?</audio>", re.DOTALL)
+          hf_p = re.compile(r"<hf-audio[^>]*/?>")
+          aliases = {"figma-launch-v2": "figma-launch"}
+          if name in aliases:
+              name = aliases[name]
+          prerendered = ["heygen-apple-motion", "heygen-ui-motion"]
+          if name in prerendered:
+              import shutil as sh2
+              sh2.copy(f"test_render/{name}.mp4", "raw.mp4")
+              sh2.copytree(f"test_render", f"test_render_copy", dirs_exist_ok=True)
+              print(f"✅ プリレンダリング済み: {name}")
+              exit(0)
+          left_offset = (canvas_w - orig_w) / 2
+          top_offset = (canvas_h - orig_h) / 2
+          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}</style>"
+          comp_dir = f"{src}/compositions"
+          if os.path.exists(comp_dir):
+              for f in sorted(os.listdir(comp_dir)):
+                  if not f.endswith(".html"): continue
+                  p = f"{comp_dir}/{f}"
+                  h = open(p).read()
+                  h = audio_p.sub("", h)
+                  h = hf_p.sub("", h)
+                  h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
+                  h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
+                  h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
+                  h = h.replace("</head>", css + "</head>")
+                  h = re.sub(r"(<body[^>]*>)(.*?)(</body>)", lambda m: m.group(1)+"<div class=\"hf-stage-wrapper\">"+m.group(2)+"</div>"+m.group(3), h, flags=re.DOTALL)
+                  open(p, "w").write(h)
+          h = open(f"{src}/index.html").read()
+          h = audio_p.sub("", h)
+          h = hf_p.sub("", h)
+          h = re.sub(r'<meta name="viewport"[^>]*>', f'<meta name="viewport" content="width={canvas_w}, height={canvas_h}" />', h)
+          h = h.replace(f'data-width="{orig_w}"', f'data-width="{canvas_w}"')
+          h = h.replace(f'data-height="{orig_h}"', f'data-height="{canvas_h}"')
+          open(f"{src}/index.html", "w").write(h)
+          char_src = "test_render/character_main.png"
+          char_dst = f"{src}/assets/character_main.png"
+          if os.path.exists(char_src):
+              shutil.copy(char_src, char_dst)
+          print("done")
+
+      - name: Render
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          RENDER_SAMPLE=$SAMPLE_NAME
+          if [ -d "hf_original/$RENDER_SAMPLE" ]; then
+            HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_original/$RENDER_SAMPLE -o raw.mp4
+          else
+            HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/$RENDER_SAMPLE -o raw.mp4
+          fi
+          ls -lh raw.mp4
+          ffprobe -v quiet -select_streams v:0 -show_entries stream=width,height -of csv=p=0 raw.mp4
+
+      - name: Generate TTS and caption composition
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_caption_composition.py \
+            "$SAMPLE_NAME" \
+            narration.mp3 \
+            captions.html \
+            narration.srt
+          ls -lh narration.mp3 narration.srt 2>/dev/null || true
+
+      - name: Merge video audio character subtitles
+        run: |
+          python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
+          echo "ASS生成: $(wc -l < narration.ass)行"
+          if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
+            ffmpeg -y \
+              -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "\
+                [0:v][1:v]overlay=W-w-20:H-h-100[v1];\
+                [v1]ass=narration.ass[vout]" \
+              -map "[vout]" -map 2:a \
+              -c:v libx264 -crf 18 -preset fast \
+              -c:a aac -shortest \
+              output.mp4
+          else
+            ffmpeg -y \
+              -i raw.mp4 -i narration.mp3 \
+              -c:v libx264 -crf 18 -preset fast \
+              -c:a aac -shortest \
+              output.mp4
+          fi
+          ls -lh output.mp4
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: recorded-render-${{ github.run_number }}
+          path: |
+            output.mp4
+            /tmp/screen_raw.mp4
+          retention-days: 3
