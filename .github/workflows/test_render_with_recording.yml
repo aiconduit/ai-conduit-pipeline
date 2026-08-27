@@ -46,8 +46,9 @@ jobs:
           ffmpeg -y \
             -f x11grab -framerate 30 -video_size 1920x1080 -i :99 \
             -t 20 \
-            -c:v libx264 -profile:v baseline -level 3.0 \
+            -vcodec libx264 -profile:v baseline -level:v 3.1 \
             -pix_fmt yuv420p -movflags +faststart \
+            -acodec aac -ar 44100 \
             -crf 18 -preset fast \
             /tmp/screen_raw.mp4 &
           FFMPEG_PID=$!
