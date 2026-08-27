@@ -44,10 +44,11 @@ jobs:
 
           # ffmpegでバックグラウンド録画開始（20秒）
           ffmpeg -y \
-            -f x11grab -framerate 60 -video_size 1920x1080 -i :99 \
+            -f x11grab -framerate 30 -video_size 1920x1080 -i :99 \
             -t 20 \
-            -c:v libx264 -preset slow -crf 10 \
-            -pix_fmt yuv420p \
+            -c:v libx264 -profile:v baseline -level 3.0 \
+            -pix_fmt yuv420p -movflags +faststart \
+            -crf 18 -preset fast \
             /tmp/screen_raw.mp4 &
           FFMPEG_PID=$!
 
