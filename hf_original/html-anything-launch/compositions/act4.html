@@ -1,109 +1,176 @@
 <template>
 <div id="act4" data-composition-id="act4" data-start="0" data-duration="9"
      data-width="1080" data-height="1920"
-     style="position:relative;width:1080px;height:1920px;overflow:hidden;">
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
-  #act4{font-family:'Inter',sans-serif;background:#000;}
-  #a4-grid{
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
+  #act4{font-family:'Inter',sans-serif;}
+  #a4-bg{
     position:absolute;inset:0;
-    background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),
-                     linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);
-    background-size:72px 72px;
+    background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);
+    background-size:80px 80px;
   }
-  #a4-glow-purple{
+  /* cta-morph-press: 中央にグロー集中 */
+  #a4-glow-p{
     position:absolute;top:50%;left:50%;
-    transform:translate(-50%,-60%);
+    transform:translate(-50%,-55%);
     width:900px;height:900px;border-radius:50%;
-    background:radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 65%);
+    background:radial-gradient(circle,rgba(124,58,237,0.16) 0%,transparent 65%);
     will-change:transform,opacity;
   }
-  #a4-glow-cyan{
+  #a4-glow-c{
     position:absolute;top:50%;left:50%;
-    transform:translate(-50%,-40%);
+    transform:translate(-50%,-45%);
     width:600px;height:600px;border-radius:50%;
-    background:radial-gradient(circle,rgba(6,182,212,0.10) 0%,transparent 65%);
+    background:radial-gradient(circle,rgba(6,182,212,0.08) 0%,transparent 65%);
     will-change:transform,opacity;
   }
-  /* メインコピー */
+
+  /* Scene 1: ブランド presence */
+  #a4-brand-mark{
+    position:absolute;top:340px;left:0;right:0;
+    text-align:center;
+    will-change:transform,opacity;
+  }
+  #a4-brand-line{
+    display:inline-block;
+    width:48px;height:2px;
+    background:rgba(255,255,255,0.15);
+    margin-bottom:20px;
+  }
+  #a4-brand-name{
+    font-size:28px;font-weight:300;letter-spacing:0.28em;
+    color:rgba(255,255,255,0.28);text-transform:uppercase;
+  }
+
+  /* Scene 2: cta-morph — ブランド→CTAへのモーフ */
   #a4-main{
-    position:absolute;top:280px;left:64px;right:64px;
+    position:absolute;top:420px;left:64px;right:64px;
     text-align:center;
     will-change:transform,opacity;
   }
   #a4-pre{
-    font-size:30px;font-weight:300;
-    color:rgba(255,255,255,0.4);
-    letter-spacing:0.04em;margin-bottom:24px;
+    font-size:32px;font-weight:300;
+    color:rgba(255,255,255,0.38);
+    letter-spacing:0.05em;margin-bottom:20px;
   }
-  #a4-cta-text{
-    font-size:96px;font-weight:800;
-    color:#fff;letter-spacing:-0.04em;
-    line-height:1.0;margin-bottom:16px;
+  #a4-cta-word{
+    font-size:108px;font-weight:900;color:#fff;
+    letter-spacing:-0.04em;line-height:0.95;
+    margin-bottom:4px;
   }
-  #a4-cta-text .purple{color:#7c3aed;}
+  #a4-cta-word .purple{
+    background:linear-gradient(135deg,#a78bfa,#7c3aed);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  #a4-cta-sub{
+    font-size:96px;font-weight:900;color:#fff;
+    letter-spacing:-0.04em;line-height:0.95;
+  }
   #a4-post{
     font-size:30px;font-weight:300;
-    color:rgba(255,255,255,0.4);
-    letter-spacing:0.04em;
+    color:rgba(255,255,255,0.32);
+    letter-spacing:0.04em;margin-top:20px;
   }
-  /* ボタン */
-  #a4-btn{
-    position:absolute;top:660px;left:80px;right:80px;
-    background:linear-gradient(135deg,#7c3aed 0%,#06b6d4 100%);
-    border-radius:9999px;padding:36px 0;
-    text-align:center;
-    font-size:36px;font-weight:700;color:#fff;
-    letter-spacing:-0.01em;
+
+  /* Scene 3: press — CTAボタン */
+  #a4-btn-wrap{
+    position:absolute;top:752px;left:72px;right:72px;
     will-change:transform,opacity;
   }
-  /* 概要欄テキスト */
-  #a4-sub{
-    position:absolute;top:784px;left:0;right:0;
+  #a4-btn{
+    background:linear-gradient(135deg,#7c3aed 0%,#06b6d4 100%);
+    border-radius:9999px;padding:34px 0;
     text-align:center;
-    font-size:26px;font-weight:300;
-    color:rgba(255,255,255,0.3);
-    letter-spacing:0.02em;
+    font-size:34px;font-weight:700;color:#fff;
+    letter-spacing:-0.01em;
+    position:relative;overflow:hidden;
+  }
+  /* press ring */
+  #a4-ring{
+    position:absolute;top:50%;left:50%;
+    width:0;height:0;border-radius:50%;
+    background:rgba(255,255,255,0.15);
+    transform:translate(-50%,-50%);
+    will-change:width,height,opacity;
+  }
+
+  #a4-sub{
+    position:absolute;top:862px;left:0;right:0;
+    text-align:center;
+    font-size:24px;font-weight:300;
+    color:rgba(255,255,255,0.25);
+    letter-spacing:0.03em;
     will-change:opacity;
   }
-  /* ブランドロゴ */
-  #a4-brand{
-    position:absolute;bottom:200px;left:0;right:0;
-    display:flex;flex-direction:column;align-items:center;gap:16px;
+
+  /* 下部: チャンネル名 */
+  #a4-footer{
+    position:absolute;bottom:160px;left:0;right:0;
+    text-align:center;
     will-change:opacity;
   }
-  #a4-brand-line{
-    width:60px;height:1px;background:rgba(255,255,255,0.12);
+  #a4-footer-div{
+    display:inline-block;width:40px;height:1px;
+    background:rgba(255,255,255,0.1);
+    vertical-align:middle;margin:0 16px;
   }
-  #a4-brand-name{
-    font-size:28px;font-weight:300;letter-spacing:0.25em;
-    color:rgba(255,255,255,0.25);text-transform:uppercase;
+  #a4-footer-name{
+    font-size:24px;font-weight:300;letter-spacing:0.24em;
+    color:rgba(255,255,255,0.2);text-transform:uppercase;
   }
 </style>
-<div id="a4-grid"></div>
-<div id="a4-glow-purple"></div>
-<div id="a4-glow-cyan"></div>
-<div id="a4-main">
-  <div id="a4-pre">コメントに</div>
-  <div id="a4-cta-text"><span class="purple">AI Conduit</span><br>と書いてね</div>
-  <div id="a4-post">テンプレートを無料プレゼント</div>
-</div>
-<div id="a4-btn">いいね＆保存お願いします</div>
-<div id="a4-sub">概要欄のリンクから受け取れます</div>
-<div id="a4-brand">
+<div id="a4-bg"></div>
+<div id="a4-glow-p"></div>
+<div id="a4-glow-c"></div>
+
+<!-- Scene 1: brand presence -->
+<div id="a4-brand-mark">
   <div id="a4-brand-line"></div>
   <div id="a4-brand-name">AI Conduit</div>
 </div>
+
+<!-- Scene 2: morph to CTA -->
+<div id="a4-main">
+  <div id="a4-pre">コメントに</div>
+  <div id="a4-cta-word"><span class="purple">AI Conduit</span></div>
+  <div id="a4-cta-sub">と書いてね</div>
+  <div id="a4-post">テンプレートを無料プレゼント</div>
+</div>
+
+<!-- Scene 3: press -->
+<div id="a4-btn-wrap">
+  <div id="a4-btn">
+    いいね＆保存お願いします
+    <div id="a4-ring"></div>
+  </div>
+</div>
+<div id="a4-sub">概要欄のリンクから受け取れます</div>
+
+<div id="a4-footer">
+  <span id="a4-footer-div"></span>
+  <span id="a4-footer-name">AI Conduit</span>
+  <span id="a4-footer-div"></span>
+</div>
+
 <script>
 (function(){
-  CustomEase.create("hf-out","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   var tl = gsap.timeline({paused:true});
-  tl.from("#a4-glow-purple",{scale:0.5,opacity:0,duration:2.0,ease:"sine.inOut"},0);
-  tl.from("#a4-glow-cyan",{scale:0.5,opacity:0,duration:2.0,ease:"sine.inOut"},0.3);
-  tl.from("#a4-main",{y:60,opacity:0,duration:1.0,ease:"hf-out"},0.5);
-  tl.from("#a4-btn",{y:30,opacity:0,scale:0.96,duration:0.8,ease:"back.out(1.7)"},1.4);
-  tl.from("#a4-sub",{opacity:0,duration:0.6,ease:"sine.inOut"},2.1);
-  tl.from("#a4-brand",{opacity:0,duration:0.8,ease:"sine.inOut"},2.6);
+  // glow breathe
+  tl.to("#a4-glow-p",{scale:1.08,duration:4,ease:"sine.inOut",yoyo:true,repeat:-1},0);
+  // Scene 1: brand presence
+  tl.from("#a4-brand-mark",{opacity:0,y:16,duration:0.7,ease:"hf"},0.2);
+  // Scene 2: morph — brand fades as main CTA arrives
+  tl.to("#a4-brand-mark",{opacity:0,y:-16,duration:0.5,ease:"power2.in"},0.9);
+  tl.from("#a4-main",{opacity:0,scale:0.94,duration:0.8,ease:"hf"},1.1);
+  // Scene 3: press — button spring-in
+  tl.from("#a4-btn-wrap",{opacity:0,y:28,scale:0.95,duration:0.7,ease:"back.out(1.7)"},2.0);
+  // ring pulse (press effect)
+  tl.to("#a4-ring",{width:300,height:300,opacity:0,duration:0.6,ease:"power2.out"},2.6);
+  tl.from("#a4-sub",{opacity:0,duration:0.5,ease:"power2.out"},2.8);
+  tl.from("#a4-footer",{opacity:0,duration:0.6,ease:"power2.out"},3.4);
   window.__timelines["act4"] = tl;
 })();
 </script>

@@ -1,98 +1,119 @@
 <template>
 <div id="act1" data-composition-id="act1" data-start="0" data-duration="8"
      data-width="1080" data-height="1920"
-     style="position:relative;width:1080px;height:1920px;overflow:hidden;">
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
-  #act1 { font-family:'Inter',sans-serif; background:#000; }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;800;900&display=block');
+  #act1{font-family:'Inter',sans-serif;}
+
   /* グリッド背景 */
-  #a1-grid {
+  #a1-bg{
     position:absolute;inset:0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
-    background-size:72px 72px;
-    will-change:opacity;
+      linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);
+    background-size:80px 80px;
   }
-  /* パープルグロー */
-  #a1-glow {
-    position:absolute;top:-200px;left:50%;transform:translateX(-50%);
-    width:900px;height:900px;border-radius:50%;
-    background:radial-gradient(circle, rgba(124,58,237,0.22) 0%, transparent 65%);
+  /* パープルグロー（上部） */
+  #a1-glow{
+    position:absolute;top:-300px;left:50%;transform:translateX(-50%);
+    width:1000px;height:1000px;border-radius:50%;
+    background:radial-gradient(circle,rgba(124,58,237,0.20) 0%,transparent 65%);
+    will-change:transform;
+  }
+
+  /* kinetic-type-beats: 各行は画面中央に独立配置 */
+  .a1-beat{
+    position:absolute;left:0;right:0;
+    text-align:center;
     will-change:transform,opacity;
   }
-  /* GitHub stars badge */
-  #a1-badge {
-    position:absolute;top:148px;left:50%;transform:translateX(-50%);
-    white-space:nowrap;
-    display:flex;align-items:center;gap:16px;
-    border:1px solid rgba(255,255,255,0.12);
+  /* Beat 1: 小さい前置き */
+  #a1-b0{
+    top:260px;
+    font-size:32px;font-weight:300;letter-spacing:0.12em;
+    color:rgba(255,255,255,0.35);text-transform:uppercase;
+  }
+  /* Beat 1: Stars badge */
+  #a1-b1{
+    top:320px;
+    display:flex;justify-content:center;
+  }
+  #a1-b1-inner{
+    display:inline-flex;align-items:center;gap:14px;
+    border:1px solid rgba(255,255,255,0.1);
     border-radius:9999px;padding:14px 36px;
-    font-size:26px;font-weight:300;letter-spacing:0.04em;color:rgba(255,255,255,0.6);
+    font-size:26px;font-weight:300;color:rgba(255,255,255,0.5);
+  }
+  #a1-b1-dot{width:8px;height:8px;border-radius:50%;background:#7c3aed;flex-shrink:0;}
+
+  /* Beat 2: メインコピー（kinetic-type: 大テキスト） */
+  #a1-b2{top:448px;font-size:96px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.02em;line-height:1;}
+  #a1-b3{top:556px;font-size:120px;font-weight:900;color:#fff;letter-spacing:-0.04em;line-height:1;}
+  #a1-b4{top:688px;font-size:96px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.02em;line-height:1;}
+
+  /* Beat 3: 区切り線 */
+  #a1-divider{
+    position:absolute;top:820px;left:120px;right:120px;
+    height:1px;background:rgba(255,255,255,0.08);
     will-change:transform,opacity;
   }
-  #a1-badge .dot {width:8px;height:8px;border-radius:50%;background:#7c3aed;}
-  /* メインテキスト */
-  #a1-line1 {
-    position:absolute;top:256px;left:0;right:0;text-align:center;
-    font-size:76px;font-weight:200;color:rgba(255,255,255,0.55);
-    letter-spacing:-0.01em;line-height:1;
+
+  /* Beat 4: banner画像 */
+  #a1-img{
+    position:absolute;top:852px;left:40px;right:40px;
+    border-radius:20px;overflow:hidden;
+    border:1px solid rgba(255,255,255,0.07);
+    box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);
     will-change:transform,opacity;
   }
-  #a1-line2 {
-    position:absolute;top:348px;left:0;right:0;text-align:center;
-    font-size:108px;font-weight:800;color:#fff;
-    letter-spacing:-0.03em;line-height:1;
-    will-change:transform,opacity;
-  }
-  #a1-line3 {
-    position:absolute;top:466px;left:0;right:0;text-align:center;
-    font-size:76px;font-weight:200;color:rgba(255,255,255,0.55);
-    letter-spacing:-0.01em;line-height:1;
-    will-change:transform,opacity;
-  }
-  /* banner画像 */
-  #a1-img-wrap {
-    position:absolute;top:592px;left:48px;right:48px;
-    border-radius:24px;overflow:hidden;
-    border:1px solid rgba(255,255,255,0.08);
-    box-shadow:0 48px 120px -24px rgba(0,0,0,0.9);
-    will-change:transform,opacity;
-  }
-  #a1-img-wrap img{width:100%;display:block;}
+  #a1-img img{width:100%;display:block;}
   #a1-img-overlay{
     position:absolute;inset:0;
-    background:linear-gradient(to bottom,transparent 50%,rgba(0,0,0,0.85) 100%);
+    background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.88) 100%);
   }
-  /* Stars count */
-  #a1-stars {
-    position:absolute;bottom:24px;left:32px;
-    font-size:28px;font-weight:700;color:#fff;letter-spacing:-0.01em;
+  #a1-img-meta{
+    position:absolute;bottom:20px;left:24px;
+    font-size:24px;font-weight:300;color:rgba(255,255,255,0.45);
+    letter-spacing:0.02em;
   }
-  #a1-stars span{color:rgba(255,255,255,0.4);font-weight:300;font-size:24px;}
+  #a1-img-stars{
+    position:absolute;bottom:20px;right:24px;
+    font-size:26px;font-weight:700;color:#fff;
+    letter-spacing:-0.02em;
+  }
 </style>
-<div id="a1-grid"></div>
+<div id="a1-bg"></div>
 <div id="a1-glow"></div>
-<div id="a1-badge"><span class="dot"></span>GitHub トレンド急上昇<span class="dot"></span></div>
-<div id="a1-line1">HTMLを書くだけで</div>
-<div id="a1-line2">動画になる</div>
-<div id="a1-line3">時代が来た</div>
-<div id="a1-img-wrap">
-  <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/assets/banner.png"
-       crossorigin="anonymous" alt="html-anything" />
+<div class="a1-beat" id="a1-b0">GitHub トレンド</div>
+<div class="a1-beat" id="a1-b1"><div id="a1-b1-inner"><div id="a1-b1-dot"></div>nexu-io / html-anything<div id="a1-b1-dot"></div></div></div>
+<div class="a1-beat" id="a1-b2">HTMLを書くだけで</div>
+<div class="a1-beat" id="a1-b3">動画になる</div>
+<div class="a1-beat" id="a1-b4">時代が来た</div>
+<div id="a1-divider"></div>
+<div id="a1-img">
+  <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/assets/banner.png" crossorigin="anonymous" alt="html-anything" />
   <div id="a1-img-overlay"></div>
-  <div id="a1-stars">8,464 Stars <span>· nexu-io/html-anything</span></div>
+  <div id="a1-img-meta">nexu-io/html-anything</div>
+  <div id="a1-img-stars">8,464 ★</div>
 </div>
 <script>
 (function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   var tl = gsap.timeline({paused:true});
-  CustomEase.create("hf-out","M0,0 C0.16,1 0.3,1 1,1");
-  tl.from("#a1-glow",{scale:0.6,opacity:0,duration:2.0,ease:"sine.inOut"},0);
-  tl.from("#a1-badge",{y:-20,opacity:0,duration:0.6,ease:"power3.out"},0.3);
-  tl.from("#a1-line1",{y:40,opacity:0,duration:0.7,ease:"hf-out"},0.6);
-  tl.from("#a1-line2",{y:50,opacity:0,duration:0.8,ease:"hf-out"},0.9);
-  tl.from("#a1-line3",{y:40,opacity:0,duration:0.7,ease:"hf-out"},1.2);
-  tl.from("#a1-img-wrap",{y:60,opacity:0,scale:0.96,duration:1.0,ease:"hf-out"},1.6);
+  // glow drift
+  tl.to("#a1-glow",{y:60,duration:8,ease:"sine.inOut"},0);
+  // badge
+  tl.from("#a1-b0",{opacity:0,y:16,duration:0.5,ease:"power2.out"},0.2);
+  tl.from("#a1-b1",{opacity:0,y:16,duration:0.5,ease:"power2.out"},0.4);
+  // kinetic-type-beats: 各行が下からスプリングイン
+  tl.from("#a1-b2",{opacity:0,y:48,duration:0.6,ease:"hf"},0.7);
+  tl.from("#a1-b3",{opacity:0,y:56,duration:0.7,ease:"hf"},0.95);
+  tl.from("#a1-b4",{opacity:0,y:48,duration:0.6,ease:"hf"},1.2);
+  // divider wipe
+  tl.from("#a1-divider",{scaleX:0,transformOrigin:"left center",duration:0.6,ease:"power3.out"},1.6);
+  // image spring-in
+  tl.from("#a1-img",{opacity:0,y:50,scale:0.97,duration:0.9,ease:"hf"},1.9);
   window.__timelines["act1"] = tl;
 })();
 </script>

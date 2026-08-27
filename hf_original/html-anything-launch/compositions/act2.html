@@ -1,97 +1,114 @@
 <template>
 <div id="act2" data-composition-id="act2" data-start="0" data-duration="12"
      data-width="1080" data-height="1920"
-     style="position:relative;width:1080px;height:1920px;overflow:hidden;">
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800&display=block');
-  #act2{font-family:'Inter',sans-serif;background:#000;}
-  #a2-grid{
+  #act2{font-family:'Inter',sans-serif;}
+  #a2-bg{
     position:absolute;inset:0;
-    background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),
-                     linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);
-    background-size:72px 72px;
+    background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),
+                     linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);
+    background-size:80px 80px;
   }
   #a2-glow{
-    position:absolute;top:-100px;right:-200px;
+    position:absolute;top:-100px;right:-150px;
     width:700px;height:700px;border-radius:50%;
-    background:radial-gradient(circle,rgba(6,182,212,0.14) 0%,transparent 65%);
+    background:radial-gradient(circle,rgba(6,182,212,0.13) 0%,transparent 65%);
   }
-  /* section label */
+
+  /* label */
   #a2-label{
     position:absolute;top:100px;left:64px;
-    font-size:22px;font-weight:300;letter-spacing:0.2em;
-    color:rgba(255,255,255,0.3);text-transform:uppercase;
+    font-size:22px;font-weight:300;letter-spacing:0.22em;
+    color:rgba(255,255,255,0.25);text-transform:uppercase;
     will-change:opacity;
   }
-  /* 大見出し */
+  /* headline */
   #a2-head{
     position:absolute;top:148px;left:64px;right:64px;
-    font-size:80px;font-weight:700;color:#fff;
-    letter-spacing:-0.03em;line-height:1.05;
+    font-size:84px;font-weight:800;color:#fff;
+    letter-spacing:-0.035em;line-height:1.0;
     will-change:transform,opacity;
   }
   #a2-head em{font-style:normal;color:#06b6d4;}
-  /* showcase画像 */
-  #a2-img-wrap{
-    position:absolute;top:380px;left:48px;right:48px;
-    border-radius:20px;overflow:hidden;
+
+  /* showcase image */
+  #a2-img{
+    position:absolute;top:406px;left:40px;right:40px;
+    border-radius:18px;overflow:hidden;
     border:1px solid rgba(255,255,255,0.07);
-    box-shadow:0 32px 80px -16px rgba(0,0,0,0.8);
+    box-shadow:0 24px 64px -16px rgba(0,0,0,0.8);
     will-change:transform,opacity;
   }
-  #a2-img-wrap img{width:100%;display:block;}
-  /* AIグリッド */
-  #a2-grid-agents{
-    position:absolute;top:772px;left:48px;right:48px;
-    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
-    will-change:transform,opacity;
+  #a2-img img{width:100%;display:block;}
+
+  /* grid-card-assemble: 3×2グリッド */
+  #a2-grid{
+    position:absolute;top:780px;left:40px;right:40px;
+    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
+    will-change:opacity;
   }
-  .a2-agent{
+  .a2-card{
     background:rgba(255,255,255,0.04);
     border:1px solid rgba(255,255,255,0.07);
-    border-radius:14px;padding:24px 16px;
+    border-radius:14px;padding:24px 14px;
     text-align:center;
+    will-change:transform,opacity;
   }
-  .a2-agent-name{font-size:27px;font-weight:600;color:#fff;letter-spacing:-0.01em;}
-  .a2-agent-sub{font-size:19px;font-weight:300;color:rgba(255,255,255,0.35);margin-top:4px;}
-  /* 説明文 */
+  .a2-card-name{
+    font-size:26px;font-weight:600;color:#fff;
+    letter-spacing:-0.02em;line-height:1.1;
+  }
+  .a2-card-sub{
+    font-size:18px;font-weight:300;
+    color:rgba(255,255,255,0.3);
+    margin-top:4px;letter-spacing:0.01em;
+  }
+
+  /* description */
   #a2-desc{
-    position:absolute;top:1052px;left:64px;right:64px;
-    font-size:36px;font-weight:300;color:rgba(255,255,255,0.6);
-    line-height:1.6;letter-spacing:-0.005em;
+    position:absolute;top:1072px;left:64px;right:64px;
+    font-size:34px;font-weight:300;
+    color:rgba(255,255,255,0.55);line-height:1.65;
+    letter-spacing:-0.005em;
     will-change:transform,opacity;
   }
   #a2-desc strong{color:#fff;font-weight:600;}
 </style>
-<div id="a2-grid"></div>
+<div id="a2-bg"></div>
 <div id="a2-glow"></div>
-<div id="a2-label">// What it does</div>
-<div id="a2-head">AIが<em>HTML</em>を<br>自動生成して<br>動画化する</div>
-<div id="a2-img-wrap">
+<div id="a2-label">// 9 AI Agents</div>
+<div id="a2-head">AIが<em>HTML</em>を<br>自動生成する</div>
+<div id="a2-img">
   <img src="https://repo-assets.open-design.ai/resources/images/hero.png"
-       crossorigin="anonymous" alt="Open Design" />
+       crossorigin="anonymous" alt="Open Design UI" />
 </div>
-<div id="a2-grid-agents">
-  <div class="a2-agent"><div class="a2-agent-name">Claude Code</div><div class="a2-agent-sub">Anthropic</div></div>
-  <div class="a2-agent"><div class="a2-agent-name">Cursor</div><div class="a2-agent-sub">Agent</div></div>
-  <div class="a2-agent"><div class="a2-agent-name">Gemini CLI</div><div class="a2-agent-sub">Google</div></div>
-  <div class="a2-agent"><div class="a2-agent-name">Codex</div><div class="a2-agent-sub">OpenAI</div></div>
-  <div class="a2-agent"><div class="a2-agent-name">Qwen</div><div class="a2-agent-sub">Alibaba</div></div>
-  <div class="a2-agent"><div class="a2-agent-name">Aider</div><div class="a2-agent-sub">Open Source</div></div>
+<div id="a2-grid">
+  <div class="a2-card" id="ac0"><div class="a2-card-name">Claude Code</div><div class="a2-card-sub">Anthropic</div></div>
+  <div class="a2-card" id="ac1"><div class="a2-card-name">Cursor</div><div class="a2-card-sub">Agent</div></div>
+  <div class="a2-card" id="ac2"><div class="a2-card-name">Gemini CLI</div><div class="a2-card-sub">Google</div></div>
+  <div class="a2-card" id="ac3"><div class="a2-card-name">Codex</div><div class="a2-card-sub">OpenAI</div></div>
+  <div class="a2-card" id="ac4"><div class="a2-card-name">Qwen</div><div class="a2-card-sub">Alibaba</div></div>
+  <div class="a2-card" id="ac5"><div class="a2-card-name">Aider</div><div class="a2-card-sub">OSS</div></div>
 </div>
 <div id="a2-desc">
-  <strong>APIキー不要。</strong>手元のAIエージェントだけで動く。<br>
+  <strong>APIキー不要。</strong>手元のAIだけで動く。<br>
   75スキル × 9出力形式に対応。
 </div>
 <script>
 (function(){
-  CustomEase.create("hf-out","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   var tl = gsap.timeline({paused:true});
-  tl.from("#a2-label",{opacity:0,duration:0.5},0.1);
-  tl.from("#a2-head",{y:50,opacity:0,duration:0.8,ease:"hf-out"},0.3);
-  tl.from("#a2-img-wrap",{y:40,opacity:0,scale:0.97,duration:0.9,ease:"hf-out"},0.8);
-  tl.from(".a2-agent",{y:30,opacity:0,duration:0.4,stagger:0.07,ease:"power3.out"},1.8);
-  tl.from("#a2-desc",{y:20,opacity:0,duration:0.7,ease:"hf-out"},3.0);
+  tl.from("#a2-label",{opacity:0,duration:0.5,ease:"power2.out"},0.1);
+  tl.from("#a2-head",{opacity:0,y:44,duration:0.8,ease:"hf"},0.3);
+  tl.from("#a2-img",{opacity:0,y:36,scale:0.97,duration:0.8,ease:"hf"},0.8);
+  // grid-card-assemble: stagger cascade
+  tl.from(["#ac0","#ac1","#ac2","#ac3","#ac4","#ac5"],{
+    opacity:0,y:24,scale:0.88,
+    duration:0.45,stagger:0.09,ease:"back.out(1.5)"
+  },1.9);
+  tl.from("#a2-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},3.2);
   window.__timelines["act2"] = tl;
 })();
 </script>
