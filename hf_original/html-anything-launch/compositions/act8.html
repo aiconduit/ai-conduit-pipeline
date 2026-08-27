@@ -1,0 +1,65 @@
+<template>
+<div id="act8" data-composition-id="act8" data-start="0" data-duration="6"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
+#act8{font-family:Inter,sans-serif;}
+.bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:80px 80px;}
+#glow-p{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 65%);will-change:transform;}
+#glow-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-42%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.10) 0%,transparent 65%);}
+/* Scene1: brand presence */
+#brand{position:absolute;top:360px;left:0;right:0;text-align:center;will-change:transform,opacity;}
+#brand-div{display:inline-block;width:48px;height:1px;background:rgba(255,255,255,0.15);margin-bottom:16px;}
+#brand-name{font-size:28px;font-weight:300;letter-spacing:0.28em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
+/* Scene2: CTA morph */
+#main{position:absolute;top:440px;left:64px;right:64px;text-align:center;will-change:transform,opacity;}
+#pre{font-size:32px;font-weight:300;color:rgba(255,255,255,0.38);letter-spacing:0.05em;margin-bottom:20px;}
+#word1{font-size:108px;font-weight:900;line-height:0.95;letter-spacing:-0.04em;
+  background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+#word2{font-size:108px;font-weight:900;line-height:0.95;letter-spacing:-0.04em;color:#fff;}
+#post{font-size:30px;font-weight:300;color:rgba(255,255,255,0.32);letter-spacing:0.04em;margin-top:20px;}
+/* Scene3: press */
+#btn-wrap{position:absolute;top:784px;left:72px;right:72px;will-change:transform,opacity;}
+#btn{background:linear-gradient(135deg,#7c3aed 0%,#06b6d4 100%);border-radius:9999px;padding:36px 0;text-align:center;font-size:34px;font-weight:700;color:#fff;letter-spacing:-0.01em;position:relative;overflow:hidden;}
+#ring{position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.18);transform:translate(-50%,-50%);}
+#sub{position:absolute;top:900px;left:0;right:0;text-align:center;font-size:24px;font-weight:300;color:rgba(255,255,255,0.25);letter-spacing:0.03em;will-change:opacity;}
+/* footer */
+#footer{position:absolute;bottom:140px;left:0;right:0;text-align:center;will-change:opacity;}
+#footer-name{font-size:24px;font-weight:300;letter-spacing:0.24em;color:rgba(255,255,255,0.18);text-transform:uppercase;}
+</style>
+<div class="bg"></div>
+<div id="glow-p"></div>
+<div id="glow-c"></div>
+<div id="brand"><div id="brand-div"></div><div id="brand-name">AI Conduit</div></div>
+<div id="main">
+  <div id="pre">コメントに</div>
+  <div id="word1">AI Conduit</div>
+  <div id="word2">と書いてね</div>
+  <div id="post">テンプレートを無料プレゼント</div>
+</div>
+<div id="btn-wrap">
+  <div id="btn">いいね＆保存お願いします<div id="ring"></div></div>
+</div>
+<div id="sub">概要欄のリンクから受け取れます</div>
+<div id="footer"><div id="footer-name">AI Conduit</div></div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.to("#glow-p",{scale:1.06,duration:5,ease:"sine.inOut",yoyo:true,repeat:-1},0);
+  // Scene1: brand presence
+  tl.from("#brand",{opacity:0,y:16,duration:0.7,ease:"hf"},0.2);
+  // Scene2: morph
+  tl.to("#brand",{opacity:0,y:-16,duration:0.5,ease:"power2.in"},1.0);
+  tl.from("#main",{opacity:0,scale:0.93,duration:0.9,ease:"hf"},1.2);
+  // Scene3: press
+  tl.from("#btn-wrap",{opacity:0,y:28,scale:0.95,duration:0.7,ease:"back.out(1.7)"},2.2);
+  tl.to("#ring",{width:320,height:320,opacity:0,duration:0.7,ease:"power2.out"},2.8);
+  tl.from("#sub",{opacity:0,duration:0.5},3.1);
+  tl.from("#footer",{opacity:0,duration:0.6},3.6);
+  window.__timelines["act8"]=tl;
+})();
+</script>
+</div>
+</template>

@@ -1,154 +1,49 @@
 <template>
-<div id="act3" data-composition-id="act3" data-start="0" data-duration="13"
+<div id="act3" data-composition-id="act3" data-start="0" data-duration="4"
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=block');
-  #act3{font-family:'Inter',sans-serif;}
-  #a3-bg{
-    position:absolute;inset:0;
-    background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),
-                     linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);
-    background-size:80px 80px;
-  }
-  #a3-glow{
-    position:absolute;bottom:-200px;left:-100px;
-    width:700px;height:700px;border-radius:50%;
-    background:radial-gradient(circle,rgba(124,58,237,0.11) 0%,transparent 65%);
-  }
-  #a3-label{
-    position:absolute;top:100px;left:64px;
-    font-size:22px;font-weight:300;letter-spacing:0.22em;
-    color:rgba(255,255,255,0.25);text-transform:uppercase;
-    will-change:opacity;
-  }
-  #a3-head{
-    position:absolute;top:148px;left:64px;right:64px;
-    font-size:84px;font-weight:800;color:#fff;
-    letter-spacing:-0.035em;line-height:1.0;
-    will-change:transform,opacity;
-  }
-  #a3-head em{font-style:normal;color:#06b6d4;}
-
-  /* agent-progress-theater: ターミナル */
-  #a3-term{
-    position:absolute;top:396px;left:40px;right:40px;
-    background:#080810;
-    border:1px solid rgba(124,58,237,0.28);
-    border-radius:18px;overflow:hidden;
-    box-shadow:0 0 60px -8px rgba(124,58,237,0.10),
-               0 32px 80px -16px rgba(0,0,0,0.85);
-    will-change:transform,opacity;
-  }
-  #a3-tbar{
-    background:#0f0f18;
-    padding:16px 20px;
-    display:flex;align-items:center;gap:8px;
-    border-bottom:1px solid rgba(255,255,255,0.04);
-  }
-  .a3-dot{width:12px;height:12px;border-radius:50%;}
-  .dr{background:#ff5f57;}.dy{background:#ffbd2e;}.dg{background:#28c840;}
-  #a3-ttitle{
-    font-size:20px;color:rgba(255,255,255,0.2);
-    margin-left:10px;font-family:'JetBrains Mono',monospace;
-    letter-spacing:0.02em;
-  }
-  #a3-tbody{
-    padding:28px 28px 24px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:27px;line-height:2.1;
-  }
-  .tc{color:rgba(255,255,255,0.22);}
-  .tcmd{color:#06b6d4;font-weight:500;}
-  .tstr{color:#a78bfa;}
-  .tok{color:#34d399;}
-  .tpath{color:rgba(255,255,255,0.75);}
-  /* agent progress lines: 各行は独立opacity */
-  .a3-line{will-change:opacity,transform;}
-  #a3-cur{
-    display:inline-block;width:12px;height:26px;
-    background:#06b6d4;vertical-align:middle;
-    animation:a3blink 1s step-end infinite;
-  }
-  @keyframes a3blink{0%,100%{opacity:1}50%{opacity:0}}
-
-  /* stats row */
-  #a3-stats{
-    position:absolute;top:840px;left:40px;right:40px;
-    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
-    will-change:transform,opacity;
-  }
-  .a3-stat{
-    background:rgba(255,255,255,0.03);
-    border:1px solid rgba(255,255,255,0.07);
-    border-radius:14px;padding:28px 16px;text-align:center;
-  }
-  .a3-num{
-    font-size:60px;font-weight:800;color:#fff;
-    letter-spacing:-0.04em;line-height:1;
-  }
-  .a3-num.c{color:#06b6d4;}
-  .a3-lbl{
-    font-size:20px;font-weight:300;
-    color:rgba(255,255,255,0.3);
-    margin-top:8px;letter-spacing:0.02em;
-  }
-
-  /* description */
-  #a3-desc{
-    position:absolute;top:1060px;left:64px;right:64px;
-    font-size:34px;font-weight:300;
-    color:rgba(255,255,255,0.55);line-height:1.65;
-    will-change:transform,opacity;
-  }
-  #a3-desc strong{color:#fff;font-weight:600;}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
+#act3{font-family:Inter,sans-serif;}
+.bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:80px 80px;}
+#glow{position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:900px;height:900px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 65%);}
+#lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
+#head{position:absolute;top:148px;left:64px;right:64px;font-size:80px;font-weight:800;color:#fff;letter-spacing:-0.035em;line-height:1.05;will-change:transform,opacity;}
+#head em{font-style:normal;color:#06b6d4;}
+/* product name大表示 */
+#product{position:absolute;top:400px;left:40px;right:40px;text-align:center;will-change:transform,opacity;}
+#product-name{font-size:72px;font-weight:900;color:#fff;letter-spacing:-0.03em;margin-bottom:16px;}
+#product-sub{font-size:30px;font-weight:300;color:rgba(255,255,255,0.4);letter-spacing:0.05em;}
+/* スクリーン */
+#screen{position:absolute;top:600px;left:40px;right:40px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);box-shadow:0 40px 100px -20px rgba(0,0,0,0.9);will-change:transform,opacity;}
+#screen img{width:100%;display:block;}
+#screen-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 60%,rgba(0,0,0,0.8) 100%);}
+#screen-label{position:absolute;bottom:20px;left:24px;font-size:22px;font-weight:300;color:rgba(255,255,255,0.4);letter-spacing:0.05em;}
+#stars{position:absolute;bottom:20px;right:24px;font-size:28px;font-weight:700;color:#fff;letter-spacing:-0.02em;}
 </style>
-<div id="a3-bg"></div>
-<div id="a3-glow"></div>
-<div id="a3-label">// Setup</div>
-<div id="a3-head"><em>30秒</em>で<br>始められる</div>
-<div id="a3-term">
-  <div id="a3-tbar">
-    <div class="a3-dot dr"></div>
-    <div class="a3-dot dy"></div>
-    <div class="a3-dot dg"></div>
-    <span id="a3-ttitle">claude-code</span>
-  </div>
-  <div id="a3-tbody">
-    <div class="a3-line" id="l0"><span class="tc"># スキルを追加してレンダリング</span></div>
-    <div class="a3-line" id="l1"><span class="tcmd">npx</span> <span class="tstr">skills add html-anything</span></div>
-    <div class="a3-line" id="l2"><span class="tcmd">hyperframes</span> <span class="tstr">render</span> <span class="tpath">shorts/</span></div>
-    <div class="a3-line" id="l3"><span class="tok">✓</span> <span class="tpath">output.mp4</span> 生成完了</div>
-    <div class="a3-line" id="l4"><span class="tok">✓</span> YouTube Shorts 投稿完了</div>
-    <div><span id="a3-cur"></span></div>
-  </div>
+<div class="bg"></div>
+<div id="glow"></div>
+<div id="lbl">// Solution</div>
+<div id="head"><em>html-anything</em><br>の登場</div>
+<div id="product">
+  <div id="product-name">nexu-io/html-anything</div>
+  <div id="product-sub">GitHub トレンド急上昇</div>
 </div>
-<div id="a3-stats">
-  <div class="a3-stat"><div class="a3-num c">75</div><div class="a3-lbl">スキル数</div></div>
-  <div class="a3-stat"><div class="a3-num">9</div><div class="a3-lbl">出力形式</div></div>
-  <div class="a3-stat"><div class="a3-num c">¥0</div><div class="a3-lbl">APIキー</div></div>
-</div>
-<div id="a3-desc">
-  <strong>完全自動パイプライン。</strong><br>
-  HyperFramesと組み合わせれば<br>毎日自動投稿できる。
+<div id="screen">
+  <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/assets/banner.png" crossorigin="anonymous" alt="html-anything" />
+  <div id="screen-overlay"></div>
+  <div id="screen-label">agentic HTML editor</div>
+  <div id="stars">8,464 ★</div>
 </div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
-  var tl = gsap.timeline({paused:true});
-  tl.from("#a3-label",{opacity:0,duration:0.4},0.1);
-  tl.from("#a3-head",{opacity:0,y:44,duration:0.7,ease:"hf"},0.3);
-  tl.from("#a3-term",{opacity:0,y:36,duration:0.7,ease:"hf"},0.8);
-  // agent-progress-theater: 1行ずつタイプイン
-  tl.from("#l0",{opacity:0,x:-12,duration:0.3,ease:"power2.out"},1.5);
-  tl.from("#l1",{opacity:0,x:-12,duration:0.3,ease:"power2.out"},2.1);
-  tl.from("#l2",{opacity:0,x:-12,duration:0.3,ease:"power2.out"},2.7);
-  tl.from("#l3",{opacity:0,x:-12,duration:0.3,ease:"power2.out"},3.4);
-  tl.from("#l4",{opacity:0,x:-12,duration:0.3,ease:"power2.out"},4.1);
-  // stats cascade
-  tl.from("#a3-stats .a3-stat",{opacity:0,y:20,scale:0.9,duration:0.4,stagger:0.1,ease:"back.out(1.5)"},5.0);
-  tl.from("#a3-desc",{opacity:0,y:18,duration:0.6,ease:"hf"},6.2);
-  window.__timelines["act3"] = tl;
+  var tl=gsap.timeline({paused:true});
+  tl.from("#lbl",{opacity:0,duration:0.4},0.1);
+  tl.from("#head",{opacity:0,y:44,duration:0.7,ease:"hf"},0.3);
+  tl.from("#product",{opacity:0,y:30,duration:0.6,ease:"hf"},0.8);
+  tl.from("#screen",{opacity:0,y:50,scale:0.96,duration:0.9,ease:"hf"},1.2);
+  window.__timelines["act3"]=tl;
 })();
 </script>
 </div>

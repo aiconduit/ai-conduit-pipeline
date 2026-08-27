@@ -1,115 +1,43 @@
 <template>
-<div id="act2" data-composition-id="act2" data-start="0" data-duration="12"
+<div id="act2" data-composition-id="act2" data-start="0" data-duration="4"
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;600;700;800&display=block');
-  #act2{font-family:'Inter',sans-serif;}
-  #a2-bg{
-    position:absolute;inset:0;
-    background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),
-                     linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);
-    background-size:80px 80px;
-  }
-  #a2-glow{
-    position:absolute;top:-100px;right:-150px;
-    width:700px;height:700px;border-radius:50%;
-    background:radial-gradient(circle,rgba(6,182,212,0.13) 0%,transparent 65%);
-  }
-
-  /* label */
-  #a2-label{
-    position:absolute;top:100px;left:64px;
-    font-size:22px;font-weight:300;letter-spacing:0.22em;
-    color:rgba(255,255,255,0.25);text-transform:uppercase;
-    will-change:opacity;
-  }
-  /* headline */
-  #a2-head{
-    position:absolute;top:148px;left:64px;right:64px;
-    font-size:84px;font-weight:800;color:#fff;
-    letter-spacing:-0.035em;line-height:1.0;
-    will-change:transform,opacity;
-  }
-  #a2-head em{font-style:normal;color:#06b6d4;}
-
-  /* showcase image */
-  #a2-img{
-    position:absolute;top:406px;left:40px;right:40px;
-    border-radius:18px;overflow:hidden;
-    border:1px solid rgba(255,255,255,0.07);
-    box-shadow:0 24px 64px -16px rgba(0,0,0,0.8);
-    will-change:transform,opacity;
-  }
-  #a2-img img{width:100%;display:block;}
-
-  /* grid-card-assemble: 3×2グリッド */
-  #a2-grid{
-    position:absolute;top:780px;left:40px;right:40px;
-    display:grid;grid-template-columns:repeat(3,1fr);gap:10px;
-    will-change:opacity;
-  }
-  .a2-card{
-    background:rgba(255,255,255,0.04);
-    border:1px solid rgba(255,255,255,0.07);
-    border-radius:14px;padding:24px 14px;
-    text-align:center;
-    will-change:transform,opacity;
-  }
-  .a2-card-name{
-    font-size:26px;font-weight:600;color:#fff;
-    letter-spacing:-0.02em;line-height:1.1;
-  }
-  .a2-card-sub{
-    font-size:18px;font-weight:300;
-    color:rgba(255,255,255,0.3);
-    margin-top:4px;letter-spacing:0.01em;
-  }
-
-  /* description */
-  #a2-desc{
-    position:absolute;top:1072px;left:64px;right:64px;
-    font-size:34px;font-weight:300;
-    color:rgba(255,255,255,0.55);line-height:1.65;
-    letter-spacing:-0.005em;
-    will-change:transform,opacity;
-  }
-  #a2-desc strong{color:#fff;font-weight:600;}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800&display=block');
+#act2{font-family:Inter,sans-serif;}
+.bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:80px 80px;}
+#glow{position:absolute;top:-200px;right:-100px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(239,68,68,0.12) 0%,transparent 65%);}
+#lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.25);text-transform:uppercase;will-change:opacity;}
+#head{position:absolute;top:148px;left:64px;right:64px;font-size:80px;font-weight:800;color:#fff;letter-spacing:-0.035em;line-height:1.05;will-change:transform,opacity;}
+/* pain points: 縦リスト */
+#pains{position:absolute;top:440px;left:40px;right:40px;display:flex;flex-direction:column;gap:16px;}
+.pain{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:14px;padding:28px 32px;display:flex;align-items:center;gap:20px;will-change:transform,opacity;}
+.pain-line{width:3px;height:48px;background:rgba(239,68,68,0.5);border-radius:2px;flex-shrink:0;}
+.pain-text{font-size:30px;font-weight:300;color:rgba(255,255,255,0.7);line-height:1.4;}
+#desc{position:absolute;top:940px;left:64px;right:64px;font-size:36px;font-weight:300;color:rgba(255,255,255,0.5);line-height:1.6;will-change:transform,opacity;}
+#desc strong{color:#fff;font-weight:700;}
 </style>
-<div id="a2-bg"></div>
-<div id="a2-glow"></div>
-<div id="a2-label">// 9 AI Agents</div>
-<div id="a2-head">AIが<em>HTML</em>を<br>自動生成する</div>
-<div id="a2-img">
-  <img src="https://repo-assets.open-design.ai/resources/images/hero.png"
-       crossorigin="anonymous" alt="Open Design UI" />
+<div class="bg"></div>
+<div id="glow"></div>
+<div id="lbl">// Before</div>
+<div id="head">これまでは<br>大変だった</div>
+<div id="pains">
+  <div class="pain" id="p0"><div class="pain-line"></div><div class="pain-text">動画編集ソフトの習得が必要</div></div>
+  <div class="pain" id="p1"><div class="pain-line"></div><div class="pain-text">専門的なスキルと時間が必要</div></div>
+  <div class="pain" id="p2"><div class="pain-line"></div><div class="pain-text">コストと工数がかかりすぎる</div></div>
 </div>
-<div id="a2-grid">
-  <div class="a2-card" id="ac0"><div class="a2-card-name">Claude Code</div><div class="a2-card-sub">Anthropic</div></div>
-  <div class="a2-card" id="ac1"><div class="a2-card-name">Cursor</div><div class="a2-card-sub">Agent</div></div>
-  <div class="a2-card" id="ac2"><div class="a2-card-name">Gemini CLI</div><div class="a2-card-sub">Google</div></div>
-  <div class="a2-card" id="ac3"><div class="a2-card-name">Codex</div><div class="a2-card-sub">OpenAI</div></div>
-  <div class="a2-card" id="ac4"><div class="a2-card-name">Qwen</div><div class="a2-card-sub">Alibaba</div></div>
-  <div class="a2-card" id="ac5"><div class="a2-card-name">Aider</div><div class="a2-card-sub">OSS</div></div>
-</div>
-<div id="a2-desc">
-  <strong>APIキー不要。</strong>手元のAIだけで動く。<br>
-  75スキル × 9出力形式に対応。
-</div>
+<div id="desc">しかし<strong>HTMLを書くだけ</strong>で<br>動画を作れるツールが登場した。</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
-  var tl = gsap.timeline({paused:true});
-  tl.from("#a2-label",{opacity:0,duration:0.5,ease:"power2.out"},0.1);
-  tl.from("#a2-head",{opacity:0,y:44,duration:0.8,ease:"hf"},0.3);
-  tl.from("#a2-img",{opacity:0,y:36,scale:0.97,duration:0.8,ease:"hf"},0.8);
-  // grid-card-assemble: stagger cascade
-  tl.from(["#ac0","#ac1","#ac2","#ac3","#ac4","#ac5"],{
-    opacity:0,y:24,scale:0.88,
-    duration:0.45,stagger:0.09,ease:"back.out(1.5)"
-  },1.9);
-  tl.from("#a2-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},3.2);
-  window.__timelines["act2"] = tl;
+  var tl=gsap.timeline({paused:true});
+  tl.from("#lbl",{opacity:0,duration:0.4},0.1);
+  tl.from("#head",{opacity:0,y:44,duration:0.7,ease:"hf"},0.3);
+  tl.from("#p0",{opacity:0,x:-40,duration:0.5,ease:"hf"},0.8);
+  tl.from("#p1",{opacity:0,x:-40,duration:0.5,ease:"hf"},1.1);
+  tl.from("#p2",{opacity:0,x:-40,duration:0.5,ease:"hf"},1.4);
+  tl.from("#desc",{opacity:0,y:20,duration:0.6,ease:"hf"},2.0);
+  window.__timelines["act2"]=tl;
 })();
 </script>
 </div>
