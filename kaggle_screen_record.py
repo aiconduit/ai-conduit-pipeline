@@ -35,7 +35,7 @@ kernel_lines = [
 kernel_code = "\n".join(kernel_lines)
 
 meta = {
-    "id": f"{user}/hf-screen-recording",
+    "id": f"{user}/wan22-gpu-test",
     "title": "HF Screen Recording",
     "code_file": "kernel.py",
     "language": "python",

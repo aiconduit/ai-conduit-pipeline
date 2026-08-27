@@ -2,7 +2,7 @@ import os, requests, time, subprocess
 
 u = os.environ["KAGGLE_USERNAME"]
 k = os.environ["KAGGLE_KEY"]
-slug = f"{u}/hf-screen-recording"
+slug = f"{u}/wan22-gpu-test"
 
 print("Waiting for Kaggle kernel...")
 for i in range(40):
@@ -19,7 +19,7 @@ for i in range(40):
 os.environ["KAGGLE_USERNAME"] = u
 os.environ["KAGGLE_KEY"] = k
 result = subprocess.run(
-    ["kaggle", "kernels", "output", f"{u}/hf-screen-recording", "-p", "/tmp/kout/"],
+    ["kaggle", "kernels", "output", f"{u}/wan22-gpu-test", "-p", "/tmp/kout/"],
     capture_output=True, text=True
 )
 print(result.stdout)
