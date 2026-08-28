@@ -1,4 +1,4 @@
-import os, json, requests, zipfile, tempfile
+import os, json, requests, zipfile, tempfile, time
 
 user = os.environ["KAGGLE_USERNAME"]
 key = os.environ["KAGGLE_KEY"]
@@ -9,6 +9,10 @@ print(f"User: {user}")
 r = requests.get("https://www.kaggle.com/api/v1/datasets/list",
                 params={"search": "test", "pageSize": 1}, auth=auth, timeout=10)
 print(f"Auth: {r.status_code}")
+
+# ユニークなカーネル名を生成
+kernel_slug = f"screen-rec-{int(time.time()) % 100000}"
+print(f"Kernel slug: {user}/{kernel_slug}")
 
 kernel_code = f"""
 import subprocess, os, time, asyncio
@@ -48,9 +52,9 @@ shutil.copy("/tmp/screen_raw.mp4", "/kaggle/working/screen_raw.mp4")
 print("Done:", os.path.getsize("/kaggle/working/screen_raw.mp4")//1024, "KB")
 """
 
-meta = {
-    "id": f"{user}/wan22-gpu-test",
-    "title": "Wan2.2 GPU Test",
+meta = {{
+    "id": f"{{user}}/{{kernel_slug}}",
+    "title": f"Screen Recording {{kernel_slug}}",
     "code_file": "kernel.py",
     "language": "python",
     "kernel_type": "script",
@@ -60,17 +64,20 @@ meta = {
     "dataset_sources": [],
     "competition_sources": [],
     "kernel_sources": []
-}
+}}
+
+# kernel_slugをファイルに保存してwait/downloadスクリプトで使えるようにする
+open("/tmp/kernel_slug.txt", "w").write(f"{{user}}/{{kernel_slug}}")
 
 with tempfile.TemporaryDirectory() as d:
-    open(f"{d}/kernel.py", "w").write(kernel_code)
-    json.dump(meta, open(f"{d}/kernel-metadata.json", "w"))
-    z = f"{d}/k.zip"
+    open(f"{{d}}/kernel.py", "w").write(kernel_code)
+    json.dump(meta, open(f"{{d}}/kernel-metadata.json", "w"))
+    z = f"{{d}}/k.zip"
     with zipfile.ZipFile(z, "w") as zf:
-        zf.write(f"{d}/kernel.py", "kernel.py")
-        zf.write(f"{d}/kernel-metadata.json", "kernel-metadata.json")
+        zf.write(f"{{d}}/kernel.py", "kernel.py")
+        zf.write(f"{{d}}/kernel-metadata.json", "kernel-metadata.json")
     with open(z, "rb") as f:
         r2 = requests.post("https://www.kaggle.com/api/v1/kernels/push",
-                          auth=auth, files={"file":("k.zip",f,"application/zip")}, timeout=30)
-    print(f"Push: {r2.status_code}")
+                          auth=auth, files={{"file":("k.zip",f,"application/zip")}}, timeout=30)
+    print(f"Push: {{r2.status_code}}")
     print(r2.text[:300])
