@@ -3,40 +3,44 @@
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;600;700;800&display=block');
 #act2{font-family:Inter,sans-serif;}
-.bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:80px 80px;}
-#glow{position:absolute;top:-200px;right:-100px;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(239,68,68,0.12) 0%,transparent 65%);}
-#lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.25);text-transform:uppercase;will-change:opacity;}
-#head{position:absolute;top:148px;left:64px;right:64px;font-size:80px;font-weight:800;color:#fff;letter-spacing:-0.035em;line-height:1.05;will-change:transform,opacity;}
-/* pain points: 縦リスト */
-#pains{position:absolute;top:440px;left:40px;right:40px;display:flex;flex-direction:column;gap:16px;}
-.pain{background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);border-radius:14px;padding:28px 32px;display:flex;align-items:center;gap:20px;will-change:transform,opacity;}
-.pain-line{width:3px;height:48px;background:rgba(239,68,68,0.5);border-radius:2px;flex-shrink:0;}
-.pain-text{font-size:30px;font-weight:300;color:rgba(255,255,255,0.7);line-height:1.4;}
-#desc{position:absolute;top:940px;left:64px;right:64px;font-size:36px;font-weight:300;color:rgba(255,255,255,0.5);line-height:1.6;will-change:transform,opacity;}
-#desc strong{color:#fff;font-weight:700;}
+#a2-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);filter:brightness(0.35);will-change:transform;}
+#a2-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.15) 40%,rgba(0,0,0,0.75) 100%);}
+#a2-lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.3);text-transform:uppercase;will-change:opacity;}
+#a2-head{position:absolute;top:148px;left:64px;right:64px;font-size:84px;font-weight:800;color:#fff;letter-spacing:-0.035em;line-height:1.0;will-change:transform,opacity;}
+#a2-head em{font-style:normal;color:#06b6d4;}
+#a2-screen{position:absolute;top:400px;left:40px;right:40px;border-radius:18px;overflow:hidden;border:1px solid rgba(6,182,212,0.2);box-shadow:0 0 60px rgba(6,182,212,0.1),0 32px 80px rgba(0,0,0,0.8);will-change:transform,opacity;}
+#a2-screen img{width:100%;display:block;filter:brightness(0.9);}
+#a2-chips{position:absolute;top:852px;left:40px;right:40px;display:flex;flex-wrap:wrap;gap:12px;will-change:opacity,transform;}
+.a2-chip{background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);border-radius:9999px;padding:12px 28px;font-size:26px;font-weight:300;color:#06b6d4;}
+#a2-desc{position:absolute;top:980px;left:64px;right:64px;font-size:34px;font-weight:300;color:rgba(255,255,255,0.55);line-height:1.65;will-change:transform,opacity;}
+#a2-desc strong{color:#fff;font-weight:600;}
 </style>
-<div class="bg"></div>
-<div id="glow"></div>
-<div id="lbl">// Before</div>
-<div id="head">これまでは<br>大変だった</div>
-<div id="pains">
-  <div class="pain" id="p0"><div class="pain-line"></div><div class="pain-text">動画編集ソフトの習得が必要</div></div>
-  <div class="pain" id="p1"><div class="pain-line"></div><div class="pain-text">専門的なスキルと時間が必要</div></div>
-  <div class="pain" id="p2"><div class="pain-line"></div><div class="pain-text">コストと工数がかかりすぎる</div></div>
+<img id="a2-bg-img" src="https://image.pollinations.ai/prompt/futuristic%20AI%20robot%20hand%20touching%20holographic%20screen%20dark%20background%20cinematic?width=1080&height=1920&nologo=true&model=flux" crossorigin="anonymous" alt="" />
+<div id="a2-overlay"></div>
+<div id="a2-lbl">// Solution</div>
+<div id="a2-head">AIが<em>HTML</em>を<br>自動生成する</div>
+<div id="a2-screen">
+  <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/assets/banner.png" crossorigin="anonymous" alt="html-anything" />
 </div>
-<div id="desc">しかし<strong>HTMLを書くだけ</strong>で<br>動画を作れるツールが登場した。</div>
+<div id="a2-chips">
+  <div class="a2-chip">Claude Code</div>
+  <div class="a2-chip">Cursor</div>
+  <div class="a2-chip">Gemini</div>
+  <div class="a2-chip">APIキー不要</div>
+</div>
+<div id="a2-desc"><strong>HTMLを書くだけ</strong>で動画が完成。<br>9つのAIエージェントに対応。</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.from("#lbl",{opacity:0,duration:0.4},0.1);
-  tl.from("#head",{opacity:0,y:44,duration:0.7,ease:"hf"},0.3);
-  tl.from("#p0",{opacity:0,x:-40,duration:0.5,ease:"hf"},0.8);
-  tl.from("#p1",{opacity:0,x:-40,duration:0.5,ease:"hf"},1.1);
-  tl.from("#p2",{opacity:0,x:-40,duration:0.5,ease:"hf"},1.4);
-  tl.from("#desc",{opacity:0,y:20,duration:0.6,ease:"hf"},2.0);
+  tl.to("#a2-bg-img",{scale:1.0,duration:4,ease:"none"},0);
+  tl.from("#a2-lbl",{opacity:0,duration:0.4},0.1);
+  tl.from("#a2-head",{opacity:0,y:44,duration:0.7,ease:"hf"},0.3);
+  tl.from("#a2-screen",{opacity:0,y:40,scale:0.97,duration:0.8,ease:"hf"},0.8);
+  tl.from(".a2-chip",{opacity:0,scale:0.85,duration:0.4,stagger:0.08,ease:"back.out(1.5)"},1.8);
+  tl.from("#a2-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},2.5);
   window.__timelines["act2"]=tl;
 })();
 </script>

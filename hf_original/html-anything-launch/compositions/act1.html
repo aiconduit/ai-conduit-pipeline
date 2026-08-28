@@ -3,31 +3,70 @@
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;800;900&display=block');
 #act1{font-family:Inter,sans-serif;}
-.bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:80px 80px;}
-#glow{position:absolute;top:-300px;left:50%;transform:translateX(-50%);width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.22) 0%,transparent 65%);}
-/* kinetic-type: 各行が独立 */
-.beat{position:absolute;left:0;right:0;text-align:center;will-change:transform,opacity;}
-#b0{top:680px;font-size:36px;font-weight:300;letter-spacing:0.1em;color:rgba(255,255,255,0.3);}
-#b1{top:740px;font-size:108px;font-weight:900;color:#fff;letter-spacing:-0.04em;line-height:1;}
-#b2{top:858px;font-size:108px;font-weight:200;color:rgba(255,255,255,0.4);letter-spacing:-0.04em;line-height:1;}
-#b3{top:976px;font-size:108px;font-weight:900;color:#06b6d4;letter-spacing:-0.04em;line-height:1;}
+/* 背景画像 */
+#a1-bg-img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transform:scale(1.08);will-change:transform;
+  filter:brightness(0.45);
+}
+/* ケンバーンズ */
+#a1-bg-wrap{position:absolute;inset:0;overflow:hidden;}
+/* グラデーションオーバーレイ */
+#a1-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.7) 100%);
+}
+/* テキスト */
+#a1-content{
+  position:absolute;top:560px;left:0;right:0;
+  text-align:center;padding:0 64px;
+}
+#a1-tag{
+  font-size:24px;font-weight:300;letter-spacing:0.22em;
+  color:rgba(255,255,255,0.5);text-transform:uppercase;
+  margin-bottom:32px;will-change:opacity,transform;
+}
+#a1-title-1{
+  font-size:100px;font-weight:200;color:rgba(255,255,255,0.55);
+  letter-spacing:-0.02em;line-height:1;margin-bottom:8px;
+  will-change:opacity,transform;
+}
+#a1-title-2{
+  font-size:120px;font-weight:900;color:#fff;
+  letter-spacing:-0.04em;line-height:1;margin-bottom:8px;
+  will-change:opacity,transform;
+}
+#a1-title-3{
+  font-size:100px;font-weight:200;color:rgba(255,255,255,0.55);
+  letter-spacing:-0.02em;line-height:1;
+  will-change:opacity,transform;
+}
 </style>
-<div class="bg"></div>
-<div id="glow"></div>
-<div class="beat" id="b0">HTML を書くだけで</div>
-<div class="beat" id="b1">動画になる</div>
-<div class="beat" id="b2">時代が</div>
-<div class="beat" id="b3">来た</div>
+<div id="a1-bg-wrap">
+  <img id="a1-bg-img"
+    src="https://image.pollinations.ai/prompt/cinematic%20dark%20tech%20background%20code%20matrix%20purple%20blue%20gradient%204K%20vertical%20portrait?width=1080&height=1920&nologo=true&model=flux"
+    crossorigin="anonymous" alt="" />
+</div>
+<div id="a1-overlay"></div>
+<div id="a1-content">
+  <div id="a1-tag">GitHub トレンド</div>
+  <div id="a1-title-1">HTMLを書くだけで</div>
+  <div id="a1-title-2">動画になる</div>
+  <div id="a1-title-3">時代が来た</div>
+</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.from("#b0",{opacity:0,y:30,duration:0.4,ease:"hf"},0.1);
-  tl.from("#b1",{opacity:0,y:60,duration:0.5,ease:"hf"},0.3);
-  tl.from("#b2",{opacity:0,y:60,duration:0.5,ease:"hf"},0.55);
-  tl.from("#b3",{opacity:0,scale:0.7,duration:0.6,ease:"back.out(2)"},0.8);
+  // ケンバーンズ：ゆっくりズームイン
+  tl.to("#a1-bg-img",{scale:1.0,duration:3,ease:"none"},0);
+  // テキストイン
+  tl.from("#a1-tag",{opacity:0,y:20,duration:0.5,ease:"hf"},0.2);
+  tl.from("#a1-title-1",{opacity:0,y:50,duration:0.6,ease:"hf"},0.4);
+  tl.from("#a1-title-2",{opacity:0,y:60,duration:0.7,ease:"hf"},0.65);
+  tl.from("#a1-title-3",{opacity:0,y:50,duration:0.6,ease:"hf"},0.9);
   window.__timelines["act1"]=tl;
 })();
 </script>
