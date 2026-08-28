@@ -10,7 +10,7 @@ r = requests.get("https://www.kaggle.com/api/v1/datasets/list",
                 params={"search": "test", "pageSize": 1}, auth=auth, timeout=10)
 print(f"Auth: {r.status_code}")
 
-kernel_slug = f"screen-rec-{int(time.time()) % 100000}"
+kernel_slug = "wan22-gpu-test"
 print(f"Kernel slug: {user}/{kernel_slug}")
 
 # GITHUB_ENVに書き込む
