@@ -109,13 +109,12 @@ jobs:
           if [ "$RENDER_SAMPLE" = "heygen-apple-motion" ] || [ "$RENDER_SAMPLE" = "heygen-ui-motion" ]; then
             cp test_render/${RENDER_SAMPLE}.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画"
             ls -la test_render/ || echo "test_render not found"
-          else
-            # hf_originalを優先
-          if [ -d "hf_original/$RENDER_SAMPLE" ]; then
+          elif [ -d "hf_original/$RENDER_SAMPLE" ]; then
             HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_original/$RENDER_SAMPLE -o raw.mp4
+            echo "✅ hf_original使用: $RENDER_SAMPLE"
           else
             HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/$RENDER_SAMPLE -o raw.mp4
-          fi
+            echo "✅ hf_launches使用: $RENDER_SAMPLE"
           fi
           ls -lh raw.mp4
       - name: Generate TTS and caption composition
