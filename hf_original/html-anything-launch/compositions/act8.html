@@ -27,7 +27,13 @@
 /* footer */
 #footer{position:absolute;bottom:140px;left:0;right:0;text-align:center;will-change:opacity;}
 #footer-name{font-size:24px;font-weight:300;letter-spacing:0.24em;color:rgba(255,255,255,0.18);text-transform:uppercase;}
+
+#act8-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);filter:brightness(0.32);will-change:transform;}
+#act8-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.1) 40%,rgba(0,0,0,0.8) 100%);}
 </style>
+
+<img id="act8-bg" src="assets/act8_cta.jpg" crossorigin="anonymous" alt="" />
+<div id="act8-ov"></div>
 <div class="bg"></div>
 <div id="glow-p"></div>
 <div id="glow-c"></div>
@@ -47,6 +53,7 @@
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   var tl=gsap.timeline({paused:true});
+  tl.to("#act8-bg",{scale:1.0,duration:5,ease:"none"},0);
   tl.to("#glow-p",{scale:1.06,duration:5,ease:"sine.inOut",yoyo:true,repeat:-1},0);
   // Scene1: brand presence
   tl.from("#brand",{opacity:0,y:16,duration:0.7,ease:"hf"},0.2);
