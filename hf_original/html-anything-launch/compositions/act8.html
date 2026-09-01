@@ -3,68 +3,58 @@
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 #act8{font-family:Inter,sans-serif;}
-.bg{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.035) 1px,transparent 1px);background-size:80px 80px;}
-#glow-p{position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);width:1000px;height:1000px;border-radius:50%;background:radial-gradient(circle,rgba(124,58,237,0.18) 0%,transparent 65%);will-change:transform;}
-#glow-c{position:absolute;top:50%;left:50%;transform:translate(-50%,-42%);width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,0.10) 0%,transparent 65%);}
-/* Scene1: brand presence */
-#brand{position:absolute;top:360px;left:0;right:0;text-align:center;will-change:transform,opacity;}
-#brand-div{display:inline-block;width:48px;height:1px;background:rgba(255,255,255,0.15);margin-bottom:16px;}
-#brand-name{font-size:28px;font-weight:300;letter-spacing:0.28em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
-/* Scene2: CTA morph */
-#main{position:absolute;top:440px;left:64px;right:64px;text-align:center;will-change:transform,opacity;}
-#pre{font-size:32px;font-weight:300;color:rgba(255,255,255,0.38);letter-spacing:0.05em;margin-bottom:20px;}
-#word1{font-size:108px;font-weight:900;line-height:0.95;letter-spacing:-0.04em;
-  background:linear-gradient(135deg,#a78bfa,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-#word2{font-size:108px;font-weight:900;line-height:0.95;letter-spacing:-0.04em;color:#fff;}
-#post{font-size:30px;font-weight:300;color:rgba(255,255,255,0.32);letter-spacing:0.04em;margin-top:20px;}
-/* Scene3: press */
-#btn-wrap{position:absolute;top:784px;left:72px;right:72px;will-change:transform,opacity;}
-#btn{background:linear-gradient(135deg,#7c3aed 0%,#06b6d4 100%);border-radius:9999px;padding:36px 0;text-align:center;font-size:34px;font-weight:700;color:#fff;letter-spacing:-0.01em;position:relative;overflow:hidden;}
-#ring{position:absolute;top:50%;left:50%;width:0;height:0;border-radius:50%;background:rgba(255,255,255,0.18);transform:translate(-50%,-50%);}
-#sub{position:absolute;top:900px;left:0;right:0;text-align:center;font-size:24px;font-weight:300;color:rgba(255,255,255,0.25);letter-spacing:0.03em;will-change:opacity;}
-/* footer */
-#footer{position:absolute;bottom:140px;left:0;right:0;text-align:center;will-change:opacity;}
-#footer-name{font-size:24px;font-weight:300;letter-spacing:0.24em;color:rgba(255,255,255,0.18);text-transform:uppercase;}
-
-#act8-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.32);will-change:transform;}
-#act8-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.1) 40%,rgba(0,0,0,0.8) 100%);}
+#act8-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.28);will-change:transform;}
+#act8-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 40%);}
+#act8-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.0) 50%);}
+#act8-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act8-tag-dot{width:8px;height:8px;border-radius:50%;background:#f59e0b;box-shadow:0 0 12px #f59e0b;}
+#act8-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act8-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#f59e0b,transparent);border-radius:2px;will-change:width;}
+#act8-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act8-line1{font-size:96px;font-weight:900;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act8-line2{font-size:72px;font-weight:200;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(245,158,11,0.4);}
+#act8-line3{font-size:96px;font-weight:900;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act8-badge{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act8-badge-line{flex:1;height:1px;background:linear-gradient(to right,#f59e0b,transparent);opacity:0.4;}
+#act8-badge-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;white-space:nowrap;}
 </style>
-
 <img id="act8-bg" src="assets/act8_cta.jpg" crossorigin="anonymous" alt="" />
-<div id="act8-ov"></div>
-<div class="bg"></div>
-<div id="glow-p"></div>
-<div id="glow-c"></div>
-<div id="brand"><div id="brand-div"></div><div id="brand-name">AI Conduit</div></div>
-<div id="main">
-  <div id="pre">コメントに</div>
-  <div id="word1">AI Conduit</div>
-  <div id="word2">と書いてね</div>
-  <div id="post">テンプレートを無料プレゼント</div>
+<div id="act8-ov-top"></div>
+<div id="act8-ov-bot"></div>
+<div id="act8-tag-wrap">
+  <div id="act8-tag-dot"></div>
+  <div id="act8-tag">Free Gift</div>
 </div>
-<div id="btn-wrap">
-  <div id="btn">いいね＆保存お願いします<div id="ring"></div></div>
+<div id="act8-accent-line"></div>
+<div id="act8-content">
+  <div id="act8-line1">いいねと保存</div>
+  <div id="act8-line2">コメントに</div>
+  <div id="act8-line3">AI Conduit</div>
 </div>
-<div id="sub">概要欄のリンクから受け取れます</div>
-<div id="footer"><div id="footer-name">AI Conduit</div></div>
+<div id="act8-badge">
+  <div id="act8-badge-line"></div>
+  <div id="act8-badge-text">@AI.Conduit</div>
+  <div id="act8-badge-line"></div>
+</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.to("#act8-bg",{scale:1.0,duration:5,ease:"none"},0);
-  tl.to("#glow-p",{scale:1.06,duration:5,ease:"sine.inOut",yoyo:true,repeat:-1},0);
-  // Scene1: brand presence
-  tl.from("#brand",{opacity:0,y:16,duration:0.7,ease:"hf"},0.2);
-  // Scene2: morph
-  tl.to("#brand",{opacity:0,y:-16,duration:0.5,ease:"power2.in"},1.0);
-  tl.from("#main",{opacity:0,scale:0.93,duration:0.9,ease:"hf"},1.2);
-  // Scene3: press
-  tl.from("#btn-wrap",{opacity:0,y:28,scale:0.95,duration:0.7,ease:"back.out(1.7)"},2.2);
-  tl.to("#ring",{width:320,height:320,opacity:0,duration:0.7,ease:"power2.out"},2.8);
-  tl.from("#sub",{opacity:0,duration:0.5},3.1);
-  tl.from("#footer",{opacity:0,duration:0.6},3.6);
+  // ケンバーンズ
+  tl.fromTo("#act8-bg",{scale:1.08},{scale:1.0,duration:6,ease:"none"},0);
+  // タグイン
+  tl.from("#act8-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  // アクセントライン
+  tl.to("#act8-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  // テキスト stagger
+  tl.from("#act8-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act8-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act8-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  // バッジ
+  tl.from("#act8-badge",{opacity:0,duration:0.5},1.1);
   window.__timelines["act8"]=tl;
 })();
 </script>

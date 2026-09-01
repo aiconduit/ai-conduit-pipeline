@@ -3,44 +3,58 @@
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 #act4{font-family:Inter,sans-serif;}
-#a4-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.32);will-change:transform;}
-#a4-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.1) 40%,rgba(0,0,0,0.8) 100%);}
-#a4-lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
-#a4-head{position:absolute;top:148px;left:64px;right:64px;font-size:80px;font-weight:800;color:#fff;letter-spacing:-0.035em;line-height:1.05;will-change:transform,opacity;}
-#a4-head em{font-style:normal;color:#06b6d4;}
-#a4-step{position:absolute;top:388px;left:64px;display:flex;align-items:center;gap:12px;}
-.step-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.15);}
-.step-dot.active{background:#06b6d4;}.step-line{width:32px;height:1px;background:rgba(255,255,255,0.1);}
-#a4-screen{position:absolute;top:436px;left:40px;right:40px;border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);box-shadow:0 40px 100px rgba(0,0,0,0.9);will-change:transform,opacity;}
-#a4-screen img{width:100%;display:block;}
-#a4-cap{position:absolute;top:940px;left:64px;right:64px;font-size:36px;font-weight:300;color:rgba(255,255,255,0.55);line-height:1.6;will-change:transform,opacity;}
-#a4-cap strong{color:#fff;font-weight:700;}
+#act4-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.28);will-change:transform;}
+#act4-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 40%);}
+#act4-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.0) 50%);}
+#act4-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act4-tag-dot{width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;}
+#act4-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act4-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
+#act4-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act4-line1{font-size:88px;font-weight:300;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act4-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
+#act4-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act4-badge{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act4-badge-line{flex:1;height:1px;background:linear-gradient(to right,#06b6d4,transparent);opacity:0.4;}
+#act4-badge-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;white-space:nowrap;}
 </style>
-<img id="a4-bg-img" src="assets/act4_step1.jpg" crossorigin="anonymous" alt="" />
-<div id="a4-overlay"></div>
-<div id="a4-lbl">// Step 1</div>
-<div id="a4-head">設定は<br><em>不要</em></div>
-<div id="a4-step">
-  <div class="step-dot active"></div><div class="step-line"></div>
-  <div class="step-dot"></div><div class="step-line"></div>
-  <div class="step-dot"></div>
+<img id="act4-bg" src="assets/act4_step1.jpg" crossorigin="anonymous" alt="" />
+<div id="act4-ov-top"></div>
+<div id="act4-ov-bot"></div>
+<div id="act4-tag-wrap">
+  <div id="act4-tag-dot"></div>
+  <div id="act4-tag">Step 1</div>
 </div>
-<div id="a4-screen">
-  <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/screenshots/01-entry-view.png" crossorigin="anonymous" alt="entry view" />
+<div id="act4-accent-line"></div>
+<div id="act4-content">
+  <div id="act4-line1">npxコマンド</div>
+  <div id="act4-line2">一発で完了</div>
+  <div id="act4-line3">設定不要</div>
 </div>
-<div id="a4-cap"><strong>npxコマンド一発</strong>でインストール完了。<br>追加設定は一切不要。</div>
+<div id="act4-badge">
+  <div id="act4-badge-line"></div>
+  <div id="act4-badge-text">@AI.Conduit</div>
+  <div id="act4-badge-line"></div>
+</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.to("#a4-bg-img",{scale:1.0,duration:4,ease:"none"},0);
-  tl.from("#a4-lbl",{opacity:0,duration:0.3},0.1);
-  tl.from("#a4-head",{opacity:0,y:40,duration:0.6,ease:"hf"},0.2);
-  tl.from("#a4-step",{opacity:0,duration:0.4},0.5);
-  tl.from("#a4-screen",{opacity:0,y:40,scale:0.97,duration:0.8,ease:"hf"},0.7);
-  tl.from("#a4-cap",{opacity:0,y:20,duration:0.6,ease:"hf"},1.5);
+  // ケンバーンズ
+  tl.fromTo("#act4-bg",{scale:1.08},{scale:1.0,duration:4,ease:"none"},0);
+  // タグイン
+  tl.from("#act4-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  // アクセントライン
+  tl.to("#act4-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  // テキスト stagger
+  tl.from("#act4-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act4-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act4-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  // バッジ
+  tl.from("#act4-badge",{opacity:0,duration:0.5},1.1);
   window.__timelines["act4"]=tl;
 })();
 </script>

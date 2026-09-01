@@ -3,44 +3,58 @@
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;600;700;800&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 #act2{font-family:Inter,sans-serif;}
-#a2-bg-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.35);will-change:transform;}
-#a2-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.15) 40%,rgba(0,0,0,0.75) 100%);}
-#a2-lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.3);text-transform:uppercase;will-change:opacity;}
-#a2-head{position:absolute;top:148px;left:64px;right:64px;font-size:84px;font-weight:800;color:#fff;letter-spacing:-0.035em;line-height:1.0;will-change:transform,opacity;}
-#a2-head em{font-style:normal;color:#06b6d4;}
-#a2-screen{position:absolute;top:400px;left:40px;right:40px;border-radius:18px;overflow:hidden;border:1px solid rgba(6,182,212,0.2);box-shadow:0 0 60px rgba(6,182,212,0.1),0 32px 80px rgba(0,0,0,0.8);will-change:transform,opacity;}
-#a2-screen img{width:100%;display:block;filter:brightness(0.9);}
-#a2-chips{position:absolute;top:852px;left:40px;right:40px;display:flex;flex-wrap:wrap;gap:12px;will-change:opacity,transform;}
-.a2-chip{background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.25);border-radius:9999px;padding:12px 28px;font-size:26px;font-weight:300;color:#06b6d4;}
-#a2-desc{position:absolute;top:980px;left:64px;right:64px;font-size:34px;font-weight:300;color:rgba(255,255,255,0.55);line-height:1.65;will-change:transform,opacity;}
-#a2-desc strong{color:#fff;font-weight:600;}
+#act2-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.28);will-change:transform;}
+#act2-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 40%);}
+#act2-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.0) 50%);}
+#act2-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act2-tag-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 12px #ef4444;}
+#act2-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act2-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#ef4444,transparent);border-radius:2px;will-change:width;}
+#act2-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act2-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act2-line2{font-size:108px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(239,68,68,0.4);}
+#act2-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act2-badge{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act2-badge-line{flex:1;height:1px;background:linear-gradient(to right,#ef4444,transparent);opacity:0.4;}
+#act2-badge-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;white-space:nowrap;}
 </style>
-<img id="a2-bg-img" src="assets/act2_ai.jpg" crossorigin="anonymous" alt="" />
-<div id="a2-overlay"></div>
-<div id="a2-lbl">// Solution</div>
-<div id="a2-head">AIが<em>HTML</em>を<br>自動生成する</div>
-<div id="a2-screen">
-  <img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/assets/banner.png" crossorigin="anonymous" alt="html-anything" />
+<img id="act2-bg" src="assets/act2_ai.jpg" crossorigin="anonymous" alt="" />
+<div id="act2-ov-top"></div>
+<div id="act2-ov-bot"></div>
+<div id="act2-tag-wrap">
+  <div id="act2-tag-dot"></div>
+  <div id="act2-tag">Problem</div>
 </div>
-<div id="a2-chips">
-  <div class="a2-chip">Claude Code</div>
-  <div class="a2-chip">Cursor</div>
-  <div class="a2-chip">Gemini</div>
-  <div class="a2-chip">APIキー不要</div>
+<div id="act2-accent-line"></div>
+<div id="act2-content">
+  <div id="act2-line1">専門ツールと</div>
+  <div id="act2-line2">多くの時間が</div>
+  <div id="act2-line3">必要だった</div>
 </div>
-<div id="a2-desc"><strong>HTMLを書くだけ</strong>で動画が完成。<br>9つのAIエージェントに対応。</div>
+<div id="act2-badge">
+  <div id="act2-badge-line"></div>
+  <div id="act2-badge-text">@AI.Conduit</div>
+  <div id="act2-badge-line"></div>
+</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.to("#a2-bg-img",{scale:1.0,duration:4,ease:"none"},0);
-  tl.from("#a2-lbl",{opacity:0,duration:0.4},0.1);
-  tl.from("#a2-head",{opacity:0,y:44,duration:0.7,ease:"hf"},0.3);
-  tl.from("#a2-screen",{opacity:0,y:40,scale:0.97,duration:0.8,ease:"hf"},0.8);
-  tl.from(".a2-chip",{opacity:0,scale:0.85,duration:0.4,stagger:0.08,ease:"back.out(1.5)"},1.8);
-  tl.from("#a2-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},2.5);
+  // ケンバーンズ
+  tl.fromTo("#act2-bg",{scale:1.08},{scale:1.0,duration:4,ease:"none"},0);
+  // タグイン
+  tl.from("#act2-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  // アクセントライン
+  tl.to("#act2-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  // テキスト stagger
+  tl.from("#act2-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act2-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act2-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  // バッジ
+  tl.from("#act2-badge",{opacity:0,duration:0.5},1.1);
   window.__timelines["act2"]=tl;
 })();
 </script>

@@ -3,70 +3,58 @@
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 #act1{font-family:Inter,sans-serif;}
-/* 背景画像 */
-#a1-bg-img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  will-change:transform;
-  filter:brightness(0.45);
-}
-/* ケンバーンズ */
-#a1-bg-wrap{position:absolute;inset:0;overflow:hidden;}
-/* グラデーションオーバーレイ */
-#a1-overlay{
-  position:absolute;inset:0;
-  background:linear-gradient(to bottom,rgba(0,0,0,0.1) 0%,rgba(0,0,0,0.3) 50%,rgba(0,0,0,0.7) 100%);
-}
-/* テキスト */
-#a1-content{
-  position:absolute;top:560px;left:0;right:0;
-  text-align:center;padding:0 64px;
-}
-#a1-tag{
-  font-size:24px;font-weight:300;letter-spacing:0.22em;
-  color:rgba(255,255,255,0.5);text-transform:uppercase;
-  margin-bottom:32px;will-change:opacity,transform;
-}
-#a1-title-1{
-  font-size:100px;font-weight:200;color:rgba(255,255,255,0.55);
-  letter-spacing:-0.02em;line-height:1;margin-bottom:8px;
-  will-change:opacity,transform;
-}
-#a1-title-2{
-  font-size:120px;font-weight:900;color:#fff;
-  letter-spacing:-0.04em;line-height:1;margin-bottom:8px;
-  will-change:opacity,transform;
-}
-#a1-title-3{
-  font-size:100px;font-weight:200;color:rgba(255,255,255,0.55);
-  letter-spacing:-0.02em;line-height:1;
-  will-change:opacity,transform;
-}
+#act1-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.28);will-change:transform;}
+#act1-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 40%);}
+#act1-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.0) 50%);}
+#act1-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act1-tag-dot{width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;}
+#act1-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act1-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
+#act1-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act1-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act1-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
+#act1-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act1-badge{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act1-badge-line{flex:1;height:1px;background:linear-gradient(to right,#06b6d4,transparent);opacity:0.4;}
+#act1-badge-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;white-space:nowrap;}
 </style>
-<div id="a1-bg-wrap">
-  <img id="a1-bg-img"
-    src="assets/act1_hook.jpg"
-    crossorigin="anonymous" alt="" />
+<img id="act1-bg" src="assets/act1_hook.jpg" crossorigin="anonymous" alt="" />
+<div id="act1-ov-top"></div>
+<div id="act1-ov-bot"></div>
+<div id="act1-tag-wrap">
+  <div id="act1-tag-dot"></div>
+  <div id="act1-tag">GitHub Trend</div>
 </div>
-<div id="a1-overlay"></div>
-<div id="a1-content">
-  <div id="a1-tag">GitHub トレンド</div>
-  <div id="a1-title-1">HTMLを書くだけで</div>
-  <div id="a1-title-2">動画になる</div>
-  <div id="a1-title-3">時代が来た</div>
+<div id="act1-accent-line"></div>
+<div id="act1-content">
+  <div id="act1-line1">HTMLを書くだけで</div>
+  <div id="act1-line2">動画になる</div>
+  <div id="act1-line3">時代が来た</div>
+</div>
+<div id="act1-badge">
+  <div id="act1-badge-line"></div>
+  <div id="act1-badge-text">@AI.Conduit</div>
+  <div id="act1-badge-line"></div>
 </div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
   var tl=gsap.timeline({paused:true});
-  // ケンバーンズ：ゆっくりズームイン
-  tl.to("#a1-bg-img",{scale:1.0,duration:3,ease:"none"},0);
-  // テキストイン
-  tl.from("#a1-tag",{opacity:0,y:20,duration:0.5,ease:"hf"},0.2);
-  tl.from("#a1-title-1",{opacity:0,y:50,duration:0.6,ease:"hf"},0.4);
-  tl.from("#a1-title-2",{opacity:0,y:60,duration:0.7,ease:"hf"},0.65);
-  tl.from("#a1-title-3",{opacity:0,y:50,duration:0.6,ease:"hf"},0.9);
+  // ケンバーンズ
+  tl.fromTo("#act1-bg",{scale:1.08},{scale:1.0,duration:3,ease:"none"},0);
+  // タグイン
+  tl.from("#act1-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  // アクセントライン
+  tl.to("#act1-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  // テキスト stagger
+  tl.from("#act1-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act1-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act1-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  // バッジ
+  tl.from("#act1-badge",{opacity:0,duration:0.5},1.1);
   window.__timelines["act1"]=tl;
 })();
 </script>

@@ -3,38 +3,58 @@
      data-width="1080" data-height="1920"
      style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 #act5{font-family:Inter,sans-serif;}
-#a5-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.32);will-change:transform;}
-#a5-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.3) 0%,rgba(0,0,0,0.1) 40%,rgba(0,0,0,0.8) 100%);}
-#a5-lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
-#a5-head{position:absolute;top:148px;left:64px;right:64px;font-size:80px;font-weight:800;color:#fff;letter-spacing:-0.035em;line-height:1.05;will-change:transform,opacity;}
-#a5-head em{font-style:normal;color:#a78bfa;}
-#a5-step{position:absolute;top:388px;left:64px;display:flex;align-items:center;gap:12px;}
-.sd{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.15);}
-.sd.a{background:#a78bfa;}.sl{width:32px;height:1px;background:rgba(255,255,255,0.1);}
-#a5-screen{position:absolute;top:436px;left:40px;right:40px;border-radius:18px;overflow:hidden;border:1px solid rgba(167,139,250,0.15);box-shadow:0 40px 100px rgba(0,0,0,0.9);will-change:transform,opacity;}
-#a5-screen img{width:100%;display:block;}
-#a5-cap{position:absolute;top:940px;left:64px;right:64px;font-size:36px;font-weight:300;color:rgba(255,255,255,0.55);line-height:1.6;will-change:transform,opacity;}
-#a5-cap strong{color:#fff;font-weight:700;}
+#act5-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.28);will-change:transform;}
+#act5-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 40%);}
+#act5-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.0) 50%);}
+#act5-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act5-tag-dot{width:8px;height:8px;border-radius:50%;background:#a78bfa;box-shadow:0 0 12px #a78bfa;}
+#act5-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act5-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#a78bfa,transparent);border-radius:2px;will-change:width;}
+#act5-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act5-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act5-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(167,139,250,0.4);}
+#act5-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act5-badge{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act5-badge-line{flex:1;height:1px;background:linear-gradient(to right,#a78bfa,transparent);opacity:0.4;}
+#act5-badge-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;white-space:nowrap;}
 </style>
-<img id="a5-bg" src="assets/act5_step2.jpg" crossorigin="anonymous" alt="" />
-<div id="a5-ov"></div>
-<div id="a5-lbl">// Step 2</div>
-<div id="a5-head">AIが<br><em>自動生成</em></div>
-<div id="a5-step"><div class="sd"></div><div class="sl"></div><div class="sd a"></div><div class="sl"></div><div class="sd"></div></div>
-<div id="a5-screen"><img src="https://raw.githubusercontent.com/nexu-io/html-anything/main/docs/screenshots/02-template-picker.png" crossorigin="anonymous" alt="template picker" /></div>
-<div id="a5-cap">テンプレートを選んで<strong>AIに指示するだけ</strong>。<br>9種類のAI対応。</div>
+<img id="act5-bg" src="assets/act5_step2.jpg" crossorigin="anonymous" alt="" />
+<div id="act5-ov-top"></div>
+<div id="act5-ov-bot"></div>
+<div id="act5-tag-wrap">
+  <div id="act5-tag-dot"></div>
+  <div id="act5-tag">Step 2</div>
+</div>
+<div id="act5-accent-line"></div>
+<div id="act5-content">
+  <div id="act5-line1">9つのAIに</div>
+  <div id="act5-line2">全対応</div>
+  <div id="act5-line3">指示するだけ</div>
+</div>
+<div id="act5-badge">
+  <div id="act5-badge-line"></div>
+  <div id="act5-badge-text">@AI.Conduit</div>
+  <div id="act5-badge-line"></div>
+</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.to("#a5-bg",{scale:1.0,duration:4,ease:"none"},0);
-  tl.from("#a5-lbl",{opacity:0,duration:0.3},0.1);
-  tl.from("#a5-head",{opacity:0,y:40,duration:0.6,ease:"hf"},0.2);
-  tl.from("#a5-step",{opacity:0,duration:0.4},0.5);
-  tl.from("#a5-screen",{opacity:0,y:40,scale:0.97,duration:0.8,ease:"hf"},0.7);
-  tl.from("#a5-cap",{opacity:0,y:20,duration:0.6,ease:"hf"},1.5);
+  // ケンバーンズ
+  tl.fromTo("#act5-bg",{scale:1.08},{scale:1.0,duration:4,ease:"none"},0);
+  // タグイン
+  tl.from("#act5-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  // アクセントライン
+  tl.to("#act5-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  // テキスト stagger
+  tl.from("#act5-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act5-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act5-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  // バッジ
+  tl.from("#act5-badge",{opacity:0,duration:0.5},1.1);
   window.__timelines["act5"]=tl;
 })();
 </script>
