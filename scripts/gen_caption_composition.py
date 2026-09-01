@@ -91,6 +91,21 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["anydoc-launch"] = {
+    "chunks": [
+        "WordもPDFもExcelも全部Markdownに変換できるツールが登場しました。",
+        "これまで異なる形式のドキュメントを扱うには複数のツールが必要でした。",
+        "anydocはRust製で驚異的な速さを実現しています。",
+        "コマンド一発で変換完了。設定は一切不要です。",
+        "Word・PowerPoint・Excel・PDF・EPUB・CSVに全対応しています。",
+        "変換後は綺麗なMarkdownとして出力されます。",
+        "AIエージェントとの相性も抜群です。",
+        "ドキュメント処理がここまで簡単になりました。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄から無料テンプレートを受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["deepseek-harness-launch"] = {
     "chunks": [
         "DeepSeekが207万スターを獲得した革命的なツールを紹介します。",
@@ -199,6 +214,21 @@ if __name__ == "__main__":
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
 
 # html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["anydoc-launch"] = {
+    "chunks": [
+        "WordもPDFもExcelも全部Markdownに変換できるツールが登場しました。",
+        "これまで異なる形式のドキュメントを扱うには複数のツールが必要でした。",
+        "anydocはRust製で驚異的な速さを実現しています。",
+        "コマンド一発で変換完了。設定は一切不要です。",
+        "Word・PowerPoint・Excel・PDF・EPUB・CSVに全対応しています。",
+        "変換後は綺麗なMarkdownとして出力されます。",
+        "AIエージェントとの相性も抜群です。",
+        "ドキュメント処理がここまで簡単になりました。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄から無料テンプレートを受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["deepseek-harness-launch"] = {
     "chunks": [
         "DeepSeekが207万スターを獲得した革命的なツールを紹介します。",
