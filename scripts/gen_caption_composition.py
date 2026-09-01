@@ -91,6 +91,21 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["html-anything-launch"] = {
+    "chunks": [
+        "HTMLを書くだけで動画が作れる時代が来ました。",
+        "これまで動画制作には専門ツールと多くの時間が必要でした。",
+        "html-anythingならAIがHTMLを自動生成して動画にできます。",
+        "npxコマンド一発でインストール完了。設定不要です。",
+        "9つの主要AIエージェントに全対応しています。",
+        "テンプレートを選んでAIに指示するだけ。",
+        "HyperFramesで完全自動投稿も実現できます。",
+        "こんなに簡単になりました。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄から無料テンプレートを受け取れます。",
+    ],
+    "rate": "+15%",
+}
 FALLBACK_NARRATIONS = {
     "variables-launch": "HyperFramesのVariables機能を紹介します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
     "spacex-launch": "Claude CodeとHyperFramesを使ったシネマティック動画です。コメントにAI Conduitと書いてください。",
