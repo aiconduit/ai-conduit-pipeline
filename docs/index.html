@@ -3,36 +3,80 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Conduit - Claude Code 無料テンプレート集</title>
+<title>AI Conduit - 無料テンプレート</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:'Noto Sans JP',sans-serif;background:#0a0a14;color:#fff;min-height:100vh;}
 .hero{background:linear-gradient(135deg,#1a1a2e,#0f3460);padding:60px 20px;text-align:center;}
 .hero h1{font-size:2em;color:#FFD700;margin-bottom:10px;}
-.hero p{color:#aaa;font-size:1.1em;}
+.hero p{color:#aaa;font-size:1.1em;margin-bottom:8px;}
+.hero .hint{color:#64C8FF;font-size:0.9em;margin-top:16px;padding:12px;background:rgba(100,200,255,0.1);border-radius:8px;display:inline-block;}
 .container{max-width:800px;margin:0 auto;padding:40px 20px;}
+
+/* パスワード入力エリア */
+.pw-section{background:#1a1a2e;border:2px solid #333;border-radius:16px;padding:32px;text-align:center;margin-bottom:32px;}
+.pw-section h2{color:#FFD700;font-size:1.4em;margin-bottom:8px;}
+.pw-section p{color:#aaa;font-size:0.9em;margin-bottom:24px;}
+.pw-input-wrap{display:flex;gap:12px;justify-content:center;margin-bottom:20px;}
+.pw-digit{width:64px;height:80px;background:#0a0a14;border:2px solid #333;border-radius:12px;text-align:center;font-size:2.5em;font-weight:700;color:#FFD700;outline:none;transition:border-color 0.2s;}
+.pw-digit:focus{border-color:#FFD700;}
+.pw-btn{background:#FFD700;color:#000;border:none;border-radius:8px;padding:12px 40px;font-size:1.1em;font-weight:700;cursor:pointer;transition:background 0.2s;}
+.pw-btn:hover{background:#FFC107;}
+.pw-error{color:#ff4444;font-size:0.9em;margin-top:8px;display:none;}
+.pw-hint{color:#555;font-size:0.8em;margin-top:16px;}
+
+/* テンプレートエリア（ロック状態） */
+#locked{display:block;}
+#unlocked{display:none;}
+
+.lock-icon{font-size:4em;margin-bottom:16px;}
 .gift-card{background:#1a1a2e;border:1px solid #333;border-radius:12px;padding:24px;margin:16px 0;transition:transform 0.2s;}
 .gift-card:hover{transform:translateY(-2px);border-color:#FFD700;}
 .gift-card h3{color:#FFD700;font-size:1.2em;margin-bottom:8px;}
 .gift-card p{color:#aaa;font-size:0.9em;margin-bottom:16px;}
 .gift-card pre{background:#0a0a14;border:1px solid #333;border-radius:8px;padding:16px;font-size:0.85em;color:#64FF64;overflow-x:auto;white-space:pre-wrap;}
-.copy-btn{background:#FFD700;color:#000;border:none;border-radius:6px;padding:8px 20px;font-weight:bold;cursor:pointer;margin-top:12px;}
+.copy-btn{background:#FFD700;color:#000;border:none;border-radius:6px;padding:8px 20px;font-weight:700;cursor:pointer;margin-top:12px;}
 .copy-btn:hover{background:#FFC107;}
 .tag{display:inline-block;background:#0f3460;color:#64C8FF;padding:2px 8px;border-radius:4px;font-size:0.8em;margin-bottom:8px;}
+.success-msg{color:#64FF64;font-size:1.1em;text-align:center;padding:16px;background:rgba(100,255,100,0.1);border-radius:8px;margin-bottom:24px;}
 </style>
 </head>
 <body>
 <div class="hero">
-  <h1>AI Conduit 無料テンプレート集</h1>
-  <p>Claude Codeですぐ使えるファイルを無料配布中</p>
+  <h1>🎁 AI Conduit 無料テンプレート</h1>
+  <p>動画の全シーンをスクショして、自分のAIに読ませてパスワードを取得！</p>
+  <div class="hint">💡 動画の各シーンにパスワードが隠れています<br>全シーンをスクショ → AIに「パスワードを教えて」と聞く → ここに入力</div>
 </div>
-<div class="container">
 
-<div class="gift-card">
-  <span class="tag">reviewer.md</span>
-  <h3>自動コードレビューエージェント</h3>
-  <p>.claude/agents/reviewer.md に保存してください</p>
-  <pre>---
+<div class="container">
+  <!-- パスワード入力 -->
+  <div class="pw-section">
+    <div id="locked">
+      <div class="lock-icon">🔐</div>
+      <h2>パスワードを入力してください</h2>
+      <p>動画の全シーンをスクショして、ClaudeやGPTに読ませると<br>パスワードがわかります</p>
+      <div class="pw-input-wrap">
+        <input class="pw-digit" type="text" maxlength="1" inputmode="numeric" id="d1">
+        <input class="pw-digit" type="text" maxlength="1" inputmode="numeric" id="d2">
+        <input class="pw-digit" type="text" maxlength="1" inputmode="numeric" id="d3">
+        <input class="pw-digit" type="text" maxlength="1" inputmode="numeric" id="d4">
+      </div>
+      <button class="pw-btn" onclick="checkPW()">解錠する 🔓</button>
+      <div id="pw-error" class="pw-error">❌ パスワードが違います。動画を全部見てスクショしましたか？</div>
+      <p class="pw-hint">ヒント：動画のシーン2・4・6・8に数字が隠れています</p>
+    </div>
+    <div id="unlocked" style="display:none;">
+      <div class="success-msg">✅ 解錠成功！テンプレートをお楽しみください</div>
+    </div>
+  </div>
+
+  <!-- テンプレート（ロック中は非表示） -->
+  <div id="templates" style="display:none;">
+    <div class="gift-card">
+      <span class="tag">reviewer.md</span>
+      <h3>🤖 自動コードレビューエージェント</h3>
+      <p>.claude/agents/reviewer.md に保存してください</p>
+      <pre>---
 name: reviewer
 description: コードレビューを自動実行するエージェント
 disallowedTools:
@@ -43,66 +87,96 @@ disallowedTools:
 - バグ・セキュリティ問題を指摘
 - 改善提案を具体的に
 - 日本語で回答</pre>
-  <button class="copy-btn" onclick="copy(this)">コピーする</button>
-</div>
+      <button class="copy-btn" onclick="copyText(this)">コピーする</button>
+    </div>
 
-<div class="gift-card">
-  <span class="tag">CLAUDE.md</span>
-  <h3>プロジェクト設定テンプレート</h3>
-  <p>プロジェクトルートの CLAUDE.md に保存してください</p>
-  <pre># プロジェクト設定
+    <div class="gift-card">
+      <span class="tag">CLAUDE.md</span>
+      <h3>⚡ Claude Code最適化設定</h3>
+      <p>プロジェクトルートのCLAUDE.mdに保存してください</p>
+      <pre># プロジェクト設定
+## 基本ルール
+- 日本語で回答する
+- コードは簡潔に書く
+- 変更前に必ず確認する
 
-## コーディングルール
-- TypeScriptを使用
-- テストを必ず書く
-- コメントは日本語で
+## コーディング規約
+- TypeScript優先
+- エラーハンドリング必須
+- コメントは日本語で記述</pre>
+      <button class="copy-btn" onclick="copyText(this)">コピーする</button>
+    </div>
 
-## よく使うコマンド
-- npm run dev: 開発サーバー起動
-- npm test: テスト実行
+    <div class="gift-card">
+      <span class="tag">shortcuts.md</span>
+      <h3>⌨️ Claude Codeショートカット集</h3>
+      <p>すぐ使えるClaude Codeのショートカット一覧</p>
+      <pre># Claude Code ショートカット
+- Ctrl+K: コマンドパレット
+- Ctrl+L: チャットクリア
+- Ctrl+R: 最後のコマンド再実行
+- /review: コードレビュー開始
+- /fix: バグ修正モード
+- /test: テスト生成モード
+- /doc: ドキュメント生成</pre>
+      <button class="copy-btn" onclick="copyText(this)">コピーする</button>
+    </div>
 
-## Claude Codeへの指示
-- コードを変更する前に必ず確認する
-- テストが通ることを確認してからコミット</pre>
-  <button class="copy-btn" onclick="copy(this)">コピーする</button>
-</div>
-
-<div class="gift-card">
-  <span class="tag">shortcuts.md</span>
-  <h3>Claude Codeショートカット集</h3>
-  <p>.claude/shortcuts.md に保存してください</p>
-  <pre># Claude Code よく使うコマンド
-
-/loop 5m /babysit    # 5分ごとに自動監視
-/review              # コードレビュー実行
-/test                # テスト自動生成
-/doc                 # ドキュメント生成
-/fix                 # バグ自動修正
-/init                # プロジェクト初期化</pre>
-  <button class="copy-btn" onclick="copy(this)">コピーする</button>
-</div>
-
-<div class="gift-card">
-  <span class="tag">settings.json</span>
-  <h3>Claude Code最適設定</h3>
-  <p>.claude/settings.json に保存してください</p>
-  <pre>{
-  "permissions": {
-    "allow": ["Bash", "Read", "Write", "Edit"],
-    "deny": []
-  },
-  "model": "claude-opus-4-6",
-  "autoApprove": false
+    <div class="gift-card">
+      <span class="tag">settings.json</span>
+      <h3>🔧 Claude Code設定ファイル</h3>
+      <p>.claude/settings.json に保存してください</p>
+      <pre>{
+  "language": "ja",
+  "autoApprove": ["Read", "LS", "Glob"],
+  "theme": "dark",
+  "fontSize": 14,
+  "confirmBeforeWrite": true,
+  "logLevel": "info"
 }</pre>
-  <button class="copy-btn" onclick="copy(this)">コピーする</button>
+      <button class="copy-btn" onclick="copyText(this)">コピーする</button>
+    </div>
+  </div>
 </div>
 
-</div>
 <script>
-function copy(btn) {
-  const pre = btn.previousElementSibling;
-  navigator.clipboard.writeText(pre.textContent).then(() => {
-    btn.textContent = 'コピーしました!';
+// 4桁入力の自動フォーカス移動
+['d1','d2','d3','d4'].forEach((id, i, arr) => {
+  document.getElementById(id).addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9]/g, '');
+    if(this.value && i < arr.length - 1) {
+      document.getElementById(arr[i+1]).focus();
+    }
+  });
+  document.getElementById(id).addEventListener('keydown', function(e) {
+    if(e.key === 'Backspace' && !this.value && i > 0) {
+      document.getElementById(arr[i-1]).focus();
+    }
+  });
+});
+
+function checkPW() {
+  const pw = ['d1','d2','d3','d4'].map(id => document.getElementById(id).value).join('');
+  if(pw === '2749') {
+    document.getElementById('locked').style.display = 'none';
+    document.getElementById('unlocked').style.display = 'block';
+    document.getElementById('templates').style.display = 'block';
+    document.getElementById('pw-error').style.display = 'none';
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+    ['d1','d2','d3','d4'].forEach(id => {
+      document.getElementById(id).value = '';
+      document.getElementById(id).style.borderColor = '#ff4444';
+      setTimeout(() => document.getElementById(id).style.borderColor = '#333', 1000);
+    });
+    document.getElementById('d1').focus();
+  }
+}
+
+function copyText(btn) {
+  const text = btn.previousElementSibling.textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ コピー完了！';
     setTimeout(() => btn.textContent = 'コピーする', 2000);
   });
 }

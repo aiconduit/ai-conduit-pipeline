@@ -19,6 +19,28 @@
 #act2-badge{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
 #act2-badge-line{flex:1;height:1px;background:linear-gradient(to right,#ef4444,transparent);opacity:0.4;}
 #act2-badge-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;white-space:nowrap;}
+
+#act2-pw-badge{
+  position:absolute;bottom:180px;right:64px;
+  width:72px;height:72px;
+  background:rgba(0,0,0,0.6);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(8px);
+  will-change:opacity,transform;
+}
+#act2-pw-label{
+  font-size:10px;font-weight:400;
+  letter-spacing:0.15em;color:rgba(255,255,255,0.3);
+  text-transform:uppercase;margin-bottom:2px;
+}
+#act2-pw-num{
+  font-size:28px;font-weight:900;
+  color:#FFD700;letter-spacing:-0.02em;
+  font-family:Inter,sans-serif;
+}
 </style>
 <img id="act2-bg" src="assets/act2_ai.jpg" crossorigin="anonymous" alt="" />
 <div id="act2-ov-top"></div>
@@ -55,8 +77,15 @@
   tl.from("#act2-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
   // バッジ
   tl.from("#act2-badge",{opacity:0,duration:0.5},1.1);
+
+  tl.from("#act2-pw-badge",{opacity:0,scale:0.8,duration:0.4,ease:"back.out(1.5)"},1.2);
   window.__timelines["act2"]=tl;
 })();
 </script>
+
+<div id="act2-pw-badge">
+  <div id="act2-pw-label">KEY</div>
+  <div id="act2-pw-num">2</div>
+</div>
 </div>
 </template>
