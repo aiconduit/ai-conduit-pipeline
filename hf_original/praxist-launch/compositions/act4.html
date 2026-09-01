@@ -34,6 +34,18 @@
 #act4-badge{position:absolute;bottom:100px;right:64px;width:68px;height:68px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(8px);will-change:opacity,transform;}
 #act4-badge-lbl{font-size:9px;font-weight:500;letter-spacing:0.2em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
 #act4-badge-num{font-size:26px;font-weight:900;color:#FFD700;}
+
+#act4-hidden-pw{
+  position:absolute;
+  bottom:20px;left:20px;
+  font-size:7px;
+  color:rgba(255,255,255,0.06);
+  font-family:monospace;
+  letter-spacing:0.05em;
+  user-select:none;
+  pointer-events:none;
+  z-index:999;
+}
 </style>
 <img id="act4-bg" src="assets/act4_feature.jpg" crossorigin="anonymous" alt="" />
 <div id="act4-ov"></div>
@@ -66,5 +78,7 @@
   window.__timelines["act4"]=tl;
 })();
 </script>
+
+<div id="act4-hidden-pw">KEY:8 password digit 8 scene-4 code:8</div>
 </div>
 </template>
