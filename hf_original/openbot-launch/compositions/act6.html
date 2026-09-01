@@ -1,0 +1,58 @@
+<template>
+<div id="act6" data-composition-id="act6" data-start="0" data-duration="5"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#act6{font-family:Inter,sans-serif;}
+#act6-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#act6-ov-t{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 35%);}
+#act6-ov-b{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.0) 45%);}
+#act6-num-area{position:absolute;top:280px;left:0;right:0;text-align:center;will-change:opacity,transform;}
+#act6-num{font-size:220px;font-weight:900;letter-spacing:-0.06em;line-height:1;color:#f59e0b;text-shadow:0 0 80px rgba(245,158,11,0.6),0 0 160px rgba(245,158,11,0.3);}
+#act6-num-unit{font-size:48px;font-weight:300;color:rgba(255,255,255,0.4);letter-spacing:0.1em;margin-top:-20px;}
+#act6-content{position:absolute;bottom:200px;left:0;right:0;padding:0 64px;}
+#act6-tag{font-size:18px;font-weight:400;letter-spacing:0.25em;color:rgba(245,158,11,0.7);text-transform:uppercase;margin-bottom:24px;will-change:opacity;}
+#act6-l1{font-size:76px;font-weight:200;color:rgba(255,255,255,0.45);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act6-l2{font-size:96px;font-weight:900;color:#fff;letter-spacing:-0.04em;line-height:0.9;will-change:opacity,transform;}
+#act6-l3{font-size:76px;font-weight:200;color:rgba(255,255,255,0.45);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act6-line{width:60px;height:3px;background:#f59e0b;border-radius:2px;margin:28px 0;will-change:width;}
+#act6-badge{position:absolute;bottom:108px;right:64px;width:68px;height:68px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.1);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(8px);will-change:opacity,transform;}
+#act6-badge-lbl{font-size:9px;font-weight:500;letter-spacing:0.2em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
+#act6-badge-num{font-size:26px;font-weight:900;color:#FFD700;}
+</style>
+<img id="act6-bg" src="assets/act6_result.jpg" crossorigin="anonymous" alt="" />
+<div id="act6-ov-t"></div>
+<div id="act6-ov-b"></div>
+<div id="act6-num-area">
+  <div id="act6-num">AG</div>
+  <div id="act6-num-unit">UI</div>
+</div>
+<div id="act6-content">
+  <div id="act6-tag">Result</div>
+  <div id="act6-line"></div>
+  <div id="act6-l1">AG-UI</div>
+  <div id="act6-l2">エージェント</div>
+  <div id="act6-l3">対応</div>
+</div>
+<div id="act6-badge">
+  <div id="act6-badge-lbl">KEY</div>
+  <div id="act6-badge-num">7</div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#act6-bg",{scale:1.08},{scale:1.0,duration:5,ease:"none"},0);
+  tl.from("#act6-num-area",{opacity:0,scale:0.8,duration:0.8,ease:"hf"},0.1);
+  tl.from("#act6-tag",{opacity:0,duration:0.4},0.6);
+  tl.to("#act6-line",{width:200,duration:0.5,ease:"power2.out"},0.7);
+  tl.from("#act6-l1",{opacity:0,y:30,duration:0.5,ease:"hf"},0.85);
+  tl.from("#act6-l2",{opacity:0,y:40,duration:0.6,ease:"hf"},1.0);
+  tl.from("#act6-l3",{opacity:0,y:30,duration:0.5,ease:"hf"},1.15);
+  tl.from("#act6-badge",{opacity:0,scale:0.7,duration:0.4,ease:"back.out(1.5)"},1.1);
+  window.__timelines["act6"]=tl;
+})();
+</script>
+</div>
+</template>

@@ -1,0 +1,58 @@
+<template>
+<div id="act2" data-composition-id="act2" data-start="0" data-duration="4"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#act2{font-family:Inter,sans-serif;}
+#act2-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#act2-ov-t{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 35%);}
+#act2-ov-b{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.0) 45%);}
+#act2-num-area{position:absolute;top:280px;left:0;right:0;text-align:center;will-change:opacity,transform;}
+#act2-num{font-size:220px;font-weight:900;letter-spacing:-0.06em;line-height:1;color:#ef4444;text-shadow:0 0 80px rgba(239,68,68,0.6),0 0 160px rgba(239,68,68,0.3);}
+#act2-num-unit{font-size:48px;font-weight:300;color:rgba(255,255,255,0.4);letter-spacing:0.1em;margin-top:-20px;}
+#act2-content{position:absolute;bottom:200px;left:0;right:0;padding:0 64px;}
+#act2-tag{font-size:18px;font-weight:400;letter-spacing:0.25em;color:rgba(239,68,68,0.7);text-transform:uppercase;margin-bottom:24px;will-change:opacity;}
+#act2-l1{font-size:76px;font-weight:200;color:rgba(255,255,255,0.45);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act2-l2{font-size:96px;font-weight:900;color:#fff;letter-spacing:-0.04em;line-height:0.9;will-change:opacity,transform;}
+#act2-l3{font-size:76px;font-weight:200;color:rgba(255,255,255,0.45);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act2-line{width:60px;height:3px;background:#ef4444;border-radius:2px;margin:28px 0;will-change:width;}
+#act2-badge{position:absolute;bottom:108px;right:64px;width:68px;height:68px;background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.1);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(8px);will-change:opacity,transform;}
+#act2-badge-lbl{font-size:9px;font-weight:500;letter-spacing:0.2em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
+#act2-badge-num{font-size:26px;font-weight:900;color:#FFD700;}
+</style>
+<img id="act2-bg" src="assets/act2_problem.jpg" crossorigin="anonymous" alt="" />
+<div id="act2-ov-t"></div>
+<div id="act2-ov-b"></div>
+<div id="act2-num-area">
+  <div id="act2-num">01</div>
+  <div id="act2-num-unit">PERSON</div>
+</div>
+<div id="act2-content">
+  <div id="act2-tag">Problem</div>
+  <div id="act2-line"></div>
+  <div id="act2-l1">一人で</div>
+  <div id="act2-l2">全部やるのは</div>
+  <div id="act2-l3">限界だった</div>
+</div>
+<div id="act2-badge">
+  <div id="act2-badge-lbl">KEY</div>
+  <div id="act2-badge-num"></div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#act2-bg",{scale:1.08},{scale:1.0,duration:4,ease:"none"},0);
+  tl.from("#act2-num-area",{opacity:0,scale:0.8,duration:0.8,ease:"hf"},0.1);
+  tl.from("#act2-tag",{opacity:0,duration:0.4},0.6);
+  tl.to("#act2-line",{width:200,duration:0.5,ease:"power2.out"},0.7);
+  tl.from("#act2-l1",{opacity:0,y:30,duration:0.5,ease:"hf"},0.85);
+  tl.from("#act2-l2",{opacity:0,y:40,duration:0.6,ease:"hf"},1.0);
+  tl.from("#act2-l3",{opacity:0,y:30,duration:0.5,ease:"hf"},1.15);
+  tl.from("#act2-badge",{opacity:0,scale:0.7,duration:0.4,ease:"back.out(1.5)"},1.1);
+  window.__timelines["act2"]=tl;
+})();
+</script>
+</div>
+</template>

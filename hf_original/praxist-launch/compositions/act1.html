@@ -1,0 +1,70 @@
+<template>
+<div id="act1" data-composition-id="act1" data-start="0" data-duration="3"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#act1{font-family:Inter,sans-serif;}
+#act1-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.35);will-change:transform;}
+#act1-ov{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,0.4) 0%,rgba(0,0,0,0.1) 50%,rgba(0,0,0,0.6) 100%);}
+#act1-card{
+  position:absolute;top:520px;left:48px;right:48px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:32px;padding:48px 52px;
+  backdrop-filter:blur(20px);
+  box-shadow:0 8px 80px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.1);
+  will-change:opacity,transform;
+}
+#act1-tag{
+  display:inline-flex;align-items:center;gap:10px;
+  background:rgba(6,182,212,0.12);
+  border:1px solid rgba(6,182,212,0.3);
+  border-radius:9999px;padding:8px 24px;
+  font-size:18px;font-weight:500;letter-spacing:0.12em;
+  color:#06b6d4;text-transform:uppercase;
+  margin-bottom:36px;will-change:opacity;
+}
+#act1-tag-dot{width:6px;height:6px;border-radius:50%;background:#06b6d4;box-shadow:0 0 8px #06b6d4;}
+#act1-l1{font-size:80px;font-weight:200;color:rgba(255,255,255,0.45);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act1-l2{font-size:100px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.9;will-change:opacity,transform;text-shadow:0 0 40px rgba(6,182,212,0.5);}
+#act1-l3{font-size:80px;font-weight:200;color:rgba(255,255,255,0.45);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act1-divider{height:1px;background:linear-gradient(to right,transparent,rgba(6,182,212,0.4),transparent);margin:32px 0;will-change:opacity;}
+#act1-sub{font-size:22px;font-weight:300;color:rgba(255,255,255,0.3);letter-spacing:0.05em;will-change:opacity;}
+#act1-badge{position:absolute;bottom:100px;right:64px;width:68px;height:68px;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;backdrop-filter:blur(8px);will-change:opacity,transform;}
+#act1-badge-lbl{font-size:9px;font-weight:500;letter-spacing:0.2em;color:rgba(255,255,255,0.25);text-transform:uppercase;}
+#act1-badge-num{font-size:26px;font-weight:900;color:#FFD700;}
+</style>
+<img id="act1-bg" src="assets/act1_hook.jpg" crossorigin="anonymous" alt="" />
+<div id="act1-ov"></div>
+<div id="act1-card">
+  <div id="act1-tag"><div id="act1-tag-dot"></div>Trending</div>
+  <div id="act1-l1">自律型AI</div>
+  <div id="act1-l2">研究システム</div>
+  <div id="act1-l3">登場</div>
+  <div id="act1-divider"></div>
+  <div id="act1-sub">@AI.Conduit — AI Conduit Pipeline</div>
+</div>
+<div id="act1-badge">
+  <div id="act1-badge-lbl">KEY</div>
+  <div id="act1-badge-num"></div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#act1-bg",{scale:1.08},{scale:1.0,duration:3,ease:"none"},0);
+  tl.from("#act1-card",{opacity:0,y:60,scale:0.97,duration:0.8,ease:"hf"},0.2);
+  tl.from("#act1-tag",{opacity:0,x:-20,duration:0.4,ease:"hf"},0.5);
+  tl.from("#act1-l1",{opacity:0,y:30,duration:0.5,ease:"hf"},0.7);
+  tl.from("#act1-l2",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  tl.from("#act1-l3",{opacity:0,y:30,duration:0.5,ease:"hf"},1.0);
+  tl.from("#act1-divider",{opacity:0,scaleX:0,duration:0.5,ease:"snap",transformOrigin:"left"},1.2);
+  tl.from("#act1-sub",{opacity:0,duration:0.4},1.4);
+  tl.from("#act1-badge",{opacity:0,scale:0.7,duration:0.4,ease:"back.out(1.5)"},1.3);
+  window.__timelines["act1"]=tl;
+})();
+</script>
+</div>
+</template>
