@@ -1,0 +1,34 @@
+<template>
+<div id="act5" data-composition-id="act5" data-start="0" data-duration="4"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
+#act5{font-family:Inter,sans-serif;}
+#act5-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.32);will-change:transform;}
+#act5-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 50%,rgba(0,0,0,0.85) 100%);}
+#act5-lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.3);text-transform:uppercase;will-change:opacity;}
+#act5-title{position:absolute;top:580px;left:0;right:0;text-align:center;padding:0 64px;font-size:108px;font-weight:900;color:#fff;letter-spacing:-0.04em;line-height:1.0;will-change:transform,opacity;}
+#act5-title em{font-style:normal;color:#7c3aed;}
+#act5-bar{position:absolute;top:560px;left:64px;width:6px;height:0;background:#7c3aed;border-radius:3px;will-change:height;}
+</style>
+<img id="act5-bg" src="assets/act5_plugin.jpg" crossorigin="anonymous" alt="" />
+<div id="act5-ov"></div>
+<div id="act5-lbl">// Plugin</div>
+<div id="act5-bar"></div>
+<div id="act5-title">機能を
+<em>無限</em>に
+拡張できる</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.to("#act5-bg",{scale:1.05,duration:4,ease:"none"},0);
+  tl.from("#act5-lbl",{opacity:0,duration:0.4},0.1);
+  tl.to("#act5-bar",{height:160,duration:0.5,ease:"hf"},0.2);
+  tl.from("#act5-title",{opacity:0,y:60,duration:0.7,ease:"hf"},0.4);
+  window.__timelines["act5"]=tl;
+})();
+</script>
+</div>
+</template>

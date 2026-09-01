@@ -1,0 +1,34 @@
+<template>
+<div id="act8" data-composition-id="act8" data-start="0" data-duration="6"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;700;800;900&display=block');
+#act8{font-family:Inter,sans-serif;}
+#act8-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.32);will-change:transform;}
+#act8-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.2) 0%,rgba(0,0,0,0.1) 50%,rgba(0,0,0,0.85) 100%);}
+#act8-lbl{position:absolute;top:100px;left:64px;font-size:22px;font-weight:300;letter-spacing:0.22em;color:rgba(255,255,255,0.3);text-transform:uppercase;will-change:opacity;}
+#act8-title{position:absolute;top:580px;left:0;right:0;text-align:center;padding:0 64px;font-size:108px;font-weight:900;color:#fff;letter-spacing:-0.04em;line-height:1.0;will-change:transform,opacity;}
+#act8-title em{font-style:normal;color:#06b6d4;}
+#act8-bar{position:absolute;top:560px;left:64px;width:6px;height:0;background:#06b6d4;border-radius:3px;will-change:height;}
+</style>
+<img id="act8-bg" src="assets/act8_cta.jpg" crossorigin="anonymous" alt="" />
+<div id="act8-ov"></div>
+<div id="act8-lbl">// CTA</div>
+<div id="act8-bar"></div>
+<div id="act8-title">いいねと
+<em>保存</em>を
+お願いします</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.to("#act8-bg",{scale:1.05,duration:6,ease:"none"},0);
+  tl.from("#act8-lbl",{opacity:0,duration:0.4},0.1);
+  tl.to("#act8-bar",{height:160,duration:0.5,ease:"hf"},0.2);
+  tl.from("#act8-title",{opacity:0,y:60,duration:0.7,ease:"hf"},0.4);
+  window.__timelines["act8"]=tl;
+})();
+</script>
+</div>
+</template>

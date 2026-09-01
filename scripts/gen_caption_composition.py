@@ -91,6 +91,21 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["deepseek-harness-launch"] = {
+    "chunks": [
+        "DeepSeekが207万スターを獲得した革命的なツールを紹介します。",
+        "これまでAIエージェントの拡張には複雑な設定が必要でした。",
+        "DeepSeek Harnessなら全ての機能がプラグインで実現できます。",
+        "インストールはコマンド一発で完了します。",
+        "プラグインを追加するだけで機能を無限に拡張できます。",
+        "Claude CodeもCursorも全てのAIエージェントに対応しています。",
+        "プラグインの組み合わせで自分だけのAI環境が作れます。",
+        "こんなに自由なAI開発環境が登場しました。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄から無料テンプレートを受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["html-anything-launch"] = {
     "chunks": [
         "HTMLを書くだけで動画が作れる時代が来ました。",
@@ -184,6 +199,21 @@ if __name__ == "__main__":
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
 
 # html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["deepseek-harness-launch"] = {
+    "chunks": [
+        "DeepSeekが207万スターを獲得した革命的なツールを紹介します。",
+        "これまでAIエージェントの拡張には複雑な設定が必要でした。",
+        "DeepSeek Harnessなら全ての機能がプラグインで実現できます。",
+        "インストールはコマンド一発で完了します。",
+        "プラグインを追加するだけで機能を無限に拡張できます。",
+        "Claude CodeもCursorも全てのAIエージェントに対応しています。",
+        "プラグインの組み合わせで自分だけのAI環境が作れます。",
+        "こんなに自由なAI開発環境が登場しました。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄から無料テンプレートを受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["html-anything-launch"] = {
     "chunks": [
         "HTMLを書くだけで動画が作れる時代が来ました。",
