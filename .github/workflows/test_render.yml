@@ -109,7 +109,6 @@ jobs:
           if [ "$RENDER_SAMPLE" = "heygen-apple-motion" ] || [ "$RENDER_SAMPLE" = "heygen-ui-motion" ]; then
             cp test_render/${RENDER_SAMPLE}.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画"
             ls -la test_render/ || echo "test_render not found"
-            cp test_render/heygen-apple-motion.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画を使用" || echo "❌ ファイルが見つかりません"
           else
             # hf_originalを優先
           if [ -d "hf_original/$RENDER_SAMPLE" ]; then
