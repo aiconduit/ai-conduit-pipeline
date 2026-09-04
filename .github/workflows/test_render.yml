@@ -1,4 +1,4 @@
-name: Test Render Vertical
+name: AI Conduit Video Render
 on:
   workflow_dispatch:
     inputs:
