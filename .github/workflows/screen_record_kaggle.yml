@@ -1,30 +1,133 @@
 name: Screen Record Kaggle
 on:
   workflow_dispatch:
+    inputs:
+      sample_name:
+        description: Sample name
+        required: true
+        default: m3e-canvas-launch
+      upload:
+        description: Upload to YouTube
+        required: false
+        default: 'false'
 jobs:
   record:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-      - name: Push screen recording to Kaggle
-        env:
-          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
-          TARGET_URL: 'https://open-design.ai/html-anything/'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install
         run: |
-          pip install requests -q
-          python3 kaggle_screen_record.py
-      - name: Wait and download from Kaggle
-        env:
-          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
-          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+          sudo apt-get install -y ffmpeg git-lfs fonts-noto-cjk --no-install-recommends -qq
+          pip install edge-tts --quiet
+          npm install -g hyperframes --ignore-scripts
+      - name: Clone sample
         run: |
-          pip install kaggle requests -q
-          python3 kaggle_wait_download.py
+          git lfs install
+          git clone --depth=1 https://github.com/heygen-com/hyperframes-launches.git hf_launches
+          CLONE_NAME="${{ github.event.inputs.sample_name }}"
+          if [ -d "hf_original/$CLONE_NAME" ]; then
+            echo "✅ hf_originalを使用: $CLONE_NAME"
+          else
+            cd hf_launches && git lfs pull --include="${CLONE_NAME}/**"
+          fi
+      - name: Convert to vertical
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        shell: python3 {0}
+        run: |
+          import re, os, shutil
+          name = os.environ["SAMPLE_NAME"]
+          prerendered = ["heygen-apple-motion", "heygen-ui-motion"]
+          aliases = {"figma-launch-v2": "figma-launch"}
+          if name in aliases:
+              name = aliases[name]
+          if name in prerendered:
+              import shutil as sh2
+              sh2.copy(f"test_render/{name}.mp4", "raw.mp4")
+              exit(0)
+          if os.path.exists(f"hf_original/{name}"):
+              src = f"hf_original/{name}"
+          else:
+              src = f"hf_launches/{name}"
+          idx_html = open(f"{src}/index.html").read()
+          dw = re.search(r'data-width="(\d+)"', idx_html)
+          dh = re.search(r'data-height="(\d+)"', idx_html)
+          orig_w = int(dw.group(1)) if dw else 1080
+          orig_h = int(dh.group(1)) if dh else 1080
+          canvas_w, canvas_h = 1080, 1920
+          left_offset = (canvas_w - orig_w) / 2
+          top_offset = (canvas_h - orig_h) / 2
+          audio_p = re.compile(r"<audio[^>]*>.*?</audio>", re.DOTALL)
+          hf_p = re.compile(r"<hf-audio[^>]*/?>")
+          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}</style>"
+          comp_dir = f"{src}/compositions"
+          if os.path.exists(comp_dir):
+              for f in sorted(os.listdir(comp_dir)):
+                  if not f.endswith(".html"): continue
+                  p = f"{comp_dir}/{f}"
+                  h = open(p).read()
+                  h = audio_p.sub("", h)
+                  h = hf_p.sub("", h)
+                  h = re.sub(r"(<body[^>]*>)(.*?)(</body>)", lambda m: m.group(1)+"<div class=\"hf-stage-wrapper\">"+m.group(2)+"</div>"+m.group(3), h, flags=re.DOTALL)
+                  open(p, "w").write(h)
+          char_src = "test_render/character_main.png"
+          char_dst = f"{src}/assets/character_main.png"
+          if os.path.exists(char_src):
+              shutil.copy(char_src, char_dst)
+          print("done")
+      - name: Render
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          RENDER_SAMPLE=$SAMPLE_NAME
+          [ "$SAMPLE_NAME" = "figma-launch-v2" ] && RENDER_SAMPLE="figma-launch"
+          if [ "$RENDER_SAMPLE" = "heygen-apple-motion" ] || [ "$RENDER_SAMPLE" = "heygen-ui-motion" ]; then
+            cp test_render/${RENDER_SAMPLE}.mp4 raw.mp4 && echo "✅ プリレンダリング済み動画"
+          elif [ -d "hf_original/$RENDER_SAMPLE" ]; then
+            HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_original/$RENDER_SAMPLE -o raw.mp4
+            echo "✅ hf_original使用: $RENDER_SAMPLE"
+          else
+            HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/$RENDER_SAMPLE -o raw.mp4
+            echo "✅ hf_launches使用: $RENDER_SAMPLE"
+          fi
+          ls -lh raw.mp4
+      - name: Generate TTS and caption composition
+        env:
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_caption_composition.py "$SAMPLE_NAME" narration.mp3 captions.html narration.srt
+          echo "✅ TTS+字幕composition生成完了"
+      - name: Merge video audio character subtitles
+        run: |
+          python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
+          if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
+            ffmpeg -y -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]ass=narration.ass[vout]" \
+              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
+          else
+            ffmpeg -y -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar]" \
+              -map "[vchar]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p output.mp4
+          fi
+          ls -lh output.mp4
+      - name: Upload to YouTube
+        if: github.event.inputs.upload == 'true'
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
+        run: |
+          pip install requests --quiet 2>/dev/null
+          python3 scripts/youtube_upload.py
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: kaggle-recording-${{ github.run_number }}
-          path: screen_raw.mp4
+          name: test-vertical-${{ github.run_number }}
+          path: output.mp4
           retention-days: 3
