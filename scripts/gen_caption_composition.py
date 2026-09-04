@@ -91,6 +91,20 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["codex-chatgpt-launch"] = {
+    "chunks": [
+        "ChatGPTが考えてCodexが動く時代が来ました。",
+        "一つのAIだけでは限界がありました。",
+        "二つのAIを組み合わせるという新しい発想です。",
+        "ChatGPTがプランニングブレインとして戦略を立案します。",
+        "Codexがハーネスを保ちながら自動で実行します。",
+        "GitHubで2400スター、急速に拡大しています。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["praxist-launch"] = {
     "chunks": [
         "自律型AI研究システムが登場しました。",
@@ -242,6 +256,20 @@ if __name__ == "__main__":
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
 
 # html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["codex-chatgpt-launch"] = {
+    "chunks": [
+        "ChatGPTが考えてCodexが動く時代が来ました。",
+        "一つのAIだけでは限界がありました。",
+        "二つのAIを組み合わせるという新しい発想です。",
+        "ChatGPTがプランニングブレインとして戦略を立案します。",
+        "Codexがハーネスを保ちながら自動で実行します。",
+        "GitHubで2400スター、急速に拡大しています。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "コメントにAI Conduitと書いて、いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["praxist-launch"] = {
     "chunks": [
         "自律型AI研究システムが登場しました。",
