@@ -3,7 +3,7 @@ name: AI Conduit 完全自律システム
 on:
   # コメント返信: 毎日投稿後1時間後
   schedule:
-    - cron: "0 12 * * *"
+    # # - cron: "0 12 * * *"
   workflow_dispatch:
     inputs:
       task:

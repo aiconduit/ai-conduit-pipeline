@@ -3,7 +3,7 @@ name: AI Conduit Pipeline 9 Stats MrBeast
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 18 * * *'
+    # # - cron: '0 18 * * *'
 
 jobs:
   generate:

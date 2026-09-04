@@ -3,7 +3,7 @@ name: AI Conduit Pipeline 5 MoneyPrinter
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 14 * * *'
+    # # - cron: '0 14 * * *'
 
 jobs:
   generate:

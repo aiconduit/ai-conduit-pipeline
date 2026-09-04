@@ -3,7 +3,7 @@ name: AI Conduit Pipeline 6 ShortGPT Style
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 15 * * *'
+    # # - cron: '0 15 * * *'
 
 jobs:
   generate:

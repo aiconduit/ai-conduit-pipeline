@@ -1,10 +1,10 @@
 name: AI Conduit 自動デイリーワーカー
 
 on:
-  schedule:
-    - cron: '0 21 * * *'  # 毎日06:00 JST
-    - cron: '0 3 * * *'   # 毎日12:00 JST
-    - cron: '0 9 * * *'   # 毎日18:00 JST
+  # schedule: 停止中（手動実行のみ）
+  # - cron: '0 21 * * *'  # 毎日06:00 JST
+  # - cron: '0 3 * * *'   # 毎日12:00 JST
+  # - cron: '0 9 * * *'   # 毎日18:00 JST
   workflow_dispatch:
 
 jobs:

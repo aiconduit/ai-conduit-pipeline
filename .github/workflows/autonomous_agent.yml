@@ -3,7 +3,7 @@ name: AI Conduit 完全量産システム
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 11 * * *"
+    # # - cron: "0 11 * * *"
 
 jobs:
   full_pipeline:

@@ -2,7 +2,7 @@ name: AI Conduit パイプライン3 プロ品質ニュース動画
 
 on:
   schedule:
-    - cron: '0 12 * * *'  # 毎日21:00 JST (UTC 12:00) ※視聴者が最も多い時間帯
+    # # - cron: '0 12 * * *'  # 毎日21:00 JST (UTC 12:00) ※視聴者が最も多い時間帯
   workflow_dispatch:
 
 jobs:
