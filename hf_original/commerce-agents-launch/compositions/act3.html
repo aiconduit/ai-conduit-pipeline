@@ -1,0 +1,82 @@
+<template>
+<div id="act3" data-composition-id="act3" data-start="0" data-duration="4"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=block');
+#act3{font-family:Inter,sans-serif;}
+#act3-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.28);will-change:transform;}
+#act3-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.0) 40%);}
+#act3-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.0) 50%);}
+#act3-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act3-tag-dot{width:8px;height:8px;border-radius:50%;background:#10b981;box-shadow:0 0 12px #10b981;}
+#act3-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act3-terminal{position:absolute;top:108px;right:0;width:520px;background:rgba(8,10,18,0.92);border-left:2px solid rgba(16,185,129,0.5);border-bottom:2px solid rgba(16,185,129,0.5);border-bottom-left-radius:20px;padding:18px 22px;}
+#act3-term-hdr{display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:14px;}
+.act3-dot{width:11px;height:11px;border-radius:50%;}
+#act3-hidden{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
+#act3-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#10b981,transparent);border-radius:2px;will-change:width;}
+#act3-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act3-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act3-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(16,185,129,0.4);}
+#act3-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act3-bottom{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act3-bottom-line{flex:1;height:1px;background:linear-gradient(to right,#10b981,transparent);opacity:0.3;}
+#act3-bottom-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;white-space:nowrap;}
+@keyframes blinkact3{0%,100%{opacity:1}50%{opacity:0}}
+</style>
+<img id="act3-bg" src="assets/act3_solution.jpg" crossorigin="anonymous" alt="" />
+<div id="act3-ov-top"></div>
+<div id="act3-ov-bot"></div>
+<div id="act3-tag-wrap">
+  <div id="act3-tag-dot"></div>
+  <div id="act3-tag">Solution</div>
+</div>
+<div id="act3-terminal">
+  <div id="act3-term-hdr">
+    <div class="act3-dot" style="background:#ff5f57;"></div>
+    <div class="act3-dot" style="background:#febc2e;"></div>
+    <div class="act3-dot" style="background:#28c840;"></div>
+    <span style="font-family:JetBrains Mono,monospace;font-size:16px;color:rgba(255,255,255,0.25);margin-left:8px;">terminal</span>
+  </div>
+  <div id="act3-tl0" style="font-family:JetBrains Mono,monospace;font-size:22px;line-height:1.75;opacity:0;color:#10b981;">$ npm install commerce-agents</div>
+<div id="act3-tl1" style="font-family:JetBrains Mono,monospace;font-size:22px;line-height:1.75;opacity:0;color:rgba(255,255,255,0.65);">Installing...</div>
+<div id="act3-tl2" style="font-family:JetBrains Mono,monospace;font-size:22px;line-height:1.75;opacity:0;color:#28c840;">✅ 完了!</div>
+
+  <span style="font-family:JetBrains Mono,monospace;font-size:22px;color:#10b981;animation:blinkact3 0.8s infinite;">█</span>
+</div>
+<div id="act3-hidden">KEY: code: password:</div>
+<div id="act3-accent-line"></div>
+<div id="act3-content">
+  <div id="act3-line1">commerce-agents</div>
+  <div id="act3-line2">新しい</div>
+  <div id="act3-line3">アプローチ</div>
+</div>
+<div id="act3-bottom">
+  <div id="act3-bottom-line"></div>
+  <div id="act3-bottom-text">@AI.Conduit</div>
+  <div id="act3-bottom-line"></div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#act3-bg",{scale:1.08},{scale:1.0,duration:4,ease:"none"},0);
+  tl.from("#act3-terminal",{opacity:0,x:30,duration:0.5,ease:"hf"},0.1);
+  tl.to("#act3-tl0",{opacity:1,duration:0.1},0.2);
+  tl.to("#act3-tl1",{opacity:1,duration:0.1},0.4);
+  tl.to("#act3-tl2",{opacity:1,duration:0.1},0.6);
+
+  tl.from("#act3-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  tl.to("#act3-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  tl.from("#act3-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act3-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act3-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  tl.from("#act3-bottom",{opacity:0,duration:0.5},1.1);
+  window.__timelines["act3"]=tl;
+})();
+</script>
+</div>
+</template>
