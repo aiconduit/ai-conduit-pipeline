@@ -157,7 +157,8 @@ disallowedTools:
 
 function checkPW() {
   const pw = ['d1','d2','d3','d4'].map(id => document.getElementById(id).value).join('');
-  if(pw === '2749') {
+  const validPWs = ['2749','4739','3815','6274'];
+  if(validPWs.includes(pw)) {
     document.getElementById('locked').style.display = 'none';
     document.getElementById('unlocked').style.display = 'block';
     document.getElementById('templates').style.display = 'block';
