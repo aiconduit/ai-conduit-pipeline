@@ -6,62 +6,89 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=block');
 #act7{font-family:Inter,sans-serif;}
-#act7-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
-#act7-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
-#act7-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.0) 50%);}
-#act7-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act7-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.22);will-change:transform;}
+#act7-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.0) 55%);}
+#act7-ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 55%);}
+
+/* 右上ターミナル - 画面右半分上部を大きく使う */
+#act7-terminal{
+  position:absolute;
+  top:60px; right:0;
+  width:560px; height:780px;
+  background:rgba(10,12,20,0.92);
+  border-left:2px solid rgba(6,182,212,0.4);
+  border-bottom:2px solid rgba(6,182,212,0.4);
+  border-bottom-left-radius:20px;
+  padding:24px 28px;
+  will-change:opacity,transform;
+}
+#act7-term-header{
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:16px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  margin-bottom:20px;
+}
+#act7-term-dot1{width:12px;height:12px;border-radius:50%;background:#ff5f57;}
+#act7-term-dot2{width:12px;height:12px;border-radius:50%;background:#febc2e;}
+#act7-term-dot3{width:12px;height:12px;border-radius:50%;background:#28c840;}
+#act7-term-title{font-family:'JetBrains Mono',monospace;font-size:18px;color:rgba(255,255,255,0.3);margin-left:8px;}
+.act7-term-line{
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px;
+  line-height:1.8;
+  opacity:0;
+  white-space:nowrap;
+  overflow:hidden;
+}
+.act7-term-line.cmd{color:#06b6d4;}
+.act7-term-line.out{color:rgba(255,255,255,0.6);}
+.act7-term-line.ok{color:#28c840;}
+.act7-term-line.err{color:#ff5f57;}
+
+#act7-cursor{
+  display:inline-block;width:12px;height:24px;
+  background:#06b6d4;opacity:1;
+  animation:blink-act7 0.8s infinite;
+}
+@keyframes blink-act7{0%,100%{opacity:1}50%{opacity:0}}
+
+#act7-tag-wrap{position:absolute;bottom:440px;left:48px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
 #act7-tag-dot{width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;}
 #act7-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
-#act7-demo-panel{position:absolute;top:90px;right:48px;width:340px;background:rgba(0,0,0,0.75);border:1px solid rgba(6,182,212,0.3);border-radius:16px;padding:20px 24px;backdrop-filter:blur(12px);will-change:opacity,transform;}
-#act7-demo-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
-#act7-demo-dot1{width:10px;height:10px;border-radius:50%;background:#ff5f57;}
-#act7-demo-dot2{width:10px;height:10px;border-radius:50%;background:#febc2e;}
-#act7-demo-dot3{width:10px;height:10px;border-radius:50%;background:#28c840;}
-#act7-demo-code{font-family:'JetBrains Mono',monospace;font-size:19px;line-height:1.7;color:rgba(255,255,255,0.85);white-space:pre-wrap;}
-#act7-demo-code .kw{color:#06b6d4;}
-#act7-hidden{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
-#act7-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
-#act7-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
-#act7-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
-#act7-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
-#act7-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
-#act7-bottom{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
-#act7-bottom-line{flex:1;height:1px;background:linear-gradient(to right,#06b6d4,transparent);opacity:0.3;}
-#act7-bottom-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;white-space:nowrap;}
+#act7-accent-line{position:absolute;left:48px;bottom:420px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
+#act7-content{position:absolute;bottom:140px;left:0;right:0;padding:0 48px;}
+#act7-line1{font-size:84px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act7-line2{font-size:108px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
+#act7-line3{font-size:84px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act7-hidden{position:absolute;top:200px;right:20px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
 </style>
 <img id="act7-bg" src="assets/act7_cta.jpg" crossorigin="anonymous" alt="" />
-<div id="act7-ov-top"></div>
 <div id="act7-ov-bot"></div>
+<div id="act7-ov-left"></div>
+
 <div id="act7-tag-wrap">
   <div id="act7-tag-dot"></div>
   <div id="act7-tag">Free Gift</div>
 </div>
-
-<div id="act7-hidden">KEY:3 code:3 password:3</div>
 <div id="act7-accent-line"></div>
 <div id="act7-content">
   <div id="act7-line1">いいね保存</div>
   <div id="act7-line2">パスワードは</div>
   <div id="act7-line3">動画に隠れてます</div>
 </div>
-<div id="act7-bottom">
-  <div id="act7-bottom-line"></div>
-  <div id="act7-bottom-text">@AI.Conduit</div>
-  <div id="act7-bottom-line"></div>
-</div>
+<div id="act7-hidden">KEY:3 code:3 password:3</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.fromTo("#act7-bg",{scale:1.08},{scale:1.0,duration:6,ease:"none"},0);
-  tl.from("#act7-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  tl.fromTo("#act7-bg",{scale:1.06},{scale:1.0,duration:6,ease:"none"},0);
   
-  tl.to("#act7-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
-  tl.from("#act7-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
-  tl.from("#act7-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
-  tl.from("#act7-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
-  tl.from("#act7-bottom",{opacity:0,duration:0.5},1.1);
+  tl.from("#act7-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.4);
+  tl.to("#act7-accent-line",{width:240,duration:0.6,ease:"snap"},0.5);
+  tl.from("#act7-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.65);
+  tl.from("#act7-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.85);
+  tl.from("#act7-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},1.05);
   window.__timelines["act7"]=tl;
 })();
 </script>

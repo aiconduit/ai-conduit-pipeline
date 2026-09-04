@@ -6,69 +6,104 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=block');
 #act3{font-family:Inter,sans-serif;}
-#act3-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
-#act3-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
-#act3-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.0) 50%);}
-#act3-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act3-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.22);will-change:transform;}
+#act3-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.0) 55%);}
+#act3-ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 55%);}
+
+/* 右上ターミナル - 画面右半分上部を大きく使う */
+#act3-terminal{
+  position:absolute;
+  top:60px; right:0;
+  width:560px; height:780px;
+  background:rgba(10,12,20,0.92);
+  border-left:2px solid rgba(6,182,212,0.4);
+  border-bottom:2px solid rgba(6,182,212,0.4);
+  border-bottom-left-radius:20px;
+  padding:24px 28px;
+  will-change:opacity,transform;
+}
+#act3-term-header{
+  display:flex;align-items:center;gap:10px;
+  padding-bottom:16px;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+  margin-bottom:20px;
+}
+#act3-term-dot1{width:12px;height:12px;border-radius:50%;background:#ff5f57;}
+#act3-term-dot2{width:12px;height:12px;border-radius:50%;background:#febc2e;}
+#act3-term-dot3{width:12px;height:12px;border-radius:50%;background:#28c840;}
+#act3-term-title{font-family:'JetBrains Mono',monospace;font-size:18px;color:rgba(255,255,255,0.3);margin-left:8px;}
+.act3-term-line{
+  font-family:'JetBrains Mono',monospace;
+  font-size:22px;
+  line-height:1.8;
+  opacity:0;
+  white-space:nowrap;
+  overflow:hidden;
+}
+.act3-term-line.cmd{color:#06b6d4;}
+.act3-term-line.out{color:rgba(255,255,255,0.6);}
+.act3-term-line.ok{color:#28c840;}
+.act3-term-line.err{color:#ff5f57;}
+
+#act3-cursor{
+  display:inline-block;width:12px;height:24px;
+  background:#06b6d4;opacity:1;
+  animation:blink-act3 0.8s infinite;
+}
+@keyframes blink-act3{0%,100%{opacity:1}50%{opacity:0}}
+
+#act3-tag-wrap{position:absolute;bottom:440px;left:48px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
 #act3-tag-dot{width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;}
 #act3-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
-#act3-demo-panel{position:absolute;top:90px;right:48px;width:340px;background:rgba(0,0,0,0.75);border:1px solid rgba(6,182,212,0.3);border-radius:16px;padding:20px 24px;backdrop-filter:blur(12px);will-change:opacity,transform;}
-#act3-demo-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
-#act3-demo-dot1{width:10px;height:10px;border-radius:50%;background:#ff5f57;}
-#act3-demo-dot2{width:10px;height:10px;border-radius:50%;background:#febc2e;}
-#act3-demo-dot3{width:10px;height:10px;border-radius:50%;background:#28c840;}
-#act3-demo-code{font-family:'JetBrains Mono',monospace;font-size:19px;line-height:1.7;color:rgba(255,255,255,0.85);white-space:pre-wrap;}
-#act3-demo-code .kw{color:#06b6d4;}
-#act3-hidden{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
-#act3-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
-#act3-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
-#act3-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
-#act3-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
-#act3-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
-#act3-bottom{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
-#act3-bottom-line{flex:1;height:1px;background:linear-gradient(to right,#06b6d4,transparent);opacity:0.3;}
-#act3-bottom-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;white-space:nowrap;}
+#act3-accent-line{position:absolute;left:48px;bottom:420px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
+#act3-content{position:absolute;bottom:140px;left:0;right:0;padding:0 48px;}
+#act3-line1{font-size:84px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act3-line2{font-size:108px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
+#act3-line3{font-size:84px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act3-hidden{position:absolute;top:200px;right:20px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
 </style>
 <img id="act3-bg" src="assets/act3_solution.jpg" crossorigin="anonymous" alt="" />
-<div id="act3-ov-top"></div>
 <div id="act3-ov-bot"></div>
+<div id="act3-ov-left"></div>
+<div id="act3-terminal">
+  <div id="act3-term-header">
+    <div id="act3-term-dot1"></div>
+    <div id="act3-term-dot2"></div>
+    <div id="act3-term-dot3"></div>
+    <span id="act3-term-title">terminal</span>
+  </div>
+  <div class="act3-term-line cmd" id="act3-tl0">$ pip install camera-to-blender</div><div class="act3-term-line out" id="act3-tl1">Collecting camera-to-blender...</div><div class="act3-term-line ok" id="act3-tl2">Successfully installed ✓</div><div class="act3-term-line cmd" id="act3-tl3">$ camera-to-blender photo.jpg</div><div class="act3-term-line out" id="act3-tl4">>>> 3D変換中...</div><div class="act3-term-line ok" id="act3-tl5">✅ 完了! 0.3秒</div>
+  <span id="act3-cursor"></span>
+</div>
 <div id="act3-tag-wrap">
   <div id="act3-tag-dot"></div>
   <div id="act3-tag">Solution</div>
 </div>
-<div id="act3-demo-panel">
-  <div id="act3-demo-header">
-    <div id="act3-demo-dot1"></div>
-    <div id="act3-demo-dot2"></div>
-    <div id="act3-demo-dot3"></div>
-  </div>
-  <div id="act3-demo-code">pip install camera-to-blender</div>
-</div>
-<div id="act3-hidden">KEY: code: password:</div>
 <div id="act3-accent-line"></div>
 <div id="act3-content">
   <div id="act3-line1">camera-to-blender</div>
   <div id="act3-line2">写真→3Dが</div>
   <div id="act3-line3">即座に完了</div>
 </div>
-<div id="act3-bottom">
-  <div id="act3-bottom-line"></div>
-  <div id="act3-bottom-text">@AI.Conduit</div>
-  <div id="act3-bottom-line"></div>
-</div>
+<div id="act3-hidden">KEY: code: password:</div>
 <script>
 (function(){
   CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
   CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
   var tl=gsap.timeline({paused:true});
-  tl.fromTo("#act3-bg",{scale:1.08},{scale:1.0,duration:4,ease:"none"},0);
-  tl.from("#act3-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
-  tl.from("#act3-demo-panel",{opacity:0,x:40,duration:0.6,ease:"hf"},0.25);
-  tl.to("#act3-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
-  tl.from("#act3-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
-  tl.from("#act3-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
-  tl.from("#act3-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
-  tl.from("#act3-bottom",{opacity:0,duration:0.5},1.1);
+  tl.fromTo("#act3-bg",{scale:1.06},{scale:1.0,duration:4,ease:"none"},0);
+  tl.from("#act3-terminal",{opacity:0,x:40,duration:0.5,ease:"hf"},0.1);
+  tl.to("#act3-tl0",{opacity:1,duration:0.15},0.30);
+  tl.to("#act3-tl1",{opacity:1,duration:0.15},0.55);
+  tl.to("#act3-tl2",{opacity:1,duration:0.15},0.80);
+  tl.to("#act3-tl3",{opacity:1,duration:0.15},1.05);
+  tl.to("#act3-tl4",{opacity:1,duration:0.15},1.30);
+  tl.to("#act3-tl5",{opacity:1,duration:0.15},1.55);
+  tl.from("#act3-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.4);
+  tl.to("#act3-accent-line",{width:240,duration:0.6,ease:"snap"},0.5);
+  tl.from("#act3-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.65);
+  tl.from("#act3-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.85);
+  tl.from("#act3-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},1.05);
   window.__timelines["act3"]=tl;
 })();
 </script>
