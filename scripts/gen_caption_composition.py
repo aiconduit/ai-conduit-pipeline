@@ -91,6 +91,20 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["m3e-canvas-launch"] = {
+    "chunks": [
+        "Material 3のUIをブラウザでスケッチできるツールが登場しました。",
+        "これまでUIをコードで表現するのは難しい作業でした。",
+        "m3e-canvasはブラウザ上でUIを描いてすぐにプロンプト化できます。",
+        "Material 3のコンポーネントをドラッグ&ドロップで配置するだけです。",
+        "そのままvibe-codingのプロンプトとして使えます。",
+        "GitHubで686スター、急速に広がっています。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["codex-chatgpt-launch"] = {
     "chunks": [
         "ChatGPTが考えてCodexが動く時代が来ました。",
@@ -256,6 +270,20 @@ if __name__ == "__main__":
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
 
 # html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["m3e-canvas-launch"] = {
+    "chunks": [
+        "Material 3のUIをブラウザでスケッチできるツールが登場しました。",
+        "これまでUIをコードで表現するのは難しい作業でした。",
+        "m3e-canvasはブラウザ上でUIを描いてすぐにプロンプト化できます。",
+        "Material 3のコンポーネントをドラッグ&ドロップで配置するだけです。",
+        "そのままvibe-codingのプロンプトとして使えます。",
+        "GitHubで686スター、急速に広がっています。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["codex-chatgpt-launch"] = {
     "chunks": [
         "ChatGPTが考えてCodexが動く時代が来ました。",

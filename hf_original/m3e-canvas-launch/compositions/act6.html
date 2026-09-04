@@ -1,0 +1,59 @@
+<template>
+<div id="act6" data-composition-id="act6" data-start="0" data-duration="5"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#act6{font-family:Inter,sans-serif;}
+#act6-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.28);will-change:transform;}
+#act6-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.75) 0%,rgba(0,0,0,0.0) 40%);}
+#act6-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.0) 50%);}
+#act6-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act6-tag-dot{width:8px;height:8px;border-radius:50%;background:#f59e0b;box-shadow:0 0 12px #f59e0b;}
+#act6-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act6-hidden{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
+#act6-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#f59e0b,transparent);border-radius:2px;will-change:width;}
+#act6-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act6-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act6-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(245,158,11,0.4);}
+#act6-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act6-bottom{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act6-bottom-line{flex:1;height:1px;background:linear-gradient(to right,#f59e0b,transparent);opacity:0.3;}
+#act6-bottom-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;white-space:nowrap;}
+</style>
+<img id="act6-bg" src="assets/act6_result.jpg" crossorigin="anonymous" alt="" />
+<div id="act6-ov-top"></div>
+<div id="act6-ov-bot"></div>
+<div id="act6-tag-wrap">
+  <div id="act6-tag-dot"></div>
+  <div id="act6-tag">Result</div>
+</div>
+<div id="act6-hidden">KEY:2 code:2 password:2</div>
+<div id="act6-accent-line"></div>
+<div id="act6-content">
+  <div id="act6-line1">686⭐</div>
+  <div id="act6-line2">急速に</div>
+  <div id="act6-line3">拡大中</div>
+</div>
+<div id="act6-bottom">
+  <div id="act6-bottom-line"></div>
+  <div id="act6-bottom-text">@AI.Conduit</div>
+  <div id="act6-bottom-line"></div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#act6-bg",{scale:1.08},{scale:1.0,duration:5,ease:"none"},0);
+  tl.from("#act6-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  tl.to("#act6-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  tl.from("#act6-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act6-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act6-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  tl.from("#act6-bottom",{opacity:0,duration:0.5},1.1);
+  window.__timelines["act6"]=tl;
+})();
+</script>
+</div>
+</template>
