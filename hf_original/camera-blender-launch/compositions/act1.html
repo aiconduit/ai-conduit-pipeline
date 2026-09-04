@@ -1,0 +1,69 @@
+<template>
+<div id="act1" data-composition-id="act1" data-start="0" data-duration="3"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=block');
+#act1{font-family:Inter,sans-serif;}
+#act1-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#act1-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
+#act1-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.0) 50%);}
+#act1-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act1-tag-dot{width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;}
+#act1-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act1-demo-panel{position:absolute;top:90px;right:48px;width:340px;background:rgba(0,0,0,0.75);border:1px solid rgba(6,182,212,0.3);border-radius:16px;padding:20px 24px;backdrop-filter:blur(12px);will-change:opacity,transform;}
+#act1-demo-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+#act1-demo-dot1{width:10px;height:10px;border-radius:50%;background:#ff5f57;}
+#act1-demo-dot2{width:10px;height:10px;border-radius:50%;background:#febc2e;}
+#act1-demo-dot3{width:10px;height:10px;border-radius:50%;background:#28c840;}
+#act1-demo-code{font-family:'JetBrains Mono',monospace;font-size:19px;line-height:1.7;color:rgba(255,255,255,0.85);white-space:pre-wrap;}
+#act1-demo-code .kw{color:#06b6d4;}
+#act1-hidden{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
+#act1-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
+#act1-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act1-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act1-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
+#act1-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act1-bottom{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act1-bottom-line{flex:1;height:1px;background:linear-gradient(to right,#06b6d4,transparent);opacity:0.3;}
+#act1-bottom-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;white-space:nowrap;}
+</style>
+<img id="act1-bg" src="assets/act1_hook.jpg" crossorigin="anonymous" alt="" />
+<div id="act1-ov-top"></div>
+<div id="act1-ov-bot"></div>
+<div id="act1-tag-wrap">
+  <div id="act1-tag-dot"></div>
+  <div id="act1-tag">Trending</div>
+</div>
+
+<div id="act1-hidden">KEY: code: password:</div>
+<div id="act1-accent-line"></div>
+<div id="act1-content">
+  <div id="act1-line1">写真を撮るだけで</div>
+  <div id="act1-line2">Blenderに</div>
+  <div id="act1-line3">貼り付けられる</div>
+</div>
+<div id="act1-bottom">
+  <div id="act1-bottom-line"></div>
+  <div id="act1-bottom-text">@AI.Conduit</div>
+  <div id="act1-bottom-line"></div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#act1-bg",{scale:1.08},{scale:1.0,duration:3,ease:"none"},0);
+  tl.from("#act1-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  
+  tl.to("#act1-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  tl.from("#act1-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act1-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act1-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  tl.from("#act1-bottom",{opacity:0,duration:0.5},1.1);
+  window.__timelines["act1"]=tl;
+})();
+</script>
+</div>
+</template>

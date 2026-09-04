@@ -91,6 +91,20 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["camera-blender-launch"] = {
+    "chunks": [
+        "写真を撮るだけでBlenderに3Dアセットを貼り付けられるツールが登場しました。",
+        "これまで手動モデリングには何時間もかかっていました。",
+        "camera-to-blenderは写真から即座に3D変換が完了します。",
+        "Blenderのアドオンとしてすぐに使えます。",
+        "実物を撮影して3Dアセットに変換できます。",
+        "GitHubで246スター、急速に拡大しています。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["m3e-canvas-launch"] = {
     "chunks": [
         "Material 3のUIをブラウザでスケッチできるツールが登場しました。",
@@ -270,6 +284,20 @@ if __name__ == "__main__":
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
 
 # html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["camera-blender-launch"] = {
+    "chunks": [
+        "写真を撮るだけでBlenderに3Dアセットを貼り付けられるツールが登場しました。",
+        "これまで手動モデリングには何時間もかかっていました。",
+        "camera-to-blenderは写真から即座に3D変換が完了します。",
+        "Blenderのアドオンとしてすぐに使えます。",
+        "実物を撮影して3Dアセットに変換できます。",
+        "GitHubで246スター、急速に拡大しています。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["m3e-canvas-launch"] = {
     "chunks": [
         "Material 3のUIをブラウザでスケッチできるツールが登場しました。",

@@ -1,0 +1,80 @@
+<template>
+<div id="act2" data-composition-id="act2" data-start="0" data-duration="4"
+     data-width="1080" data-height="1920"
+     style="position:relative;width:1080px;height:1920px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=block');
+#act2{font-family:Inter,sans-serif;}
+#act2-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#act2-ov-top{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
+#act2-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.92) 0%,rgba(0,0,0,0.0) 50%);}
+#act2-tag-wrap{position:absolute;top:108px;left:64px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
+#act2-tag-dot{width:8px;height:8px;border-radius:50%;background:#ef4444;box-shadow:0 0 12px #ef4444;}
+#act2-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
+#act2-demo-panel{position:absolute;top:90px;right:48px;width:340px;background:rgba(0,0,0,0.75);border:1px solid rgba(239,68,68,0.3);border-radius:16px;padding:20px 24px;backdrop-filter:blur(12px);will-change:opacity,transform;}
+#act2-demo-header{display:flex;align-items:center;gap:8px;margin-bottom:14px;}
+#act2-demo-dot1{width:10px;height:10px;border-radius:50%;background:#ff5f57;}
+#act2-demo-dot2{width:10px;height:10px;border-radius:50%;background:#febc2e;}
+#act2-demo-dot3{width:10px;height:10px;border-radius:50%;background:#28c840;}
+#act2-demo-code{font-family:'JetBrains Mono',monospace;font-size:19px;line-height:1.7;color:rgba(255,255,255,0.85);white-space:pre-wrap;}
+#act2-demo-code .kw{color:#ef4444;}
+#act2-hidden{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
+#act2-accent-line{position:absolute;left:64px;top:520px;width:0;height:3px;background:linear-gradient(to right,#ef4444,transparent);border-radius:2px;will-change:width;}
+#act2-content{position:absolute;top:540px;left:0;right:0;padding:0 64px;}
+#act2-line1{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act2-line2{font-size:116px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(239,68,68,0.4);}
+#act2-line3{font-size:88px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act2-bottom{position:absolute;bottom:120px;left:64px;right:64px;display:flex;align-items:center;gap:20px;will-change:opacity;}
+#act2-bottom-line{flex:1;height:1px;background:linear-gradient(to right,#ef4444,transparent);opacity:0.3;}
+#act2-bottom-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.2);text-transform:uppercase;white-space:nowrap;}
+</style>
+<img id="act2-bg" src="assets/act2_problem.jpg" crossorigin="anonymous" alt="" />
+<div id="act2-ov-top"></div>
+<div id="act2-ov-bot"></div>
+<div id="act2-tag-wrap">
+  <div id="act2-tag-dot"></div>
+  <div id="act2-tag">Problem</div>
+</div>
+<div id="act2-demo-panel">
+  <div id="act2-demo-header">
+    <div id="act2-demo-dot1"></div>
+    <div id="act2-demo-dot2"></div>
+    <div id="act2-demo-dot3"></div>
+  </div>
+  <div id="act2-demo-code"># 従来の方法
+① 写真を撮る
+② 手動でモデリング
+③ テクスチャ貼り付け
+→ 数時間〜数日</div>
+</div>
+<div id="act2-hidden">KEY:5 code:5 password:5</div>
+<div id="act2-accent-line"></div>
+<div id="act2-content">
+  <div id="act2-line1">手動モデリングに</div>
+  <div id="act2-line2">何時間も</div>
+  <div id="act2-line3">かかっていた</div>
+</div>
+<div id="act2-bottom">
+  <div id="act2-bottom-line"></div>
+  <div id="act2-bottom-text">@AI.Conduit</div>
+  <div id="act2-bottom-line"></div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#act2-bg",{scale:1.08},{scale:1.0,duration:4,ease:"none"},0);
+  tl.from("#act2-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.15);
+  tl.from("#act2-demo-panel",{opacity:0,x:40,duration:0.6,ease:"hf"},0.25);
+  tl.to("#act2-accent-line",{width:280,duration:0.6,ease:"snap"},0.3);
+  tl.from("#act2-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.45);
+  tl.from("#act2-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.65);
+  tl.from("#act2-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
+  tl.from("#act2-bottom",{opacity:0,duration:0.5},1.1);
+  window.__timelines["act2"]=tl;
+})();
+</script>
+</div>
+</template>
