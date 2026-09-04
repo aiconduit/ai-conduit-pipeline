@@ -1,0 +1,150 @@
+name: Auto Upload Schedule
+on:
+  schedule:
+    # 平日朝7時 JST = UTC 22:00 (前日)
+    - cron: '0 22 * * 0-4'
+    # 平日夜19時 JST = UTC 10:00
+    - cron: '0 10 * * 1-5'
+    # 土日朝10時 JST = UTC 1:00
+    - cron: '0 1 * * 6,0'
+  workflow_dispatch:
+
+jobs:
+  auto_upload:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg git-lfs fonts-noto-cjk --no-install-recommends -qq --fix-missing
+          pip install edge-tts --quiet
+          npm install -g hyperframes
+
+      - name: Generate new video content
+        id: generate
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 scripts/auto_generate.py
+
+      - name: Commit generated content
+        run: |
+          git config user.name "AI Conduit Bot"
+          git config user.email "bot@aiconduit.com"
+          git add hf_original/ scripts/
+          git diff --staged --quiet || git commit -m "auto: 新動画コンテンツ自動生成 $(date '+%Y-%m-%d %H:%M')"
+          git push origin master || true
+
+      - name: Clone sample
+        run: |
+          git lfs install
+          git clone --depth=1 https://github.com/heygen-com/hyperframes-launches.git hf_launches
+
+      - name: Convert to vertical
+        env:
+          SAMPLE_NAME: ${{ steps.generate.outputs.sample_name }}
+        shell: python3 {0}
+        run: |
+          import re, os, shutil
+          name = os.environ["SAMPLE_NAME"]
+          if os.path.exists(f"hf_original/{name}"):
+              src = f"hf_original/{name}"
+          else:
+              src = f"hf_launches/{name}"
+          idx_html = open(f"{src}/index.html").read()
+          dw = re.search(r'data-width="(\d+)"', idx_html)
+          dh = re.search(r'data-height="(\d+)"', idx_html)
+          orig_w = int(dw.group(1)) if dw else 1080
+          orig_h = int(dh.group(1)) if dh else 1080
+          canvas_w, canvas_h = 1080, 1920
+          left_offset = (canvas_w - orig_w) / 2
+          top_offset = (canvas_h - orig_h) / 2
+          audio_p = re.compile(r"<audio[^>]*>.*?</audio>", re.DOTALL)
+          hf_p = re.compile(r"<hf-audio[^>]*/?>")
+          css = f"<style>html,body{{width:{canvas_w}px!important;height:{canvas_h}px!important;margin:0!important;background:#000!important;overflow:hidden!important;}}.hf-stage-wrapper{{position:absolute;left:{left_offset}px;top:{top_offset}px;width:{orig_w}px;height:{orig_h}px;overflow:hidden;}}</style>"
+          comp_dir = f"{src}/compositions"
+          if os.path.exists(comp_dir):
+              for f in sorted(os.listdir(comp_dir)):
+                  if not f.endswith(".html"): continue
+                  p = f"{comp_dir}/{f}"
+                  h = open(p).read()
+                  h = audio_p.sub("", h)
+                  h = hf_p.sub("", h)
+                  h = re.sub(r"(<body[^>]*>)(.*?)(</body>)", lambda m: m.group(1)+"<div class=\"hf-stage-wrapper\">"+m.group(2)+"</div>"+m.group(3), h, flags=re.DOTALL)
+                  open(p, "w").write(h)
+          char_src = "test_render/character_main.png"
+          char_dst = f"{src}/assets/character_main.png"
+          if os.path.exists(char_src):
+              shutil.copy(char_src, char_dst)
+          print("done")
+
+      - name: Render
+        env:
+          SAMPLE_NAME: ${{ steps.generate.outputs.sample_name }}
+        run: |
+          if [ -d "hf_original/$SAMPLE_NAME" ]; then
+            HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_original/$SAMPLE_NAME -o raw.mp4
+          else
+            HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_launches/$SAMPLE_NAME -o raw.mp4
+          fi
+          ls -lh raw.mp4
+
+      - name: Generate TTS and caption
+        env:
+          SAMPLE_NAME: ${{ steps.generate.outputs.sample_name }}
+        run: |
+          python3 scripts/gen_caption_composition.py "$SAMPLE_NAME" narration.mp3 captions.html narration.srt
+          echo "✅ TTS完了"
+          ls -lh narration.mp3
+
+      - name: Merge video audio character subtitles BGM
+        run: |
+          python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
+          if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
+            ffmpeg -y -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]ass=narration.ass[vout]" \
+              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p tmp_output.mp4
+          else
+            ffmpeg -y -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+              -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar]" \
+              -map "[vchar]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p tmp_output.mp4
+          fi
+          # BGMミックス
+          if [ -f "assets/bgm_lofi.mp3" ]; then
+            VIDEO_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 tmp_output.mp4 | cut -d. -f1)
+            FADE_START=$((VIDEO_DUR - 3))
+            ffmpeg -y \
+              -i tmp_output.mp4 \
+              -i assets/bgm_lofi.mp3 \
+              -filter_complex "[1:a]aloop=loop=-1:size=2000000,atrim=0:${VIDEO_DUR},afade=t=in:st=0:d=2,afade=t=out:st=${FADE_START}:d=3,volume=0.18[bgm];[0:a][bgm]amix=inputs=2:duration=first[aout]" \
+              -map 0:v -map "[aout]" \
+              -c:v copy -c:a aac -b:a 128k output.mp4 && echo "✅ BGMミックス完了"
+          else
+            mv tmp_output.mp4 output.mp4
+          fi
+          ls -lh output.mp4
+
+      - name: Upload to YouTube
+        env:
+          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+          SAMPLE_NAME: ${{ steps.generate.outputs.sample_name }}
+        run: |
+          pip install requests --quiet 2>/dev/null
+          python3 scripts/youtube_upload.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-upload-${{ github.run_number }}
+          path: output.mp4
+          retention-days: 3
