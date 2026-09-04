@@ -6,65 +6,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=block');
 #act7{font-family:Inter,sans-serif;}
+/* 背景 */
 #act7-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.22);will-change:transform;}
-#act7-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.0) 55%);}
-#act7-ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.7) 0%,rgba(0,0,0,0.0) 55%);}
-
-/* 右上ターミナル - 画面右半分上部を大きく使う */
+/* 下部グラデーション */
+#act7-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.95) 0%,rgba(0,0,0,0.0) 55%);z-index:1;}
+/* ターミナル: 右上半分 */
 #act7-terminal{
-  position:absolute;
-  top:60px; right:0;
-  width:560px; height:780px;
-  background:rgba(10,12,20,0.92);
-  border-left:2px solid rgba(6,182,212,0.4);
-  border-bottom:2px solid rgba(6,182,212,0.4);
-  border-bottom-left-radius:20px;
-  padding:24px 28px;
+  position:absolute;top:50px;right:0;
+  width:580px;height:820px;
+  background:rgba(8,10,18,0.93);
+  border-left:2px solid rgba(6,182,212,0.5);
+  border-bottom:2px solid rgba(6,182,212,0.5);
+  border-bottom-left-radius:24px;
+  padding:20px 24px;
+  z-index:10;
   will-change:opacity,transform;
 }
-#act7-term-header{
-  display:flex;align-items:center;gap:10px;
-  padding-bottom:16px;
-  border-bottom:1px solid rgba(255,255,255,0.08);
-  margin-bottom:20px;
+#act7-term-hdr{display:flex;align-items:center;gap:8px;padding-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:16px;}
+.dot{width:12px;height:12px;border-radius:50%;}
+.dot.r{background:#ff5f57;}.dot.y{background:#febc2e;}.dot.g{background:#28c840;}
+#act7-term-title{font-family:'JetBrains Mono',monospace;font-size:17px;color:rgba(255,255,255,0.25);margin-left:6px;}
+.tline{font-family:'JetBrains Mono',monospace;font-size:23px;line-height:1.75;opacity:0;white-space:pre-wrap;}
+.tline.cmd{color:#06b6d4;}.tline.ok{color:#28c840;}.tline.err{color:#ff5f57;}.tline.out{color:rgba(255,255,255,0.65);}
+#act7-cursor{font-family:'JetBrains Mono',monospace;font-size:23px;color:#06b6d4;animation:blinkact7 0.8s infinite;}
+@keyframes blinkact7{0%,100%{opacity:1}50%{opacity:0}}
+/* 左下テキストエリア: z-index高く確実に表示 */
+#act7-tag-wrap{
+  position:absolute;bottom:520px;left:48px;
+  display:flex;align-items:center;gap:14px;
+  z-index:20;will-change:opacity,transform;
 }
-#act7-term-dot1{width:12px;height:12px;border-radius:50%;background:#ff5f57;}
-#act7-term-dot2{width:12px;height:12px;border-radius:50%;background:#febc2e;}
-#act7-term-dot3{width:12px;height:12px;border-radius:50%;background:#28c840;}
-#act7-term-title{font-family:'JetBrains Mono',monospace;font-size:18px;color:rgba(255,255,255,0.3);margin-left:8px;}
-.act7-term-line{
-  font-family:'JetBrains Mono',monospace;
-  font-size:22px;
-  line-height:1.8;
-  opacity:0;
-  white-space:nowrap;
-  overflow:hidden;
-}
-.act7-term-line.cmd{color:#06b6d4;}
-.act7-term-line.out{color:rgba(255,255,255,0.6);}
-.act7-term-line.ok{color:#28c840;}
-.act7-term-line.err{color:#ff5f57;}
-
-#act7-cursor{
-  display:inline-block;width:12px;height:24px;
-  background:#06b6d4;opacity:1;
-  animation:blink-act7 0.8s infinite;
-}
-@keyframes blink-act7{0%,100%{opacity:1}50%{opacity:0}}
-
-#act7-tag-wrap{position:absolute;bottom:500px;left:48px;display:flex;align-items:center;gap:16px;will-change:opacity,transform;}
 #act7-tag-dot{width:8px;height:8px;border-radius:50%;background:#06b6d4;box-shadow:0 0 12px #06b6d4;}
-#act7-tag{font-size:20px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.45);text-transform:uppercase;}
-#act7-accent-line{position:absolute;left:48px;bottom:480px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;will-change:width;}
-#act7-content{position:absolute;bottom:100px;left:0;right:0;padding:0 48px;}
-#act7-line1{font-size:78px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
-#act7-line2{font-size:100px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 60px rgba(6,182,212,0.4);}
-#act7-line3{font-size:78px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act7-tag{font-size:19px;font-weight:400;letter-spacing:0.28em;color:rgba(255,255,255,0.5);text-transform:uppercase;}
+#act7-accent-line{position:absolute;left:48px;bottom:500px;width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;z-index:20;will-change:width;}
+#act7-content{position:absolute;bottom:110px;left:0;right:0;padding:0 48px;z-index:20;}
+#act7-line1{font-size:82px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
+#act7-line2{font-size:104px;font-weight:900;color:#fff;letter-spacing:-0.045em;line-height:0.95;will-change:opacity,transform;text-shadow:0 0 50px rgba(6,182,212,0.5);}
+#act7-line3{font-size:82px;font-weight:200;color:rgba(255,255,255,0.5);letter-spacing:-0.03em;line-height:1.05;will-change:opacity,transform;}
 #act7-hidden{position:absolute;top:200px;right:20px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
 </style>
 <img id="act7-bg" src="assets/act7_cta.jpg" crossorigin="anonymous" alt="" />
 <div id="act7-ov-bot"></div>
-<div id="act7-ov-left"></div>
 
 <div id="act7-tag-wrap">
   <div id="act7-tag-dot"></div>
@@ -85,10 +67,10 @@
   tl.fromTo("#act7-bg",{scale:1.06},{scale:1.0,duration:6,ease:"none"},0);
   
   tl.from("#act7-tag-wrap",{opacity:0,x:-20,duration:0.5,ease:"hf"},0.4);
-  tl.to("#act7-accent-line",{width:240,duration:0.6,ease:"snap"},0.5);
-  tl.from("#act7-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.65);
-  tl.from("#act7-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.85);
-  tl.from("#act7-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},1.05);
+  tl.to("#act7-accent-line",{width:240,duration:0.6,ease:"snap"},0.55);
+  tl.from("#act7-line1",{opacity:0,y:40,duration:0.6,ease:"hf"},0.7);
+  tl.from("#act7-line2",{opacity:0,y:50,duration:0.7,ease:"hf"},0.9);
+  tl.from("#act7-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},1.1);
   window.__timelines["act7"]=tl;
 })();
 </script>
