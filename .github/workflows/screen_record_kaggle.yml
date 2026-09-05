@@ -91,12 +91,7 @@ jobs:
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
-          if [ -d "hf_original/$SAMPLE_NAME" ]; then
-            INDEX="hf_original/$SAMPLE_NAME/index.html"
-          else
-            INDEX="hf_launches/$SAMPLE_NAME/index.html"
-          fi
-          python3 scripts/adjust_index_duration.py narration.srt "$INDEX"
+          echo "✅ duration調整スキップ（固定durationを使用）"
       - name: Render
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
