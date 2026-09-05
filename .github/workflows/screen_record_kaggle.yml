@@ -106,16 +106,14 @@ jobs:
       - name: Merge video audio character subtitles
         run: |
           python3 scripts/gen_subtitle_filter.py narration.srt narration.ass
-          NARR_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 narration.mp3 | awk -F. '{print $1+2}')
-          echo "ナレーション長: ${NARR_DUR}秒"
           if ffmpeg -filters 2>&1 | grep -q "^.*ass"; then
-            ffmpeg -y -stream_loop -1 -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+            ffmpeg -y -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar];[vchar]ass=narration.ass[vout]" \
-              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p -t ${NARR_DUR} output.mp4
+              -map "[vout]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p -shortest output.mp4
           else
-            ffmpeg -y -stream_loop -1 -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
+            ffmpeg -y -i raw.mp4 -i test_render/character_main.png -i narration.mp3 \
               -filter_complex "[1:v]scale=iw*0.65:-1[char];[0:v][char]overlay=W-w-20:H-h-100[vchar]" \
-              -map "[vchar]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p -t ${NARR_DUR} output.mp4
+              -map "[vchar]" -map "2:a" -c:v libx264 -c:a aac -pix_fmt yuv420p -shortest output.mp4
           fi
           # BGMミックス
           if [ -f "assets/bgm_lofi.mp3" ]; then
