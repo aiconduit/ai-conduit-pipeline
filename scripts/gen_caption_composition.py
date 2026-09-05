@@ -91,6 +91,20 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["gpt6-astra-launch"] = {
+    "chunks": [
+        "OpenAIがGPT-6 Astraをリリースしました。",
+        "従来のAIは質問に答えるだけでした。",
+        "AstraはコンピューターをAGI水準で自律操作できます。",
+        "Computer Use機能で人間のようにPCを操作します。",
+        "Greg Brockman氏はAGI時代へようこそと述べました。",
+        "ChatGPT Plus・Pro・BusinessとAPIで利用可能です。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["camera-blender-launch"] = {
     "chunks": [
         "写真を撮るだけでBlenderに3Dアセットを貼り付けられるツールが登場しました。",
@@ -298,6 +312,20 @@ if __name__ == "__main__":
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
 
 # html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["gpt6-astra-launch"] = {
+    "chunks": [
+        "OpenAIがGPT-6 Astraをリリースしました。",
+        "従来のAIは質問に答えるだけでした。",
+        "AstraはコンピューターをAGI水準で自律操作できます。",
+        "Computer Use機能で人間のようにPCを操作します。",
+        "Greg Brockman氏はAGI時代へようこそと述べました。",
+        "ChatGPT Plus・Pro・BusinessとAPIで利用可能です。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["camera-blender-launch"] = {
     "chunks": [
         "写真を撮るだけでBlenderに3Dアセットを貼り付けられるツールが登場しました。",
