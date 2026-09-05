@@ -14,7 +14,7 @@ def parse_srt_durations(srt_path):
             times = lines[1].split(' --> ')
             start = time_to_sec(times[0].strip())
             end = time_to_sec(times[1].strip())
-            chunks.append((start, end, end - start))
+            chunks.append(end - start)
     return chunks
 
 def time_to_sec(t):
@@ -26,59 +26,62 @@ def update_index_html(index_path, chunk_durations):
     content = open(index_path).read()
     
     n_chunks = len(chunk_durations)
-    total_dur = sum(d for _, _, d in chunk_durations)
-    total_sec = math.ceil(total_dur) + 1
+    total_dur = sum(chunk_durations)
+    total_sec = math.ceil(total_dur) + 2
     
-    # 各actを検索
-    acts = re.findall(r'data-composition-id="(act\d+)"', content)
+    # 各actを検索（順番通りに）
+    act_pattern = re.compile(
+        r'(<div class="clip"[^>]*data-composition-id="(act\d+)"[^>]*data-start=")([^"]*)(\"[^>]*data-duration=")([^"]*)(")'
+    )
+    
+    acts = act_pattern.findall(content)
     n_acts = len(acts)
     
     if n_acts == 0:
         print("WARNING: actが見つかりません")
+        print(content[:500])
         return
     
-    # チャンクをactに振り分け
+    # チャンクをactに均等振り分け
     chunks_per_act = n_chunks / n_acts
     act_durations = []
     
     for i in range(n_acts):
-        start_chunk = int(i * chunks_per_act)
-        end_chunk = int((i + 1) * chunks_per_act) if i < n_acts - 1 else n_chunks
-        if start_chunk >= n_chunks:
+        s = int(i * chunks_per_act)
+        e = int((i + 1) * chunks_per_act) if i < n_acts - 1 else n_chunks
+        if s >= n_chunks:
             act_dur = 3
         else:
-            act_dur = sum(d for _, _, d in chunk_durations[start_chunk:end_chunk])
-            act_dur = max(3, math.ceil(act_dur) + 1)
+            act_dur = max(3, math.ceil(sum(chunk_durations[s:e])) + 1)
         act_durations.append(act_dur)
     
-    # ルートのduration更新
+    # 文字列置換（正規表現ではなく直接）
+    new_content = content
+    
+    # ルートduration更新
     new_content = re.sub(
         r'(id="root"[^>]*data-duration=")[^"]*"',
-        lambda m: m.group(0)[:m.group(0).rfind('"')] + str(total_sec) + '"',
-        content
+        f'\\1{total_sec}"',
+        new_content
     )
     
-    # 各actのstart・duration更新
+    # 各actを順番に処理
     start = 0
-    for i, act_id in enumerate(acts):
+    for i, (prefix, act_id, old_start, mid, old_dur, suffix) in enumerate(acts):
         dur = act_durations[i]
-        
-        # actのstart更新
-        pattern = r'(data-composition-id="' + act_id + r'"[^>]*data-start=")[^"]*"'
-        new_content = re.sub(pattern, lambda m: m.group(0)[:m.group(0).rfind('"')] + str(start) + '"', new_content)
-        
-        # actのduration更新
-        pattern = r'(data-composition-id="' + act_id + r'"[^>]*data-start="[^"]*"[^>]*data-duration=")[^"]*"'
-        new_content = re.sub(pattern, lambda m: m.group(0)[:m.group(0).rfind('"')] + str(dur) + '"', new_content)
+        old = prefix + old_start + mid + old_dur + suffix
+        new = prefix + str(start) + mid + str(dur) + suffix
+        new_content = new_content.replace(old, new, 1)
         
         # compositions/{act_id}.htmlのdurationも更新
         comp_dir = os.path.dirname(index_path)
         comp_path = os.path.join(comp_dir, f"compositions/{act_id}.html")
         if os.path.exists(comp_path):
             comp = open(comp_path).read()
+            # data-duration="X" を更新（対象actのみ）
             comp = re.sub(
-                r'(data-composition-id="' + act_id + r'"[^>]*data-duration=")[^"]*"',
-                lambda m: m.group(0)[:m.group(0).rfind('"')] + str(dur) + '"',
+                rf'(data-composition-id="{act_id}"[^>]*data-duration=")[^"]*"',
+                f'\\g<1>{dur}"',
                 comp
             )
             open(comp_path, 'w').write(comp)
@@ -99,7 +102,7 @@ if __name__ == "__main__":
     
     chunk_durations = parse_srt_durations(srt_path)
     print(f"チャンク数: {len(chunk_durations)}")
-    for i, (s, e, d) in enumerate(chunk_durations):
+    for i, d in enumerate(chunk_durations):
         print(f"  chunk{i+1}: {d:.2f}s")
     
     update_index_html(index_path, chunk_durations)
