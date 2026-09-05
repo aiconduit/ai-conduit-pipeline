@@ -40,16 +40,19 @@ def update_index_html(index_path, chunk_durations):
         print(content[:300])
         return
     
-    # チャンクをactに均等振り分け
-    chunks_per_act = n_chunks / n_acts
+    # 各actに1チャンクずつ対応（n_acts <= n_chunksの場合）
+    # 最後のactは残りのチャンクを全て含む
     act_durations = []
     for i in range(n_acts):
-        s = int(i * chunks_per_act)
-        e = int((i + 1) * chunks_per_act) if i < n_acts - 1 else n_chunks
-        if s >= n_chunks:
-            act_dur = 3
+        if i < n_acts - 1:
+            if i < n_chunks:
+                act_dur = max(3, math.ceil(chunk_durations[i]) + 1)
+            else:
+                act_dur = 3
         else:
-            act_dur = max(3, math.ceil(sum(chunk_durations[s:e])) + 1)
+            # 最後のact: 残り全チャンク
+            remaining = chunk_durations[i:] if i < n_chunks else []
+            act_dur = max(3, math.ceil(sum(remaining)) + 1) if remaining else 3
         act_durations.append(act_dur)
     
     # 各actのstart・durationを計算して置換
