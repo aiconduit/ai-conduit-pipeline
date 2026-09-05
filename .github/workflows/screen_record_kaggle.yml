@@ -91,27 +91,12 @@ jobs:
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
-          NARR_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 narration.mp3 | awk '{printf "%.0f", $1}')
-          echo "ナレーション長: ${NARR_DUR}秒"
-          # index.htmlのdurationをナレーション長に合わせて更新
           if [ -d "hf_original/$SAMPLE_NAME" ]; then
             INDEX="hf_original/$SAMPLE_NAME/index.html"
           else
             INDEX="hf_launches/$SAMPLE_NAME/index.html"
           fi
-          # data-durationを更新
-          sed -i "s/data-duration=\"[0-9]*\"/data-duration=\"${NARR_DUR}\"/g" "$INDEX"
-          # 各actのdurationを均等に分配（7act想定）
-          ACT_DUR=$((NARR_DUR / 7))
-          LAST_DUR=$((NARR_DUR - ACT_DUR * 6))
-          START=0
-          for i in 1 2 3 4 5 6; do
-            END=$((START + ACT_DUR))
-            sed -i "s/data-track-index=\"${i}\">/data-track-index=\"${i}\">/g" "$INDEX"
-            START=$END
-          done
-          echo "✅ duration調整完了: ${NARR_DUR}秒"
-          cat "$INDEX" | grep data-duration | head -3
+          python3 scripts/adjust_index_duration.py narration.srt "$INDEX"
       - name: Render
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
