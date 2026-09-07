@@ -91,6 +91,20 @@ NARRATION_DATA = {
     },
 }
 
+NARRATION_DATA["grok-build-launch"] = {
+    "chunks": [
+        "xAIがGrok-Buildを公開しました。",
+        "従来の開発は複数ウィンドウを行き来する非効率な作業でした。",
+        "Grok-BuildはフルスクリーンTUIで全機能を1画面に集約します。",
+        "マウス操作対応で拡張可能なプラグイン式アーキテクチャです。",
+        "実際に使うとGrokがコード修正を提案し一発で適用できます。",
+        "xAI公式ツールとして急速に注目を集めています。",
+        "この動画の各シーンにパスワードが隠されています。",
+        "全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["gpt6-astra-launch"] = {
     "chunks": [
         "OpenAIがGPT-6 Astraをリリースしました。",
@@ -340,6 +354,20 @@ if __name__ == "__main__":
         print(f"done: {len(sentences)}chunks {dur:.2f}s")
 
 # html-anything紹介動画（縦型オリジナル）
+NARRATION_DATA["grok-build-launch"] = {
+    "chunks": [
+        "xAIがGrok-Buildを公開しました。",
+        "従来の開発は複数ウィンドウを行き来する非効率な作業でした。",
+        "Grok-BuildはフルスクリーンTUIで全機能を1画面に集約します。",
+        "マウス操作対応で拡張可能なプラグイン式アーキテクチャです。",
+        "実際に使うとGrokがコード修正を提案し一発で適用できます。",
+        "xAI公式ツールとして急速に注目を集めています。",
+        "この動画の各シーンにパスワードが隠されています。",
+        "全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["gpt6-astra-launch"] = {
     "chunks": [
         "OpenAIがGPT-6 Astraをリリースしました。",
