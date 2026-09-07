@@ -28,8 +28,9 @@ jobs:
 
       - name: Install Chrome for Remotion
         run: |
+          sudo apt-get install -y chromium-browser --no-install-recommends -qq 2>/dev/null ||           sudo apt-get install -y chromium --no-install-recommends -qq 2>/dev/null || true
           cd remotion-videos/${{ github.event.inputs.video_name }}
-          npx remotion browser ensure
+          npx remotion browser ensure 2>/dev/null || true
 
       - name: Install ffmpeg
         run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
