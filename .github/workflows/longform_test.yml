@@ -1,0 +1,13 @@
+name: Longform Test
+on:
+  workflow_dispatch:
+    inputs:
+      video_name:
+        description: 'video name'
+        required: true
+        default: 'anthropic-vs-openai'
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "test ${{ github.event.inputs.video_name }}"
