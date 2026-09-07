@@ -31,19 +31,18 @@ jobs:
           cd remotion-videos/${{ github.event.inputs.video_name }}
           npx remotion browser ensure
 
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+
       - name: Render video
         run: |
           cd remotion-videos/${{ github.event.inputs.video_name }}
-          # node_modules/.bin を使用
           export PATH="$PWD/node_modules/.bin:$PATH"
-          which remotion || echo "PATH: $PATH"
-          ls node_modules/.bin/remotion || echo "remotion not found in .bin"
           node node_modules/.bin/remotion render src/index.ts AnthropicVsOpenAI output.mp4 \
             --codec h264 \
-            --concurrency 1 \
-            --log verbose 2>&1 | tail -30
+            --concurrency 1
           ls -lh output.mp4
-          ffprobe -v quiet -show_entries format=duration -of csv=p=0 output.mp4 || echo "ffprobe check"
+          ffprobe -v quiet -show_entries format=duration -of csv=p=0 output.mp4
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
