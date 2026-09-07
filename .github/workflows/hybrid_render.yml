@@ -1,0 +1,90 @@
+name: Hybrid Remotion + HyperFrames Render
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: 'Upload to YouTube'
+        required: false
+        default: 'false'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+
+      - name: Install Remotion dependencies
+        run: |
+          cd remotion-videos/hybrid-test
+          npm install
+
+      - name: Install Chrome for Remotion
+        run: |
+          cd remotion-videos/hybrid-test
+          npx remotion browser ensure
+
+      - name: Render Remotion intro
+        run: |
+          cd remotion-videos/hybrid-test
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          node node_modules/.bin/remotion render src/index.ts HybridIntro remotion_intro.mp4 \
+            --codec h264 --concurrency 1
+          ls -lh remotion_intro.mp4
+          ffprobe -v quiet -show_entries format=duration -of csv=p=0 remotion_intro.mp4
+          cp remotion_intro.mp4 ../../remotion_intro.mp4
+
+      - name: Install HyperFrames
+        run: npm install -g hyperframes
+
+      - name: Render HyperFrames content
+        run: |
+          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_original/hybrid-test -o hf_content.mp4
+          ls -lh hf_content.mp4
+          ffprobe -v quiet -show_entries format=duration -of csv=p=0 hf_content.mp4
+
+      - name: Merge Remotion + HyperFrames
+        run: |
+          # 解像度を統一
+          ffmpeg -y -i remotion_intro.mp4 -vf "scale=1920:1080" -c:v libx264 -pix_fmt yuv420p intro_norm.mp4 2>/dev/null
+          ffmpeg -y -i hf_content.mp4 -vf "scale=1920:1080" -c:v libx264 -pix_fmt yuv420p content_norm.mp4 2>/dev/null
+          
+          # BGMを生成してミックス
+          INTRO_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 intro_norm.mp4 | cut -d. -f1)
+          CONTENT_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 content_norm.mp4 | cut -d. -f1)
+          TOTAL=$((INTRO_DUR + CONTENT_DUR))
+          FADE_START=$((TOTAL - 3))
+          
+          # 結合
+          printf "file 'intro_norm.mp4'\nfile 'content_norm.mp4'\n" > concat_list.txt
+          ffmpeg -y -f concat -safe 0 -i concat_list.txt -c:v libx264 -pix_fmt yuv420p merged_video.mp4 2>/dev/null
+          
+          # BGMミックス
+          if [ -f "assets/bgm_lofi.mp3" ]; then
+            ffmpeg -y \
+              -i merged_video.mp4 \
+              -i assets/bgm_lofi.mp3 \
+              -filter_complex "[1:a]aloop=loop=-1:size=2000000,atrim=0:${TOTAL},afade=t=in:st=0:d=2,afade=t=out:st=${FADE_START}:d=3,volume=0.15[bgm];[bgm]amix=inputs=1:duration=first[aout]" \
+              -map 0:v -map "[aout]" \
+              -c:v copy -c:a aac -b:a 192k output.mp4 2>/dev/null || \
+            cp merged_video.mp4 output.mp4
+          else
+            cp merged_video.mp4 output.mp4
+          fi
+          
+          echo "✅ 合成完了"
+          ls -lh output.mp4
+          ffprobe -v quiet -show_entries format=duration -of csv=p=0 output.mp4
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hybrid-render-${{ github.run_number }}
+          path: output.mp4
+          retention-days: 7
