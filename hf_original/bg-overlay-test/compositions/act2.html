@@ -1,0 +1,82 @@
+<template>
+<div id="act2" data-composition-id="act2" data-start="0" data-duration="8"
+     data-width="1920" data-height="1080"
+     style="position:relative;width:1920px;height:1080px;overflow:hidden;background:#050510;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=block');
+/* 背景動画 */
+#act2-bgvid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+/* 左グラデーションオーバーレイ */
+#act2-ov{position:absolute;inset:0;background:linear-gradient(to right,rgba(5,5,16,0.92) 0%,rgba(5,5,16,0.5) 50%,rgba(5,5,16,0.1) 100%);}
+/* アクセントバー */
+#act2-bar{position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(to bottom,transparent,#10b981,#10b981,transparent);}
+/* タグ */
+#act2-tag{position:absolute;top:60px;left:80px;font-size:13px;letter-spacing:0.4em;color:rgba(255,255,255,0.25);text-transform:uppercase;font-family:Inter,sans-serif;will-change:opacity;}
+/* メインテキスト */
+#act2-content{position:absolute;left:80px;top:50%;transform:translateY(-50%);}
+#act2-l1{font-size:72px;font-weight:200;color:rgba(255,255,255,0.4);letter-spacing:-2px;line-height:1;will-change:opacity,transform;}
+#act2-l2{font-size:140px;font-weight:900;color:#fff;letter-spacing:-5px;line-height:0.88;text-shadow:0 0 100px rgba(16,185,129,0.6);will-change:opacity,transform;}
+#act2-l3{font-size:72px;font-weight:200;color:rgba(255,255,255,0.4);letter-spacing:-2px;line-height:1;will-change:opacity,transform;}
+#act2-divider{width:0;height:3px;background:linear-gradient(to right,#10b981,transparent);border-radius:2px;margin:20px 0;will-change:width;}
+/* ターミナル */
+#act2-terminal{position:absolute;right:80px;top:50%;transform:translateY(-50%);width:580px;background:rgba(5,5,16,0.75);backdrop-filter:blur(20px);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:28px 32px;}
+#act2-hdr{display:flex;align-items:center;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.05);}
+/* プログレス */
+#act2-prog{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.04);}
+#act2-prog-bar{height:100%;background:linear-gradient(to right,#10b981,#10b98188);width:0;}
+</style>
+
+<!-- Remotionで生成した背景動画 -->
+<video id="act2-bgvid" src="assets/bg_motion.mp4" autoplay loop muted playsinline></video>
+<div id="act2-ov"></div>
+<div id="act2-bar"></div>
+<div id="act2-tag">@AI.Conduit — Revenue 2026</div>
+
+<div id="act2-content">
+  <div id="act2-l1">収益</div>
+  <div id="act2-l2">$30B</div>
+  <div id="act2-l3">vs $25B</div>
+  <div id="act2-divider"></div>
+</div>
+
+<div id="act2-terminal">
+  <div id="act2-hdr">
+    <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div>
+    <div style="width:12px;height:12px;border-radius:50%;background:#febc2e;margin-left:6px;"></div>
+    <div style="width:12px;height:12px;border-radius:50%;background:#28c840;margin-left:6px;"></div>
+    <span style="font-family:JetBrains Mono,monospace;font-size:14px;color:rgba(255,255,255,0.2);margin-left:10px;">analysis</span>
+  </div>
+  <div id="act2-t0" style="font-family:JetBrains Mono,monospace;font-size:20px;line-height:1.85;opacity:0;color:#10b981;">Anthropic ARR: $30B ↑↑↑</div>
+<div id="act2-t1" style="font-family:JetBrains Mono,monospace;font-size:20px;line-height:1.85;opacity:0;color:#10b981;">OpenAI ARR: $25B ↑↑</div>
+<div id="act2-t2" style="font-family:JetBrains Mono,monospace;font-size:20px;line-height:1.85;opacity:0;color:rgba(255,255,255,0.6);">Growth ratio: 33x</div>
+<div id="act2-t3" style="font-family:JetBrains Mono,monospace;font-size:20px;line-height:1.85;opacity:0;color:#28c840;">✅ Anthropic逆転</div>
+
+  <span style="font-family:JetBrains Mono,monospace;font-size:20px;color:#10b981;animation:act2blink 0.8s infinite;">█</span>
+</div>
+
+<div id="act2-prog"><div id="act2-prog-bar"></div></div>
+<style>@keyframes act2blink{0%,100%{opacity:1}50%{opacity:0}}</style>
+
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.to("#act2-prog-bar",{width:"100%",duration:8,ease:"none"},0);
+  tl.from("#act2-tag",{opacity:0,duration:0.4},0.1);
+  tl.from("#act2-l1",{opacity:0,x:-40,duration:0.5,ease:"hf"},0.2);
+  tl.from("#act2-l2",{opacity:0,x:-50,duration:0.65,ease:"hf"},0.35);
+  tl.from("#act2-l3",{opacity:0,x:-40,duration:0.5,ease:"hf"},0.5);
+  tl.to("#act2-divider",{width:300,duration:0.5,ease:"snap"},0.55);
+  tl.from("#act2-terminal",{opacity:0,x:30,duration:0.5,ease:"hf"},0.3);
+  tl.to("#act2-t0",{opacity:1,duration:0.1},0.60);
+tl.to("#act2-t1",{opacity:1,duration:0.1},0.85);
+tl.to("#act2-t2",{opacity:1,duration:0.1},1.10);
+tl.to("#act2-t3",{opacity:1,duration:0.1},1.35);
+
+  window.__timelines["act2"]=tl;
+})();
+</script>
+</div>
+</template>

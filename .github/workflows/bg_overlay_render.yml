@@ -1,0 +1,54 @@
+name: BG Overlay Render (Remotion BG + HyperFrames Text)
+on:
+  workflow_dispatch:
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+
+      - name: Install Remotion dependencies
+        run: |
+          cd remotion-videos/bg-motion
+          npm install
+
+      - name: Install Chrome for Remotion
+        run: |
+          cd remotion-videos/bg-motion
+          npx remotion browser ensure
+
+      - name: Render Remotion background video
+        run: |
+          cd remotion-videos/bg-motion
+          export PATH="$PWD/node_modules/.bin:$PATH"
+          node node_modules/.bin/remotion render src/index.ts MotionBackground bg_motion.mp4 \
+            --codec h264 --concurrency 1
+          ls -lh bg_motion.mp4
+          # HyperFrames用assetsフォルダにコピー
+          cp bg_motion.mp4 ../../hf_original/bg-overlay-test/assets/bg_motion.mp4
+          echo "✅ 背景動画生成完了"
+
+      - name: Install HyperFrames
+        run: npm install -g hyperframes
+
+      - name: Render HyperFrames with motion background
+        run: |
+          HF_VIDEO_COVERAGE_THRESHOLD=0 hyperframes render hf_original/bg-overlay-test -o output.mp4
+          ls -lh output.mp4
+          ffprobe -v quiet -show_entries format=duration -of csv=p=0 output.mp4
+          echo "✅ HyperFrames合成完了"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: bg-overlay-${{ github.run_number }}
+          path: output.mp4
+          retention-days: 7
