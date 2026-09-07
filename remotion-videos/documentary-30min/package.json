@@ -1,0 +1,22 @@
+{
+  "name": "documentary-30min",
+  "version": "1.0.0",
+  "dependencies": {
+    "@remotion/animation-utils": "^4.0.419",
+    "@remotion/cli": "^4.0.0",
+    "@remotion/google-fonts": "^4.0.419",
+    "@remotion/noise": "^4.0.419",
+    "@remotion/paths": "^4.0.419",
+    "@remotion/shapes": "^4.0.419",
+    "@remotion/transitions": "^4.0.419",
+    "@remotion/light-leaks": "^4.0.419",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "remotion": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0"
+  }
+}
