@@ -11,6 +11,13 @@ import {
 import React from 'react';
 
 // ============================================================
+// フォント読み込み (Noto Sans JP for 日本語)
+// ============================================================
+import {loadFont as loadNotoSans} from "@remotion/google-fonts/NotoSansJP";
+
+const {fontFamily: jaFont} = loadNotoSans();
+
+// ============================================================
 // THEME OBJECT (原則8: 全てここから)
 // ============================================================
 const THEME = {
@@ -24,7 +31,7 @@ const THEME = {
     border: 'rgba(255,255,255,0.08)',
   },
   fonts: {
-    display: 'Inter, system-ui, sans-serif',
+    display: `${jaFont}, Inter, system-ui, sans-serif`,
     mono: 'JetBrains Mono, Menlo, monospace',
   },
 };
