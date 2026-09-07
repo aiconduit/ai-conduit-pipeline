@@ -33,7 +33,7 @@ jobs:
             --codec h264 --concurrency 1
           ls -lh bg_motion.mp4
           # HyperFrames用assetsフォルダにコピー
-          cp bg_motion.mp4 ../../hf_original/bg-overlay-test/assets/bg_motion.mp4
+          cp bg_motion.mp4 $GITHUB_WORKSPACE/hf_original/bg-overlay-test/assets/bg_motion.mp4
           echo "✅ 背景動画生成完了"
 
       - name: Install HyperFrames
