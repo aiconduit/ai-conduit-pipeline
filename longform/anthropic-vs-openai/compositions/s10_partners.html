@@ -1,0 +1,53 @@
+<template>
+<div id="s10_partners" data-composition-id="s10_partners" data-start="0" data-duration="120"
+     data-width="1920" data-height="1080"
+     style="position:relative;width:1920px;height:1080px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#s10_partners{font-family:Inter,sans-serif;}
+#s10_partners-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#s10_partners-ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 60%,rgba(0,0,0,0.0) 100%);}
+#s10_partners-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
+#s10_partners-accent{position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,transparent,#10b981,#10b981,transparent);}
+#s10_partners-content{position:absolute;left:80px;top:50%;transform:translateY(-50%);max-width:900px;}
+#s10_partners-tag{font-size:16px;font-weight:400;letter-spacing:0.3em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:24px;will-change:opacity,transform;}
+#s10_partners-title{font-size:72px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.0;margin-bottom:32px;will-change:opacity,transform;text-shadow:0 0 80px rgba(16,185,129,0.4);}
+#s10_partners-divider{width:0;height:3px;background:linear-gradient(to right,#10b981,transparent);border-radius:2px;margin-bottom:32px;will-change:width;}
+#s10_partners-desc{font-size:28px;font-weight:300;color:rgba(255,255,255,0.65);line-height:1.6;will-change:opacity,transform;}
+#s10_partners-bottom{position:absolute;bottom:40px;left:80px;right:80px;display:flex;align-items:center;justify-content:space-between;}
+#s10_partners-channel{font-size:18px;font-weight:400;letter-spacing:0.2em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+#s10_partners-progress{height:2px;flex:1;margin:0 40px;background:rgba(255,255,255,0.1);border-radius:1px;overflow:hidden;}
+#s10_partners-progress-bar{height:100%;background:#10b981;width:0;will-change:width;}
+</style>
+<img id="s10_partners-bg" src="../assets/s10_partners.jpg" crossorigin="anonymous" alt="" />
+<div id="s10_partners-ov-left"></div>
+<div id="s10_partners-ov-bot"></div>
+<div id="s10_partners-accent"></div>
+<div id="s10_partners-content">
+  <div id="s10_partners-tag">@AI.Conduit — パートナー戦略</div>
+  <div id="s10_partners-title">パートナー戦略</div>
+  <div id="s10_partners-divider"></div>
+  <div id="s10_partners-desc">Anthropic vs OpenAI</div>
+</div>
+<div id="s10_partners-bottom">
+  <div id="s10_partners-channel">@AI.Conduit</div>
+  <div id="s10_partners-progress"><div id="s10_partners-progress-bar"></div></div>
+  <div id="s10_partners-channel">AnthropicとOpenAI完全比較</div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#s10_partners-bg",{scale:1.04},{scale:1.0,duration:120,ease:"none"},0);
+  tl.to("#s10_partners-progress-bar",{width:"100%",duration:120,ease:"none"},0);
+  tl.from("#s10_partners-tag",{opacity:0,x:-30,duration:0.6,ease:"hf"},0.2);
+  tl.from("#s10_partners-title",{opacity:0,y:40,duration:0.8,ease:"hf"},0.4);
+  tl.to("#s10_partners-divider",{width:400,duration:0.7,ease:"snap"},0.6);
+  tl.from("#s10_partners-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},0.8);
+  tl.from("#s10_partners-bottom",{opacity:0,duration:0.5},1.0);
+  window.__timelines["s10_partners"]=tl;
+})();
+</script>
+</div>
+</template>

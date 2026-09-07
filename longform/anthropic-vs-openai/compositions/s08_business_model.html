@@ -1,0 +1,53 @@
+<template>
+<div id="s08_business_model" data-composition-id="s08_business_model" data-start="0" data-duration="180"
+     data-width="1920" data-height="1080"
+     style="position:relative;width:1920px;height:1080px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#s08_business_model{font-family:Inter,sans-serif;}
+#s08_business_model-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#s08_business_model-ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 60%,rgba(0,0,0,0.0) 100%);}
+#s08_business_model-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
+#s08_business_model-accent{position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,transparent,#a78bfa,#a78bfa,transparent);}
+#s08_business_model-content{position:absolute;left:80px;top:50%;transform:translateY(-50%);max-width:900px;}
+#s08_business_model-tag{font-size:16px;font-weight:400;letter-spacing:0.3em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:24px;will-change:opacity,transform;}
+#s08_business_model-title{font-size:72px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.0;margin-bottom:32px;will-change:opacity,transform;text-shadow:0 0 80px rgba(167,139,250,0.4);}
+#s08_business_model-divider{width:0;height:3px;background:linear-gradient(to right,#a78bfa,transparent);border-radius:2px;margin-bottom:32px;will-change:width;}
+#s08_business_model-desc{font-size:28px;font-weight:300;color:rgba(255,255,255,0.65);line-height:1.6;will-change:opacity,transform;}
+#s08_business_model-bottom{position:absolute;bottom:40px;left:80px;right:80px;display:flex;align-items:center;justify-content:space-between;}
+#s08_business_model-channel{font-size:18px;font-weight:400;letter-spacing:0.2em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+#s08_business_model-progress{height:2px;flex:1;margin:0 40px;background:rgba(255,255,255,0.1);border-radius:1px;overflow:hidden;}
+#s08_business_model-progress-bar{height:100%;background:#a78bfa;width:0;will-change:width;}
+</style>
+<img id="s08_business_model-bg" src="../assets/s08_business_model.jpg" crossorigin="anonymous" alt="" />
+<div id="s08_business_model-ov-left"></div>
+<div id="s08_business_model-ov-bot"></div>
+<div id="s08_business_model-accent"></div>
+<div id="s08_business_model-content">
+  <div id="s08_business_model-tag">@AI.Conduit — ビジネスモデルの違い</div>
+  <div id="s08_business_model-title">ビジネスモデルの違い</div>
+  <div id="s08_business_model-divider"></div>
+  <div id="s08_business_model-desc">Anthropic vs OpenAI</div>
+</div>
+<div id="s08_business_model-bottom">
+  <div id="s08_business_model-channel">@AI.Conduit</div>
+  <div id="s08_business_model-progress"><div id="s08_business_model-progress-bar"></div></div>
+  <div id="s08_business_model-channel">AnthropicとOpenAI完全比較</div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#s08_business_model-bg",{scale:1.04},{scale:1.0,duration:180,ease:"none"},0);
+  tl.to("#s08_business_model-progress-bar",{width:"100%",duration:180,ease:"none"},0);
+  tl.from("#s08_business_model-tag",{opacity:0,x:-30,duration:0.6,ease:"hf"},0.2);
+  tl.from("#s08_business_model-title",{opacity:0,y:40,duration:0.8,ease:"hf"},0.4);
+  tl.to("#s08_business_model-divider",{width:400,duration:0.7,ease:"snap"},0.6);
+  tl.from("#s08_business_model-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},0.8);
+  tl.from("#s08_business_model-bottom",{opacity:0,duration:0.5},1.0);
+  window.__timelines["s08_business_model"]=tl;
+})();
+</script>
+</div>
+</template>

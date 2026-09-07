@@ -1,0 +1,53 @@
+<template>
+<div id="s02_origin_openai" data-composition-id="s02_origin_openai" data-start="0" data-duration="180"
+     data-width="1920" data-height="1080"
+     style="position:relative;width:1920px;height:1080px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#s02_origin_openai{font-family:Inter,sans-serif;}
+#s02_origin_openai-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#s02_origin_openai-ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 60%,rgba(0,0,0,0.0) 100%);}
+#s02_origin_openai-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
+#s02_origin_openai-accent{position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,transparent,#10b981,#10b981,transparent);}
+#s02_origin_openai-content{position:absolute;left:80px;top:50%;transform:translateY(-50%);max-width:900px;}
+#s02_origin_openai-tag{font-size:16px;font-weight:400;letter-spacing:0.3em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:24px;will-change:opacity,transform;}
+#s02_origin_openai-title{font-size:72px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.0;margin-bottom:32px;will-change:opacity,transform;text-shadow:0 0 80px rgba(16,185,129,0.4);}
+#s02_origin_openai-divider{width:0;height:3px;background:linear-gradient(to right,#10b981,transparent);border-radius:2px;margin-bottom:32px;will-change:width;}
+#s02_origin_openai-desc{font-size:28px;font-weight:300;color:rgba(255,255,255,0.65);line-height:1.6;will-change:opacity,transform;}
+#s02_origin_openai-bottom{position:absolute;bottom:40px;left:80px;right:80px;display:flex;align-items:center;justify-content:space-between;}
+#s02_origin_openai-channel{font-size:18px;font-weight:400;letter-spacing:0.2em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+#s02_origin_openai-progress{height:2px;flex:1;margin:0 40px;background:rgba(255,255,255,0.1);border-radius:1px;overflow:hidden;}
+#s02_origin_openai-progress-bar{height:100%;background:#10b981;width:0;will-change:width;}
+</style>
+<img id="s02_origin_openai-bg" src="../assets/s02_origin_openai.jpg" crossorigin="anonymous" alt="" />
+<div id="s02_origin_openai-ov-left"></div>
+<div id="s02_origin_openai-ov-bot"></div>
+<div id="s02_origin_openai-accent"></div>
+<div id="s02_origin_openai-content">
+  <div id="s02_origin_openai-tag">@AI.Conduit — OpenAIの誕生（2015）</div>
+  <div id="s02_origin_openai-title">OpenAIの誕生（2015）</div>
+  <div id="s02_origin_openai-divider"></div>
+  <div id="s02_origin_openai-desc">Anthropic vs OpenAI</div>
+</div>
+<div id="s02_origin_openai-bottom">
+  <div id="s02_origin_openai-channel">@AI.Conduit</div>
+  <div id="s02_origin_openai-progress"><div id="s02_origin_openai-progress-bar"></div></div>
+  <div id="s02_origin_openai-channel">AnthropicとOpenAI完全比較</div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#s02_origin_openai-bg",{scale:1.04},{scale:1.0,duration:180,ease:"none"},0);
+  tl.to("#s02_origin_openai-progress-bar",{width:"100%",duration:180,ease:"none"},0);
+  tl.from("#s02_origin_openai-tag",{opacity:0,x:-30,duration:0.6,ease:"hf"},0.2);
+  tl.from("#s02_origin_openai-title",{opacity:0,y:40,duration:0.8,ease:"hf"},0.4);
+  tl.to("#s02_origin_openai-divider",{width:400,duration:0.7,ease:"snap"},0.6);
+  tl.from("#s02_origin_openai-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},0.8);
+  tl.from("#s02_origin_openai-bottom",{opacity:0,duration:0.5},1.0);
+  window.__timelines["s02_origin_openai"]=tl;
+})();
+</script>
+</div>
+</template>

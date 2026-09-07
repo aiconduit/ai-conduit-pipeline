@@ -1,0 +1,53 @@
+<template>
+<div id="s12_conclusion" data-composition-id="s12_conclusion" data-start="0" data-duration="180"
+     data-width="1920" data-height="1080"
+     style="position:relative;width:1920px;height:1080px;overflow:hidden;background:#000;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+#s12_conclusion{font-family:Inter,sans-serif;}
+#s12_conclusion-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.25);will-change:transform;}
+#s12_conclusion-ov-left{position:absolute;inset:0;background:linear-gradient(to right,rgba(0,0,0,0.9) 0%,rgba(0,0,0,0.3) 60%,rgba(0,0,0,0.0) 100%);}
+#s12_conclusion-ov-bot{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.8) 0%,rgba(0,0,0,0.0) 40%);}
+#s12_conclusion-accent{position:absolute;left:0;top:0;bottom:0;width:6px;background:linear-gradient(to bottom,transparent,#06b6d4,#06b6d4,transparent);}
+#s12_conclusion-content{position:absolute;left:80px;top:50%;transform:translateY(-50%);max-width:900px;}
+#s12_conclusion-tag{font-size:16px;font-weight:400;letter-spacing:0.3em;color:rgba(255,255,255,0.4);text-transform:uppercase;margin-bottom:24px;will-change:opacity,transform;}
+#s12_conclusion-title{font-size:72px;font-weight:900;color:#fff;letter-spacing:-0.03em;line-height:1.0;margin-bottom:32px;will-change:opacity,transform;text-shadow:0 0 80px rgba(6,182,212,0.4);}
+#s12_conclusion-divider{width:0;height:3px;background:linear-gradient(to right,#06b6d4,transparent);border-radius:2px;margin-bottom:32px;will-change:width;}
+#s12_conclusion-desc{font-size:28px;font-weight:300;color:rgba(255,255,255,0.65);line-height:1.6;will-change:opacity,transform;}
+#s12_conclusion-bottom{position:absolute;bottom:40px;left:80px;right:80px;display:flex;align-items:center;justify-content:space-between;}
+#s12_conclusion-channel{font-size:18px;font-weight:400;letter-spacing:0.2em;color:rgba(255,255,255,0.2);text-transform:uppercase;}
+#s12_conclusion-progress{height:2px;flex:1;margin:0 40px;background:rgba(255,255,255,0.1);border-radius:1px;overflow:hidden;}
+#s12_conclusion-progress-bar{height:100%;background:#06b6d4;width:0;will-change:width;}
+</style>
+<img id="s12_conclusion-bg" src="../assets/s12_conclusion.jpg" crossorigin="anonymous" alt="" />
+<div id="s12_conclusion-ov-left"></div>
+<div id="s12_conclusion-ov-bot"></div>
+<div id="s12_conclusion-accent"></div>
+<div id="s12_conclusion-content">
+  <div id="s12_conclusion-tag">@AI.Conduit — まとめ：どちらが勝つのか</div>
+  <div id="s12_conclusion-title">まとめ：どちらが勝つのか</div>
+  <div id="s12_conclusion-divider"></div>
+  <div id="s12_conclusion-desc">Anthropic vs OpenAI</div>
+</div>
+<div id="s12_conclusion-bottom">
+  <div id="s12_conclusion-channel">@AI.Conduit</div>
+  <div id="s12_conclusion-progress"><div id="s12_conclusion-progress-bar"></div></div>
+  <div id="s12_conclusion-channel">AnthropicとOpenAI完全比較</div>
+</div>
+<script>
+(function(){
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({paused:true});
+  tl.fromTo("#s12_conclusion-bg",{scale:1.04},{scale:1.0,duration:180,ease:"none"},0);
+  tl.to("#s12_conclusion-progress-bar",{width:"100%",duration:180,ease:"none"},0);
+  tl.from("#s12_conclusion-tag",{opacity:0,x:-30,duration:0.6,ease:"hf"},0.2);
+  tl.from("#s12_conclusion-title",{opacity:0,y:40,duration:0.8,ease:"hf"},0.4);
+  tl.to("#s12_conclusion-divider",{width:400,duration:0.7,ease:"snap"},0.6);
+  tl.from("#s12_conclusion-desc",{opacity:0,y:20,duration:0.6,ease:"hf"},0.8);
+  tl.from("#s12_conclusion-bottom",{opacity:0,duration:0.5},1.0);
+  window.__timelines["s12_conclusion"]=tl;
+})();
+</script>
+</div>
+</template>
