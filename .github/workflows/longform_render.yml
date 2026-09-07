@@ -8,7 +8,7 @@ on:
         default: 'anthropic-vs-openai'
       upload:
         description: 'Upload to YouTube'
-        required: true
+        required: false
         default: 'false'
 
 jobs:
@@ -21,12 +21,69 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Install
+      - name: Install dependencies
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ffmpeg git-lfs fonts-noto-cjk --no-install-recommends -qq
+          sudo apt-get install -y ffmpeg fonts-noto-cjk --no-install-recommends -qq
           pip install edge-tts --quiet
           npm install -g hyperframes
+          npm install -g playwright
+          npx playwright install chromium --with-deps
+
+      - name: Take screenshots of reference URLs
+        env:
+          VIDEO_NAME: ${{ github.event.inputs.video_name }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, subprocess, asyncio
+          
+          script = json.load(open(f"longform/{os.environ['VIDEO_NAME']}/script.json"))
+          os.makedirs(f"longform/{os.environ['VIDEO_NAME']}/screenshots", exist_ok=True)
+          
+          js_code = """
+          const { chromium } = require('playwright');
+          const fs = require('fs');
+          const path = require('path');
+          
+          const sections = """ + json.dumps([{
+              'id': s['id'],
+              'url': s.get('url', 'https://anthropic.com')
+          } for s in script['sections']]) + """;
+          
+          (async () => {
+            const browser = await chromium.launch();
+            for (const section of sections) {
+              try {
+                const page = await browser.newPage();
+                await page.setViewportSize({ width: 1280, height: 800 });
+                await page.goto(section.url, { waitUntil: 'domcontentloaded', timeout: 15000 });
+                await page.waitForTimeout(2000);
+                const outPath = `longform/""" + os.environ['VIDEO_NAME'] + """/screenshots/${section.id}.jpg`;
+                await page.screenshot({ path: outPath, type: 'jpeg', quality: 85 });
+                await page.close();
+                console.log(`✅ ${section.id}: ${section.url}`);
+              } catch(e) {
+                console.log(`⚠️ ${section.id}: ${e.message}`);
+              }
+            }
+            await browser.close();
+          })();
+          """
+          
+          with open('/tmp/screenshot.js', 'w') as f:
+              f.write(js_code)
+          
+          subprocess.run(['node', '/tmp/screenshot.js'], check=False)
+          
+          # スクリーンショット確認
+          for s in script['sections']:
+              path = f"longform/{os.environ['VIDEO_NAME']}/screenshots/{s['id']}.jpg"
+              if os.path.exists(path):
+                  size = os.path.getsize(path) // 1024
+                  print(f"  {s['id']}: {size}KB")
+              else:
+                  print(f"  {s['id']}: MISSING")
+          PYEOF
 
       - name: Generate TTS for all sections
         env:
@@ -43,20 +100,19 @@ jobs:
           
           async def main():
               seg_paths = []
+              srt_all = ""
+              total_time = 0.0
+              
               for section in script['sections']:
                   sid = section['id']
                   chunks = section['narration']
-                  rate = "+15%"
-                  
-                  # 各チャンクを生成
                   chunk_paths = []
+                  
                   for i, chunk in enumerate(chunks):
                       path = f"/tmp/{sid}_chunk{i:02d}.mp3"
-                      await gen_audio(chunk, path, rate)
+                      await gen_audio(chunk, path)
                       chunk_paths.append(path)
-                      print(f"  {sid} chunk{i}: done")
                   
-                  # セクションを結合
                   concat_file = f"/tmp/{sid}_concat.txt"
                   with open(concat_file, 'w') as f:
                       for p in chunk_paths:
@@ -64,16 +120,39 @@ jobs:
                   
                   out_path = f"/tmp/{sid}.mp3"
                   subprocess.run(["ffmpeg", "-y", "-f", "concat", "-safe", "0",
-                                 "-i", concat_file, "-c", "copy", out_path],
-                                capture_output=True)
+                                 "-i", concat_file, "-c", "copy", out_path], capture_output=True)
                   seg_paths.append(out_path)
                   
-                  dur = float(subprocess.run(["ffprobe","-v","error","-show_entries",
-                      "format=duration","-of","csv=p=0",out_path],
-                      capture_output=True,text=True).stdout.strip())
-                  print(f"Section {sid}: {dur:.1f}s")
+                  # SRT生成
+                  for chunk in chunks:
+                      chunk_idx = chunks.index(chunk)
+                      p = chunk_paths[chunk_idx]
+                      dur = float(subprocess.run(["ffprobe","-v","error","-show_entries",
+                          "format=duration","-of","csv=p=0",p],
+                          capture_output=True,text=True).stdout.strip() or "3")
+                      
+                      def fmt_srt(t):
+                          h = int(t // 3600)
+                          m = int((t % 3600) // 60)
+                          s = t % 60
+                          return f"{h:02d}:{m:02d}:{s:06.3f}".replace('.', ',')
+                      
+                      srt_all += f"{len(srt_all.split(chr(10)*2)+[1])}\n"
+                      srt_all += f"{fmt_srt(total_time)} --> {fmt_srt(total_time + dur)}\n"
+                      srt_all += f"{chunk}\n\n"
+                      total_time += dur
               
-              # 全セクションを結合
+              # SRTファイル保存
+              with open("narration_full.srt", "w", encoding="utf-8") as f:
+                  # 番号を振り直す
+                  entries = [e for e in srt_all.strip().split("\n\n") if e.strip()]
+                  for idx, entry in enumerate(entries, 1):
+                      lines = entry.strip().split("\n")
+                      if len(lines) >= 3:
+                          f.write(f"{idx}\n")
+                          f.write("\n".join(lines[1:]) + "\n\n")
+              
+              # 全ナレーション結合
               concat_all = "/tmp/all_concat.txt"
               with open(concat_all, 'w') as f:
                   for p in seg_paths:
@@ -87,8 +166,140 @@ jobs:
                   "format=duration","-of","csv=p=0","narration_full.mp3"],
                   capture_output=True,text=True).stdout.strip())
               print(f"✅ 全ナレーション: {total:.1f}s ({total/60:.1f}分)")
+              print(f"✅ SRTファイル生成完了")
           
           asyncio.run(main())
+          PYEOF
+
+      - name: Build HyperFrames compositions with screenshots
+        env:
+          VIDEO_NAME: ${{ github.event.inputs.video_name }}
+        run: |
+          python3 << 'PYEOF'
+          import json, os, re
+          
+          video_name = os.environ['VIDEO_NAME']
+          script = json.load(open(f"longform/{video_name}/script.json"))
+          
+          comp_dir = f"longform/{video_name}/compositions"
+          os.makedirs(comp_dir, exist_ok=True)
+          
+          for section in script['sections']:
+              sid = section['id']
+              title = section['title']
+              color = section['color']
+              dur = section['duration_sec']
+              cr = int(color[1:3], 16)
+              cg = int(color[3:5], 16)
+              cb = int(color[5:7], 16)
+              
+              # スクリーンショットパス
+              ss_path = f"../screenshots/{sid}.jpg"
+              ss_exists = os.path.exists(f"longform/{video_name}/screenshots/{sid}.jpg")
+              
+              html = f'''<template>
+<div id="{sid}" data-composition-id="{sid}" data-start="0" data-duration="{dur}"
+     data-width="1920" data-height="1080"
+     style="position:relative;width:1920px;height:1080px;overflow:hidden;background:#050510;">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;700;800;900&display=block');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@200;400;700;900&display=block');
+#{sid}{{font-family:"Noto Sans JP",Inter,sans-serif;}}
+#{sid}-bg{{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(0.22);}}
+#{sid}-ov-l{{position:absolute;inset:0;background:linear-gradient(to right,rgba(5,5,16,0.98) 0%,rgba(5,5,16,0.6) 55%,rgba(5,5,16,0.0) 100%);}}
+#{sid}-ov-b{{position:absolute;inset:0;background:linear-gradient(to top,rgba(5,5,16,0.8) 0%,rgba(5,5,16,0.0) 40%);}}
+#{sid}-accent{{position:absolute;left:0;top:0;bottom:0;width:5px;background:linear-gradient(to bottom,transparent,{color},{color},transparent);}}
+#{sid}-tag{{position:absolute;top:52px;left:72px;font-size:12px;letter-spacing:0.4em;color:rgba(255,255,255,0.25);text-transform:uppercase;font-family:Inter,sans-serif;}}
+#{sid}-left{{position:absolute;left:72px;top:50%;transform:translateY(-50%);max-width:840px;}}
+#{sid}-l1{{font-size:68px;font-weight:200;color:rgba(255,255,255,0.4);letter-spacing:-2px;line-height:1;will-change:opacity,transform;}}
+#{sid}-l2{{font-size:56px;font-weight:900;color:#fff;letter-spacing:-2px;line-height:1.1;will-change:opacity,transform;text-shadow:0 0 60px rgba({cr},{cg},{cb},0.5);}}
+#{sid}-divider{{width:0;height:2px;background:linear-gradient(to right,{color},transparent);border-radius:1px;margin:20px 0;will-change:width;}}
+#{sid}-prog{{position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,0.04);}}
+#{sid}-prog-bar{{height:100%;background:{color};width:0;}}
+/* スクリーンショット右側 */
+#{sid}-ss-wrap{{position:absolute;right:40px;top:50%;transform:translateY(-50%);width:680px;}}
+#{sid}-ss-frame{{border-radius:12px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,0.6);border:1px solid rgba({cr},{cg},{cb},0.2);position:relative;}}
+#{sid}-ss-img{{width:100%;height:420px;object-fit:cover;object-position:top;}}
+#{sid}-ss-bar{{height:36px;background:rgba(8,10,18,0.9);display:flex;align-items:center;padding:0 16px;gap:8px;border-bottom:1px solid rgba(255,255,255,0.06);}}
+#{sid}-ss-url{{font-family:Inter,monospace;font-size:12px;color:rgba(255,255,255,0.3);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}}
+#{sid}-ss-dots{{display:flex;gap:6px;margin-right:12px;flex-shrink:0;}}
+</style>
+<img id="{sid}-bg" src="../assets/{sid}.jpg" crossorigin="anonymous" alt="" />
+<div id="{sid}-ov-l"></div>
+<div id="{sid}-ov-b"></div>
+<div id="{sid}-accent"></div>
+<div id="{sid}-tag">@AI.Conduit — {title}</div>
+<div id="{sid}-left">
+  <div id="{sid}-l1">{title}</div>
+  <div id="{sid}-divider"></div>
+</div>
+<div id="{sid}-ss-wrap">
+  <div id="{sid}-ss-frame">
+    <div id="{sid}-ss-bar">
+      <div id="{sid}-ss-dots">
+        <div style="width:12px;height:12px;border-radius:50%;background:#ff5f57;"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#febc2e;"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#28c840;"></div>
+      </div>
+      <div id="{sid}-ss-url">{section.get('url', 'https://anthropic.com')}</div>
+    </div>
+    {'<img id="' + sid + '-ss-img" src="' + ss_path + '" crossorigin="anonymous" alt="" />' if ss_exists else '<div style="width:100%;height:420px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.2);font-size:14px;">Loading...</div>'}
+  </div>
+</div>
+<div id="{sid}-prog"><div id="{sid}-prog-bar"></div></div>
+<script>
+(function(){{
+  CustomEase.create("hf","M0,0 C0.16,1 0.3,1 1,1");
+  CustomEase.create("snap","M0,0 C0.6,0 0.4,1 1,1");
+  var tl=gsap.timeline({{paused:true}});
+  tl.to("#{sid}-prog-bar",{{width:"100%",duration:{dur},ease:"none"}},0);
+  tl.from("#{sid}-tag",{{opacity:0,duration:0.4,ease:"hf"}},0.1);
+  tl.from("#{sid}-l1",{{opacity:0,x:-30,duration:0.6,ease:"hf"}},0.2);
+  tl.to("#{sid}-divider",{{width:400,duration:0.5,ease:"snap"}},0.4);
+  tl.from("#{sid}-ss-wrap",{{opacity:0,x:40,duration:0.7,ease:"hf"}},0.3);
+  window.__timelines["{sid}"]=tl;
+}})();
+</script>
+</div>
+</template>'''
+              
+              open(f"{comp_dir}/{sid}.html", 'w').write(html)
+              print(f"✅ {sid}.html")
+          
+          # index.html更新
+          clips = ""
+          start = 0
+          total = 0
+          for s in script['sections']:
+              sid = s['id']
+              dur = s['duration_sec']
+              idx = script['sections'].index(s) + 1
+              clips += f'  <div class="clip" data-composition-id="{sid}" data-composition-src="compositions/{sid}.html" data-start="{start}" data-duration="{dur}" data-track-index="{idx}"></div>\n'
+              start += dur
+              total += dur
+          
+          index_html = f'''<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/CustomEase.min.js"></script>
+<style>
+*{{margin:0;padding:0;box-sizing:border-box;}}
+html,body{{width:1920px;height:1080px;overflow:hidden;background:#050510;}}
+#root{{position:relative;width:1920px;height:1080px;}}
+.clip{{position:absolute;inset:0;}}
+</style>
+<script>window.__timelines={{}};</script>
+</head>
+<body>
+<div id="root" data-composition-id="{video_name}" data-start="0" data-width="1920" data-height="1080" data-duration="{total}">
+{clips}</div>
+</body>
+</html>'''
+          
+          open(f"longform/{video_name}/index.html", 'w').write(index_html)
+          print(f"✅ index.html ({total}秒)")
           PYEOF
 
       - name: Render with HyperFrames
@@ -99,31 +310,52 @@ jobs:
           PRODUCER_STREAMING_ENCODE_MAX_DURATION_SECONDS=2400 \
           hyperframes render longform/$VIDEO_NAME -o raw_video.mp4 --low-memory-mode
           ls -lh raw_video.mp4
-          ffprobe -v quiet -show_entries format=duration -of csv=p=0 raw_video.mp4
 
-      - name: Merge video and audio
+      - name: Merge video audio BGM subtitles
         run: |
-          # BGMミックス
-          VIDEO_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 raw_video.mp4 | awk '{printf "%.0f", $1}')
-          FADE_START=$((VIDEO_DUR - 5))
+          # ASSに変換
+          ffmpeg -y -i narration_full.srt narration_full.ass 2>/dev/null || true
           
-          if [ -f "assets/bgm_lofi.mp3" ]; then
+          # 動画長取得
+          VIDEO_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 raw_video.mp4 | awk '{printf "%.0f", $1}')
+          NARR_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 narration_full.mp3 | awk '{printf "%.0f", $1}')
+          MAX_DUR=$((VIDEO_DUR > NARR_DUR ? VIDEO_DUR : NARR_DUR))
+          FADE_START=$((MAX_DUR - 5))
+          
+          echo "映像: ${VIDEO_DUR}s, ナレーション: ${NARR_DUR}s"
+          
+          # 字幕付きマージ
+          if [ -f "narration_full.ass" ]; then
             ffmpeg -y \
               -i raw_video.mp4 \
               -i narration_full.mp3 \
-              -i assets/bgm_lofi.mp3 \
-              -filter_complex "\
-                [2:a]aloop=loop=-1:size=2000000,atrim=0:${VIDEO_DUR},afade=t=in:st=0:d=3,afade=t=out:st=${FADE_START}:d=5,volume=0.12[bgm];\
-                [1:a][bgm]amix=inputs=2:duration=first[aout]" \
-              -map 0:v -map "[aout]" \
-              -c:v libx264 -c:a aac -b:a 192k -pix_fmt yuv420p \
-              output.mp4
+              -vf "ass=narration_full.ass" \
+              -map 0:v -map 1:a \
+              -c:v libx264 -c:a aac -pix_fmt yuv420p \
+              merged_with_subs.mp4 2>/dev/null
           else
             ffmpeg -y -i raw_video.mp4 -i narration_full.mp3 \
-              -map 0:v -map 1:a \
-              -c:v libx264 -c:a aac -b:a 192k -pix_fmt yuv420p \
-              -shortest output.mp4
+              -map 0:v -map 1:a -c:v libx264 -c:a aac -pix_fmt yuv420p \
+              merged_with_subs.mp4 2>/dev/null
           fi
+          
+          # BGMループミックス（全尺分）
+          if [ -f "assets/bgm_lofi.mp3" ]; then
+            ffmpeg -y \
+              -i merged_with_subs.mp4 \
+              -i assets/bgm_lofi.mp3 \
+              -filter_complex "\
+                [1:a]aloop=loop=-1:size=2000000,atrim=0:${MAX_DUR},\
+                afade=t=in:st=0:d=3,afade=t=out:st=${FADE_START}:d=5,\
+                volume=0.12[bgm];\
+                [0:a][bgm]amix=inputs=2:duration=first[aout]" \
+              -map 0:v -map "[aout]" \
+              -c:v copy -c:a aac -b:a 192k output.mp4
+            echo "✅ BGM+字幕ミックス完了"
+          else
+            cp merged_with_subs.mp4 output.mp4
+          fi
+          
           ls -lh output.mp4
           ffprobe -v quiet -show_entries format=duration -of csv=p=0 output.mp4
 
@@ -139,7 +371,6 @@ jobs:
           python3 << 'PYEOF'
           import requests, os, json
           
-          # YouTube OAuth
           token_resp = requests.post("https://oauth2.googleapis.com/token", data={
               "client_id": os.environ["YOUTUBE_CLIENT_ID"],
               "client_secret": os.environ["YOUTUBE_CLIENT_SECRET"],
@@ -148,20 +379,17 @@ jobs:
           })
           token = token_resp.json()["access_token"]
           
-          video_name = os.environ["VIDEO_NAME"]
           titles = {
-              "anthropic-vs-openai": "【完全版】AnthropicとOpenAI徹底比較｜AI最強2社の戦略・収益・哲学を33分で解説",
+              "anthropic-vs-openai": "【完全版33分】AnthropicとOpenAI徹底比較｜AI最強2社の戦略・収益・哲学を解説",
           }
-          title = titles.get(video_name, "AI企業完全解説")
+          title = titles.get(os.environ["VIDEO_NAME"], "AI企業完全解説")
           
-          # メタデータアップロード
           meta = {
               "snippet": {
                   "title": title,
-                  "description": "AnthropicとOpenAI、2社のAI戦略を徹底比較。設立の歴史から最新の財務データ、モデル比較、安全性哲学まで完全解説。\n\n📌 チャプター\n00:00 イントロ\n02:00 OpenAIの誕生\n05:00 Anthropicの誕生\n08:00 決別の真相\n11:00 モデル比較\n14:00 収益比較\n17:00 資金調達\n19:00 ビジネスモデル\n22:00 安全性哲学\n25:00 パートナー戦略\n27:00 今後の展望\n30:00 まとめ\n\n#AI #Anthropic #OpenAI #Claude #ChatGPT #AI企業",
-                  "tags": ["AI","Anthropic","OpenAI","Claude","ChatGPT","人工知能","AI比較"],
+                  "description": "AnthropicとOpenAI、2社のAI戦略を徹底比較。\n\n#AI #Anthropic #OpenAI #Claude #ChatGPT",
+                  "tags": ["AI","Anthropic","OpenAI","Claude","ChatGPT"],
                   "categoryId": "28",
-                  "defaultLanguage": "ja"
               },
               "status": {"privacyStatus": "public"}
           }

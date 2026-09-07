@@ -15,7 +15,8 @@
         "どちらが真のAIリーダーなのか。その答えを探っていきましょう。"
       ],
       "bg_prompt": "two giant tech company logos facing each other dark dramatic backdrop, spotlight chiaroscuro, shot on Hasselblad X2D 28mm f1.4, teal orange color grade, cinematic photorealistic",
-      "color": "#06b6d4"
+      "color": "#06b6d4",
+      "url": "https://sqmagazine.co.uk/openai-vs-anthropic-statistics/"
     },
     {
       "id": "s02_origin_openai",
@@ -32,7 +33,8 @@
         "2026年現在、ChatGPTは週間9億人のユーザーを抱える世界最大のAIサービスとなっています。"
       ],
       "bg_prompt": "Silicon Valley startup office 2015 dark cinematic, team of engineers founding moment, dramatic spotlight, shot on Leica Q3 35mm f1.7, warm amber chiaroscuro, photorealistic",
-      "color": "#10b981"
+      "color": "#10b981",
+      "url": "https://openai.com/about"
     },
     {
       "id": "s03_origin_anthropic",
@@ -49,7 +51,8 @@
         "DarioはRLHFという技術の共同発明者でもあり、今やChatGPTを含む全AIに使われる技術の生みの親です。"
       ],
       "bg_prompt": "small team of 8 researchers leaving big tech company dramatic moment dark background, determination faces, single overhead spotlight, shot on Sony A7IV 35mm f2.0, teal cinematic",
-      "color": "#a78bfa"
+      "color": "#a78bfa",
+      "url": "https://www.anthropic.com/company"
     },
     {
       "id": "s04_split",
@@ -66,7 +69,8 @@
         "この対立は、2026年現在も続く根本的な思想の違いです。"
       ],
       "bg_prompt": "philosophical divide two paths diverging dark dramatic, light vs shadow symbolism, shot on Hasselblad 45mm f2.8, teal orange split tone, cinematic photorealistic",
-      "color": "#ef4444"
+      "color": "#ef4444",
+      "url": "https://beginnersinai.org/story-of-anthropic/"
     },
     {
       "id": "s05_models",
@@ -83,7 +87,8 @@
         "どちらが優れているかは用途によって異なりますが、水準は拮抗しています。"
       ],
       "bg_prompt": "two AI models competing benchmark visualization dark background, glowing data streams, dramatic side lighting, shot on Canon 5D Mark IV 50mm f1.8, cyan purple accent",
-      "color": "#f59e0b"
+      "color": "#f59e0b",
+      "url": "https://brandclickx.com/openai-vs-anthropic/"
     },
     {
       "id": "s06_revenue",
@@ -100,7 +105,8 @@
         "エンタープライズ支出シェアでは、Anthropicが34.4%でOpenAIの32.3%を逆転しました。"
       ],
       "bg_prompt": "financial charts ascending dark background glowing data visualization, dramatic overhead spotlight, shot on Sony A7R V 24mm f2.0, gold teal color grade, cinematic",
-      "color": "#10b981"
+      "color": "#10b981",
+      "url": "https://sqmagazine.co.uk/openai-vs-anthropic-statistics/"
     },
     {
       "id": "s07_funding",
@@ -115,7 +121,8 @@
         "しかしAnthropicの時価総額がOpenAIを上回るという歴史的な逆転が起きています。"
       ],
       "bg_prompt": "billion dollar investment visualization dark space, money flow digital art, single dramatic spotlight, shot on Hasselblad X2D 28mm f1.4, gold teal color grade",
-      "color": "#f59e0b"
+      "color": "#f59e0b",
+      "url": "https://tech-insider.org/anthropic-vs-openai-2026/"
     },
     {
       "id": "s08_business_model",
@@ -132,7 +139,8 @@
         "OpenAIが規模、Anthropicが効率で競い合う構図です。"
       ],
       "bg_prompt": "enterprise vs consumer market visualization dark background, B2B vs B2C diagram glowing, shot on Leica Q3 50mm f1.7, teal orange color grade, cinematic",
-      "color": "#a78bfa"
+      "color": "#a78bfa",
+      "url": "https://jobsbyculture.com/blog/anthropic-vs-openai-2026"
     },
     {
       "id": "s09_safety",
@@ -149,7 +157,8 @@
         "この安全性へのアプローチの差が、2社の文化と製品の違いを生み出しています。"
       ],
       "bg_prompt": "AI safety concept visualization ethical AI dark background, constitutional principles glowing text, shot on Sony A7IV 35mm f2.0, purple teal accent, cinematic photorealistic",
-      "color": "#06b6d4"
+      "color": "#06b6d4",
+      "url": "https://beginnersinai.org/story-of-anthropic/"
     },
     {
       "id": "s10_partners",
@@ -164,7 +173,8 @@
         "この構図を見ると、AIの覇権争いは単なる2社の競争ではなく、Microsoft陣営とAmazon・Google連合の代理戦争とも言えます。"
       ],
       "bg_prompt": "tech giant partnerships network visualization dark background, Microsoft Amazon Google logos connected glowing, shot on Hasselblad 45mm f2.8, teal color grade",
-      "color": "#10b981"
+      "color": "#10b981",
+      "url": "https://tech-insider.org/anthropic-vs-openai-2026/"
     },
     {
       "id": "s11_future",
@@ -180,7 +190,8 @@
         "合計で2000億ドル以上の資金調達となる可能性があり、市場への影響が注目されています。"
       ],
       "bg_prompt": "future AGI concept dark space visualization, ascending neural network galaxy, IMAX anamorphic lens, teal gold color grade, epic scale photorealistic",
-      "color": "#f59e0b"
+      "color": "#f59e0b",
+      "url": "https://brandclickx.com/openai-vs-anthropic/"
     },
     {
       "id": "s12_conclusion",
@@ -198,7 +209,8 @@
         "最後まで視聴ありがとうございました。チャンネル登録とベルアイコンを押して、最新情報をお見逃しなく。"
       ],
       "bg_prompt": "two companies facing each other epic showdown dark dramatic space, equal power balance, IMAX anamorphic shot on Hasselblad, teal orange cinematic grade, photorealistic",
-      "color": "#06b6d4"
+      "color": "#06b6d4",
+      "url": "https://sqmagazine.co.uk/openai-vs-anthropic-statistics/"
     }
   ]
 }
