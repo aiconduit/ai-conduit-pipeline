@@ -39,7 +39,7 @@ jobs:
         run: |
           cd remotion-videos/${{ github.event.inputs.video_name }}
           export PATH="$PWD/node_modules/.bin:$PATH"
-          node node_modules/.bin/remotion render src/index.ts Main output.mp4 \
+          node node_modules/.bin/remotion render src/index.tsx Main output.mp4 \
             --codec h264 \
             --concurrency 1
           ls -lh output.mp4
