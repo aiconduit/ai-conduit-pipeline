@@ -48,10 +48,13 @@ jobs:
           fi
           echo "Entry detected: $ENTRY"
           ls src/ | head -5
-          # コンポジションIDを自動検出
-          COMP=$(node node_modules/.bin/remotion compositions "$ENTRY" 2>/dev/null | grep -v "^$" | head -1 | awk '{print $1}')
+          # package.jsonからコンポジションIDを取得、なければMainを使用
+          COMP=$(grep -r "id=" src/ 2>/dev/null | grep "Composition" | head -1 | sed 's/.*id=["'"'"']//' | sed 's/["'"'"'].*//' || echo "Main")
+          if [ -z "$COMP" ] || [ "$COMP" = "Main" ]; then
+            COMP=$(grep -rh '"id"' src/ 2>/dev/null | head -1 | sed 's/.*"id": *"//;s/".*//' || echo "Main")
+          fi
           if [ -z "$COMP" ]; then COMP="Main"; fi
-          echo "Composition: $COMP"
+          echo "Using composition: $COMP"
           node node_modules/.bin/remotion render "$ENTRY" "$COMP" output.mp4 \
             --codec h264 \
             --concurrency 1
