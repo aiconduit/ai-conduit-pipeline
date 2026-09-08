@@ -22,6 +22,8 @@
 #act1-pw{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
 #act1-terminal{position:absolute;top:108px;right:0;width:480px;background:rgba(8,10,18,0.92);border-left:2px solid rgba(6,182,212,0.5);border-bottom:2px solid rgba(6,182,212,0.5);border-bottom-left-radius:20px;padding:18px 22px;}
 #act1-term-hdr{display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:14px;}
+#act1-caption-wrap{position:absolute;bottom:140px;left:40px;right:40px;text-align:center;z-index:200;}
+#act1-caption{display:inline-block;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);border-radius:10px;padding:14px 28px;font-size:42px;font-weight:400;color:#fff;font-family:"Noto Sans JP",Inter,sans-serif;line-height:1.5;max-width:100%;opacity:0;will-change:opacity;}
 </style>
 <img id="act1-bg" src="assets/act1_hook.jpg" crossorigin="anonymous" alt="" />
 <div id="act1-ov-top"></div>
@@ -63,6 +65,9 @@
   tl.to("#act1-tl2",{opacity:1,duration:0.05},0.8);
   tl.to("#act1-tl3",{opacity:1,duration:0.05},1.0);
   tl.from("#act1-terminal",{opacity:0,x:30,duration:0.5,ease:"hf"},0.2);
+  // 字幕アニメーション（フェードイン・アウト）
+  tl.to("#act1-caption",{opacity:1,duration:0.2,ease:"hf"},0.1);
+  tl.to("#act1-caption",{opacity:0,duration:0.3,ease:"hf"},"end-=0.4");
   window.__timelines["act1"]=tl;
 })();
 </script>
@@ -81,5 +86,6 @@
 
   <span style="font-family:monospace;font-size:17px;color:#06b6d4;animation:act1blink 0.8s infinite;">█</span>
 </div>
+<div id="act1-caption-wrap"><div id="act1-caption">ElevenLabsの音声クローンが、完全無料で使える時代が来ました。</div></div>
 </div>
 </template>
