@@ -47,7 +47,7 @@ def update_index_html(index_path, chunk_durations):
         if i < n_acts - 1:
             if i < n_chunks:
                 # TTS長さと完全一致（ceil+0.5で微小バッファ）
-                act_dur = round(chunk_durations[i] + 0.3, 1)
+                act_dur = round(chunk_durations[i] + 1.5, 1)
                 act_dur = max(3.0, act_dur)
             else:
                 act_dur = 3.0
