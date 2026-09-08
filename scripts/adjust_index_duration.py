@@ -102,3 +102,59 @@ if __name__ == '__main__':
         print("Usage: adjust_index_duration.py <index.html> <narration.srt>")
         sys.exit(1)
     update_index_html(sys.argv[1], sys.argv[2])
+    update_act_html_durations(sys.argv[1], sys.argv[2])
+
+def update_act_html_durations(index_path, srt_path):
+    """各actのHTMLファイルのGSAPタイムラインdurationも更新する"""
+    import os
+    srt_entries = parse_srt(srt_path)
+    base_dir = os.path.dirname(index_path)
+    
+    n_chunks = len(srt_entries)
+    
+    for i in range(min(n_chunks, 8)):
+        act_num = i + 1
+        act_id = f"act{act_num}"
+        
+        if i < n_chunks - 1:
+            chunk_dur = srt_entries[i]['end'] - srt_entries[i]['start']
+            act_dur = round(chunk_dur + 1.5, 1)
+        else:
+            # 最後のactは残り全部
+            act_dur = round(srt_entries[-1]['end'] - srt_entries[i]['start'] + 0.5, 1)
+        
+        act_dur = max(3.0, act_dur)
+        
+        # actのHTMLファイルを更新
+        act_path = os.path.join(base_dir, f"compositions/{act_id}.html")
+        if not os.path.exists(act_path):
+            continue
+        
+        act_content = open(act_path).read()
+        
+        # data-durationを更新
+        act_content = re.sub(
+            rf'data-duration="[^"]*"',
+            f'data-duration="{act_dur}"',
+            act_content,
+            count=1
+        )
+        
+        # GSAPのfromToのdurationを更新（背景ズームなど）
+        act_content = re.sub(
+            rf'(fromTo\("#?{act_id}-bg".*?duration:)\d+(\.\d+)?',
+            rf'\g<1>{act_dur}',
+            act_content
+        )
+        
+        # 字幕フェードアウトタイミングを更新
+        fade_out = round(act_dur - 0.5, 1)
+        act_content = re.sub(
+            rf'(tl\.to\("#?{act_id}-caption",\{{opacity:0.*?\}}),[\d.]+(\);)',
+            rf'\g<1>,{fade_out}\2',
+            act_content
+        )
+        
+        open(act_path, 'w').write(act_content)
+        print(f"  Updated {act_id}.html: dur={act_dur}s, caption_fade={fade_out}s")
+
