@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
 """
-ナレーションのSRTファイルを読んで各actのdurationをindex.htmlに反映する
-ルートのdurationは変更しない（HyperFramesが自動計算するため）
+SRTファイルの実際の開始・終了時刻をactのdata-start/data-durationに反映する
+各actの映像がその字幕が終わるまで表示されるよう保証する
 """
-import sys, re, os, math
+import sys, re, math
 
-def parse_srt_durations(srt_path):
+def time_to_sec(t):
+    t = t.replace(',', '.')
+    parts = t.split(':')
+    return float(parts[0])*3600 + float(parts[1])*60 + float(parts[2])
+
+def parse_srt(srt_path):
+    """SRTから各チャンクの開始・終了時刻を取得"""
     content = open(srt_path).read()
-    chunks = []
+    entries = []
     blocks = content.strip().split('\n\n')
     for block in blocks:
         lines = block.strip().split('\n')
@@ -15,102 +21,84 @@ def parse_srt_durations(srt_path):
             times = lines[1].split(' --> ')
             start = time_to_sec(times[0].strip())
             end = time_to_sec(times[1].strip())
-            chunks.append(end - start)
-    return chunks
+            text = ' '.join(lines[2:]) if len(lines) > 2 else ''
+            entries.append({'start': start, 'end': end, 'text': text})
+    return entries
 
-def time_to_sec(t):
-    t = t.replace(',', '.')
-    parts = t.split(':')
-    return float(parts[0])*3600 + float(parts[1])*60 + float(parts[2])
-
-def update_index_html(index_path, chunk_durations):
+def update_index_html(index_path, srt_path):
     content = open(index_path).read()
+    srt_entries = parse_srt(srt_path)
     
-    n_chunks = len(chunk_durations)
-    total_dur = sum(chunk_durations)
-    total_sec = math.ceil(total_dur) + 2
-    
-    # 各actのdata-durationとdata-startを更新
-    # パターン: data-track-index="N"の順番で処理
+    # actのIDリストを取得（順番通り）
     acts = re.findall(r'data-composition-id="(act\d+)"', content)
     n_acts = len(acts)
+    n_chunks = len(srt_entries)
     
     if n_acts == 0:
-        print(f"WARNING: actが見つかりません。index.htmlの内容を確認:")
-        print(content[:300])
+        print("WARNING: actが見つかりません")
         return
     
-    # 各actに1チャンクずつ対応（n_acts <= n_chunksの場合）
-    # 最後のactは残りのチャンクを全て含む
-    act_durations = []
+    print(f"Acts: {n_acts}, SRT chunks: {n_chunks}")
+    
+    # 各actのstart/durationを計算
+    # 原則：actのduration = そのactに対応する字幕が完全に終わるまで
+    act_starts = []
+    act_durs = []
+    
     for i in range(n_acts):
         if i < n_acts - 1:
+            # 通常のact：対応するチャンクの終了時刻まで
             if i < n_chunks:
-                # TTS長さと完全一致（ceil+0.5で微小バッファ）
-                act_dur = round(chunk_durations[i] + 1.5, 1)
-                act_dur = max(3.0, act_dur)
+                chunk_end = srt_entries[i]['end']
+                chunk_start = srt_entries[i]['start']
+                # actのstartはSRTのstart時刻
+                act_start = chunk_start
+                # actのdurationは字幕終了+0.3秒バッファ
+                act_dur = round(chunk_end - chunk_start + 0.3, 1)
+                act_dur = max(2.0, act_dur)
             else:
-                act_dur = 3.0
+                act_start = act_starts[-1] + act_durs[-1] if act_starts else 0
+                act_dur = 2.0
         else:
-            # 最後のact: 残り全チャンク
-            remaining = chunk_durations[i:] if i < n_chunks else []
-            act_dur = max(3.0, round(sum(remaining) + 0.5, 1)) if remaining else 3.0
-        act_durations.append(act_dur)
+            # 最後のact：残り全チャンクをカバー
+            if i < n_chunks:
+                first_start = srt_entries[i]['start']
+                last_end = srt_entries[-1]['end']
+                act_start = first_start
+                act_dur = round(last_end - first_start + 0.5, 1)
+                act_dur = max(2.0, act_dur)
+            else:
+                act_start = act_starts[-1] + act_durs[-1] if act_starts else 0
+                act_dur = 2.0
+        
+        act_starts.append(act_start)
+        act_durs.append(act_dur)
+        print(f"  {acts[i]}: start={act_start:.1f}s, dur={act_dur:.1f}s")
     
-    # 各actのstart・durationを計算して置換
+    # index.htmlのdata-start/data-durationを更新
     new_content = content
-    start = 0
     for i, act_id in enumerate(acts):
-        dur = act_durations[i]
+        start = act_starts[i]
+        dur = act_durs[i]
         
-        # この特定のactのdata-startとdata-durationのみ更新
-        # 正確なパターン: data-composition-id="actN"から次の></div>まで
-        old_pattern = re.compile(
-            rf'(<div class="clip" data-composition-id="{act_id}" data-composition-src="[^"]*" data-start=")([^"]*)(" data-duration=")([^"]*)(" data-track-index="[^"]*"></div>)'
+        # data-startを更新（整数で渡す）
+        new_content = re.sub(
+            rf'(data-composition-id="{act_id}"[^>]*data-start=")[^"]*(")',
+            rf'\g<1>{int(start)}\2',
+            new_content
         )
-        
-        def make_replacement(m, s=start, d=dur):
-            return m.group(1) + str(s) + m.group(3) + str(d) + m.group(5)
-        
-        new_content = old_pattern.sub(make_replacement, new_content)
-        print(f"  {act_id}: start={start}s, duration={dur}s")
-        start += dur
-    
-    # ルートのdata-durationを更新
-    new_content = re.sub(
-        r'(id="root" data-composition-id="[^"]*" data-start="[^"]*" data-width="[^"]*" data-height="[^"]*" data-duration=")[^"]*"',
-        f'\\g<1>{total_sec}"',
-        new_content
-    )
-    
-    # compositions/{act_id}.htmlのdurationも更新
-    comp_dir = os.path.dirname(index_path)
-    for i, act_id in enumerate(acts):
-        dur = act_durations[i]
-        comp_path = os.path.join(comp_dir, f"compositions/{act_id}.html")
-        if os.path.exists(comp_path):
-            comp = open(comp_path).read()
-            comp = re.sub(
-                rf'(id="{act_id}" data-composition-id="{act_id}" data-start="[^"]*" data-duration=")[^"]*"',
-                f'\\g<1>{dur}"',
-                comp
-            )
-            open(comp_path, 'w').write(comp)
+        # data-durationを更新
+        new_content = re.sub(
+            rf'(data-composition-id="{act_id}"[^>]*data-duration=")[^"]*(")',
+            rf'\g<1>{dur}\2',
+            new_content
+        )
     
     open(index_path, 'w').write(new_content)
-    print(f"✅ index.html更新完了: 総{total_sec}秒, {n_acts}acts")
+    print(f"✅ index.html更新完了（{n_acts}acts）")
 
-if __name__ == "__main__":
-    srt_path = sys.argv[1] if len(sys.argv) > 1 else "narration.srt"
-    index_path = sys.argv[2] if len(sys.argv) > 2 else "hf_original/index.html"
-    
-    if not os.path.exists(srt_path):
-        print(f"ERROR: {srt_path} が見つかりません")
+if __name__ == '__main__':
+    if len(sys.argv) < 3:
+        print("Usage: adjust_index_duration.py <index.html> <narration.srt>")
         sys.exit(1)
-    
-    chunk_durations = parse_srt_durations(srt_path)
-    print(f"チャンク数: {len(chunk_durations)}")
-    for i, d in enumerate(chunk_durations):
-        print(f"  chunk{i+1}: {d:.2f}s")
-    
-    update_index_html(index_path, chunk_durations)
+    update_index_html(sys.argv[1], sys.argv[2])
