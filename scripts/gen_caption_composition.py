@@ -2,6 +2,20 @@
 import asyncio, edge_tts, subprocess, sys, os
 
 NARRATION_DATA = {
+    "html-anything-launch": {
+        "chunks": [
+            "ElevenLabsの音声クローンが、完全無料で使える時代が来ました。",
+            "VoiceStudioは646言語対応のオープンソース音声ツールです。",
+            "音声クローン、動画吹き替え、文字起こし、すべてローカルで動きます。",
+            "インターネット接続なし、APIキー不要、完全プライベートに使えます。",
+            "GitHubで7500スターを突破、今最も注目のAIプロジェクトです。",
+            "インストールはコマンド一発、Macでもwindowsでも動作します。",
+            "プロ品質の音声がこれだけ簡単に作れるのは革命的です。",
+            "いいねと保存もお願いします。",
+            "概要欄のリンクからテンプレートを無料で受け取れます。",
+        ],
+        "rate": "+15%",
+    },
     "heygen-ui-motion": {
         "chunks": [
             "HeyGenのUIをHyperFramesでアニメーション化する方法を紹介します。",
