@@ -91,7 +91,12 @@ jobs:
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
         run: |
-          echo "✅ duration調整スキップ（固定durationを使用）"
+          if [ -f "hf_original/$SAMPLE_NAME/index.html" ] && [ -f "narration.srt" ]; then
+            python3 scripts/adjust_index_duration.py "hf_original/$SAMPLE_NAME/index.html" narration.srt
+            echo "✅ duration調整完了"
+          else
+            echo "⚠️ duration調整スキップ（ファイルなし）"
+          fi
       - name: Render
         env:
           SAMPLE_NAME: ${{ github.event.inputs.sample_name }}
