@@ -40,11 +40,19 @@ jobs:
           cd remotion-videos/${{ github.event.inputs.video_name }}
           export PATH="$PWD/node_modules/.bin:$PATH"
           # エントリポイントを自動検出
-          if [ -f "src/index.tsx" ]; then ENTRY="src/index.tsx"; else ENTRY="src/index.ts"; fi
+          ENTRY=""
+          if [ -f "src/index.tsx" ]; then
+            ENTRY="src/index.tsx"
+          elif [ -f "src/index.ts" ]; then
+            ENTRY="src/index.ts"
+          fi
+          echo "Entry detected: $ENTRY"
+          ls src/ | head -5
           # コンポジションIDを自動検出
-          COMP=$(node node_modules/.bin/remotion compositions $ENTRY 2>/dev/null | head -1 | awk '{print $1}' || echo "Main")
-          echo "Entry: $ENTRY, Composition: $COMP"
-          node node_modules/.bin/remotion render $ENTRY $COMP output.mp4 \
+          COMP=$(node node_modules/.bin/remotion compositions "$ENTRY" 2>/dev/null | grep -v "^$" | head -1 | awk '{print $1}')
+          if [ -z "$COMP" ]; then COMP="Main"; fi
+          echo "Composition: $COMP"
+          node node_modules/.bin/remotion render "$ENTRY" "$COMP" output.mp4 \
             --codec h264 \
             --concurrency 1
           ls -lh output.mp4
