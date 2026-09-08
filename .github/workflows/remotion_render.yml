@@ -39,7 +39,12 @@ jobs:
         run: |
           cd remotion-videos/${{ github.event.inputs.video_name }}
           export PATH="$PWD/node_modules/.bin:$PATH"
-          node node_modules/.bin/remotion render src/index.tsx Main output.mp4 \
+          # エントリポイントを自動検出
+          if [ -f "src/index.tsx" ]; then ENTRY="src/index.tsx"; else ENTRY="src/index.ts"; fi
+          # コンポジションIDを自動検出
+          COMP=$(node node_modules/.bin/remotion compositions $ENTRY 2>/dev/null | head -1 | awk '{print $1}' || echo "Main")
+          echo "Entry: $ENTRY, Composition: $COMP"
+          node node_modules/.bin/remotion render $ENTRY $COMP output.mp4 \
             --codec h264 \
             --concurrency 1
           ls -lh output.mp4
