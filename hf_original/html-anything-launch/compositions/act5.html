@@ -20,6 +20,8 @@
 #act5-badge-line{flex:1;height:1px;background:linear-gradient(to right,#a78bfa,transparent);opacity:0.4;}
 #act5-badge-text{font-size:18px;font-weight:300;letter-spacing:0.15em;color:rgba(255,255,255,0.25);text-transform:uppercase;white-space:nowrap;}
 #act5-pw{position:absolute;top:180px;right:40px;font-size:7px;color:rgba(255,255,255,0.07);font-family:monospace;z-index:999;}
+#act5-terminal{position:absolute;top:108px;right:0;width:480px;background:rgba(8,10,18,0.92);border-left:2px solid rgba(6,182,212,0.5);border-bottom:2px solid rgba(6,182,212,0.5);border-bottom-left-radius:20px;padding:18px 22px;}
+#act5-term-hdr{display:flex;align-items:center;gap:8px;padding-bottom:12px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:14px;}
 </style>
 <img id="act5-bg" src="assets/act5_step2.jpg" crossorigin="anonymous" alt="" />
 <div id="act5-ov-top"></div>
@@ -56,9 +58,28 @@
   tl.from("#act5-line3",{opacity:0,y:40,duration:0.6,ease:"hf"},0.85);
   // バッジ
   tl.from("#act5-badge",{opacity:0,duration:0.5},1.1);
+  tl.to("#act5-tl0",{opacity:1,duration:0.05},0.4);
+  tl.to("#act5-tl1",{opacity:1,duration:0.05},0.6);
+  tl.to("#act5-tl2",{opacity:1,duration:0.05},0.8);
+  tl.to("#act5-tl3",{opacity:1,duration:0.05},1.0);
+  tl.from("#act5-terminal",{opacity:0,x:30,duration:0.5,ease:"hf"},0.2);
   window.__timelines["act5"]=tl;
 })();
 </script>
 <div id="act5-pw">KEY: 2749</div>
+<div id="act5-terminal">
+  <div id="act5-term-hdr">
+    <div style="width:11px;height:11px;border-radius:50%;background:#ff5f57;"></div>
+    <div style="width:11px;height:11px;border-radius:50%;background:#febc2e;margin-left:6px;"></div>
+    <div style="width:11px;height:11px;border-radius:50%;background:#28c840;margin-left:6px;"></div>
+    <span style="font-family:monospace;font-size:13px;color:rgba(255,255,255,0.2);margin-left:10px;">VoiceStudio</span>
+  </div>
+  <div id="act5-tl0" style="font-family:monospace;font-size:17px;line-height:1.8;opacity:0;color:#06b6d4;">$ gh repo view VoiceStudio</div>
+<div id="act5-tl1" style="font-family:monospace;font-size:17px;line-height:1.8;opacity:0;color:#f59e0b;">⭐ Stars: 7,523</div>
+<div id="act5-tl2" style="font-family:monospace;font-size:17px;line-height:1.8;opacity:0;color:#28c840;">📈 今月: +2,891</div>
+<div id="act5-tl3" style="font-family:monospace;font-size:17px;line-height:1.8;opacity:0;color:#fff;">License: MIT</div>
+
+  <span style="font-family:monospace;font-size:17px;color:#06b6d4;animation:act5blink 0.8s infinite;">█</span>
+</div>
 </div>
 </template>

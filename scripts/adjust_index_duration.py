@@ -46,13 +46,15 @@ def update_index_html(index_path, chunk_durations):
     for i in range(n_acts):
         if i < n_acts - 1:
             if i < n_chunks:
-                act_dur = max(3, math.ceil(chunk_durations[i]) + 1)
+                # TTS長さと完全一致（ceil+0.5で微小バッファ）
+                act_dur = round(chunk_durations[i] + 0.3, 1)
+                act_dur = max(3.0, act_dur)
             else:
-                act_dur = 3
+                act_dur = 3.0
         else:
             # 最後のact: 残り全チャンク
             remaining = chunk_durations[i:] if i < n_chunks else []
-            act_dur = max(3, math.ceil(sum(remaining)) + 1) if remaining else 3
+            act_dur = max(3.0, round(sum(remaining) + 0.5, 1)) if remaining else 3.0
         act_durations.append(act_dur)
     
     # 各actのstart・durationを計算して置換
