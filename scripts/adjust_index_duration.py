@@ -72,8 +72,20 @@ def update_index_html(index_path, srt_entries):
             new_content
         )
     
+    # ルートのdata-durationも更新（全actの合計）
+    total_dur = max(
+        act_infos[-1]['start'] + act_infos[-1]['dur'] if act_infos else 0,
+        srt_entries[-1]['end'] + 0.5 if srt_entries else 0
+    )
+    total_dur = round(total_dur, 1)
+    new_content = re.sub(
+        r'(data-composition-id="[^"]*"[^>]*data-duration=")[^"]*(")',
+        rf'\g<1>{total_dur}\2',
+        new_content,
+        count=1  # 最初のマッチ（ルート）のみ
+    )
     open(index_path, 'w').write(new_content)
-    print(f"✅ index.html更新完了")
+    print(f"✅ index.html更新完了（ルートduration={total_dur}s）")
     return act_infos
 
 def update_act_htmls(index_path, act_infos):
