@@ -39,26 +39,19 @@ jobs:
         run: |
           cd remotion-videos/${{ github.event.inputs.video_name }}
           export PATH="$PWD/node_modules/.bin:$PATH"
-          # エントリポイントを自動検出
-          ENTRY=""
+                    # エントリポイントを自動検出
           if [ -f "src/index.tsx" ]; then
             ENTRY="src/index.tsx"
-          elif [ -f "src/index.ts" ]; then
+          else
             ENTRY="src/index.ts"
           fi
-          echo "Entry detected: $ENTRY"
-          ls src/ | head -5
-          # package.jsonからコンポジションIDを取得、なければMainを使用
-          COMP=$(grep -r "id=" src/ 2>/dev/null | grep "Composition" | head -1 | sed 's/.*id=["'"'"']//' | sed 's/["'"'"'].*//' || echo "Main")
-          if [ -z "$COMP" ] || [ "$COMP" = "Main" ]; then
-            COMP=$(grep -rh '"id"' src/ 2>/dev/null | head -1 | sed 's/.*"id": *"//;s/".*//' || echo "Main")
-          fi
+          COMP="${{ github.event.inputs.composition_id }}"
           if [ -z "$COMP" ]; then COMP="Main"; fi
-          echo "Using composition: $COMP"
+          echo "Entry: $ENTRY, Composition: $COMP"
           node node_modules/.bin/remotion render "$ENTRY" "$COMP" output.mp4 \
             --codec h264 \
             --concurrency 1
-          ls -lh output.mp4
+                    ls -lh output.mp4
           ffprobe -v quiet -show_entries format=duration -of csv=p=0 output.mp4
 
       - name: Upload artifact
