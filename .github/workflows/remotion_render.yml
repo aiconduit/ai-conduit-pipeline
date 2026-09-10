@@ -48,7 +48,7 @@ jobs:
             COMP="Main"
           fi
           echo "Entry: $ENTRY, Composition: $COMP"
-          node node_modules/.bin/remotion render "$ENTRY" "$COMP" output.mp4 \
+          node node_modules/.bin/remotion render $ENTRY $COMP output.mp4 \
             --codec h264 \
             --concurrency 1
           ls -lh output.mp4
