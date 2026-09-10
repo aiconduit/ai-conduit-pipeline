@@ -39,16 +39,16 @@ jobs:
         run: |
           cd remotion-videos/${{ github.event.inputs.video_name }}
           export PATH="$PWD/node_modules/.bin:$PATH"
-          # config.jsonからエントリポイントとコンポジションIDを取得
+          # config.jsonからコンポジションIDを取得
           if [ -f "config.json" ]; then
-            ENTRY=$(python3 -c "import json; c=json.load(open('config.json')); print(c.get('entryPoint','src/index.tsx'))")
-            COMP=$(python3 -c "import json; c=json.load(open('config.json')); print(c.get('compositionId','Main'))")
+            COMP=$(node -e "const c=require('./config.json'); console.log(c.compositionId||'Main')")
+            ENTRY=$(node -e "const c=require('./config.json'); console.log(c.entryPoint||'src/index.tsx')")
           else
-            ENTRY=$([ -f "src/index.tsx" ] && echo "src/index.tsx" || echo "src/index.ts")
             COMP="Main"
+            ENTRY="src/index.tsx"
           fi
-          echo "Entry: $ENTRY, Composition: $COMP"
-          node node_modules/.bin/remotion render $ENTRY $COMP output.mp4 \
+          echo "Entry=${ENTRY}, Composition=${COMP}"
+          node node_modules/.bin/remotion render "${ENTRY}" "${COMP}" output.mp4 \
             --codec h264 \
             --concurrency 1
           ls -lh output.mp4
