@@ -10,35 +10,34 @@ export const COLORS = {
   openai: "#10b981",
   gold: "#f59e0b",
   accent: "#06b6d4",
+  red: "#ef4444",
   text: "#ffffff",
-  textMuted: "rgba(255,255,255,0.5)",
+  textMuted: "rgba(255,255,255,0.55)",
   textDim: "rgba(255,255,255,0.25)",
-  surface: "rgba(255,255,255,0.04)",
+  surface: "rgba(255,255,255,0.05)",
   border: "rgba(255,255,255,0.08)",
 };
 
-// 各セクション尺（秒）
+// 各セクション秒数
 export const SECTION_DURATION = {
-  intro: 12,       // イントロ
-  origin_openai: 30, // OpenAI誕生
-  origin_anthropic: 30, // Anthropic誕生
-  split: 30,       // 決別
-  models: 30,      // モデル比較
-  revenue: 30,     // 収益
-  funding: 25,     // 資金調達
-  business: 30,    // ビジネスモデル
-  safety: 30,      // 安全性
-  partners: 25,    // パートナー
-  future: 30,      // 将来
-  conclusion: 28,  // まとめ
+  s01_intro: 120,
+  s02_origin_openai: 180,
+  s03_origin_anthropic: 180,
+  s04_split: 180,
+  s05_models: 180,
+  s06_revenue: 180,
+  s07_funding: 120,
+  s08_business_model: 180,
+  s09_safety: 180,
+  s10_partners: 120,
+  s11_future: 180,
+  s12_conclusion: 180,
 };
 
-export const VIDEO_FPS_CONST = VIDEO_FPS;
+export const TRANSITION_FRAMES = 20;
 
 export const EASING = {
   cinematic: Easing.bezier(0.22, 1, 0.36, 1),
   elastic: Easing.bezier(0.1, 0.9, 0.2, 1),
   exp: Easing.bezier(0.19, 1, 0.22, 1),
 };
-
-export const TRANSITION_FRAMES = 20;
