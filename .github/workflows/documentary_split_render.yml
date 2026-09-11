@@ -27,7 +27,7 @@ jobs:
       - name: Render Part1
         run: |
           cd remotion-videos/documentary-30min
-          npx remotion render src/RootPart1.tsx DocumentaryPart1 part1.mp4 --codec h264 --concurrency 4
+          npx remotion render src/indexPart1.tsx DocumentaryPart1 part1.mp4 --codec h264 --concurrency 4
           ls -lh part1.mp4
       - name: Upload Part1
         uses: actions/upload-artifact@v4
@@ -60,7 +60,7 @@ jobs:
       - name: Render Part2
         run: |
           cd remotion-videos/documentary-30min
-          npx remotion render src/RootPart2.tsx DocumentaryPart2 part2.mp4 --codec h264 --concurrency 4
+          npx remotion render src/indexPart2.tsx DocumentaryPart2 part2.mp4 --codec h264 --concurrency 4
           ls -lh part2.mp4
       - name: Upload Part2
         uses: actions/upload-artifact@v4
@@ -93,7 +93,7 @@ jobs:
       - name: Render Part3
         run: |
           cd remotion-videos/documentary-30min
-          npx remotion render src/RootPart3.tsx DocumentaryPart3 part3.mp4 --codec h264 --concurrency 4
+          npx remotion render src/indexPart3.tsx DocumentaryPart3 part3.mp4 --codec h264 --concurrency 4
           ls -lh part3.mp4
       - name: Upload Part3
         uses: actions/upload-artifact@v4
