@@ -10,7 +10,7 @@ const totalFrames =
   f(SECTION_DURATION.s05_models) +
   f(SECTION_DURATION.s06_revenue) +
   f(SECTION_DURATION.s07_funding) +
-  f(SECTION_DURATION.s08_business) -
+  f(SECTION_DURATION.s08_business_model) -
   T * 3;
 
 export const RemotionRoot: React.FC = () => (
