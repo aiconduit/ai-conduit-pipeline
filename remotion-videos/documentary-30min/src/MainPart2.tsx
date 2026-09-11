@@ -47,7 +47,7 @@ export const DocumentaryPart2: React.FC = () => (
       <GenericScene data={SCENE_DATA.funding} />
     </TransitionSeries.Sequence>
     <TransitionSeries.Transition timing={linearTiming({ durationInFrames: T })} presentation={fade()} />
-    <TransitionSeries.Sequence durationInFrames={f(SECTION_DURATION.s08_business)}>
+    <TransitionSeries.Sequence durationInFrames={f(SECTION_DURATION.s08_business_model)}>
       <GenericScene data={SCENE_DATA.business} />
     </TransitionSeries.Sequence>
   </TransitionSeries>
