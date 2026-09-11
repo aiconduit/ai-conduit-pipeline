@@ -1,6 +1,5 @@
-import {
-  AbsoluteFill, Sequence, Series, TransitionSeries, useVideoConfig,
-} from "remotion";
+import { useVideoConfig } from "remotion";
+import { TransitionSeries } from "@remotion/transitions";
 import { fade } from "@remotion/transitions/fade";
 import { linearTiming } from "@remotion/transitions";
 import React from "react";
