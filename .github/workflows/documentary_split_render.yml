@@ -1,0 +1,138 @@
+name: Documentary Split Render
+on:
+  workflow_dispatch:
+
+jobs:
+  render-part1:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: cd remotion-videos/documentary-30min && npm install
+      - name: Install Chrome
+        run: npx remotion browser ensure 2>/dev/null || true
+        working-directory: remotion-videos/documentary-30min
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+      - name: Generate narration
+        run: |
+          sudo apt-get install -y ffmpeg --no-install-recommends -qq
+          cd remotion-videos/documentary-30min
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_narration.py
+      - name: Render Part1
+        run: |
+          cd remotion-videos/documentary-30min
+          npx remotion render src/RootPart1.tsx DocumentaryPart1 part1.mp4 --codec h264 --concurrency 4
+          ls -lh part1.mp4
+      - name: Upload Part1
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-part1
+          path: remotion-videos/documentary-30min/part1.mp4
+          retention-days: 1
+
+  render-part2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: cd remotion-videos/documentary-30min && npm install
+      - name: Install Chrome
+        run: npx remotion browser ensure 2>/dev/null || true
+        working-directory: remotion-videos/documentary-30min
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+      - name: Generate narration
+        run: |
+          sudo apt-get install -y ffmpeg --no-install-recommends -qq
+          cd remotion-videos/documentary-30min
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_narration.py
+      - name: Render Part2
+        run: |
+          cd remotion-videos/documentary-30min
+          npx remotion render src/RootPart2.tsx DocumentaryPart2 part2.mp4 --codec h264 --concurrency 4
+          ls -lh part2.mp4
+      - name: Upload Part2
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-part2
+          path: remotion-videos/documentary-30min/part2.mp4
+          retention-days: 1
+
+  render-part3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: cd remotion-videos/documentary-30min && npm install
+      - name: Install Chrome
+        run: npx remotion browser ensure 2>/dev/null || true
+        working-directory: remotion-videos/documentary-30min
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+      - name: Generate narration
+        run: |
+          sudo apt-get install -y ffmpeg --no-install-recommends -qq
+          cd remotion-videos/documentary-30min
+          pip install edge-tts --quiet 2>/dev/null
+          python3 scripts/gen_narration.py
+      - name: Render Part3
+        run: |
+          cd remotion-videos/documentary-30min
+          npx remotion render src/RootPart3.tsx DocumentaryPart3 part3.mp4 --codec h264 --concurrency 4
+          ls -lh part3.mp4
+      - name: Upload Part3
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-part3
+          path: remotion-videos/documentary-30min/part3.mp4
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs: [render-part1, render-part2, render-part3]
+    timeout-minutes: 30
+    steps:
+      - name: Install ffmpeg
+        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+      - name: Download Part1
+        uses: actions/download-artifact@v4
+        with:
+          name: documentary-part1
+      - name: Download Part2
+        uses: actions/download-artifact@v4
+        with:
+          name: documentary-part2
+      - name: Download Part3
+        uses: actions/download-artifact@v4
+        with:
+          name: documentary-part3
+      - name: Merge all parts
+        run: |
+          ls -lh *.mp4
+          echo "file part1.mp4" > concat.txt
+          echo "file part2.mp4" >> concat.txt
+          echo "file part3.mp4" >> concat.txt
+          ffmpeg -f concat -safe 0 -i concat.txt -c copy documentary_final.mp4
+          ls -lh documentary_final.mp4
+          ffprobe -v quiet -show_entries format=duration -of csv=p=0 documentary_final.mp4
+      - name: Upload final
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-final-${{ github.run_number }}
+          path: documentary_final.mp4
+          retention-days: 7
