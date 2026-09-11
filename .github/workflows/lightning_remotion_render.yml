@@ -19,12 +19,20 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
-        run: pip install requests -q
+      - name: Install lightning-sdk
+        run: pip install lightning-sdk -q
 
-      - name: Test Lightning AI API
+      - name: Render on Lightning AI Sandbox
         env:
           LIGHTNING_USER_ID: ${{ secrets.LIGHTNING_USER_ID }}
           LIGHTNING_API_KEY: ${{ secrets.LIGHTNING_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
         run: python lightning_remotion_render.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: documentary-lightning-${{ github.run_number }}
+          path: documentary_output.mp4
+          retention-days: 7
