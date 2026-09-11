@@ -1,0 +1,45 @@
+name: Modal Remotion Documentary Render
+on:
+  workflow_dispatch:
+    inputs:
+      video_name:
+        description: 'Video folder name'
+        required: true
+        default: 'documentary-30min'
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install Modal
+        run: pip install modal -q
+
+      - name: Set Modal token
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        run: modal token set --token-id $MODAL_TOKEN_ID --token-secret $MODAL_TOKEN_SECRET
+
+      - name: Create Modal GitHub secret
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          modal secret create github-token GITHUB_TOKEN=$GH_TOKEN --force 2>/dev/null || true
+
+      - name: Render on Modal (8 CPU cores)
+        run: modal run modal_remotion_render.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-modal-${{ github.run_number }}
+          path: documentary_output.mp4
+          retention-days: 7
