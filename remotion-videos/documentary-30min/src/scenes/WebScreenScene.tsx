@@ -15,8 +15,8 @@ export interface WebScreenData {
   title: string;
   subtitle?: string;
   color: string;
-  screenshotFile: string;  // public/assets/内のファイル名
-  caption: string;         // 画面説明テキスト
+  screenshotFile: string;
+  caption: string;
   narration: string[];
   audioFile?: string;
   highlights?: { x: number; y: number; w: number; h: number; label: string }[];
@@ -40,62 +40,58 @@ export const WebScreenScene: React.FC<{ data: WebScreenData }> = ({ data }) => {
   }));
 
   return (
-    <AbsoluteFill style={ opacity: exitO }>
+    <AbsoluteFill style={{ opacity: exitO }}>
       <Background primaryColor={data.color} seed={3} />
 
       {data.audioFile && (
-        <Audio src={staticFile(`audio/${data.audioFile}`}) volume={1} />
+        <Audio src={staticFile(`audio/${data.audioFile}`)} volume={1} />
       )}
 
-      <AbsoluteFill style={ display: "flex", flexDirection: "row", padding: "50px 60px", gap: 40 }>
-        {/* 左：タイトルと説明 */}
-        <div style={ flex: "0 0 420px", display: "flex", flexDirection: "column", justifyContent: "center" }>
-          <div style={
+      <AbsoluteFill style={{ display: "flex", flexDirection: "row", padding: "50px 60px", gap: 40 }}>
+        <div style={{ flex: "0 0 420px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div style={{
             opacity: interpolate(titleSp, [0, 1], [0, 1]),
-            transform: `translateX(${interpolate(titleSp, [0, 1], [-30, 0])})px)`,
-          }>
-            <div style={ fontSize: 11, color: COLORS.textDim, letterSpacing: 6, textTransform: "uppercase", fontFamily, marginBottom: 10 }>
+            transform: `translateX(${interpolate(titleSp, [0, 1], [-30, 0])}px)`,
+          }}>
+            <div style={{ fontSize: 11, color: COLORS.textDim, letterSpacing: 6, textTransform: "uppercase", fontFamily, marginBottom: 10 }}>
               実際の画面
             </div>
-            <div style={ fontSize: 48, fontWeight: 900, color: "#fff", fontFamily, letterSpacing: -2, lineHeight: 1.1, marginBottom: 16 }>
+            <div style={{ fontSize: 48, fontWeight: 900, color: "#fff", fontFamily, letterSpacing: -2, lineHeight: 1.1, marginBottom: 16 }}>
               {data.title}
             </div>
-            <div style={ width: interpolate(titleSp, [0, 1], [0, 200]), height: 3, background: `linear-gradient(to right, ${data.color}, transparent)`, borderRadius: 2, marginBottom: 24 } />
-            <div style={ fontSize: 20, color: COLORS.textMuted, fontFamily, lineHeight: 1.7, fontWeight: 300 }>
+            <div style={{ width: interpolate(titleSp, [0, 1], [0, 200]), height: 3, background: `linear-gradient(to right, ${data.color}, transparent)`, borderRadius: 2, marginBottom: 24 }} />
+            <div style={{ fontSize: 20, color: COLORS.textMuted, fontFamily, lineHeight: 1.7, fontWeight: 300 }}>
               {data.caption}
             </div>
           </div>
         </div>
 
-        {/* 右：スクリーンショット */}
-        <div style={
+        <div style={{
           flex: 1,
           opacity: interpolate(screenSp, [0, 1], [0, 1]),
-          transform: `translateY(${interpolate(screenSp, [0, 1], [20, 0])})px) scale(${interpolate(screenSp, [0, 1], [0.95, 1])})`,
+          transform: `translateY(${interpolate(screenSp, [0, 1], [20, 0])}px) scale(${interpolate(screenSp, [0, 1], [0.95, 1])})`,
           borderRadius: 12,
           overflow: "hidden",
           boxShadow: `0 0 60px ${data.color}30, 0 20px 60px rgba(0,0,0,0.5)`,
           border: `1px solid ${data.color}30`,
           position: "relative",
-        }>
-          {/* ブラウザバー */}
-          <div style={ background: "#1a1a2e", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8 }>
-            <div style={ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" } />
-            <div style={ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" } />
-            <div style={ width: 10, height: 10, borderRadius: "50%", background: "#10b981" } />
-            <div style={ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 6, padding: "4px 12px", marginLeft: 8, fontSize: 11, color: COLORS.textDim, fontFamily }>
-              {data.title.toLowerCase().replace(/\s/g, "")}.com
+        }}>
+          <div style={{ background: "#1a1a2e", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#ef4444" }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#f59e0b" }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "#10b981" }} />
+            <div style={{ flex: 1, background: "rgba(255,255,255,0.08)", borderRadius: 6, padding: "4px 12px", marginLeft: 8, fontSize: 11, color: COLORS.textDim, fontFamily }}>
+              {data.subtitle || data.title}
             </div>
           </div>
           <Img
             src={staticFile(`assets/${data.screenshotFile}`)}
-            style={ width: "100%", height: "calc(100% - 38px)", objectFit: "cover", objectPosition: "top" }
+            style={{ width: "100%", height: "calc(100% - 38px)", objectFit: "cover", objectPosition: "top" }}
           />
-          {/* ハイライト */}
           {data.highlights?.map((h, i) => {
             const hSp = spring({ frame: Math.max(0, frame - f(fps, 1.0 + i * 0.3)), fps, config: { damping: 12 } });
             return (
-              <div key={i} style={
+              <div key={i} style={{
                 position: "absolute",
                 left: `${h.x}%`, top: `${h.y + 5}%`,
                 width: `${h.w}%`, height: `${h.h}%`,
@@ -103,12 +99,12 @@ export const WebScreenScene: React.FC<{ data: WebScreenData }> = ({ data }) => {
                 borderRadius: 6,
                 opacity: interpolate(hSp, [0, 1], [0, 1]),
                 boxShadow: `0 0 20px ${data.color}60`,
-              }>
-                <div style={
+              }}>
+                <div style={{
                   position: "absolute", top: -24, left: 0,
                   background: data.color, borderRadius: "4px 4px 0 0",
                   padding: "2px 8px", fontSize: 11, color: "#000", fontFamily, fontWeight: 700,
-                }>{h.label}</div>
+                }}>{h.label}</div>
               </div>
             );
           })}
