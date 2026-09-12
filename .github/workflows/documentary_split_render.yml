@@ -159,7 +159,10 @@ jobs:
           echo "ナレーション合計: $(ffprobe -v quiet -show_entries format=duration -of csv=p=0 /tmp/narration_full.mp3)秒"
           
           # 動画にナレーションをミックス
-          ffmpeg -i merged_video.mp4 -i /tmp/narration_full.mp3             -c:v copy -c:a aac -b:a 128k             -map 0:v:0 -map 1:a:0             -shortest documentary_final.mp4
+          VIDEO_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 merged_video.mp4)
+          AUDIO_DUR=$(ffprobe -v quiet -show_entries format=duration -of csv=p=0 /tmp/narration_full.mp3)
+          echo "動画: ${VIDEO_DUR}秒, ナレーション: ${AUDIO_DUR}秒"
+          ffmpeg -i merged_video.mp4 -i /tmp/narration_full.mp3 -c:v copy -c:a aac -b:a 128k -map 0:v:0 -map 1:a:0 -t ${VIDEO_DUR} documentary_final.mp4
           ls -lh documentary_final.mp4
           ffprobe -v quiet -show_entries format=duration,bit_rate -of csv=p=0 documentary_final.mp4
       - name: Upload final
