@@ -93,7 +93,7 @@ NARRATION_DATA = {
 
 NARRATION_DATA["html-anything-launch"] = {
     "chunks": [
-        "HTMLを書くだけで動画が作れる時代が来ました。",
+        "99%のクリエイターが知らない。HTMLを書くだけで動画が作れる事実。",
         "html-anythingはAIがHTMLを自動生成して動画にするツールです。",
         "npxコマンド一発でインストール完了。設定不要です。",
         "9つの主要AIエージェントに全対応しています。",
@@ -107,7 +107,7 @@ NARRATION_DATA["html-anything-launch"] = {
 }
 NARRATION_DATA["hermes-agent-launch"] = {
     "chunks": [
-        "あなたの習慣を学習するAIアシスタントが登場しました。",
+        "使えば使うほど賢くなるAI。記憶力ゼロのChatGPTとは別次元です。",
         "Hermes Agentは使えば使うほど賢くなる長期記憶型AIです。",
         "ChatGPTと違い、前回の会話を完全に覚えています。",
         "あなたのワークフローに合わせて自動で適応してくれます。",
@@ -121,7 +121,7 @@ NARRATION_DATA["hermes-agent-launch"] = {
 }
 NARRATION_DATA["archify-launch"] = {
     "chunks": [
-        "アーキテクチャ図の作成に時間を使っていませんか？",
+        "これを知らずにFigJamに月1万払ってる人、完全に損してます。",
         "archifyはAIが自動で美しいアーキテクチャ図を生成するツールです。",
         "FigJamやMiroが不要になるかもしれません。全て無料で使えます。",
         "フローチャート・シーケンス図・ライフサイクル図に対応しています。",
@@ -135,7 +135,7 @@ NARRATION_DATA["archify-launch"] = {
 }
 NARRATION_DATA["opencode-launch"] = {
     "chunks": [
-        "Claude Codeに月額料金を払っていますか？",
+        "GitHubで12万スター。Claude Codeより使いやすいAIが無料で使えます。",
         "OpenCodeはClaude Codeの完全無料代替ツールです。",
         "ターミナル・デスクトップ・IDEすべてで動作します。",
         "自分のAPIキーを使えるのでモデルをロックインされません。",
@@ -149,7 +149,7 @@ NARRATION_DATA["opencode-launch"] = {
 }
 NARRATION_DATA["voicestudio-launch"] = {
     "chunks": [
-        "ElevenLabsの月額料金を払っていませんか？",
+        "646言語対応。ElevenLabsに課金し続けている人、聞いてください。",
         "VoiceStudioはElevenLabsの完全無料オープンソース代替です。",
         "音声クローン・動画吹き替え・文字起こしが全てローカルで動きます。",
         "インターネット不要・APIキー不要・646言語対応しています。",
@@ -163,7 +163,7 @@ NARRATION_DATA["voicestudio-launch"] = {
 }
 NARRATION_DATA["grok-build-launch"] = {
     "chunks": [
-        "xAIがGrok-Buildを公開しました。",
+        "99%のエンジニアが見逃した。xAIが無料で公開したビルドツール。",
         "従来の開発は複数ウィンドウを行き来する非効率な作業でした。",
         "Grok-BuildはフルスクリーンTUIで全機能を1画面に集約します。",
         "マウス操作対応で拡張可能なプラグイン式アーキテクチャです。",
@@ -177,7 +177,7 @@ NARRATION_DATA["grok-build-launch"] = {
 }
 NARRATION_DATA["gpt6-astra-launch"] = {
     "chunks": [
-        "OpenAIがGPT-6 Astraをリリースしました。",
+        "99%の人がまだ知らない。OpenAIが発表した最強AIの正体。",
         "従来のAIは質問に答えるだけでした。",
         "AstraはコンピューターをAGI水準で自律操作できます。",
         "Computer Use機能で人間のようにPCを操作します。",
@@ -205,7 +205,7 @@ NARRATION_DATA["camera-blender-launch"] = {
 }
 NARRATION_DATA["m3e-canvas-launch"] = {
     "chunks": [
-        "Material 3のUIをブラウザでスケッチできるツールが登場しました。",
+        "FigmaもMiroも要りません。ブラウザでスケッチするだけでUIが完成します。",
         "これまでUIをコードで表現するのは難しい作業でした。",
         "m3e-canvasはブラウザ上でUIを描いてすぐにプロンプト化できます。",
         "Material 3のコンポーネントをドラッグ&ドロップで配置するだけです。",
@@ -219,7 +219,7 @@ NARRATION_DATA["m3e-canvas-launch"] = {
 }
 NARRATION_DATA["codex-chatgpt-launch"] = {
     "chunks": [
-        "ChatGPTが考えてCodexが動く時代が来ました。",
+        "ChatGPTだけ使ってる人は損してます。Codexと組み合わせると別次元。",
         "一つのAIだけでは限界がありました。",
         "二つのAIを組み合わせるという新しい発想です。",
         "ChatGPTがプランニングブレインとして戦略を立案します。",
@@ -233,7 +233,7 @@ NARRATION_DATA["codex-chatgpt-launch"] = {
 }
 NARRATION_DATA["praxist-launch"] = {
     "chunks": [
-        "自律型AI研究システムが登場しました。",
+        "AIが自動で研究する時代が来ました。知らないと完全に出遅れます。",
         "これまで研究作業の自動化は困難でした。",
         "PRAXISTはAIが自動で研究を実行します。",
         "測定可能な結果をコンピューターが自動生成します。",
@@ -247,7 +247,7 @@ NARRATION_DATA["praxist-launch"] = {
 }
 NARRATION_DATA["openbot-launch"] = {
     "chunks": [
-        "AIコワーカーが専用PCを持って登場しました。",
+        "昨日まで：自分で全部やる。今日から：AIが24時間コワーカーとして働く。",
         "一人で全部やるのはもう限界でした。",
         "OpenBotはAIが自分のPCで自律的に作業します。",
         "ブラウザ、ファイル、ツール、全てに対応しています。",
@@ -261,7 +261,7 @@ NARRATION_DATA["openbot-launch"] = {
 }
 NARRATION_DATA["anydoc-launch"] = {
     "chunks": [
-        "WordもPDFもExcelも全部Markdownに変換できるツールが登場しました。",
+        "昨日まで：WordをMarkdownに手動変換。今日から：AI が一瞬で完了。",
         "これまで異なる形式のドキュメントを扱うには複数のツールが必要でした。",
         "anydocはRust製で驚異的な速さを実現しています。",
         "コマンド一発で変換完了。設定は一切不要です。",
@@ -276,7 +276,7 @@ NARRATION_DATA["anydoc-launch"] = {
 }
 NARRATION_DATA["deepseek-harness-launch"] = {
     "chunks": [
-        "DeepSeekが207万スターを獲得した革命的なツールを紹介します。",
+        "DeepSeekを使いこなせていない人へ。プラグイン化で爆速化できます。",
         "これまでAIエージェントの拡張には複雑な設定が必要でした。",
         "DeepSeek Harnessなら全ての機能がプラグインで実現できます。",
         "インストールはコマンド一発で完了します。",
