@@ -1,25 +1,20 @@
 import { Composition } from "remotion";
 import { Documentary } from "./Main";
-import { VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_FPS, SECTION_DURATION } from "./constants";
+import { VIDEO_WIDTH, VIDEO_HEIGHT, VIDEO_FPS, SECTION_DURATION, TRANSITION_FRAMES } from "./constants";
 import React from "react";
 
-const sec = (s: number) => Math.round(s * VIDEO_FPS);
-const T_FRAMES = 20; // トランジション
-
-// 総フレーム数を計算
+const f = (s: number) => Math.round(s * VIDEO_FPS);
 const totalSecs = Object.values(SECTION_DURATION).reduce((a, b) => a + b, 0);
-const transitionSecs = (Object.keys(SECTION_DURATION).length - 1) * (T_FRAMES / VIDEO_FPS);
-const TOTAL_FRAMES = Math.round((totalSecs - transitionSecs) * VIDEO_FPS);
+const nTransitions = Object.keys(SECTION_DURATION).length - 1;
+const totalFrames = Math.round(totalSecs * VIDEO_FPS) - nTransitions * TRANSITION_FRAMES;
 
-export const RemotionRoot: React.FC = () => {
-  return (
-    <Composition
-      id="DocumentaryTest"
-      component={Documentary}
-      durationInFrames={TOTAL_FRAMES}
-      fps={VIDEO_FPS}
-      width={VIDEO_WIDTH}
-      height={VIDEO_HEIGHT}
-    />
-  );
-};
+export const RemotionRoot: React.FC = () => (
+  <Composition
+    id="DocumentaryTest"
+    component={Documentary}
+    durationInFrames={totalFrames}
+    fps={VIDEO_FPS}
+    width={VIDEO_WIDTH}
+    height={VIDEO_HEIGHT}
+  />
+);
