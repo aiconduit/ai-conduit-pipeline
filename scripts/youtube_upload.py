@@ -4,16 +4,23 @@ sample_name = os.environ.get("SAMPLE_NAME", "")
 gift_url = "https://aiconduit.github.io/ai-conduit-pipeline/"
 
 titles = {
-    "codex-chatgpt-launch": "ChatGPTが考えてCodexが実行する最強AI開発環境 #Shorts",
-    "html-anything-launch": "HTMLを書くだけで動画が作れるAIツール登場 #Shorts",
-    "deepseek-harness-launch": "DeepSeek Harnessで全てをプラグイン化する方法 #Shorts",
-    "anydoc-launch": "Word・PDF・ExcelをMarkdownに変換するRust製ツール #Shorts",
-    "praxist-launch": "自律型AI研究システムPRAXISTの使い方 #Shorts",
-    "openbot-launch": "OpenBotで専用PCを持つAIコワーカーを作る方法 #Shorts",
-    "m3e-canvas-launch": "Material 3 UIをブラウザでスケッチしてvibe-codingに変換 #Shorts",
+    "codex-chatgpt-launch": "【無料】ChatGPT×Codexコンビでコードが自動生成！AI開発の最前線 #Shorts",
+    "html-anything-launch": "【衝撃】HTMLを書くだけで動画になる！有料ツール不要の時代が来た #Shorts",
+    "deepseek-harness-launch": "【無料】DeepSeekを最強化！プラグイン化で爆速AI開発 #Shorts",
+    "anydoc-launch": "【Microsoft製・無料】Word・PDF・ExcelをAIが一瞬でMarkdownに変換 #Shorts",
+    "praxist-launch": "【無料】AIが自動で研究する！自律型AI研究システムがGitHub話題沸騰 #Shorts",
+    "openbot-launch": "【無料】AIが24時間働くコワーカーに！OpenBotで専用PCを持つ方法 #Shorts",
+    "m3e-canvas-launch": "【無料】スケッチするだけでUIが完成！vibe-codingの革命ツール #Shorts",
+    "gpt6-astra-launch": "【速報】GPT-6 Astraリリース！OpenAIの最新AIが業界を震撼させた #Shorts",
+    "grok-build-launch": "【無料】xAI Grok-Build公開！AIで何でも作れる時代が到来 #Shorts",
+    "commerce-agents": "【衝撃】AIエージェントが自動で商品を売る！EC自動化の未来 #Shorts",
+    "camera-blender": "【無料】カメラ映像をAIが自動で3Dに！Blender革命ツール #Shorts",
+    "archify-launch": "【無料】AIが自動でアーキテクチャ図を生成！Figma・Miro不要か #Shorts",
+    "opencode-launch": "【無料】Claude Codeの代替！12万スター突破のAIコーディングツール #Shorts",
+    "voicestudio-launch": "【無料】ElevenLabs完全代替！646言語・完全ローカルの音声AI #Shorts",
+    "hermes-agent-launch": "【無料】使うほど賢くなるAI！あなたの習慣を学習するエージェント #Shorts",
 }
-
-title = titles.get(sample_name, f"AI Conduit {sample_name} #Shorts")
+title = titles.get(sample_name, f"【無料AIツール】{sample_name.replace('-launch','').replace('-',' ').title()} #Shorts")
 description = f"""📌 動画の各シーンにパスワードが隠れています！
 全シーンをスクショして、ClaudeやGPTに画像解析させてパスワードを見つけてください。
 
@@ -25,7 +32,7 @@ description = f"""📌 動画の各シーンにパスワードが隠れていま
 ✅ 役に立ったらいいね・保存をお願いします
 
 🔗 GitHub: https://github.com/aiconduit
-#HyperFrames #ClaudeCode #AI自動化 #AIツール #Shorts"""
+#AI #AIツール #人工知能 #無料AIツール #GitHub #ChatGPT #Claude #プログラミング #自動化 #Shorts #AIエージェント"""
 
 r = requests.post("https://oauth2.googleapis.com/token", data={
     "grant_type": "refresh_token",
