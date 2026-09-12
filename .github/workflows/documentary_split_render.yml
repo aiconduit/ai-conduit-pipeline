@@ -105,31 +105,55 @@ jobs:
   merge:
     runs-on: ubuntu-latest
     needs: [render-part1, render-part2, render-part3]
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
-      - name: Install ffmpeg
-        run: sudo apt-get install -y ffmpeg --no-install-recommends -qq
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get install -y ffmpeg --no-install-recommends -qq
+          pip install edge-tts --quiet 2>/dev/null
       - name: Download Part1
         uses: actions/download-artifact@v4
         with:
           name: documentary-part1
+          path: ./parts
       - name: Download Part2
         uses: actions/download-artifact@v4
         with:
           name: documentary-part2
+          path: ./parts
       - name: Download Part3
         uses: actions/download-artifact@v4
         with:
           name: documentary-part3
-      - name: Merge all parts
+          path: ./parts
+      - name: Generate narration audio
         run: |
-          ls -lh *.mp4
-          echo "file part1.mp4" > concat.txt
-          echo "file part2.mp4" >> concat.txt
-          echo "file part3.mp4" >> concat.txt
-          ffmpeg -f concat -safe 0 -i concat.txt -c copy documentary_final.mp4
+          cd remotion-videos/documentary-30min
+          python3 scripts/gen_narration.py
+          ls -lh public/audio/
+      - name: Merge video and add narration
+        run: |
+          ls -lh parts/
+          # 動画を結合
+          echo "file 'parts/part1.mp4'" > concat.txt
+          echo "file 'parts/part2.mp4'" >> concat.txt
+          echo "file 'parts/part3.mp4'" >> concat.txt
+          ffmpeg -f concat -safe 0 -i concat.txt -c copy merged_video.mp4
+          echo "動画結合完了: $(ffprobe -v quiet -show_entries format=duration -of csv=p=0 merged_video.mp4)秒"
+          
+          # 全ナレーションを1本に結合
+          cd remotion-videos/documentary-30min/public/audio
+          ls *.mp3 | sort | while read f; do echo "file '$PWD/$f'"; done > /tmp/audio_concat.txt
+          cat /tmp/audio_concat.txt
+          ffmpeg -f concat -safe 0 -i /tmp/audio_concat.txt -c copy /tmp/narration_full.mp3
+          echo "ナレーション: $(ffprobe -v quiet -show_entries format=duration -of csv=p=0 /tmp/narration_full.mp3)秒"
+          cd -
+          
+          # 動画にナレーションをミックス
+          ffmpeg -i merged_video.mp4 -i /tmp/narration_full.mp3             -c:v copy -c:a aac -b:a 128k             -map 0:v:0 -map 1:a:0             -shortest documentary_final.mp4
           ls -lh documentary_final.mp4
-          ffprobe -v quiet -show_entries format=duration -of csv=p=0 documentary_final.mp4
+          ffprobe -v quiet -show_entries format=duration,bit_rate -of csv=p=0 documentary_final.mp4
       - name: Upload final
         uses: actions/upload-artifact@v4
         with:
