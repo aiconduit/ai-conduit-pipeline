@@ -42,7 +42,7 @@ metadata = {
     "snippet": {
         "title": title[:100],
         "description": description,
-        "tags": ["HyperFrames","ClaudeCode","AI自動化","AIツール","Shorts"],
+        "tags": ["AI","AIツール","人工知能","無料AIツール","GitHub","ChatGPT","Claude","プログラミング","自動化","Shorts","AIエージェント","開発者向け","テック","人工知能ツール","最新AI"],
         "categoryId": "28",
         "defaultLanguage": "ja"
     },
