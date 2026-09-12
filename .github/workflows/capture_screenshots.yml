@@ -1,0 +1,65 @@
+name: Capture Screenshots
+on:
+  workflow_dispatch:
+
+jobs:
+  capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Chrome and take screenshots
+        run: |
+          sudo apt-get install -y chromium-browser fonts-noto-cjk -qq
+          mkdir -p /tmp/assets
+
+          # 各URLをスクリーンショット
+          URLS=(
+            "https://www.anthropic.com|anthropic_home"
+            "https://www.anthropic.com/news|anthropic_news"
+            "https://openai.com|openai_home"
+            "https://chatgpt.com|chatgpt"
+            "https://claude.ai|claude_ai"
+            "https://platform.openai.com|openai_platform"
+            "https://github.com/anthropics/claude-code|github_claude_code"
+            "https://techcrunch.com/2026/05/|techcrunch_anthropic"
+          )
+
+          for item in "${URLS[@]}"; do
+            URL=$(echo $item | cut -d'|' -f1)
+            NAME=$(echo $item | cut -d'|' -f2)
+            echo "Capturing $NAME from $URL"
+            chromium-browser \
+              --headless=new \
+              --no-sandbox \
+              --disable-gpu \
+              --window-size=1440,900 \
+              --screenshot=/tmp/assets/${NAME}.png \
+              --hide-scrollbars \
+              --force-device-scale-factor=1 \
+              "$URL" 2>/dev/null || true
+            sleep 2
+            ls -lh /tmp/assets/${NAME}.png 2>/dev/null || echo "❌ $NAME failed"
+          done
+
+          ls -lh /tmp/assets/
+
+      - name: Upload screenshots to repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          git config user.email "actions@github.com"
+          git config user.name "GitHub Actions"
+          mkdir -p remotion-videos/documentary-30min/public/assets
+          cp /tmp/assets/*.png remotion-videos/documentary-30min/public/assets/ 2>/dev/null || true
+          git add remotion-videos/documentary-30min/public/assets/
+          git diff --staged --quiet || git commit -m "feat: Webスクリーンショット素材追加"
+          git push
+
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentary-assets
+          path: /tmp/assets/*.png
+          retention-days: 7
