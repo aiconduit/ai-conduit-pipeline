@@ -28,7 +28,13 @@ jobs:
       - name: Clone sample
         run: |
           git lfs install
-          git clone --depth=1 https://github.com/heygen-com/hyperframes-launches.git hf_launches
+          git clone --depth=1 https://github.com/heygen-com/hyperframes-launches.git hf_launches || true
+          # hf_originalのサンプルをhf_launchesにコピー（カスタムサンプル対応）
+          if [ -d "hf_original/$SAMPLE_NAME" ] && [ ! -d "hf_launches/$SAMPLE_NAME" ]; then
+            mkdir -p hf_launches
+            cp -r "hf_original/$SAMPLE_NAME" "hf_launches/$SAMPLE_NAME"
+            echo "✅ hf_originalから $SAMPLE_NAME をコピー"
+          fi
           CLONE_NAME="${{ github.event.inputs.sample_name }}"
           if [ -d "hf_original/$CLONE_NAME" ]; then
             echo "✅ hf_originalを使用: $CLONE_NAME"
