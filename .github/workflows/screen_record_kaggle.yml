@@ -156,7 +156,7 @@ jobs:
           pip install requests --quiet 2>/dev/null
           python3 scripts/youtube_upload.py
       - name: Post to X (Twitter)
-        if: success()
+        if: ${{ github.event.inputs.upload == 'true' }}
         env:
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
@@ -166,12 +166,14 @@ jobs:
         run: |
           pip install requests requests-oauthlib -q
           # YouTube URLをログから取得
-          YOUTUBE_URL=$(grep -o 'https://youtube.com/shorts/[^ ]*' /tmp/yt_upload.log 2>/dev/null || echo "")
-          if [ -z "$YOUTUBE_URL" ]; then
-            echo "⚠️ YouTube URLが取得できないためスキップ"
-          else
-            YOUTUBE_URL=$YOUTUBE_URL SAMPLE_NAME=$SAMPLE_NAME python3 scripts/post_to_x.py
+          YOUTUBE_URL=$(grep -oP '(?<=YouTube投稿成功: )https://youtube\.com/shorts/\S+' action_output.log 2>/dev/null || echo "")
+          # 動画ファイルのパスを設定
+          VIDEO_PATH="final_output.mp4"
+          if [ ! -f "$VIDEO_PATH" ]; then
+            VIDEO_PATH=$(find . -name "*.mp4" | head -1)
           fi
+          echo "Video: $VIDEO_PATH, URL: $YOUTUBE_URL"
+          VIDEO_PATH=$VIDEO_PATH YOUTUBE_URL=$YOUTUBE_URL SAMPLE_NAME=$SAMPLE_NAME python3 scripts/post_to_x.py
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
