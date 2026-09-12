@@ -1,0 +1,38 @@
+name: Post to X
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'GitHub Actions Run ID（動画のartifactを含むrun）'
+        required: true
+      tweet_text:
+        description: 'ツイートテキスト'
+        required: false
+        default: '🤖 新しいAIツール紹介！ #AI #AIツール #人工知能 #Shorts'
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifact
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+        run: |
+          gh run download ${{ github.event.inputs.run_id }} --dir ./video_artifact
+          ls -lh ./video_artifact/
+          find ./video_artifact -name "*.mp4" | head -5
+
+      - name: Post video to X
+        env:
+          X_API_KEY: ${{ secrets.X_API_KEY }}
+          X_API_SECRET: ${{ secrets.X_API_SECRET }}
+          X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
+          X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
+        run: |
+          pip install requests requests-oauthlib -q
+          VIDEO_PATH=$(find ./video_artifact -name "*.mp4" | head -1)
+          echo "動画: $VIDEO_PATH"
+          VIDEO_PATH=$VIDEO_PATH TWEET_TEXT="${{ github.event.inputs.tweet_text }}" python3 scripts/post_to_x.py
