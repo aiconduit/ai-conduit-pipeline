@@ -5,21 +5,13 @@ import React from "react";
 
 const f = (s: number) => Math.round(s * VIDEO_FPS);
 const T = TRANSITION_FRAMES;
-
 const totalFrames =
-  f(SECTION_DURATION.s09_safety) +
-  f(SECTION_DURATION.s10_partners) +
-  f(SECTION_DURATION.s11_future) +
-  f(SECTION_DURATION.s12_conclusion) -
-  T * 3;
+  f(SECTION_DURATION.s17_partners_ms) + f(SECTION_DURATION.s18_partners_aws) +
+  f(SECTION_DURATION.s19_safety_constitutional) + f(SECTION_DURATION.s20_safety_rlhf) +
+  f(SECTION_DURATION.s21_fbi) + f(SECTION_DURATION.s22_future_agi) +
+  f(SECTION_DURATION.s23_stargate) + f(SECTION_DURATION.s24_conclusion) - T * 7;
 
 export const RemotionRoot: React.FC = () => (
-  <Composition
-    id="DocumentaryPart3"
-    component={DocumentaryPart3}
-    durationInFrames={totalFrames}
-    fps={VIDEO_FPS}
-    width={VIDEO_WIDTH}
-    height={VIDEO_HEIGHT}
-  />
+  <Composition id="DocumentaryPart3" component={DocumentaryPart3}
+    durationInFrames={totalFrames} fps={VIDEO_FPS} width={VIDEO_WIDTH} height={VIDEO_HEIGHT} />
 );
