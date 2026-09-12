@@ -142,13 +142,21 @@ jobs:
           ffmpeg -f concat -safe 0 -i concat.txt -c copy merged_video.mp4
           echo "動画結合完了: $(ffprobe -v quiet -show_entries format=duration -of csv=p=0 merged_video.mp4)秒"
           
-          # 全ナレーションを1本に結合
-          cd remotion-videos/documentary-30min/public/audio
-          ls *.mp3 | sort | while read f; do echo "file '$PWD/$f'"; done > /tmp/audio_concat.txt
+          # 24シーン順にナレーションを結合
+          AUDIO_DIR="remotion-videos/documentary-30min/public/audio"
+          SCENE_ORDER="s01_hook s02_intro s03_origin_openai s04_chatgpt s05_anthropic_birth s06_split s07_safety_vs_growth s08_models_claude s09_models_gpt s10_benchmark s11_revenue_anthropic s12_revenue_compare s13_funding s14_ipo_race s15_enterprise s16_consumer s17_partners_ms s18_partners_aws s19_safety_constitutional s20_safety_rlhf s21_fbi s22_future_agi s23_stargate s24_conclusion"
+          > /tmp/audio_concat.txt
+          for scene in $SCENE_ORDER; do
+            if [ -f "$AUDIO_DIR/${scene}.mp3" ]; then
+              echo "file '$PWD/$AUDIO_DIR/${scene}.mp3'" >> /tmp/audio_concat.txt
+              echo "  ✅ ${scene}.mp3"
+            else
+              echo "  ⚠️ ${scene}.mp3 not found"
+            fi
+          done
           cat /tmp/audio_concat.txt
           ffmpeg -f concat -safe 0 -i /tmp/audio_concat.txt -c copy /tmp/narration_full.mp3
-          echo "ナレーション: $(ffprobe -v quiet -show_entries format=duration -of csv=p=0 /tmp/narration_full.mp3)秒"
-          cd -
+          echo "ナレーション合計: $(ffprobe -v quiet -show_entries format=duration -of csv=p=0 /tmp/narration_full.mp3)秒"
           
           # 動画にナレーションをミックス
           ffmpeg -i merged_video.mp4 -i /tmp/narration_full.mp3             -c:v copy -c:a aac -b:a 128k             -map 0:v:0 -map 1:a:0             -shortest documentary_final.mp4
