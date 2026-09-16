@@ -1,11 +1,6 @@
 name: Post to Instagram
 on:
   workflow_dispatch:
-    inputs:
-      artifact_run_id:
-        description: "動画のartifact run ID"
-        required: false
-        default: "34564269960"
 
 jobs:
   post:
@@ -17,40 +12,21 @@ jobs:
       - name: Install dependencies
         run: pip install instagrapi requests -q
 
-      - name: Download video artifact
-        env:
-          GH_TOKEN: ${{ secrets.GH_PAT }}
-        run: |
-          RUN_ID="${{ github.event.inputs.artifact_run_id }}"
-          echo "Downloading from run: $RUN_ID"
-          gh run download $RUN_ID --dir ./video_artifact --repo aiconduit/ai-conduit-pipeline || true
-          find ./video_artifact -name "*.mp4" | head -5
-          VIDEO=$(find ./video_artifact -name "*.mp4" | head -1)
-          if [ -z "$VIDEO" ]; then
-            echo "❌ 動画が見つかりません"
-            exit 1
-          fi
-          echo "VIDEO_PATH=$VIDEO" >> $GITHUB_ENV
-          echo "動画: $VIDEO ($(du -h $VIDEO | cut -f1))"
-
       - name: Post to Instagram
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
         run: |
+          ls -lh tmp_post_video.mp4
           python3 << 'PYEOF2'
           import os
           from instagrapi import Client
 
           sessionid = os.environ.get("INSTAGRAM_SESSIONID", "")
-          video_path = os.environ.get("VIDEO_PATH", "")
+          video_path = "tmp_post_video.mp4"
           caption = "【無料】AIが自動でアーキテクチャ図を生成！Figma・Miro不要\nhttps://youtube.com/shorts/iaaY9lgRmK8\n#AI #AIツール #人工知能 #Reels"
 
           print(f"sessionid: {sessionid[:30]}...")
-          print(f"動画: {video_path}")
-
-          if not video_path or not os.path.exists(video_path):
-              print(f"❌ 動画ファイルが見つかりません: {video_path}")
-              exit(1)
+          print(f"動画: {video_path} exists={os.path.exists(video_path)}")
 
           cl = Client()
           cl.delay_range = [1, 3]
