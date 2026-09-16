@@ -105,6 +105,20 @@ NARRATION_DATA["html-anything-launch"] = {
     ],
     "rate": "+15%",
 }
+NARRATION_DATA["nanochat-launch"] = {
+    "chunks": [
+        "ChatGPTの仕組みが100行のコードで全部わかります。",
+        "Andrej KarpathyがnanoGPTの後継として公開したのがnanocharです。",
+        "LLMのトレーニングから推論まで最小構成で実装されています。",
+        "難解だったTransformerのアーキテクチャが一目瞭然になります。",
+        "GitHubで公開直後から研究者・学生に爆発的に普及しています。",
+        "AIを学びたい人にとってこれ以上ない教材です。",
+        "この動画の各シーンにパスワードが隠されています。",
+        "全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["hermes-agent-launch"] = {
     "chunks": [
         "使えば使うほど賢くなるAI。記憶力ゼロのChatGPTとは別次元です。",
