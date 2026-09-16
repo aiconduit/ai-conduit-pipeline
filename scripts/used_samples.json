@@ -15,5 +15,6 @@
   "tokentab",
   "Mac-Duo",
   "ai-data-extractor",
-  "mural"
+  "mural",
+  "recurrent-looped-tranformer"
 ]
