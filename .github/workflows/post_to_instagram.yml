@@ -8,10 +8,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-
       - name: Install dependencies
         run: pip install instagrapi requests -q
-
       - name: Post to Instagram
         env:
           INSTAGRAM_SESSIONID: ${{ secrets.INSTAGRAM_SESSIONID }}
@@ -20,17 +18,12 @@ jobs:
           python3 << 'PYEOF2'
           import os
           from instagrapi import Client
-
           sessionid = os.environ.get("INSTAGRAM_SESSIONID", "")
           video_path = "tmp_post_video.mp4"
           caption = "【無料】AIが自動でアーキテクチャ図を生成！Figma・Miro不要\nhttps://youtube.com/shorts/iaaY9lgRmK8\n#AI #AIツール #人工知能 #Reels"
-
-          print(f"sessionid: {sessionid[:30]}...")
-          print(f"動画: {video_path} exists={os.path.exists(video_path)}")
-
+          print(f"sessionid: {sessionid[:30]}... video: {os.path.exists(video_path)}")
           cl = Client()
           cl.delay_range = [1, 3]
-
           try:
               cl.login_by_sessionid(sessionid)
               print(f"✅ ログイン: {cl.username}")
