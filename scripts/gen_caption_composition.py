@@ -597,6 +597,20 @@ NARRATION_DATA["awesome-astra-embodied-ai-launch"] = {
     ],
     "rate": "+15%"
 }
+NARRATION_DATA["reelbench-skills-launch"] = {
+    "chunks": [
+        "reelbench-skillsが724スターを獲得しました。",
+        "Learning notes and tooling skills for AI。",
+        "reelbench-skillsは使いやすく設計されています。",
+        "インストールはコマンド一発で完了します。",
+        "実際に動かすと驚くほど速く動作します。",
+        "GitHubで724スター、急速に拡大しています。",
+        "この動画の各シーンにパスワードが隠されています。全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "いいねと保存もお願いします。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。"
+    ],
+    "rate": "+15%"
+}
 FALLBACK_NARRATIONS = {
     "variables-launch": "HyperFramesのVariables機能を紹介します。役に立ったらいいねと保存をお願いします。コメントにAI Conduitと書いてください。",
     "spacex-launch": "Claude CodeとHyperFramesを使ったシネマティック動画です。コメントにAI Conduitと書いてください。",
