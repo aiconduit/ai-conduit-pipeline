@@ -105,6 +105,20 @@ NARRATION_DATA["html-anything-launch"] = {
     ],
     "rate": "+15%",
 }
+NARRATION_DATA["recordly-launch"] = {
+    "chunks": [
+        "動画編集スキルゼロでプロ品質のデモ動画が作れます。",
+        "RecordlyはMac・Windows・Linux対応の完全無料ツールです。",
+        "画面録画から字幕・BGM・エフェクト追加まで全て自動化されます。",
+        "これまで3時間かかっていた動画編集が5分で完成します。",
+        "GitHubで6500スターを獲得し急速に普及しています。",
+        "YouTubeのデモ動画・社内研修動画・プレゼン動画に最適です。",
+        "この動画の各シーンにパスワードが隠されています。",
+        "全シーンをスクショしてClaudeやGPTに画像解析させてみてください。",
+        "概要欄のURLでパスワードを入力すると無料テンプレートが受け取れます。",
+    ],
+    "rate": "+15%",
+}
 NARRATION_DATA["nanochat-launch"] = {
     "chunks": [
         "ChatGPTの仕組みが100行のコードで全部わかります。",
